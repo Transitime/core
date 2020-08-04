@@ -35,6 +35,14 @@ import static java.util.stream.Collectors.groupingBy;
  */
 public class ReportingServer extends AbstractServer implements ReportingInterface {
 
+    private final boolean DEFAULT_TIME_POINTS_ONLY = false;
+    private final boolean DEFAULT_SCHEDULED_TIMES_ONLY = false;
+    private final boolean DEFAULT_DWELL_TIME_ONLY = false;
+    private final boolean DEFAULT_INCLUDE_TRIP = false;
+    private final boolean DEFAULT_INCLUDE_STOP = false;
+    private final boolean DEFAULT_INCLUDE_STOP_PATH = false;
+    private final ServiceType DEFAULT_SERVICE_TYPE = null;
+
     private static int getMaxSchedAdh() {
         return maxSchedAdhSec.getValue();
     }
@@ -88,21 +96,22 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
     }
 
     @Override
-    public List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForRoute(
+    public List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForOtp(
             LocalDate beginDate, LocalDate endDate, LocalTime beginTime, LocalTime endTime,
             String routeIdOrShortName, ServiceType serviceType,
             boolean timePointsOnly, String headsign) throws Exception{
-        return getArrivalsDeparturesForRoute(beginDate, endDate, beginTime, endTime, routeIdOrShortName, serviceType,
+        return getArrivalsDeparturesForOtp(beginDate, endDate, beginTime, endTime, routeIdOrShortName, serviceType,
                 timePointsOnly, headsign, false);
     }
 
     @Override
-    public List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForRoute(
+    public List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForOtp(
             LocalDate beginDate, LocalDate endDate, LocalTime beginTime, LocalTime endTime,
             String routeIdOrShortName, ServiceType serviceType, boolean timePointsOnly,
             String headsign, boolean readOnly) throws Exception {
 
         String routeId = null;
+        boolean  scheduledStopsOnly = true;
 
         if(StringUtils.isNotBlank(routeIdOrShortName)){
             Route dbRoute = getRoute(routeIdOrShortName);
@@ -112,8 +121,9 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
         }
 
         List<ArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesFromDb(beginDate, endDate,
-                                                    beginTime, endTime, routeId, serviceType, timePointsOnly,
-                                                    headsign, false, false, false, readOnly);
+                                                    beginTime, endTime, routeId, headsign, serviceType, timePointsOnly,
+                                                    scheduledStopsOnly,DEFAULT_DWELL_TIME_ONLY, DEFAULT_INCLUDE_TRIP,
+                                                    DEFAULT_INCLUDE_STOP, DEFAULT_INCLUDE_STOP_PATH, readOnly);
 
         List<IpcArrivalDepartureScheduleAdherence> ipcArrivalDepartures = new ArrayList<>();
 
@@ -126,12 +136,12 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
 
     @Override
     public List<IpcStopWithDwellTime> getStopsWithAvgDwellTimes(LocalDate beginDate, LocalDate endDate,
-                                                                LocalTime beginTime, LocalTime endTime, String routeIdOrShortName,
-                                                                ServiceType serviceType, boolean timePointsOnly,
-                                                                String headsign, boolean readOnly) throws Exception {
+                                                                LocalTime beginTime, LocalTime endTime,
+                                                                String routeIdOrShortName, ServiceType serviceType,
+                                                                boolean timePointsOnly, String headsign,
+                                                                boolean readOnly) throws Exception {
 
         String routeId = null;
-
         if(StringUtils.isNotBlank(routeIdOrShortName)){
             Route dbRoute = getRoute(routeIdOrShortName);
             if (dbRoute == null)
@@ -139,9 +149,12 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
             routeId = dbRoute.getId();
         }
 
+        boolean dwellTimeOnly = true;
+        boolean includeStop = true;
+
         List<ArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesFromDb(beginDate,
-                endDate, beginTime, endTime, routeId, serviceType, timePointsOnly, headsign,
-                false, true, false, readOnly);
+                endDate, beginTime, endTime, routeId, headsign, serviceType, timePointsOnly, DEFAULT_SCHEDULED_TIMES_ONLY,
+                dwellTimeOnly, DEFAULT_INCLUDE_TRIP, includeStop, DEFAULT_INCLUDE_STOP_PATH, readOnly);
 
         List<IpcStopWithDwellTime> stopsWithAvgDwellTime = new ArrayList<>();
 
@@ -158,11 +171,10 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
     @Override
     public List<IpcStopPathWithSpeed> getStopPathsWithSpeed(LocalDate beginDate, LocalDate endDate,
                                                             LocalTime beginTime, LocalTime endTime,
-                                                            String routeIdOrShortName, String headsign,
-                                                            boolean readOnly) throws Exception{
+                                                            String routeIdOrShortName, ServiceType serviceType,
+                                                            String headsign, boolean readOnly) throws Exception{
 
         String routeId = null;
-
         if(StringUtils.isNotBlank(routeIdOrShortName)){
             Route dbRoute = getRoute(routeIdOrShortName);
             if (dbRoute == null)
@@ -170,9 +182,12 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
             routeId = dbRoute.getId();
         }
 
+        boolean includeStopPath = true;
+
         List<ArrivalDeparture> arrivalDeparturesList = ArrivalDeparture.getArrivalsDeparturesFromDb(beginDate,
-                endDate, beginTime, endTime, routeId, null, false, headsign,
-                false, false, true, readOnly);
+                endDate, beginTime, endTime, routeId, headsign, serviceType, DEFAULT_TIME_POINTS_ONLY,
+                DEFAULT_SCHEDULED_TIMES_ONLY, DEFAULT_DWELL_TIME_ONLY, DEFAULT_INCLUDE_TRIP, DEFAULT_INCLUDE_STOP,
+                includeStopPath, readOnly);
 
         Map<ArrivalDepartureTripKey, List<ArrivalDeparture>> resultsMap = new HashMap<>();
         Map<String, StopPath> stopPathsMap = new HashMap<>();
@@ -351,7 +366,6 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                     String headsign, boolean readOnly) throws Exception {
 
         String routeId = null;
-
         if(StringUtils.isNotBlank(routeIdOrShortName)){
             Route dbRoute = getRoute(routeIdOrShortName);
             if (dbRoute == null)
@@ -359,9 +373,12 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
             routeId = dbRoute.getId();
         }
 
+        boolean includeTrip = true;
+        boolean scheduledTimesOnly = true;
+
         List<ArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesFromDb(beginDate,
-                endDate, beginTime, endTime, routeId, serviceType, timePointsOnly, headsign,
-                true, false, false, readOnly);
+                endDate, beginTime, endTime, routeId, headsign, serviceType, timePointsOnly, scheduledTimesOnly,
+                DEFAULT_DWELL_TIME_ONLY, includeTrip, DEFAULT_INCLUDE_STOP, DEFAULT_INCLUDE_STOP_PATH, readOnly);
 
         Map<TripDateKey, Long> runTimeByTripId = getRunTimeByTripId(arrivalDepartures);
 
