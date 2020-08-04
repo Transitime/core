@@ -171,8 +171,8 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
     @Override
     public List<IpcStopPathWithSpeed> getStopPathsWithSpeed(LocalDate beginDate, LocalDate endDate,
                                                             LocalTime beginTime, LocalTime endTime,
-                                                            String routeIdOrShortName, String headsign,
-                                                            boolean readOnly) throws Exception{
+                                                            String routeIdOrShortName, ServiceType serviceType,
+                                                            String headsign, boolean readOnly) throws Exception{
 
         String routeId = null;
         if(StringUtils.isNotBlank(routeIdOrShortName)){
@@ -185,7 +185,7 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
         boolean includeStopPath = true;
 
         List<ArrivalDeparture> arrivalDeparturesList = ArrivalDeparture.getArrivalsDeparturesFromDb(beginDate,
-                endDate, beginTime, endTime, routeId, headsign, DEFAULT_SERVICE_TYPE, DEFAULT_TIME_POINTS_ONLY,
+                endDate, beginTime, endTime, routeId, headsign, serviceType, DEFAULT_TIME_POINTS_ONLY,
                 DEFAULT_SCHEDULED_TIMES_ONLY, DEFAULT_DWELL_TIME_ONLY, DEFAULT_INCLUDE_TRIP, DEFAULT_INCLUDE_STOP,
                 includeStopPath, readOnly);
 

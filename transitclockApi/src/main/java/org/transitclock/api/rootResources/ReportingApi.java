@@ -233,7 +233,9 @@ public class ReportingApi {
             @Parameter(description="Retrives only arrivalDepartures belonging to the route name specified.",required=true)
             @QueryParam(value = "r") String route,
             @Parameter(description="Retrives only arrivalDepartures belonging to the headsign specified.",required=true)
-            @QueryParam(value = "headsign") String headsign)
+            @QueryParam(value = "headsign") String headsign,
+            @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday",required=false)
+            @QueryParam(value = "serviceType") String serviceType)
             throws WebApplicationException {
 
         // Make sure request is valid
@@ -244,9 +246,15 @@ public class ReportingApi {
             ReportingInterface reportingInterface =
                     stdParameters.getReportingInterface();
 
+            ServiceType serviceTypeEnum = null;
+
+            if(StringUtils.isNotBlank(serviceType)){
+                serviceTypeEnum = ServiceType.valueOf(serviceType.toUpperCase());
+            }
+
             List<IpcStopPathWithSpeed> stopPaths = reportingInterface.getStopPathsWithSpeed(
                     beginDate.getDate(), endDate.getDate(), beginTime.getTime(), endTime.getTime(),
-                    route, headsign, false);
+                    route, serviceTypeEnum, headsign, false);
 
             Object response = null;
 
