@@ -252,28 +252,12 @@
             </div>
         </div>
 
-        <div id="comparisonResults" hidden="true">
-            <hr>
+        <div id="comparisonResults" hidden="true"></div>
 
-            <div id="comparisonParams" class="paramDetails" style="float: left;">
-                <p style='font-size: 0.8em;'></p>
-            </div>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 
-            <div id="comparisonAvgRunTime" style="margin-left: 20px; width: 35%; vertical-align: middle;">
-                <p style="font-size: 0.9em;display: inline-block;"></p>
-                <p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>
-            </div>
-
-            <div id="comparisonRunTimeBreakdown" style="margin-left: 20px; width: 70%; vertical-align: middle;">
-                <p style="font-size: 0.9em;display: inline-block;"></p>
-                <p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>
-                <p style="font-size: 0.9em;display: inline-block;"></p>
-                <p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>
-                <p style="font-size: 0.9em;display: inline-block;"></p>
-                <p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>
-            </div>
-
-            <input type="button" id="comparisonVisualizeButton" class="visualizeButton" value="Visualize trips" style="margin-top: 10px; margin-bottom: 10px;">
+        <div id="runTimeVisualization" hidden="true">
+            <canvas id="visualizationCanvas" height="100" style="margin-top: 10px;"></canvas>
         </div>
     </div>
 
@@ -300,10 +284,98 @@
         })
     })
 
+    var canvas = $("#visualizationCanvas");
+    var barGraph = new Chart(canvas, {
+        type: 'horizontalBar',
+        data: {
+            datasets: [{
+                data: [20, 20, 20, 20],
+                backgroundColor: '#36509b',
+                label: "Fixed"
+            },
+            {
+                data: [13, 11, 10, 11],
+                backgroundColor: '#df7f17',
+                label: "Variable"
+            },
+            {
+                data: [8, 7, 9, 12],
+                backgroundColor: '#8c8c8c',
+                label: "Dwell"
+            }],
+            labels: ['Trip A', 'Trip B', 'Trip C', 'Trip D']
+        },
+        options: {
+            scales: {
+                xAxes: [{
+                    stacked: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Min"
+                    }
+                }],
+                yAxes: [{
+                    stacked: true,
+                }]
+            },
+            legend: {
+                position: 'top',
+                onClick: function(l) {
+                    l.stopPropagation();
+                }
+
+            },
+            animation: {
+                duration: 1,
+                onComplete: function () {
+                    var chartInstance = this.chart,
+                        ctx = chartInstance.ctx;
+                    ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+                    ctx.fillStyle = '#000000';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+
+                    this.data.datasets.forEach(function (dataset, i) {
+                        var meta = chartInstance.controller.getDatasetMeta(i);
+                        meta.data.forEach(function (bar, index) {
+                            var data = dataset.data[index];
+                            ctx.fillText(data, bar._model.x - ((bar._model.x - bar._model.base) / 2), bar._model.y);
+                        });
+                    });
+                }
+            }
+        },
+    });
+
     $("#submit").click(function() {
         $("#submit").attr("disabled", "disabled");
+        $("#runTimeVisualization").hide();
         $("#modalDatepicker").val("Date range")
         $("#comparisonModal").hide();
+        $("#comparisonResults").hide();
+        $("#comparisonResults").html(
+            '<hr>' +
+
+            '<div id="comparisonParams" class="paramDetails" style="float: left;">' +
+                '<p style="font-size: 0.8em;"></p>' +
+            '</div>' +
+
+            '<div id="comparisonAvgRunTime" style="margin-left: 20px; width: 35%; vertical-align: middle;">' +
+                '<p style="font-size: 0.9em;display: inline-block;"></p>' +
+                '<p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>' +
+            '</div>' +
+
+            '<div id="comparisonRunTimeBreakdown" style="margin-left: 20px; width: 70%; vertical-align: middle;">' +
+                '<p style="font-size: 0.9em;display: inline-block;"></p>' +
+                '<p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>' +
+                '<p style="font-size: 0.9em;display: inline-block;"></p>' +
+                '<p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>' +
+                '<p style="font-size: 0.9em;display: inline-block;"></p>' +
+                '<p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>' +
+            '</div>' +
+
+            '<input type="button" id="comparisonVisualizeButton" class="visualizeButton" value="Visualize trips" style="margin-top: 10px; margin-bottom: 10px;">'
+        );
 
         request = {}
 
@@ -393,7 +465,7 @@
 
     $("#modalSubmit").click(function() {
         $(".submit").attr("disabled", "disabled");
-        $("#comparisonModal").hide();
+        $("#runTimeVisualization").hide();
 
         request = {}
 
@@ -432,6 +504,8 @@
             dataType: "json",
             success: function (response) {
                 $(".submit").removeAttr("disabled");
+                $("#comparisonModal").hide();
+
                 var beginDateArray = request.beginDate.split("-");
                 var endDateArray = request.endDate.split("-");
                 [beginDateArray[0], beginDateArray[1], beginDateArray[2]] = [beginDateArray[1], beginDateArray[2], beginDateArray[0]];
@@ -486,6 +560,10 @@
 
     $("#closeModal").click(function() {
         $("#comparisonModal").hide();
+    })
+
+    $(".visualizeButton").click(function() {
+        $("#runTimeVisualization").show();
     })
 
 </script>
