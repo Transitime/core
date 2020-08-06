@@ -78,7 +78,7 @@ public class ApiStopLevel {
 
         // now set the services to be what was actually provided
         this.numberOfServices = String.valueOf(servicesCount);
-        if (servicesCount == 0 && errorDescription != null) {
+        if (servicesCount == 0 && errorDescription == null) {
             this.errorDescription = "Route and Stop combination yielded no predictions";
             this.isValid = 0;
         }

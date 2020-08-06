@@ -267,7 +267,8 @@ public class PredictionDataCache {
 		// If no predictions should still return a IpcPredictionsForRouteStopDest
 		// object so that the client can get route, stop, and direction info to
 		// display in the UI.
-		if (clonedPredictions.size() == 0) {
+		// except if no routeShortName - Ipc requires this!
+		if (clonedPredictions.size() == 0  && routeShortName != null) {
 			IpcPredictionsForRouteStopDest pred =
 					new IpcPredictionsForRouteStopDest(routeShortName,
 							directionId, stopIdOrCode, distanceToStop);
