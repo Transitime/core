@@ -41,6 +41,7 @@ public class ApiStopLevel {
     public ApiStopLevel(RouteStopNumberParameter rsn) {
         isValid = 0;
         errorDescription = rsn.getErrorDescription();
+        numberOfServices = "0";
     }
 
     /**
