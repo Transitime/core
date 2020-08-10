@@ -278,6 +278,7 @@ $("#submit").on("click", function() {
     request.early = $("#early").val() * 60000;
     request.late = $("#late").val() * -60000;
     request.r = $("#route").val();
+    request.includeHeadway = "true";
 
     var askConfirm = allVehiclesRequested() && (request.r == "All Routes" || request.r ==" ");
     var confirmYes = false;
