@@ -64,12 +64,18 @@
 
             <div class="param">
                 <label for="direction">Direction:</label>
-                <select id="direction" name="direction" disabled="true" style="width: 177px">
-
-                </select>
+                <select id="direction" name="direction" disabled="true" style="width: 177px"></select>
             </div>
 
+            <div class="param">
+                <label for="startStop">Start Stop:</label>
+                <select id="startStop" name="startStop" disabled="true" style="width: 177px"></select>
+            </div>
 
+            <div class="param">
+                <label for="endStop">End Stop:</label>
+                <select id="endStop" name="endStop" disabled="true" style="width: 177px"></select>
+            </div>
 
             <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
             <link rel="stylesheet" type="text/css" href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
@@ -263,11 +269,28 @@
 
 <script>
 
+    var stops = [];
+
     $("#route").attr("style", "width: 200px");
 
     $("#route").change(function() {
+        populateDirection();
+    })
+
+    $("#direction").change(function() {
+        populateStartStop();
+    })
+
+    $("#startStop").change(function() {
+        populateEndStop();
+    })
+
+    function populateDirection() {
+        $("#endStop").empty();
+        $("#startStop").empty();
         $("#direction").removeAttr('disabled');
         $("#direction").empty();
+
 
         $.ajax({
             url: apiUrlPrefix + "/command/headsigns",
@@ -280,9 +303,40 @@
                 response.headsigns.forEach(function(headsign) {
                     $("#direction").append("<option value='" + headsign.headsign + "'>" + headsign.label + "</option>");
                 })
+                populateStartStop();
+            },
+            error: function(response) {
+                alert("Error retrieving directions for route " + response.r);
             }
         })
-    })
+    }
+
+    function populateStartStop() {
+        $("#endStop").empty();
+        $("#startStop").removeAttr('disabled');
+        $("#startStop").empty();
+
+        stops.length = 0;
+        var apiResults = [{id: 1, name: "first stop", start: true, end: ["4"]}, {id: 2, name: "second stop", start: true, end: ["1"]}, {id: 3, name: "third stop", start: false, end: ["2"]}, {id: 4, name: "last stop", start: true, end:["1", "2"]}];
+        apiResults.forEach(function(stop) {
+            stops.push(stop);
+            if (stop.start == true) {
+                $("#startStop").append("<option value='" + stop.id + "'>" + stop.name + "</option>");
+            }
+        })
+        populateEndStop();
+    }
+
+    function populateEndStop() {
+        $("#endStop").removeAttr('disabled');
+        $("#endStop").empty();
+
+        stops.forEach(function(stop) {
+            if (stop.end.includes($("#startStop").val())) {
+                $("#endStop").append("<option value='" + stop.id + "'>" + stop.name + "</option>");
+            }
+        })
+    }
 
     var canvas = $("#visualizationCanvas");
     var barGraph = new Chart(canvas, {
