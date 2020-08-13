@@ -23,20 +23,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.config.LongConfigValue;
 import org.transitclock.configData.AgencyConfig;
 import org.transitclock.configData.CoreConfig;
-import org.transitclock.core.dataCache.ArrivalDeparturesToProcessHoldingTimesFor;
 import org.transitclock.core.dataCache.DwellTimeModelCacheFactory;
 import org.transitclock.core.dataCache.HoldingTimeCache;
-import org.transitclock.core.dataCache.HoldingTimeCacheKey;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.core.dataCache.VehicleStateManager;
-import org.transitclock.core.dataCache.ehcache.StopArrivalDepartureCache;
-import org.transitclock.core.dataCache.ehcache.scheduled.TripDataHistoryCache;
 import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
-import org.transitclock.core.holdingmethod.HoldingTimeGeneratorDefaultImpl;
 import org.transitclock.core.holdingmethod.HoldingTimeGeneratorFactory;
 
 import org.transitclock.core.predAccuracy.PredictionAccuracyModule;
@@ -53,8 +49,6 @@ import org.transitclock.db.structs.VehicleEvent;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.logging.Markers;
 import org.transitclock.utils.Time;
-
-import smile.regression.RLS;
 
 /**
  * For determining Arrival/Departure times based on a new GPS report and
@@ -98,6 +92,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 
 	private static final Logger logger =
 			LoggerFactory.getLogger(ArrivalDepartureGeneratorDefaultImpl.class);
+
+
 
 	/********************** Config Params **************************/
 
@@ -149,6 +145,46 @@ public class ArrivalDepartureGeneratorDefaultImpl
 					"If the time of a determine arrival/departure is really "
 					+ "different from the AVL time then something must be "
 					+ "wrong and the situation will be logged.");
+
+	/**
+	 * Specify minimum allowable time in msec when calculating dwell time for departures.
+	 * @return
+	 */
+	private static long getMinAllowableDwellTime() {
+		return minAllowableDwellTime.getValue();
+	}
+	private static LongConfigValue minAllowableDwellTime =
+			new LongConfigValue(
+					"transitclock.arrivalsDepartures.minAllowableDwellTimeMsec",
+					1l * Time.MS_PER_SEC,
+					"Specify minimum allowable time in msec when calculating dwell time for departures.");
+
+	/**
+	 * Specifying the Max allowable time when calculating dwell time for departures.
+	 * @return
+	 */
+	private static long getMaxAllowableDwellTime() {
+		return maxAllowableDwellTime.getValue();
+	}
+	private static LongConfigValue maxAllowableDwellTime =
+			new LongConfigValue(
+					"transitclock.arrivalsDepartures.maxAllowableDwellTimeMsec",
+					60l * Time.MS_PER_MIN,
+					"Specify maximum allowable time in msec when calculating dwell time for departures.");
+
+	/**
+	 * Specifying the Max allowable time when calculating dwell time for departures.
+	 * @return
+	 */
+	private static long getDefaultArrivalDepartureBufferTime() {
+		return defaultArrivalDepartureBufferTime.getValue();
+	}
+	private static LongConfigValue defaultArrivalDepartureBufferTime =
+			new LongConfigValue(
+					"transitclock.arrivalsDepartures.defaultArrivalDepartureBufferTime",
+					1l,
+					"Used when correcting situation where arrival time is after departure time. Default " +
+							   "time to use when specifying amount of time between arrival and departure.");
 
 	/********************** Member Functions **************************/
 
@@ -281,7 +317,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * @param stopPathIndex
 	 */
 	protected Departure createDepartureTime(VehicleState vehicleState,
-			long departureTime, Block block, int tripIndex, int stopPathIndex) {
+											long departureTime, Block block, int tripIndex, int stopPathIndex,
+											Long dwellTime) {
 		// Store the departure in the database via the db logger
 
 		Date freqStartDate=null;
@@ -290,12 +327,24 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			freqStartDate = new Date(vehicleState.getTripStartTime(vehicleState.getTripCounter()));
 		}
 
+		String stopPathId = block.getStopPath(tripIndex, stopPathIndex).getId();
+
+		Date avlTime=null;
+		if(vehicleState.getLastAvlTime() != vehicleState.getAvlReport().getDate()){
+			avlTime = vehicleState.getLastAvlTime();
+		} else{
+			avlTime = vehicleState.getAvlReport().getDate();
+		}
+
 		Departure departure = new Departure(vehicleState.getVehicleId(),
 				new Date(departureTime),
-				vehicleState.getAvlReport().getDate(),
+				avlTime,
 				block,
 				tripIndex,
-				stopPathIndex, freqStartDate);
+				stopPathIndex,
+				freqStartDate,
+				dwellTime,
+				stopPathId);
 		updateCache(vehicleState, departure);
 		logger.debug("Creating departure: {}", departure);
 		return departure;
@@ -322,12 +371,16 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			freqStartDate = new Date(vehicleState.getTripStartTime(vehicleState.getTripCounter()));
 		}
 
+		String stopPathId = block.getStopPath(tripIndex, stopPathIndex).getId();
+
 		Arrival arrival = new Arrival(vehicleState.getVehicleId(),
 				new Date(arrivalTime),
 				vehicleState.getAvlReport().getDate(),
 				block,
 				tripIndex,
-				stopPathIndex, freqStartDate);
+				stopPathIndex,
+				freqStartDate,
+				stopPathId);
 		
 		updateCache(vehicleState, arrival);
 		logger.debug("Creating arrival: {}", arrival);
@@ -336,6 +389,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		// departures are for after the arrival time.
 		if (arrivalTime > vehicleState.getLastArrivalTime())
 			vehicleState.setLastArrivalTime(arrivalTime);
+
+		vehicleState.setLastAvlTime(vehicleState.getAvlReport().getDate());
 
 		return arrival;
 	}
@@ -444,8 +499,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * the AVL time. Otherwise this indicates there was a problem determining
 	 * the arrival/departure time.
 	 *
-	 * @param time
-	 * @param avlReport
+	 * @param arrivalDeparture
 	 * @return true if arrival/departure time within 30 minutes of the AVL
 	 *         report time.
 	 */
@@ -520,7 +574,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * so that the problem is made more obvious.
 	 *
 	 * @param vehicleState
-	 * @param arrivalDeparture
+	 * @param departure
 	 */
 	private void logEventIfVehicleDepartedEarlyOrLate(VehicleState vehicleState,
 			Departure departure) {
@@ -629,6 +683,11 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			long travelTimeFromFirstStopToMatch = TravelTimes.getInstance()
 					.expectedTravelTimeBetweenMatches(vehicleId, avlReportTime,
 							beginningOfTrip, newMatch);
+
+			// TODO - dwell time for first stop?
+			//Integer firstStopDwellTime = block.getPathStopTime(tripIndex, stopPathIndex);
+			Long firstStopDwellTime = recalculateDwellTimeUsingThresholds(null);
+
 			long departureTime =
 					avlReportTime.getTime() - travelTimeFromFirstStopToMatch;
 
@@ -636,7 +695,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			// stop
 			if (!newMatch.isAtStop(tripIndex, stopPathIndex)) {
 				storeInDbAndLog(createDepartureTime(vehicleState, departureTime,
-						block, tripIndex, stopPathIndex));
+						block, tripIndex, stopPathIndex, firstStopDwellTime));
 			}
 
 			// Go through remaining intermediate stops to determine
@@ -650,12 +709,15 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				storeInDbAndLog(createArrivalTime(vehicleState, arrivalTime, block,
 						tripIndex, stopPathIndex));
 
+
+
 				// If the vehicle has left this stop then create the departure
 				if (!newMatch.isAtStop(tripIndex, stopPathIndex)) {
 					int stopTime = block.getPathStopTime(tripIndex, stopPathIndex);
 					departureTime = arrivalTime + stopTime;
+					Long dwellTime = recalculateDwellTimeUsingThresholds(departureTime - arrivalTime);
 					storeInDbAndLog(createDepartureTime(vehicleState, departureTime,
-							block, tripIndex, stopPathIndex));
+							block, tripIndex, stopPathIndex, dwellTime));
 				}
 			}
 
@@ -685,23 +747,26 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * @param vehicleState
 	 * @return
 	 */
-	private long adjustDepartureSoAfterArrival(long departureTime,
-			long departureTimeBasedOnNewMatch, VehicleState vehicleState) {
+	private Departure createDeparturePostArrival(VehicleState vehicleState, long departureTime, Block block,
+											   int tripIndex, int stopPathIndex, long departureTimeBasedOnNewMatch) {
 		String vehicleId = vehicleState.getVehicleId();
 		AvlReport avlReport = vehicleState.getAvlReport();
 		AvlReport previousAvlReport =
 				vehicleState.getPreviousAvlReportFromSuccessfulMatch();
 
+		Arrival arrivalToStoreInDb = vehicleState.getArrivalToStoreToDb();
+		long arrivalTime;
+
 		// Make sure departure time is after the previous arrival time since
 		// don't want arrival/departure times to ever go backwards. That of
 		// course looks really bad.
-		Arrival arrivalToStoreInDb = vehicleState.getArrivalToStoreToDb();
 		if (arrivalToStoreInDb != null) {
+			arrivalTime = arrivalToStoreInDb.getTime();
 			// If the arrival time is a problem then adjust both the arrival
 			// time and the departure time so that they are as accurate as
 			// possible and that the arrival time comes before the departure
 			// time.
-			if (arrivalToStoreInDb.getTime() >= departureTime) {
+			if (arrivalTime >= departureTime) {
 				long originalTimeBetweenOldAvlAndArrival = arrivalToStoreInDb
 						.getTime() - previousAvlReport.getTime();
 				// Note: don't want to subtract out departure time because
@@ -719,7 +784,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				long newArrivalTime = previousAvlReport.getTime()
 						+ Math.round(ratio
 								* originalTimeBetweenOldAvlAndArrival);
-				long newDepartureTime = newArrivalTime + 1;
+				long newDepartureTime = newArrivalTime + getDefaultArrivalDepartureBufferTime();
 
 				if (logger.isDebugEnabled()) {
 					logger.debug("vehicleId={} determined departure time was "
@@ -733,8 +798,9 @@ public class ArrivalDepartureGeneratorDefaultImpl
 							Time.dateTimeStrMsec(newDepartureTime));
 				}
 				departureTime = newDepartureTime;
+				arrivalTime = newArrivalTime;
 				arrivalToStoreInDb = arrivalToStoreInDb
-						.withUpdatedTime(new Date(newArrivalTime));
+						.withUpdatedTime(new Date(arrivalTime));
 			}
 
 			// Now that have the corrected arrival time store it in db
@@ -748,18 +814,18 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			// arrival time no matter how it was created. This could happen
 			// if travel times indicate that the vehicle departed a long time
 			// ago.
-			long lastArrivalTime = vehicleState.getLastArrivalTime();
-			if (departureTime <= lastArrivalTime) {
+			arrivalTime = vehicleState.getLastArrivalTime();
+			if (departureTime <= arrivalTime) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("vehicleId={} the determined departure was " +
 						"{} which is before the previous arrival time {}. " +
 						"Therefore adjusting the departure time to {}",
 						vehicleId,
 						Time.dateTimeStrMsec(departureTime),
-						Time.dateTimeStrMsec(lastArrivalTime),
-						Time.dateTimeStrMsec(lastArrivalTime+1));
+						Time.dateTimeStrMsec(arrivalTime),
+						Time.dateTimeStrMsec(arrivalTime+1));
 				}
-				departureTime = lastArrivalTime + 1;
+				departureTime = arrivalTime + 1;
 			}
 		}
 
@@ -779,8 +845,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			}
 		}
 
-		// Return the possibly adjusted departure time
-		return departureTime;
+		Long dwellTime = recalculateDwellTimeUsingThresholds(departureTime - arrivalTime);
+		return createDepartureTime(vehicleState, departureTime, block, tripIndex, stopPathIndex, dwellTime);
 	}
 
 	/**
@@ -896,15 +962,15 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			departureTime = avlReport.getTime() - 1;
 		}
 
-		// Make sure departure time is after arrival
-		departureTime = adjustDepartureSoAfterArrival(departureTime,
-				departureTimeBasedOnNewMatch, vehicleState);
 
-		// Create and write out the departure time to db
-		Departure departure = createDepartureTime(vehicleState,
+		// Make sure departure time is after arrival
+		Departure departure = createDeparturePostArrival(vehicleState,
 				departureTime, oldVehicleAtStopInfo.getBlock(),
 				oldVehicleAtStopInfo.getTripIndex(),
-				oldVehicleAtStopInfo.getStopPathIndex());
+				oldVehicleAtStopInfo.getStopPathIndex(),
+				departureTimeBasedOnNewMatch);
+
+		// Create and write out the departure time to db
 		storeInDbAndLog(departure);
 
 		// Log event if vehicle left a terminal too early or too late
@@ -1207,11 +1273,13 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			timeWithoutSpeedRatio += stopTime;
 			long departureTime =
 					beginTime + Math.round(timeWithoutSpeedRatio * speedRatio);
+			Long dwellTime = recalculateDwellTimeUsingThresholds(departureTime - arrivalTime);
 			ArrivalDeparture departure = createDepartureTime(vehicleState,
 					departureTime,
 					newMatch.getBlock(),
 					indices.getTripIndex(),
-					indices.getStopPathIndex());
+					indices.getStopPathIndex(),
+					dwellTime);
 			storeInDbAndLog(departure);
 
 			// Determine travel time to next time for next time through
@@ -1230,6 +1298,26 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		logger.debug("For vehicleId={} done determining if it traversed " +
 				"stops in between the new and the old AVL report.",
 				vehicleId);
+	}
+
+	/**
+	 * Recalculate dwellTime using the Min and Max Allowable Dwell Time values.
+	 * If DwellTime is below Min value, then Min value is returned.
+	 * If DwellTime is above Max value, then NULL is returned since the value is likely an error.
+	 *
+	 * @param dwellTime
+	 *            Originally calculated dwellTime
+	 */
+	private Long recalculateDwellTimeUsingThresholds(Long dwellTime){
+		if(dwellTime != null){
+			if(dwellTime < getMinAllowableDwellTime()){
+				return getMinAllowableDwellTime();
+			}
+			else if(dwellTime <= getMaxAllowableDwellTime()){
+				return dwellTime;
+			}
+		}
+		return null;
 	}
 
 	/**

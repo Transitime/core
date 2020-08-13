@@ -16,8 +16,7 @@
  */
 package org.transitclock.ipc.clients;
 
-import org.transitclock.ipc.interfaces.HoldingTimeInterface;
-import org.transitclock.ipc.interfaces.ScheduleAdherenceInterface;
+import org.transitclock.ipc.interfaces.ReportingInterface;
 import org.transitclock.ipc.rmi.ClientFactory;
 
 import java.util.HashMap;
@@ -32,8 +31,8 @@ import java.util.Map;
 public class ScheduleAdherenceInterfaceFactory {
 
 	// Keyed by agencyId
-	private static Map<String, ScheduleAdherenceInterface> scheduleAdherenceInterfaceMap =
-			new HashMap<String, ScheduleAdherenceInterface>();
+	private static Map<String, ReportingInterface> scheduleAdherenceInterfaceMap =
+			new HashMap<String, ReportingInterface>();
 
 	/********************** Member Functions **************************/
 
@@ -43,18 +42,18 @@ public class ScheduleAdherenceInterfaceFactory {
 	 * @param agencyId
 	 * @return
 	 */
-	public static ScheduleAdherenceInterface get(String agencyId) {
-		ScheduleAdherenceInterface scheduleAdherenceInterface =
+	public static ReportingInterface get(String agencyId) {
+		ReportingInterface reportingInterface =
 				scheduleAdherenceInterfaceMap.get(agencyId);
-		if (scheduleAdherenceInterface == null) {
+		if (reportingInterface == null) {
 
-			scheduleAdherenceInterface = ClientFactory.getInstance(agencyId, ScheduleAdherenceInterface.class);
+			reportingInterface = ClientFactory.getInstance(agencyId, ReportingInterface.class);
 
-			scheduleAdherenceInterfaceMap.put(agencyId, scheduleAdherenceInterface);
+			scheduleAdherenceInterfaceMap.put(agencyId, reportingInterface);
 			
 		}
 
-		return scheduleAdherenceInterface;
+		return reportingInterface;
 	}
 
 }
