@@ -271,7 +271,7 @@
 
 <script>
 
-    var stops = [];
+    var stops = {};
 
     $("#route").attr("style", "width: 200px");
 
@@ -284,10 +284,11 @@
     })
 
     $("#startStop").change(function() {
-        populateEndStop();
+        populateEndStop(stops);
     })
 
     function populateDirection() {
+
         $("#endStop").empty();
         $("#startStop").empty();
         $("#direction").removeAttr('disabled');
@@ -315,28 +316,81 @@
 
     function populateStartStop() {
         $("#endStop").empty();
-        $("#startStop").removeAttr('disabled');
         $("#startStop").empty();
 
-        stops.length = 0;
-        var apiResults = [{id: 1, name: "first stop", start: true, end: ["4"]}, {id: 2, name: "second stop", start: true, end: ["1"]}, {id: 3, name: "third stop", start: false, end: ["2"]}, {id: 4, name: "last stop", start: true, end:["1", "2"]}];
-        apiResults.forEach(function(stop) {
-            stops.push(stop);
-            if (stop.start == true) {
-                $("#startStop").append("<option value='" + stop.id + "'>" + stop.name + "</option>");
+        stops = {};
+        var request = {};
+
+        request.a = 1;
+        request.r = $("#route").val();
+        request.headsign = $("#direction").val();
+
+        $.ajax({
+            // The page being requested
+            url: "stopsJsonData.jsp",
+            // Pass in query string parameters to page being requested
+            data: request,
+            // Needed so that parameters passed properly to page being requested
+            traditional: true,
+            dataType: "json",
+            async: true,
+            // When successful process JSON data
+            success: function (resp) {
+                if (resp.data.length == 0) {
+                    alert("No stop data for selected route and headsign.");
+                }
+                else {
+                    $("#startStop").removeAttr('disabled');
+
+                    var tripId;
+                    var first;
+                    var last;
+
+                    resp.data.forEach(function (stop) {
+                        if (stop.tripPatternId == tripId) {
+                            last = stop;
+                        } else {
+                            if (typeof (last) == 'undefined') {
+                                first = stop;
+                            } else {
+                                if (typeof (stops[first.name]) == 'undefined') {
+                                    stops[first.name] = [last.name];
+                                } else {
+                                    stops[first.name].push(last.name);
+                                }
+                                first = stop;
+                            }
+                            tripId = stop.tripPatternId;
+                        }
+                    })
+
+                    if (typeof (stops[first.name]) == 'undefined') {
+                        stops[first.name] = [last.name];
+                    } else {
+                        stops[first.name].push(last.name);
+                    }
+
+                    Object.keys(stops).forEach(function (stop) {
+                        $("#startStop").append("<option value='" + stop + "'>" + stop + "</option>");
+                    })
+
+                    populateEndStop(stops);
+                }
+
+            },
+            // When there is an AJAX problem alert the user
+            error: function (request, status, error) {
+                alert(error + '. ' + request.responseText);
             }
-        })
-        populateEndStop();
+        });
     }
 
-    function populateEndStop() {
+    function populateEndStop(stops) {
         $("#endStop").removeAttr('disabled');
         $("#endStop").empty();
 
-        stops.forEach(function(stop) {
-            if (stop.end.includes($("#startStop").val())) {
-                $("#endStop").append("<option value='" + stop.id + "'>" + stop.name + "</option>");
-            }
+        stops[$("#startStop").val()].forEach(function(endStop) {
+            $("#endStop").append("<option value='" + endStop + "'>" + endStop + "</option>");
         })
     }
 
