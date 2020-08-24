@@ -14,16 +14,14 @@ import java.util.List;
  */
 @XmlRootElement
 public class ApiStopLevel {
+
+
     @XmlElement(name = "stopId")
     private String stopId;
     @XmlElement(name = "route")
     private String route; //routeShortName
     @XmlElement(name = "number_of_services")
     private String numberOfServices = "3";
-    @XmlElement(name = "is_valid")
-    private Integer isValid = 1;
-    @XmlElement(name = "error_desc")
-    private String errorDescription;
     @XmlElement(name = "predictions")
     private ArrayList<ApiStopLevelPrediction> predictions = new ArrayList<ApiStopLevelPrediction>();
 
@@ -39,9 +37,10 @@ public class ApiStopLevel {
      * @param rsn containing the errorDescription
      */
     public ApiStopLevel(RouteStopNumberParameter rsn) {
-        isValid = 0;
-        errorDescription = rsn.getErrorDescription();
+        stopId = rsn.getStopId();  // could be null
+        route = rsn.getRoute(); // could be null
         numberOfServices = "0";
+        predictions.add(new ApiStopLevelPrediction(rsn.getErrorDescription()));
     }
 
     /**
@@ -61,8 +60,7 @@ public class ApiStopLevel {
             services = 3;
             // we just ignore an invalid service count
         }
-        isValid = rsn.getValidCode();
-        errorDescription = rsn.getErrorDescription();
+
         int servicesCount = 0;
         for (IpcPredictionsForRouteStopDest routeStopPrediction : routeStopPredictions) {
             if (routeStopPrediction.getPredictionsForRouteStop() != null) {
@@ -78,10 +76,17 @@ public class ApiStopLevel {
 
         // now set the services to be what was actually provided
         this.numberOfServices = String.valueOf(servicesCount);
-        if (servicesCount == 0 && errorDescription == null) {
-            this.errorDescription = "Route and Stop combination yielded no predictions";
-            this.isValid = 0;
+        if (servicesCount == 0) {
+            if (rsn.getErrorDescription() == null) {
+                predictions.add(new ApiStopLevelPrediction("Route and Stop combination yielded no predictions"));
+            } else {
+                predictions.add(new ApiStopLevelPrediction(rsn.getErrorDescription()));
+            }
+        } else if (rsn.getErrorDescription() != null) {
+            // report an error even though we have predictions
+            predictions.add(new ApiStopLevelPrediction(rsn.getErrorDescription()));
         }
+
     }
 
 }

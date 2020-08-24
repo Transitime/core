@@ -46,7 +46,7 @@ public class RouteStopNumberParameter {
     }
 
     public void setInvalid() {
-        isValid = 0;
+        isValid = 0; //FALSE
         numberOfServices = null;
     }
 

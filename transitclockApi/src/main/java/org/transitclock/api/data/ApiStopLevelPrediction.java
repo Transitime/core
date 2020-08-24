@@ -9,10 +9,15 @@ import javax.xml.bind.annotation.XmlElement;
  */
 public class ApiStopLevelPrediction {
 
+    private static final int VALID_FALSE = 0;
+    private static final int VALID_TRUE = 1;
+
     @XmlElement(name = "is_valid")
-    private Integer isValid = 1;
+    private Integer isValid = VALID_TRUE;
+    @XmlElement(name = "error_desc")
+    private String errorDescription = null;
     @XmlElement(name = "time")
-    private long time;  //seconds from epoch
+    private Long time = null;  //seconds from epoch
     @XmlElement(name = "trip")
     private String trip;
     @XmlElement(name = "vehicle")
@@ -24,18 +29,23 @@ public class ApiStopLevelPrediction {
 
     public ApiStopLevelPrediction(IpcPrediction prediction) {
         if (prediction == null) {
-            isValid = 1;
+            isValid = VALID_FALSE;
             return;
         }
         trip = prediction.getTripId();
         vehicle = prediction.getVehicleId();
-        if (prediction.getPredictionTime() != 0) {
+        if (prediction.getPredictionTime() > 0) {
             time = prediction.getPredictionTime() / 1000; // seconds
-            isValid = 0;
         } else {
-            time = prediction.getPredictionTime();
+            isValid = VALID_FALSE;
+            errorDescription = "Invalid prediction value of " + time;
         }
 
+    }
+
+    public ApiStopLevelPrediction(String errorDescription) {
+        this.errorDescription = errorDescription;
+        isValid = VALID_FALSE;
     }
 
 }
