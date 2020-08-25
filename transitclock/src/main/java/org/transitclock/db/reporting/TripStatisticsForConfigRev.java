@@ -1,7 +1,6 @@
 package org.transitclock.db.reporting;
 
 import org.transitclock.db.structs.ArrivalDeparture;
-import org.transitclock.db.structs.StopRunTime;
 
 import java.util.HashMap;
 import java.util.Map;
