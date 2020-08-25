@@ -313,9 +313,8 @@ public final class Block implements Serializable {
 				+ ", serviceId=" + serviceId
 				+ ", startTime=" + Time.timeOfDayStr(startTime) 
 				+ ", endTime=" + Time.timeOfDayStr(endTime) 
-				// Use getTrips() instead of trips to deal with possible lazy 
-				// initialization issues
-				+ ", trips=" + getTrips() 
+				// Removing to avoid issues with lazy instantiation
+				//+ ", trips=" + getTrips()
 				+ "]";
 	}
 	
@@ -574,7 +573,7 @@ public final class Block implements Serializable {
 	 * if the service associated with the block is active. Only looks at time of
 	 * day.
 	 * 
-	 * @param date
+	 * @param epochTime
 	 *            The time checking to see whether block is active for
 	 * @param allowableBeforeTimeSecs
 	 *            Block considered active if within this number of seconds
@@ -858,8 +857,11 @@ public final class Block implements Serializable {
 								+ "globalLazyLoadSession.", 
 								getId(), session == null ? null : session.hashCode(), 
 								globalLazyLoadSession.hashCode());
-
-						globalLazyLoadSession.update(this);
+						try {
+							globalLazyLoadSession.update(this);
+						} catch(Exception e){
+							logger.warn("Unable to load lazy session", e);
+						}
 					}
 				} else {
 				  logger.error("Blocks.trips member is not a PersistentList!?!?. ");
@@ -956,6 +958,25 @@ public final class Block implements Serializable {
 
 		return Collections.unmodifiableList(trips);
 	}
+
+	public List<Trip> getTripsFromDb(boolean readOnly) {
+		Session session = HibernateUtils.getSession(readOnly);
+		try {
+			session.update(this);
+			trips.get(0);
+		} catch (HibernateException e) {
+			// Log error to the Core logger
+			Core.getLogger().error("Unable to retrieve trips", e);
+			return null;
+		} finally {
+			// Clean things up. Not sure if this absolutely needed nor if
+			// it might actually be detrimental and slow things down.
+			session.close();
+		}
+
+		return Collections.unmodifiableList(trips);
+
+	}
 	
 	/**
 	 * So can sync up loading of trip and trip pattern data when trips are all
@@ -1000,6 +1021,16 @@ public final class Block implements Serializable {
 		
 		// Return the specified trip
 		return getTrips().get(tripIndex);
+	}
+
+	public Trip getTripFromDb(int tripIndex, boolean readOnly) {
+		List<Trip> trips = getTripsFromDb(readOnly);
+		// If index out of range return null
+		if (tripIndex < 0 || tripIndex >= trips.size())  {
+			return null;
+		}
+		// Return the specified trip
+		return trips.get(tripIndex);
 	}
 	
 	/**
