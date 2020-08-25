@@ -16,12 +16,14 @@
  */
 package org.transitclock.core;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
+import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.LongConfigValue;
 import org.transitclock.configData.AgencyConfig;
@@ -36,18 +38,10 @@ import org.transitclock.core.dataCache.scheduled.ScheduleBasedHistoricalAverageC
 import org.transitclock.core.holdingmethod.HoldingTimeGeneratorFactory;
 
 import org.transitclock.core.predAccuracy.PredictionAccuracyModule;
-import org.transitclock.db.structs.Arrival;
-import org.transitclock.db.structs.ArrivalDeparture;
-import org.transitclock.db.structs.AvlReport;
-import org.transitclock.db.structs.Block;
-import org.transitclock.db.structs.Departure;
-import org.transitclock.db.structs.HoldingTime;
-import org.transitclock.db.structs.Route;
-import org.transitclock.db.structs.Stop;
-import org.transitclock.db.structs.Trip;
-import org.transitclock.db.structs.VehicleEvent;
+import org.transitclock.db.structs.*;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.logging.Markers;
+import org.transitclock.utils.Geo;
 import org.transitclock.utils.Time;
 
 /**
@@ -186,6 +180,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 					"Used when correcting situation where arrival time is after departure time. Default " +
 							   "time to use when specifying amount of time between arrival and departure.");
 
+
 	/********************** Member Functions **************************/
 
 	/**
@@ -316,10 +311,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * @param tripIndex
 	 * @param stopPathIndex
 	 */
-	protected Departure createDepartureTime(VehicleState vehicleState,
-											long departureTime, Block block, int tripIndex, int stopPathIndex,
-											Long dwellTime) {
-		// Store the departure in the database via the db logger
+	protected Departure createDepartureTime(VehicleState vehicleState, long departureTime, Block block,
+											int tripIndex, int stopPathIndex, Long dwellTime) {
 
 		Date freqStartDate=null;
 		if(vehicleState.getTripStartTime(vehicleState.getTripCounter())!=null)
@@ -328,16 +321,11 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		}
 
 		String stopPathId = block.getStopPath(tripIndex, stopPathIndex).getId();
-
-		Date avlTime=null;
-		if(vehicleState.getLastAvlTime() != vehicleState.getAvlReport().getDate()){
-			avlTime = vehicleState.getLastAvlTime();
-		} else{
-			avlTime = vehicleState.getAvlReport().getDate();
-		}
+		Date avlTime=vehicleState.getAvlReport().getDate();
+		Date time = new Date(departureTime);
 
 		Departure departure = new Departure(vehicleState.getVehicleId(),
-				new Date(departureTime),
+				time,
 				avlTime,
 				block,
 				tripIndex,
@@ -345,9 +333,34 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				freqStartDate,
 				dwellTime,
 				stopPathId);
+
 		updateCache(vehicleState, departure);
+
 		logger.debug("Creating departure: {}", departure);
 		return departure;
+	}
+
+	/**
+	 * Attempts to synchronize arrival and departure avl time.
+	 * It seems like other parts of the code compare these values directly to the avl values therefore
+	 * modifying here may create matching issues with caches and such.
+	 * Avoid using for now.
+	 *
+	 * @param lastArrivalTime
+	 * @param currentDepartureTime
+	 * @return
+	 */
+	private Date getDepartureAvlTime(Date lastArrivalTime, Date currentDepartureTime){
+		if(currentDepartureTime == null)
+			return lastArrivalTime;
+
+		if(lastArrivalTime != currentDepartureTime && lastArrivalTime != null){
+			if(Time.getTimeDifference(currentDepartureTime, lastArrivalTime) < 30 * Time.MS_PER_MIN){
+				return lastArrivalTime;
+			}
+		}
+
+		return currentDepartureTime;
 	}
 
 	/**
@@ -385,19 +398,11 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		updateCache(vehicleState, arrival);
 		logger.debug("Creating arrival: {}", arrival);
 
-		// Remember this arrival time so that can make sure that subsequent
-		// departures are for after the arrival time.
-		if (arrivalTime > vehicleState.getLastArrivalTime())
-			vehicleState.setLastArrivalTime(arrivalTime);
-
-		vehicleState.setLastAvlTime(vehicleState.getAvlReport().getDate());
-
 		return arrival;
 	}
+
 	private void updateCache(VehicleState vehicleState, ArrivalDeparture arrivalDeparture)
 	{
-								
-		
 		if(TripDataHistoryCacheFactory.getInstance()!=null)
 			TripDataHistoryCacheFactory.getInstance().putArrivalDeparture(arrivalDeparture);
 
@@ -499,26 +504,20 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * the AVL time. Otherwise this indicates there was a problem determining
 	 * the arrival/departure time.
 	 *
-	 * @param arrivalDeparture
+	 * @param avlTime
+	 * @param time
 	 * @return true if arrival/departure time within 30 minutes of the AVL
 	 *         report time.
 	 */
-	private boolean timeReasonable(ArrivalDeparture arrivalDeparture) {
-		long delta = Math.abs(arrivalDeparture.getAvlTime().getTime()
-				- arrivalDeparture.getDate().getTime());
-		if (delta < allowableDifferenceBetweenAvlTimeSecs.getValue() * Time.MS_PER_SEC)
-			return true;
-		else {
-			logger.error(Markers.email(),
-					"For {} arrival or departure time of {} is more than "
-					+ "{} secs away from the AVL time of {}. Therefore not "
-					+ "storing this time. {}",
-					AgencyConfig.getAgencyId(), arrivalDeparture.getDate(),
-					allowableDifferenceBetweenAvlTimeSecs.getValue(),
-					arrivalDeparture.getAvlTime(), arrivalDeparture);
-			return false;
+	private boolean timeReasonable(Date avlTime, Date time){
+		if(avlTime != null && time != null) {
+			long delta = Math.abs(avlTime.getTime() - time.getTime());
+			if (delta < allowableDifferenceBetweenAvlTimeSecs.getValue() * Time.MS_PER_SEC)
+				return true;
 		}
+		return false;
 	}
+
 
 	/**
 	 * Stores the specified ArrivalDeparture object into the db
@@ -532,11 +531,26 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 */
 	protected void storeInDbAndLog(ArrivalDeparture arrivalDeparture) {
 
+		if (arrivalDeparture == null)
+			return;
+
 		// If arrival/departure time too far from the AVL time then something
 		// must be wrong. For this situation don't store the arrival/departure
 		// into db.
-		if (!timeReasonable(arrivalDeparture))
+		Date avlTime = arrivalDeparture.getAvlTime();
+		Date time = arrivalDeparture.getDate();
+		if(!timeReasonable(avlTime, time)){
+			logger.error(Markers.email(),
+					"For {} arrival or departure time of {} is more than "
+							+ "{} secs away from the AVL time of {}. Therefore not "
+							+ "storing this time. {}",
+					AgencyConfig.getAgencyId(), time,
+					allowableDifferenceBetweenAvlTimeSecs.getValue(),
+					avlTime, arrivalDeparture.getBlockId());
 			return;
+		}
+
+
 
 
 		// Don't want to record arrival/departure time for last stop of a no

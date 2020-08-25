@@ -991,6 +991,13 @@ public class Time {
 			return timeDiffSecs;
 	}
 
+	public static Long getTimeDifference(Date minuendDate, Date subtrahendDate) {
+		if(minuendDate != null && subtrahendDate !=null){
+			return Math.abs(minuendDate.getTime() - subtrahendDate.getTime());
+		}
+		return null;
+	}
+
 	/**
 	 * Simply calls Thread.sleep() but catches the InterruptedException
 	 * so that the calling function doesn't need to.

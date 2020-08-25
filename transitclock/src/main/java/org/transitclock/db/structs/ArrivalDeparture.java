@@ -1002,7 +1002,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 					getScheduledTimesWhere(scheduledTimesOnly) +
 					getTimePointsWhere(timePointsOnly) +
 					getServiceTypeWhere(serviceType) +
-					getTripsWhere(headsign) +
+					getTripsWhere(headsign, includeTrip) +
 					getStopsWhere(includeStop) +
 					getStopPathsWhere(includeStopPath) +
 					getDwellTimesWhere(dwellTimeOnly);
@@ -1140,11 +1140,16 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		return "";
 	}
 
-	private static String getTripsWhere(String headsign){
-		if(StringUtils.isNotBlank(headsign)){
-			return String.format("AND ad.configRev = t.configRev AND ad.tripId = t.tripId AND t.headsign = '%s' ", headsign);
+	private static String getTripsWhere(String headsign, boolean includeTrip){
+		String tripsWhere = "";
+		boolean includeHeadsign = StringUtils.isNotBlank(headsign);
+		if(includeTrip || includeHeadsign) {
+			tripsWhere = "AND ad.configRev = t.configRev AND ad.tripId = t.tripId ";
+			if(includeHeadsign){
+				tripsWhere += String.format("AND t.headsign = '%s' ", headsign);
+			}
 		}
-		return "";
+		return tripsWhere;
 	}
 
 	private static String getStopsWhere(boolean includeStop){
