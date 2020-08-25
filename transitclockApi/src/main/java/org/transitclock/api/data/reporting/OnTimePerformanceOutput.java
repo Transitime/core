@@ -16,14 +16,14 @@ import java.util.Map;
  * @author carabalb
  *
  */
-public class OnTimePerformanceData {
+public class OnTimePerformanceOutput {
 
     private static final String EARLY = "Early";
     private static final String LATE = "Late";
-    private static final String ON_TIME = "On Time";
+    private static final String ON_TIME = "On-Time";
 
     public static PieChart getOnTimePerformanceForRoutesPieChart(List<IpcArrivalDepartureScheduleAdherence> arrivalDepartures,
-                                                  int minEarlySec, int minLateSec){
+                                                                 int minEarlySec, int minLateSec){
 
         Map<String, Integer> labelsAndCountsMap = getOTPLabelsAndCounts(arrivalDepartures, minEarlySec, minLateSec);
 
@@ -34,7 +34,7 @@ public class OnTimePerformanceData {
         data.addDataset(dataset);
         data.addLabels(EARLY, LATE, ON_TIME);
 
-        PieChart chart = new PieChart();
+        org.transitclock.api.data.reporting.chartjs.pie.PieChart chart = new org.transitclock.api.data.reporting.chartjs.pie.PieChart();
         chart.setData(data);
 
         return chart;

@@ -18,20 +18,9 @@ package org.transitclock.db.structs;
 
 import java.io.Serializable;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OrderColumn;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 import org.hibernate.CallbackException;
 import org.hibernate.HibernateException;
@@ -50,6 +39,7 @@ import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.gtfs.TitleFormatter;
 import org.transitclock.gtfs.gtfsStructs.GtfsTrip;
+import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
 
 
@@ -159,6 +149,16 @@ public class Trip implements Lifecycle, Serializable {
 	// The GTFS trips.txt shape_id
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private String shapeId;
+
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumns(
+		{
+			@JoinColumn(updatable=false,insertable=false, name="blockId", referencedColumnName="blockId"),
+			@JoinColumn(updatable=false,insertable=false, name="serviceId", referencedColumnName="serviceId"),
+			@JoinColumn(updatable=false,insertable=false, name="configRev", referencedColumnName="configRev")
+		}
+	)
+	private Block block;
 
 	@Transient
 	private Route route;
@@ -1200,5 +1200,96 @@ public class Trip implements Lifecycle, Serializable {
     }
     return count;
   }
-		
+
+	public static List<Trip> getTripsFromDb(String routeId, String headsign, Set<Integer> configRevs, boolean readOnly) {
+		IntervalTimer timer = new IntervalTimer();
+
+		// Get the database session. This is supposed to be pretty light weight
+		Session session = HibernateUtils.getSession(readOnly);
+
+		// Create the query. Table name is case sensitive and needs to be the
+		// class name instead of the name of the db table.
+
+		String hql = "SELECT " +
+				"t " +
+				"FROM " +
+				"Trip t " +
+				"JOIN FETCH t.block b " +
+				"WHERE t.routeId = :routeId " +
+				"AND t.headsign = :headsign " +
+				"AND t.configRev IN (:configRevs) " +
+				"AND t.configRev = b.configRev " +
+				"AND t.serviceId = b.serviceId " +
+				"AND t.blockId = b.blockId " +
+				"ORDER BY t.startTime";
+		try {
+			Query query = session.createQuery(hql);
+			query.setString("routeId", routeId);
+			query.setString("headsign", headsign);
+			query.setParameterList("configRevs", configRevs);
+
+			List<Trip> results = query.list();
+
+			logger.debug("Getting trips from database took {} msec",
+					timer.elapsedMsec());
+
+			return results;
+
+		} catch (HibernateException e) {
+			// Log error to the Core logger
+			Core.getLogger().error("Unable to retrieve trips", e);
+			return null;
+		} finally {
+			// Clean things up. Not sure if this absolutely needed nor if
+			// it might actually be detrimental and slow things down.
+			session.close();
+		}
+	}
+
+	public static List<Trip> getTripsFromDb(String blockId, String serviceId, int configRev, boolean readOnly) {
+		IntervalTimer timer = new IntervalTimer();
+
+		// Get the database session. This is supposed to be pretty light weight
+		Session session = HibernateUtils.getSession(readOnly);
+
+		// Create the query. Table name is case sensitive and needs to be the
+		// class name instead of the name of the db table.
+
+		String hql = "SELECT " +
+				"t " +
+				"FROM " +
+				"Trip t " +
+				"AND t.configRev = :configRev " +
+				"AND t.serviceId = :serviceId " +
+				"AND t.blockId = :blockId " +
+				"ORDER BY t.startTime";
+		try {
+			Query query = session.createQuery(hql);
+			query.setInteger("configRev", configRev);
+			query.setString("serviceId", serviceId);
+			query.setString("blockId", blockId);
+
+			List<Trip> results = query.list();
+
+			logger.debug("Getting trips from database took {} msec",
+					timer.elapsedMsec());
+
+			return results;
+
+		} catch (HibernateException e) {
+			// Log error to the Core logger
+			Core.getLogger().error("Unable to retrieve trips", e);
+			return null;
+		} finally {
+			// Clean things up. Not sure if this absolutely needed nor if
+			// it might actually be detrimental and slow things down.
+			session.close();
+		}
+	}
+
+
+	public Block getBlockFromDb(){
+  		return block;
+	}
+
 }
