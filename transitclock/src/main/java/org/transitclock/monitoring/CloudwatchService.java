@@ -236,26 +236,28 @@ public class CloudwatchService {
                       if (metricDefinition.lastUpdate == null)
                         continue;
                       long dateDiff = now.getTime() - metricDefinition.lastUpdate.getTime();
+
+                      Collection<Double> dataCopy = new ArrayList(metricDefinition.data);
+                      metricDefinition.data.clear();
+
                       Double metric = null;
                       if (dateDiff >= metricDefinition.reportingIntervalInMillis) {
                           if (metricDefinition.metricType == MetricType.AVERAGE) {
-                              Collection<Double> dataCopy = new ArrayList<Double>(metricDefinition.data);
                               if (dataCopy.isEmpty()) continue;
                               metric = MathUtils.average(dataCopy);
                           } else if (metricDefinition.metricType == MetricType.COUNT) {
-                              metric = new Double(metricDefinition.data.size());
+                              metric = new Double(dataCopy.size());
                           } else if (metricDefinition.metricType == MetricType.SUM) {
-                              metric = MathUtils.sum(metricDefinition.data);
+                              metric = MathUtils.sum(dataCopy);
                           } else if (metricDefinition.metricType == MetricType.MIN) {
-                              if (metricDefinition.data.size() < 1)
+                              if (dataCopy.size() < 1)
                                   return;
-                              metric = MathUtils.min(metricDefinition.data);
+                              metric = MathUtils.min(dataCopy);
                           } else if (metricDefinition.metricType == MetricType.MAX) {
-                              if (metricDefinition.data.size() < 1)
+                              if (dataCopy.size() < 1)
                                   return;
-                              metric = MathUtils.max(metricDefinition.data);
+                              metric = MathUtils.max(dataCopy);
                           }
-                          metricDefinition.data.clear();
                           metricDefinition.lastUpdate = now;
                       }
                       if (metric != null) {
