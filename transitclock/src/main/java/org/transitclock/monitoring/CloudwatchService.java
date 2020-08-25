@@ -157,7 +157,7 @@ public class CloudwatchService {
                 metricDefinition.reportingIntervalInMillis = reportingInterval * 24l * 60l * 60l * 1000l;
             this.metricMap.put(metricName, metricDefinition);
         }
-        logger.info("saving metric for summarized publication to Cloudwatch [{}]={}", metricName, metricValue);
+        logger.debug("saving metric for summarized publication to Cloudwatch [{}]={}", metricName, metricValue);
         this.metricMap.get(metricName).data.add(metricValue);
     }
 
@@ -212,7 +212,7 @@ public class CloudwatchService {
             List<MetricScalar> records = new ArrayList<MetricScalar>();
             individualMetricsQueue.drainTo(records, _batchSize);
             for(MetricScalar metricScalar : records){
-                logger.info("Publishing individual metric [{}]={}", metricScalar.metricName, metricScalar.metricValue);
+                logger.debug("Publishing individual metric [{}]={}", metricScalar.metricName, metricScalar.metricValue);
                 if(metricScalar.formatAsPercent){
                     publishMetricAsPercent(metricScalar.metricName, metricScalar.metricValue);
                 }else{
@@ -268,11 +268,11 @@ public class CloudwatchService {
                           }
                       }
                   } catch (Exception e) {
-                    logger.error("issue with metric {}, {}", metricName, e ,e);
+                    logger.error("issue with metric " + metricName + ": ", e);
                   }
                 }
             } catch (Exception e) {
-                logger.error("Exception with metrics: {} {}", e.getMessage(), e, e);
+                logger.error("Exception with metrics: ", e);
             }
         }
     }
