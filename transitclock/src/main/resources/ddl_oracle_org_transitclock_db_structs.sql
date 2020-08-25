@@ -41,6 +41,7 @@
         scheduledTime timestamp,
         serviceId varchar2(60 char),
         stopOrder number(10,0),
+        stopPathId varchar2(120 char),
         stopPathIndex number(10,0),
         stopPathLength float,
         tripIndex number(10,0),
@@ -69,14 +70,14 @@
     );
 
     create table Block_to_Trip_joinTable (
-        Blocks_serviceId varchar2(60 char) not null,
-        Blocks_configRev number(10,0) not null,
-        Blocks_blockId varchar2(60 char) not null,
+        blocks_serviceId varchar2(60 char) not null,
+        blocks_configRev number(10,0) not null,
+        blocks_blockId varchar2(60 char) not null,
         trips_tripId varchar2(60 char) not null,
         trips_startTime number(10,0) not null,
         trips_configRev number(10,0) not null,
         listIndex number(10,0) not null,
-        primary key (Blocks_serviceId, Blocks_configRev, Blocks_blockId, listIndex)
+        primary key (blocks_serviceId, blocks_configRev, blocks_blockId, listIndex)
     );
 
     create table Blocks (
@@ -552,14 +553,19 @@
         foreign key (stopId, configRev) 
         references Stops;
 
+    alter table ArrivalsDepartures 
+        add constraint FK_axgfl7fxphggp7qcwy6h8vbs4 
+        foreign key (tripPatternId, stopPathId, configRev) 
+        references StopPaths;
+
     alter table Block_to_Trip_joinTable 
         add constraint FK_abaj8ke6oh4imbbgnaercsowo 
         foreign key (trips_tripId, trips_startTime, trips_configRev) 
         references Trips;
 
     alter table Block_to_Trip_joinTable 
-        add constraint FK_1c1e1twdap19vq0xkav0amvm 
-        foreign key (Blocks_serviceId, Blocks_configRev, Blocks_blockId) 
+        add constraint FK_kobr9qxbawdjnf5fced46rfpo 
+        foreign key (blocks_serviceId, blocks_configRev, blocks_blockId) 
         references Blocks;
 
     alter table StopPath_locations 
