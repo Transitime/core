@@ -32,6 +32,7 @@ import org.transitclock.core.predictiongenerator.bias.BiasAdjusterFactory;
 import org.transitclock.db.structs.*;
 import org.transitclock.ipc.data.IpcPrediction;
 import org.transitclock.ipc.data.IpcPrediction.ArrivalOrDeparture;
+import org.transitclock.monitoring.CloudwatchService;
 import org.transitclock.utils.Geo;
 import org.transitclock.utils.Time;
 
@@ -64,6 +65,8 @@ import java.util.*;
  * 
  */
 public class PredictionGeneratorDefaultImpl implements PredictionGenerator, PredictionComponentElementsGenerator{
+
+	private CloudwatchService monitoring = null;
 
 	private static BooleanConfigValue terminatePredictionsAtTripEnd =
 			new BooleanConfigValue("transitclock.core.terminatePredictionsAtTripEnd",
@@ -708,4 +711,44 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 		}
 		return false;
 	}
+
+	/**
+	 * increment the metric sum
+	 * @param metricName the metric to increment
+	 */
+	protected void recordSum(String metricName) {
+		getMonitoring().saveMetric(metricName, 1.0, 1, CloudwatchService.MetricType.SUM, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+	}
+
+	/**
+	 * provide another value to average into a rolling average metric
+	 * @param metricName the rolling average metric
+	 * @param metricValue the value to merge in
+	 */
+	protected void recordAverage(String metricName, double metricValue) {
+		getMonitoring().saveMetric(metricName, metricValue, 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+	}
+
+	/**
+	 * track a rate (such as cache miss/hit rate) and the overall usage count.
+	 * @param metricName
+	 * @param hit
+	 */
+	protected void recordRate(String metricName, boolean hit) {
+		double metricValue = (hit? 1.0: 0.0);
+		getMonitoring().saveMetric(metricName, metricValue, 1, CloudwatchService.MetricType.SUM, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+		getMonitoring().saveMetric(metricName + "Rate", metricValue, 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, true);
+
+	}
+
+	/**
+	 * lazy load Cloudwatch Monitoring service.
+	 * @return
+	 */
+	private CloudwatchService getMonitoring() {
+		if (monitoring == null)
+			monitoring = CloudwatchService.getInstance();
+		return monitoring;
+	}
+
 }
