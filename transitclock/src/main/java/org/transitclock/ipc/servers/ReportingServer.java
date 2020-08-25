@@ -766,7 +766,7 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                 for(Trip trip : trips){
                     if(trip.getConfigRev() == mainTrip.getConfigRev()){
                         int currentTripIndex = mainTrip.getTripIndex();
-                        Trip nextTrip = trip.getBlockFromDb().getTripFromDb(currentTripIndex + 1, readOnly);
+                        Trip nextTrip = trip.getBlockFromDb(readOnly).getTripFromDb(currentTripIndex + 1, readOnly);
                         Integer nextTripStartTime = null;
                         if(nextTrip != null){
                             nextTripStartTime = nextTrip.getStartTime();

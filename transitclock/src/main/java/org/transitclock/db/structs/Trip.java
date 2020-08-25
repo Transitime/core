@@ -150,15 +150,8 @@ public class Trip implements Lifecycle, Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private String shapeId;
 
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumns(
-		{
-			@JoinColumn(updatable=false,insertable=false, name="blockId", referencedColumnName="blockId"),
-			@JoinColumn(updatable=false,insertable=false, name="serviceId", referencedColumnName="serviceId"),
-			@JoinColumn(updatable=false,insertable=false, name="configRev", referencedColumnName="configRev")
-		}
-	)
-	private Block block;
+	@ManyToMany(mappedBy = "trips")
+	private List<Block> blocks;
 
 	@Transient
 	private Route route;
@@ -1214,13 +1207,9 @@ public class Trip implements Lifecycle, Serializable {
 				"t " +
 				"FROM " +
 				"Trip t " +
-				"JOIN FETCH t.block b " +
 				"WHERE t.routeId = :routeId " +
 				"AND t.headsign = :headsign " +
 				"AND t.configRev IN (:configRevs) " +
-				"AND t.configRev = b.configRev " +
-				"AND t.serviceId = b.serviceId " +
-				"AND t.blockId = b.blockId " +
 				"ORDER BY t.startTime";
 		try {
 			Query query = session.createQuery(hql);
@@ -1246,50 +1235,24 @@ public class Trip implements Lifecycle, Serializable {
 		}
 	}
 
-	public static List<Trip> getTripsFromDb(String blockId, String serviceId, int configRev, boolean readOnly) {
-		IntervalTimer timer = new IntervalTimer();
-
-		// Get the database session. This is supposed to be pretty light weight
+	/**
+	 * Assumes only one block for Trip.
+	 * TODO - Fix this to return
+	 * @param readOnly
+	 * @return Block
+	 */
+	public Block getBlockFromDb(boolean readOnly){
 		Session session = HibernateUtils.getSession(readOnly);
-
-		// Create the query. Table name is case sensitive and needs to be the
-		// class name instead of the name of the db table.
-
-		String hql = "SELECT " +
-				"t " +
-				"FROM " +
-				"Trip t " +
-				"AND t.configRev = :configRev " +
-				"AND t.serviceId = :serviceId " +
-				"AND t.blockId = :blockId " +
-				"ORDER BY t.startTime";
 		try {
-			Query query = session.createQuery(hql);
-			query.setInteger("configRev", configRev);
-			query.setString("serviceId", serviceId);
-			query.setString("blockId", blockId);
-
-			List<Trip> results = query.list();
-
-			logger.debug("Getting trips from database took {} msec",
-					timer.elapsedMsec());
-
-			return results;
-
-		} catch (HibernateException e) {
-			// Log error to the Core logger
-			Core.getLogger().error("Unable to retrieve trips", e);
+			session.update(this);
+			return blocks.get(0);
+		}
+		catch (Exception e) {
+			Core.getLogger().error("Unable to retrieve block", e);
 			return null;
 		} finally {
-			// Clean things up. Not sure if this absolutely needed nor if
-			// it might actually be detrimental and slow things down.
 			session.close();
 		}
-	}
-
-
-	public Block getBlockFromDb(){
-  		return block;
 	}
 
 }
