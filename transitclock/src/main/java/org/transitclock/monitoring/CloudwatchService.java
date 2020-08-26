@@ -158,7 +158,10 @@ public class CloudwatchService {
             this.metricMap.put(metricName, metricDefinition);
         }
         logger.debug("saving metric for summarized publication to Cloudwatch [{}]={}", metricName, metricValue);
-        this.metricMap.get(metricName).data.add(metricValue);
+        MetricDefinition metricDefinition = this.metricMap.get(metricName);
+        synchronized (metricDefinition) {
+            metricDefinition.data.add(metricValue);
+        }
     }
 
     private void publishMetric(String metricName, Double metricValue){
@@ -237,8 +240,13 @@ public class CloudwatchService {
                         continue;
                       long dateDiff = now.getTime() - metricDefinition.lastUpdate.getTime();
 
-                      Collection<Double> dataCopy = new ArrayList(metricDefinition.data);
-                      metricDefinition.data.clear();
+                      Collection<Double> dataCopy = new ArrayList<>();
+                      synchronized (metricDefinition) {
+                          if (metricDefinition.data != null && !metricDefinition.data.isEmpty()) {
+                              dataCopy = new ArrayList(metricDefinition.data);
+                              metricDefinition.data.clear();
+                          }
+                      }
 
                       Double metric = null;
                       if (dateDiff >= metricDefinition.reportingIntervalInMillis) {
