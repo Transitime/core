@@ -171,7 +171,9 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 						
 						double percentageDifferecence = 100 * ((predictionTime - alternatePrediction) / (double)alternatePrediction);
 
-						getMonitoring().averageMetric("PredictionKalmanAverageDifference", Math.abs(percentageDifferecence));
+						if (!Double.isInfinite(percentageDifferecence))
+							getMonitoring().averageMetric("PredictionKalmanAverageDifference", Math.abs(percentageDifferecence));
+
 						if(Math.abs(percentageDifferecence)>percentagePredictionMethodDifferenceneEventLog.getValue())
 						{
 							String description="Predictions for "+ indices.toString()+ " have more that a "+percentagePredictionMethodDifferenceneEventLog.getValue() + " difference. Kalman predicts : "+predictionTime+" Super predicts : "+alternatePrediction;

@@ -165,7 +165,9 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 						
 						double percentageDifferecence = Math.abs(100 * ((predictionTime - alternatePrediction) / (double)alternatePrediction));
 
-						getMonitoring().averageMetric("PredictionKalmanAverageDifference", Math.abs(percentageDifferecence));
+						if (!Double.isInfinite(percentageDifferecence))
+							getMonitoring().averageMetric("PredictionKalmanAverageDifference", Math.abs(percentageDifferecence));
+
 						if(((percentageDifferecence *  alternatePrediction)/100) > tresholdForDifferenceEventLog.getValue())
 						{						
 							if(percentageDifferecence > percentagePredictionMethodDifferenceneEventLog.getValue())
