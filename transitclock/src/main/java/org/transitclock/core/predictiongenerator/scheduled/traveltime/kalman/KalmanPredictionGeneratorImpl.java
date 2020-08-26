@@ -98,7 +98,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 			 * little to say about todays.
 			 */
 			if (travelTimeDetails!=null) {
-				recordRate("PredictionKalmanHeadwayHit", true);
+				getMonitoring().rateMetric("PredictionKalmanHeadwayHit", true);
 				logger.debug("Kalman has last vehicle info for : " +indices.toString()+ " : "+travelTimeDetails);
 
 				Date nearestDay = DateUtils.truncate(avlReport.getDate(), Calendar.DAY_OF_MONTH);
@@ -116,8 +116,8 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 				 * to extended class for prediction.
 				 */
 				if (lastDaysTimes != null && lastDaysTimes.size() >= minKalmanDays.getValue().intValue()) {
-					recordRate("PredictionKalmanHistoryHit", true);
-					recordAverage("PredictionKalmanHistorySize", lastDaysTimes.size());
+					getMonitoring().rateMetric("PredictionKalmanHistoryHit", true);
+					getMonitoring().averageMetric("PredictionKalmanHistorySize", lastDaysTimes.size());
 					logger.debug("Generating Kalman prediction for : "+indices.toString());
 
 					try {
@@ -191,31 +191,29 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 							Core.getInstance().getDbLogger().add(predictionForStopPath);
 							StopPathPredictionCacheFactory.getInstance().putPrediction(predictionForStopPath);
 						}
-						recordRate("PredictionKalmanHit", true);
+						getMonitoring().rateMetric("PredictionKalmanHit", true);
+						getMonitoring().sumMetric("PredictionGenerationKalman");
 						return predictionTime;
 
 					} catch (Exception e) {
 						logger.error("Exception {}",  e.toString(), e);
 					}
 				} else {
-					recordRate("PredictionKalmanHistoryHit", false);
+					getMonitoring().rateMetric("PredictionKalmanHistoryHit", false);
 					if (lastDaysTimes == null)
-						recordAverage("PredictionKalmanHistorySize", 0.0);
+						getMonitoring().averageMetric("PredictionKalmanHistorySize", 0.0);
 					else
-						recordAverage("PredictionKalmanHistorySize", lastDaysTimes.size());
+						getMonitoring().averageMetric("PredictionKalmanHistorySize", lastDaysTimes.size());
 				}
 			} else {
-				recordRate("PredictionKalmanHeadwayHit", false);
+				getMonitoring().rateMetric("PredictionKalmanHeadwayHit", false);
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} finally {
-			// instrument prediction generation
-			recordSum("PredictionGeneration");
 		}
 		// instrument kalman miss
-		recordRate("PredictionKalmanHit", false);
+		getMonitoring().rateMetric("PredictionKalmanHit", false);
 		return alternatePrediction;
 	}
 

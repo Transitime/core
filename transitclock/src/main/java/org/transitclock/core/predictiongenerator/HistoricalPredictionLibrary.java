@@ -31,6 +31,7 @@ import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.PredictionEvent;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
+import org.transitclock.monitoring.CloudwatchService;
 
 import java.util.*;
 
@@ -38,6 +39,8 @@ import java.util.*;
  * Commonly-used methods for PredictionGenerators that use historical cached data.
  */
 public class HistoricalPredictionLibrary {
+
+	private static CloudwatchService monitoring = null;
 
 	private static final IntegerConfigValue closestVehicleStopsAhead = new IntegerConfigValue(
 			"transitclock.prediction.closestvehiclestopsahead", new Integer(2),
@@ -75,6 +78,7 @@ public class HistoricalPredictionLibrary {
 							TravelTimeDetails travelTimeDetails=new TravelTimeDetails(currentArrivalDeparture, found);
 							if(travelTimeDetails.getTravelTime()>0)
 							{
+								getMonitoring().rateMetric("PredictionStopArrivalDepartureHit", true);
 								return travelTimeDetails;
 
 							}else
@@ -88,16 +92,19 @@ public class HistoricalPredictionLibrary {
 										travelTimeDetails.getArrival().getTime(),
 										travelTimeDetails.getDeparture().getTime()
 								);
+								getMonitoring().rateMetric("PredictionStopArrivalDepartureHit", false);
 								return null;
 							}
 						}else
 						{
+							getMonitoring().rateMetric("PredictionStopArrivalDepartureHit", false);
 							return null;
 						}
 					}
 				}
 			}
 		}
+		getMonitoring().rateMetric("PredictionStopArrivalDepartureHit", false);
 		return null;
 	}
 
@@ -279,5 +286,16 @@ public class HistoricalPredictionLibrary {
 	public static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {
 		return iterable == null ? Collections.<T> emptyList() : iterable;
 	}
+
+	/**
+	 * lazy load Cloudwatch Monitoring service.
+	 * @return
+	 */
+	protected static CloudwatchService getMonitoring() {
+		if (monitoring == null)
+			monitoring = CloudwatchService.getInstance();
+		return monitoring;
+	}
+
 
 }

@@ -103,7 +103,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 			 * little to say about todays.
 			 */
 			if (travelTimeDetails!=null) {
-				recordRate("PredictionKalmanHeadwayHit", true);
+				getMonitoring().rateMetric("PredictionKalmanHeadwayHit", true);
 				logger.debug("Kalman has last vehicle info for : " +indices.toString()+ " : "+travelTimeDetails);
 
 				Date nearestDay = DateUtils.truncate(avlReport.getDate(), Calendar.DAY_OF_MONTH);
@@ -121,8 +121,8 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 				 * to extended class for prediction.
 				 */
 				if (lastDaysTimes != null && lastDaysTimes.size() >= minKalmanDays.getValue().intValue()) {
-					recordRate("PredictionKalmanHistoryHit", true);
-					recordAverage("PredictionKalmanHistorySize", lastDaysTimes.size());
+					getMonitoring().rateMetric("PredictionKalmanHistoryHit", true);
+					getMonitoring().averageMetric("PredictionKalmanHistorySize", lastDaysTimes.size());
 					logger.debug("Generating Kalman prediction for : "+indices.toString());
 
 					try {
@@ -170,7 +170,8 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 								+ alternatePrediction +" for : " + indices.toString());
 						
 						double percentageDifferecence = 100 * ((predictionTime - alternatePrediction) / (double)alternatePrediction);
-						
+
+						getMonitoring().averageMetric("PredictionKalmanAverageDifference", Math.abs(percentageDifferecence));
 						if(Math.abs(percentageDifferecence)>percentagePredictionMethodDifferenceneEventLog.getValue())
 						{
 							String description="Predictions for "+ indices.toString()+ " have more that a "+percentagePredictionMethodDifferenceneEventLog.getValue() + " difference. Kalman predicts : "+predictionTime+" Super predicts : "+alternatePrediction;
@@ -189,31 +190,29 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 							StopPathPredictionCacheFactory.getInstance().putPrediction(predictionForStopPath);
 						}
 						// instrument kalman hit
-						recordRate("PredictionKalmanHit", true);
+						getMonitoring().rateMetric("PredictionKalmanHit", true);
+						getMonitoring().sumMetric("PredictionGenerationKalman");
 						return predictionTime;
 
 					} catch (Exception e) {
 						logger.error(e.getMessage(), e);
 					}
 				} else {
-					recordRate("PredictionKalmanHistoryHit", false);
+					getMonitoring().rateMetric("PredictionKalmanHistoryHit", false);
 					if (lastDaysTimes == null)
-						recordAverage("PredictionKalmanHistorySize", 0.0);
+						getMonitoring().averageMetric("PredictionKalmanHistorySize", 0.0);
 					else
-						recordAverage("PredictionKalmanHistorySize", lastDaysTimes.size());
+						getMonitoring().averageMetric("PredictionKalmanHistorySize", lastDaysTimes.size());
 				}
 			} else {
-				recordRate("PredictionKalmanHeadwayHit", false);
+				getMonitoring().rateMetric("PredictionKalmanHeadwayHit", false);
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} finally {
-			// instrument prediction generation
-			recordSum("PredictionGeneration");
 		}
 		// instrument kalman miss
-		recordRate("PredictionKalmanHit", false);
+		getMonitoring().rateMetric("PredictionKalmanHit", false);
 		return alternatePrediction;
 	}
 

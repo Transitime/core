@@ -108,6 +108,37 @@ public class CloudwatchService {
         return singleton;
     }
 
+
+    /**
+     * increment the metric sum
+     * @param metricName the metric to increment
+     */
+    public void sumMetric(String metricName) {
+        saveMetric(metricName, 1.0, 1, CloudwatchService.MetricType.SUM, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+    }
+
+    /**
+     * provide another value to average into a rolling average metric
+     * @param metricName the rolling average metric
+     * @param metricValue the value to merge in
+     */
+    public void averageMetric(String metricName, double metricValue) {
+        saveMetric(metricName, metricValue, 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+    }
+
+    /**
+     * track a rate (such as cache miss/hit rate) and the overall usage count.
+     * @param metricName
+     * @param hit
+     */
+    public void rateMetric(String metricName, boolean hit) {
+        double metricValue = (hit? 1.0: 0.0);
+        saveMetric(metricName, metricValue, 1, CloudwatchService.MetricType.SUM, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+        saveMetric(metricName + "Rate", metricValue, 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, true);
+
+    }
+
+
     /**
      *
      * Saves metric to local cache, to be reported to Cloudwatch by PublishMetricsTask
