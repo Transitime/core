@@ -60,6 +60,11 @@
                 <input type="text" id="stopsSearch" placeholder="Stops" name="stopsSearch">
                 <button type="submit" id="stopsSubmit" onclick="showStopDetails($('#route').val(), $('#stopsSearch').val())">Show stop</button>
             </div>
+
+            <div class="param">
+                <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
+                <button type="submit" id="vehiclesSubmit" onclick="openVehiclePopup(getVehicleMarker($('#vehiclesSearch').val()))">Show vehicle</button>
+            </div>
         </div>
     </div>
 
@@ -563,14 +568,7 @@
 
         // When user clicks on vehicle popup shows additional info
         vehicleMarker.on('click', function(e) {
-            var content = getVehiclePopupContent(this.vehicleData);
-            var latlng = L.latLng(this.vehicleData.loc.lat,
-                this.vehicleData.loc.lon);
-            // Create popup and associate it with the vehicleMarker
-            // so can later update the content.
-            this.popup = L.popup(vehiclePopupOptions, this)
-                .setLatLng(latlng)
-                .setContent(content).openOn(map);
+            openVehiclePopup(this);
         });
 
         // Return the new marker
@@ -682,6 +680,15 @@
 
                 // Definitely got updated data
                 gotUpdatedAvlData = true;
+
+                // Store vehicle data obtained via AJAX with vehicle so it can be used in popup
+                vehicleMarker.vehicleData = vehicleData;
+
+                // open vehicle popup if vehicle parameter is specified
+                if (getQueryVariable("v") && getQueryVariable("v") == vehicleData.id) {
+                    openVehiclePopup(vehicleMarker);
+                }
+
             } else {
                 // If got new AVL report then remember such
                 var oldVehicleData = vehicleMarker.vehicleData;
@@ -690,10 +697,10 @@
 
                 // Vehicle icon already exists, so update it
                 updateVehicleMarker(vehicleMarker, vehicleData);
-            }
 
-            // Store vehicle data obtained via AJAX with vehicle so it can be used in popup
-            vehicleMarker.vehicleData = vehicleData;
+                // Store vehicle data obtained via AJAX with vehicle so it can be used in popup
+                vehicleMarker.vehicleData = vehicleData;
+            }
         }
 
         // If didn't get any updated AVL data then back off on the polling rate
@@ -1024,6 +1031,17 @@
         }
 
         $.getJSON(url, routeConfigCallback).error(function() {alert("Specified stop not found.");});
+    }
+
+    function openVehiclePopup(vehicleMarker) {
+        var content = getVehiclePopupContent(vehicleMarker.vehicleData);
+        var latlng = L.latLng(vehicleMarker.vehicleData.loc.lat,
+            vehicleMarker.vehicleData.loc.lon);
+        // Create popup and associate it with the vehicleMarker
+        // so can later update the content.
+        vehicleMarker.popup = L.popup(vehiclePopupOptions, vehicleMarker)
+            .setLatLng(latlng)
+            .setContent(content).openOn(map);
     }
 
     $("#route").attr("style", "width: 200px");

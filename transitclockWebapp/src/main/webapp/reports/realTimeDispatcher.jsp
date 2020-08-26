@@ -79,7 +79,7 @@
 
     var data = [
         {vehicle: '54321', last_report: '22:15:25', heading: '200', speed: '40 km/hr', route_assignment: '12', sched_adherence: '-2m', operator_id: '24', map_link: 'realTimeLiveMap.jsp?a=1&v=54321'},
-        {vehicle: '12345', last_report: '09:34:88', heading: '95', speed: '8 km/hr', route_assignment: '24589', sched_adherence: '6m', operator_id: '1004', map_link: 'realTimeLiveMap.jsp?a=1&v=12345'}
+        {vehicle: '46022', last_report: '09:34:88', heading: '95', speed: '8 km/hr', route_assignment: '24589', sched_adherence: '6m', operator_id: '1004', map_link: 'realTimeLiveMap.jsp?a=1&v=46022'}
     ];
 
     $(document).ready(function () {
