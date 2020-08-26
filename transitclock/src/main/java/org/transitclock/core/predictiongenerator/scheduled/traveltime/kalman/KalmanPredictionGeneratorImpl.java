@@ -164,7 +164,8 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 						kalmanErrorCache.putErrorValue(indices, kalmanPredictionResult.getFilterError());
 						
 						double percentageDifferecence = Math.abs(100 * ((predictionTime - alternatePrediction) / (double)alternatePrediction));
-						
+
+						getMonitoring().averageMetric("PredictionKalmanAverageDifference", Math.abs(percentageDifferecence));
 						if(((percentageDifferecence *  alternatePrediction)/100) > tresholdForDifferenceEventLog.getValue())
 						{						
 							if(percentageDifferecence > percentagePredictionMethodDifferenceneEventLog.getValue())
