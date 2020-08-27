@@ -37,6 +37,14 @@
             border-right: 1px solid black;
         }
 
+        #links {
+            margin-top: 200px;
+        }
+
+        #links div {
+            margin-bottom: 30px;
+        }
+
     </style>
     <%--        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>--%>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -56,14 +64,26 @@
 
             <jsp:include page="params/routeAllOrSingle.jsp" />
 
-            <div class="param">
-                <input type="text" id="stopsSearch" placeholder="Stops" name="stopsSearch">
-                <button type="submit" id="stopsSubmit" onclick="showStopDetails($('#route').val(), $('#stopsSearch').val())">Show stop</button>
-            </div>
+            <div id="search" style="margin-top: 20px;">
+                Search
+                <br>
+                <div class="param">
+                    <input type="text" id="stopsSearch" placeholder="Stops" name="stopsSearch">
+                    <button type="submit" id="stopsSubmit" onclick="showStopDetails($('#route').val(), $('#stopsSearch').val())">Show stop</button>
+                </div>
 
-            <div class="param">
-                <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
-                <button type="submit" id="vehiclesSubmit" onclick="openVehiclePopup(getVehicleMarker($('#vehiclesSearch').val()))">Show vehicle</button>
+                <div class="param">
+                    <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
+                    <button type="submit" id="vehiclesSubmit" onclick="openVehiclePopup(getVehicleMarker($('#vehiclesSearch').val()))">Show vehicle</button>
+                </div>
+            </div>
+        </div>
+        <div id="links">
+            <div id="dispatcherLink">
+                <a href="realTimeDispatcher.jsp?a=1">Dispatcher View >></a>
+            </div>
+            <div id="schAdhLink">
+                <a href="realTimeScheduleAdherence.jsp?a=1">Schedule Adherence View >></a>
             </div>
         </div>
     </div>

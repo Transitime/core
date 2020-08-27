@@ -32,6 +32,14 @@
             border-right: 1px solid black;
         }
 
+        #links {
+            margin-top: 200px;
+        }
+
+        #links div {
+            margin-bottom: 30px;
+        }
+
         html, body, #map {
             height: 100%; width: 100%; padding: 0px; margin: 0px;
         }
@@ -56,9 +64,21 @@
 
             <jsp:include page="params/routeAllOrSingle.jsp" />
 
-            <div class="param">
-                <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
-                <button type="submit" id="vehiclesSubmit" onclick="getAndProcessSchAdhData($('#route').val(), $('#vehiclesSearch').val())">Show vehicle</button>
+            <div id="search" style="margin-top: 20px;">
+                Search
+                <br>
+                <div class="param">
+                    <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
+                    <button type="submit" id="vehiclesSubmit" onclick="getAndProcessSchAdhData($('#route').val(), $('#vehiclesSearch').val())">Show vehicle</button>
+                </div>
+            </div>
+        </div>
+        <div id="links">
+            <div id="liveMapLink">
+                <a href="realTimeLiveMap.jsp?a=1">Live Map View >></a>
+            </div>
+            <div id="dispatcherLink">
+                <a href="realTimeDispatcher.jsp?a=1">Dispatcher View >></a>
             </div>
         </div>
     </div>

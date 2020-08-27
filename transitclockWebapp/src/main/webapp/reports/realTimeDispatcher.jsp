@@ -28,6 +28,14 @@
                 border-right: 1px solid black;
             }
 
+            #links {
+                margin-top: 200px;
+            }
+
+            #links div {
+                margin-bottom: 30px;
+            }
+
             td {
                 text-align: center;
             }
@@ -44,11 +52,19 @@
                 <%-- For passing agency param to the report --%>
                 <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
 
-                <div class="param">
-                    <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
+                <div id="search" style="margin-top: 20px;">
+                    Search
+                    <br>
+                    <div class="param">
+                        <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
+                    </div>
                 </div>
             </div>
-
+            <div id="links">
+                <div id="liveMapLink">
+                    <a href="realTimeLiveMap.jsp?a=1">Live Map View >></a>
+                </div>
+            </div>
         </div>
 
         <div id="mainPage" style="width: 79%; height: 100%; display: inline-block;">
