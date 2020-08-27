@@ -152,8 +152,7 @@
             stopName += " (" + routeStopPreds.stopCode + ")";
         var content = '<b>Route:</b> ' + routeStopPreds.routeName + '<br/>'
             + '<b>Stop:</b> ' + stopName + '<br/>';
-        if (verbose)
-            content += '<b>Stop Id:</b> ' + routeStopPreds.stopId + '<br/>';
+        content += '<b>Stop Id:</b> ' + routeStopPreds.stopId + '<br/>';
 
         // For each destination add predictions
         for (var i in routeStopPreds.dest) {
@@ -194,9 +193,7 @@
                                 content += '<sup>delayed</sup>';
                     }
                     */
-                    // If in verbose mode add vehicle info
-                    if (verbose)
-                        content += ' <span class="vehicle">(vehicle ' + pred.vehicle + ')</span>';
+                    content += ' <span class="vehicle">(vehicle ' + pred.vehicle + ')</span>';
                 }
                 content += ' minutes';
 
@@ -314,18 +311,6 @@
             // Store shape data obtained via AJAX with polyline so it can be used in popup
             polyline.shape = shape;
 
-            // Popup trip pattern info when user clicks on path
-            if (verbose) {
-                polyline.on('click', function(e) {
-                    var content = "<b>TripPattern:</b> " + this.shape.tripPattern
-                        + "<br/><b>Headsign:</b> " + this.shape.headsign;
-                    L.popup(tripPatternPopupOptions)
-                        .setLatLng(e.latlng)
-                        .setContent(content)
-                        .openOn(map);}
-                );
-            }
-
         }
 
         // Add all of the paths and stops to the map at once via the FeatureGroup
@@ -385,25 +370,24 @@
      * to be displayed for the vehicles popup.
      */
     function getVehiclePopupContent(vehicleData) {
-        var layoverStr = verbose && vehicleData.layover ?
+        var layoverStr = vehicleData.layover ?
             ("<br/><b>Layover:</b> " + vehicleData.layover) : "";
         var layoverDepartureStr = vehicleData.layover ?
             ("<br/><b>Departure:</b> " +
                 dateFormat(vehicleData.layoverDepTime)) : "";
         var nextStopNameStr = vehicleData.nextStopName ?
             ("<br/><b>Next Stop:</b> " + vehicleData.nextStopName) : "";
-        if (verbose && vehicleData.nextStopId)
+        if (vehicleData.nextStopId)
             nextStopNameStr += "<br/><b>Next Stop Id:</b> " + vehicleData.nextStopId;
         var driver = vehicleData.driver ?
             "<br/><b>Driver:</b> " + vehicleData.driver : "";
-        var latLonHeadingStr = verbose ? "<br/><b>Lat:</b> " + vehicleData.loc.lat
+        var latLonHeadingStr = "<br/><b>Lat:</b> " + vehicleData.loc.lat
             + "<br/><b>Lon:</b> " + vehicleData.loc.lon
             + "<br/><b>Heading:</b> " + vehicleData.loc.heading
-            + "<br/><b>Speed:</b> " + formatSpeed(vehicleData.loc.speed)
-            : "";
+            + "<br/><b>Speed:</b> " + formatSpeed(vehicleData.loc.speed);
         var gpsTimeStr = dateFormat(vehicleData.loc.time);
-        var directionStr = verbose ? "<br/><b>Direction:</b> " + vehicleData.direction : "";
-        var tripPatternStr = verbose ? "<br/><b>Trip Pattern:</b> " + vehicleData.tripPattern : "";
+        var directionStr = "<br/><b>Direction:</b> " + vehicleData.direction;
+        var tripPatternStr = "<br/><b>Trip Pattern:</b> " + vehicleData.tripPattern;
         var startTimeStr = vehicleData.isScheduledService ? "" : "<br/><b>Start Time:</b> "+dateFormat(vehicleData.freqStartTime/1000);
         var schAdhStr = vehicleData.isScheduledService ? "<br/><b>SchAdh:</b> " + vehicleData.schAdhStr : ""
         var content = "<b>Vehicle:</b> " + vehicleData.id
@@ -843,7 +827,6 @@
     /************** Executable statements **************/
 
 // Setup some global parameters
-    var verbose = getQueryVariable("verbose");
     var agencyId = getQueryVariable("a");
     if (!agencyId)
         alert("You must specify agency in URL using a=agencyId parameter");
