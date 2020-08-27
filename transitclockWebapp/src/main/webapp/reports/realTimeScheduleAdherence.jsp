@@ -57,8 +57,8 @@
             <jsp:include page="params/routeAllOrSingle.jsp" />
 
             <div class="param">
-                <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch" disabled="true">
-                <button type="submit" id="vehiclesSubmit" disabled="true" onclick="">Show vehicle</button>
+                <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
+                <button type="submit" id="vehiclesSubmit" onclick="getAndProcessSchAdhData($('#route').val(), $('#vehiclesSearch').val())">Show vehicle</button>
             </div>
         </div>
     </div>
@@ -100,7 +100,7 @@
             $("#route").select2({
                 data: selectorData
             }).on("select2:select", function (e) {
-                getAndProcessSchAdhData($("#route").val())});
+                getAndProcessSchAdhData($("#route").val(), $("#vehiclesSearch").val())});
         }
     );
 
@@ -127,7 +127,7 @@
     /**
      * Reads in and processes schedule adherence data
      */
-    function getAndProcessSchAdhData(routeId) {
+    function getAndProcessSchAdhData(routeId, vehicleId) {
         // Do API call to get schedule adherence data
         $.getJSON(apiUrlPrefix + "/command/vehiclesDetails?onlyAssigned=true", {r: routeId},
             // Process data
@@ -206,15 +206,12 @@
 
                     // Create popup window for vehicle when clicked on
                     vehicleMarker.on('click', function(e) {
-                        var content = getVehiclePopupContent(this.vehicle);
-                        var latlng = L.latLng(this.vehicle.loc.lat,
-                            this.vehicle.loc.lon);
-                        // Create popup and associate it with the vehicleMarker
-                        // so can later update the content.
-                        this.popup = L.popup(vehiclePopupOptions, this)
-                            .setLatLng(latlng)
-                            .setContent(content).openOn(map);
+                        openVehiclePopup(this);
                     });
+
+                    if (vehicleId.trim() != "" && vehicle.id == vehicleId) {
+                        openVehiclePopup(vehicleMarker);
+                    }
 
                 } // End of while loop
 
@@ -301,10 +298,20 @@
         // Updating every is more than is truly useful since won't get significant
         // change every 10 seconds, but it shows that the map is live and is
         // really cool.
-        getAndProcessSchAdhData($("#route").val());
-        setInterval(function() {getAndProcessSchAdhData($("#route").val())}, 10000);
+        getAndProcessSchAdhData($("#route").val(), $("#vehiclesSearch").val());
+        setInterval(function() {getAndProcessSchAdhData($("#route").val(), $("#vehiclesSearch").val())}, 10000);
     }
 
+    function openVehiclePopup(vehicleMarker) {
+        var content = getVehiclePopupContent(vehicleMarker.vehicle);
+        var latlng = L.latLng(vehicleMarker.vehicle.loc.lat,
+            vehicleMarker.vehicle.loc.lon);
+        // Create popup and associate it with the vehicleMarker
+        // so can later update the content.
+        vehicleMarker.popup = L.popup(vehiclePopupOptions, vehicleMarker)
+            .setLatLng(latlng)
+            .setContent(content).openOn(map);
+    }
     /**
      * When page finishes loading then create map
      */
