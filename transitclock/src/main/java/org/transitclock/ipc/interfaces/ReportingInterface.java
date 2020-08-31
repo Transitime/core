@@ -44,12 +44,14 @@ public interface ReportingInterface extends Remote {
     IpcRunTime getRunTimeSummary(LocalDate beginDate, LocalDate endDate,
                            LocalTime beginTime, LocalTime endTime,
                            String routeIdOrShortName, String headsign,
+                           String startStop, String endStop,
                            ServiceType serviceType, boolean timePointsOnly,
                            boolean currentTripsOnly, boolean readOnly) throws Exception;
 
     List<IpcRunTimeForTrip> getRunTimeForTrips(LocalDate beginDate, LocalDate endDate,
                                   LocalTime beginTime, LocalTime endTime,
                                   String routeIdOrShortName, String headsign,
+                                  String startStop, String endStop,
                                   ServiceType serviceType, boolean timePointsOnly,
                                   boolean currentTripsOnly, boolean readOnly) throws Exception;
 }

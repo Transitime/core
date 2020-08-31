@@ -290,6 +290,10 @@ public class ReportingApi {
             @QueryParam(value = "r") String route,
             @Parameter(description="Retrives only arrivalDepartures belonging to the headsign specified.",required=true)
             @QueryParam(value = "headsign") String headsign,
+            @Parameter(description="Specifies to the starting stop Id for the trips to filter by.",required=true)
+            @QueryParam(value = "startStop") String startStop,
+            @Parameter(description="Specifies to the ending stop Id for the trips to filter by.",required=true)
+            @QueryParam(value = "endStop") String endStop,
             @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday",required=false)
             @QueryParam(value = "serviceType") String serviceType,
             @Parameter(description="if set, retrives only arrivalDepartures with stops that are timePoints",required=false)
@@ -310,8 +314,8 @@ public class ReportingApi {
             }
 
             IpcRunTime ipcRunTime = reportingInterface.getRunTimeSummary(beginDate.getDate(), endDate.getDate(),
-                    beginTime.getTime(), endTime.getTime(), route, headsign, serviceTypeEnum, timePointsOnly,
-                    false, false);
+                    beginTime.getTime(), endTime.getTime(), route, headsign, startStop, endStop,
+                    serviceTypeEnum, timePointsOnly, false, false);
 
             Object response = null;
 
@@ -347,6 +351,10 @@ public class ReportingApi {
             @QueryParam(value = "r") String route,
             @Parameter(description="Retrives only arrivalDepartures belonging to the headsign specified.",required=true)
             @QueryParam(value = "headsign") String headsign,
+            @Parameter(description="Specifies to the starting stop Id for the trips to filter by.",required=true)
+            @QueryParam(value = "startStop") String startStop,
+            @Parameter(description="Specifies to the ending stop Id for the trips to filter by.",required=true)
+            @QueryParam(value = "endStop") String endStop,
             @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday",required=false)
             @QueryParam(value = "serviceType") String serviceType,
             @Parameter(description="if set, retrives only arrivalDepartures with stops that are timePoints",required=false)
@@ -366,8 +374,9 @@ public class ReportingApi {
                 serviceTypeEnum = ServiceType.valueOf(serviceType.toUpperCase());
             }
 
-            List<IpcRunTimeForTrip> ipcRunTimeTrips = reportingInterface.getRunTimeForTrips(beginDate.getDate(), endDate.getDate(),
-                    beginTime.getTime(), endTime.getTime(), route, headsign, serviceTypeEnum, timePointsOnly,
+            List<IpcRunTimeForTrip> ipcRunTimeTrips = reportingInterface.getRunTimeForTrips(
+                    beginDate.getDate(), endDate.getDate(), beginTime.getTime(), endTime.getTime(),
+                    route, headsign, startStop, endStop, serviceTypeEnum, timePointsOnly,
                     false, false);
 
             Object response = TripRunTimeOutput.getAvgTripRunTimes(ipcRunTimeTrips);

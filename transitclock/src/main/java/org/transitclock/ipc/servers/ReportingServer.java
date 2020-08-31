@@ -454,6 +454,7 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
     public IpcRunTime getRunTimeSummary(LocalDate beginDate, LocalDate endDate,
                                   LocalTime beginTime, LocalTime endTime,
                                   String routeIdOrShortName, String headsign,
+                                  String startStop, String endStop,
                                   ServiceType serviceType, boolean timePointsOnly,
                                   boolean currentTripsOnly,boolean readOnly) throws Exception {
 
@@ -468,9 +469,10 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
 
         boolean includeTrip = true;
 
-        List<ArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesFromDb(beginDate, endDate,
-                beginTime, endTime, routeId, headsign, serviceType, timePointsOnly, DEFAULT_SCHEDULED_TIMES_ONLY,
-                DEFAULT_DWELL_TIME_ONLY, includeTrip, DEFAULT_INCLUDE_STOP, DEFAULT_INCLUDE_STOP_PATH, readOnly);
+        List<ArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesFromDb(
+                beginDate, endDate, beginTime, endTime, routeId, headsign, startStop, endStop, serviceType,
+                timePointsOnly, DEFAULT_SCHEDULED_TIMES_ONLY, DEFAULT_DWELL_TIME_ONLY, includeTrip,
+                DEFAULT_INCLUDE_STOP, DEFAULT_INCLUDE_STOP_PATH, readOnly);
 
         Set<Integer> configRevs = new HashSet<>();
         Map<ArrivalDepartureTripKey, List<ArrivalDeparture>> arrivalDeparturesByTripMap =
@@ -490,6 +492,7 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
     public List<IpcRunTimeForTrip> getRunTimeForTrips(LocalDate beginDate, LocalDate endDate,
                                          LocalTime beginTime, LocalTime endTime,
                                          String routeIdOrShortName, String headsign,
+                                         String startStop, String endStop,
                                          ServiceType serviceType, boolean timePointsOnly,
                                          boolean currentTripsOnly, boolean readOnly) throws Exception {
 
@@ -503,9 +506,10 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
 
         boolean includeTrip = true;
 
-        List<ArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesFromDb(beginDate, endDate,
-                beginTime, endTime, routeId, headsign, serviceType, timePointsOnly, DEFAULT_SCHEDULED_TIMES_ONLY,
-                DEFAULT_DWELL_TIME_ONLY, includeTrip, DEFAULT_INCLUDE_STOP, DEFAULT_INCLUDE_STOP_PATH, readOnly);
+        List<ArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesFromDb(
+                beginDate, endDate, beginTime, endTime, routeId, headsign, startStop, endStop,
+                serviceType, timePointsOnly, DEFAULT_SCHEDULED_TIMES_ONLY, DEFAULT_DWELL_TIME_ONLY,
+                includeTrip, DEFAULT_INCLUDE_STOP, DEFAULT_INCLUDE_STOP_PATH, readOnly);
 
         Set<Integer> configRevs = new HashSet<>();
         Map<ArrivalDepartureTripKey, List<ArrivalDeparture>> arrivalDeparturesByTripMap =

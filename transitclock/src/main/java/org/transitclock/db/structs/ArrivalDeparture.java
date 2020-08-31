@@ -959,6 +959,18 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 				endTime, sqlClause, firstResult, maxResults, arrivalOrDeparture, false);
 	}
 
+	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(LocalDate beginDate, LocalDate endDate,
+																	 LocalTime beginTime, LocalTime endTime,
+																	 String routeId, String headsign,
+																	 ServiceType serviceType, boolean timePointsOnly,
+																	 boolean scheduledTimesOnly, boolean dwellTimeOnly,
+																	 boolean includeTrip, boolean includeStop,
+																	 boolean includeStopPath, boolean readOnly) throws Exception {
+		return getArrivalsDeparturesFromDb(beginDate, endDate, beginTime, endTime, routeId, headsign,
+				null, null, serviceType, timePointsOnly, scheduledTimesOnly, dwellTimeOnly,
+				includeTrip, includeStop, includeStopPath, readOnly);
+	}
+
 
 	/**
 	 * Reads the arrivals/departures for the timespan and routeId specified
@@ -975,6 +987,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(LocalDate beginDate, LocalDate endDate,
 																	 LocalTime beginTime, LocalTime endTime,
 																	 String routeId, String headsign,
+																	 String startStop, String endStop,
 																	 ServiceType serviceType, boolean timePointsOnly,
 																	 boolean scheduledTimesOnly, boolean dwellTimeOnly,
 																	 boolean includeTrip, boolean includeStop,
@@ -999,6 +1012,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 					"WHERE " +
 					getArrivalDepartureTimeWhere(beginDate, endDate, beginTime, endTime) +
 					getRouteIdWhere(routeId) +
+					getTripPatternWhere(startStop, endStop) +
 					getScheduledTimesWhere(scheduledTimesOnly) +
 					getTimePointsWhere(timePointsOnly) +
 					getServiceTypeWhere(serviceType) +
@@ -1107,6 +1121,13 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	private static String getRouteIdWhere(String routeId){
 		if(routeId !=null) {
 			return String.format("AND ad.routeId = '%s' ", routeId);
+		}
+		return "";
+	}
+
+	private static String getTripPatternWhere(String startStop, String endStop){
+		if(StringUtils.isNotBlank(startStop) && StringUtils.isNotBlank(endStop)) {
+			return String.format("AND ad.tripPatternId LIKE 'shape_%%_%s_to_%s_%%' ", startStop, endStop);
 		}
 		return "";
 	}
