@@ -609,7 +609,13 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                 && arrDep1.isArrival()
                 && arrDep2.isDeparture()) {
             if(arrDep1.getStopPathIndex() == 0){
-                dwellTime = (double) (arrDep2.getTime() - arrDep2.getScheduledTime());
+                double firstDwellTime = (double) (arrDep2.getTime() - arrDep2.getScheduledTime());
+                // check for case where trip left before expected departure time
+                if(firstDwellTime < 0){
+                    dwellTime = 1000.0;
+                } else {
+                    dwellTime = firstDwellTime;
+                }
             }else {
                 dwellTime = (double) (arrDep2.getTime() - arrDep1.getTime());
             }

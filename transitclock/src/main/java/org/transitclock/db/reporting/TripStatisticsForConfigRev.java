@@ -2,8 +2,7 @@ package org.transitclock.db.reporting;
 
 import org.transitclock.db.structs.ArrivalDeparture;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class TripStatisticsForConfigRev {
     private final int configRev;
@@ -11,8 +10,8 @@ public class TripStatisticsForConfigRev {
     private final int tripIndex;
     private final String blockId;
     private final int expectedStopPathCount;
-    private int stopPathRunTimeCount=0;
-    private int stopPathDwellTimeCount=0;
+    private Set<StopPathRunTimeKey> uniqueStopPathRunTimes= new HashSet<>();
+    private Set<StopPathRunTimeKey> uniqueStopPathDwellTimes=new HashSet<>();
     private Map<StopPathRunTimeKey, StopPathStatistics> stopPathStatistics = new HashMap<>();
 
     public TripStatisticsForConfigRev(int configRev, String tripId, int expectedStopPathCount, int tripIndex, String blockId){
@@ -48,29 +47,29 @@ public class TripStatisticsForConfigRev {
     }
 
     public boolean hasAllStopPathsForRunTimes(){
-        return stopPathRunTimeCount == expectedStopPathCount;
+        return uniqueStopPathRunTimes.size() == expectedStopPathCount;
     }
 
     public boolean hasAllStopPathsForDwellTimes(){
-        return stopPathDwellTimeCount == expectedStopPathCount;
+        return uniqueStopPathDwellTimes.size() == expectedStopPathCount;
     }
 
     public void addStopPathRunTime(StopPathRunTimeKey key, ArrivalDeparture ad, Double runTime){
         StopPathStatistics result = getStatsMapResult(key, ad);
         result.getRunTimeStats().accept(runTime);
-        stopPathRunTimeCount++;
+        uniqueStopPathRunTimes.add(key);
     }
 
     public void addStopPathDwellTime(StopPathRunTimeKey key, ArrivalDeparture ad, Double dwellTime){
         StopPathStatistics result = getStatsMapResult(key, ad);
         result.getDwellTimeStats().accept(dwellTime);
-        stopPathDwellTimeCount++;
+        uniqueStopPathDwellTimes.add(key);
     }
 
     private StopPathStatistics getStatsMapResult(StopPathRunTimeKey key, ArrivalDeparture ad){
         StopPathStatistics result = stopPathStatistics.get(key);
         if(result == null){
-            boolean isLastStop = ad.getStopPathIndex() == expectedStopPathCount -1;
+            boolean isLastStop = ad.getStopPathIndex() == expectedStopPathCount;
             result = new StopPathStatistics(ad.getTripId(), ad.getStopPathId(), ad.getStopPathIndex(), isLastStop);
             stopPathStatistics.put(key, result);
         }
@@ -98,6 +97,9 @@ public class TripStatisticsForConfigRev {
         if(hasAllStopPathsForRunTimes()){
             for(Map.Entry<StopPathRunTimeKey, StopPathStatistics> entry : stopPathStatistics.entrySet()){
                 StopPathStatistics sps = entry.getValue();
+                if(sps.isFirstStop()){
+                    continue;
+                }
                 Double minRunTime = sps.getMinRunTime();
                 if(minRunTime == null){
                     return null;
@@ -115,7 +117,10 @@ public class TripStatisticsForConfigRev {
             for(Map.Entry<StopPathRunTimeKey, StopPathStatistics> entry : stopPathStatistics.entrySet()){
                 StopPathStatistics sps = entry.getValue();
                 Double avgDwellTime = sps.getAverageDwellTime();
-                if(avgDwellTime == 0 || avgDwellTime == null){
+                if(sps.isLastStop()){
+                    continue;
+                }
+                else if(avgDwellTime == 0 || avgDwellTime == null){
                     return null;
                 }
                 tripDwellTime += avgDwellTime;

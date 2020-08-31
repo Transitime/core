@@ -3,10 +3,11 @@ package org.transitclock.db.reporting;
 import java.util.DoubleSummaryStatistics;
 
 public class StopPathStatistics {
-    final String tripId;
-    final String stopPathId;
-    final int stopPathIndex;
-    final boolean isLastStop;
+    private final String tripId;
+    private final String stopPathId;
+    private final int stopPathIndex;
+    private final boolean isLastStop;
+    private final boolean isFirstStop;
 
     DoubleSummaryStatistics dwellTimeStats = new DoubleSummaryStatistics();
     DoubleSummaryStatistics runTimeStats = new DoubleSummaryStatistics();
@@ -16,6 +17,7 @@ public class StopPathStatistics {
         this.stopPathId = stopPathId;
         this.stopPathIndex = stopPathIndex;
         this.isLastStop = isLastStop;
+        this.isFirstStop = stopPathIndex == 0;
     }
 
     public DoubleSummaryStatistics getDwellTimeStats() {
@@ -36,5 +38,13 @@ public class StopPathStatistics {
 
     public Double getAverageDwellTime() {
         return dwellTimeStats.getAverage();
+    }
+
+    public boolean isLastStop() {
+        return isLastStop;
+    }
+
+    public boolean isFirstStop() {
+        return isFirstStop;
     }
 }

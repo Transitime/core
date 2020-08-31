@@ -18,8 +18,9 @@ public class IpcRunTimeForTrip extends IpcRunTime {
             double tripSchTimeLengthMsec = (tripSchEndTime - tripSchStartTime) * 1000;
             this.scheduledTripCompletionTime = tripSchTimeLengthMsec;
         }
-        if(tripSchEndTime != null && nextTripSchStartTime != null) {
-            double nextTripSchTripLengthMsec = (nextTripSchStartTime - tripSchEndTime) * 1000;
+
+        if(tripSchStartTime != null && nextTripSchStartTime != null) {
+            double nextTripSchTripLengthMsec = (nextTripSchStartTime - tripSchStartTime) * 1000;
             this.nextScheduledTripStartTime = nextTripSchTripLengthMsec;
         }
     }
