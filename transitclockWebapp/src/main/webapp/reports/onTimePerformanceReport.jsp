@@ -136,9 +136,9 @@
                     Report Settings
 
                     <div id="radioButtons" style="margin-top: 10px;">
-                        <input type="radio" name="stopType" id="timePointsOnly">Timepoints (selected)
+                        <input type="radio" name="stopType" id="timePointsOnly">Timepoints Only
                         <br>
-                        <input type="radio" name="stopType">All stops
+                        <input type="radio" name="stopType" checked="checked">All stops
                     </div>
                 </div>
 
@@ -175,6 +175,7 @@
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+        <script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script>
 
         <div id="reportResults" style="width: 79%; display: inline-block;">
             <canvas id="chartCanvas" style="margin-top: 10px;"></canvas>
@@ -191,13 +192,21 @@
         data: {
             datasets: [{
                 data: [],
-                backgroundColor: ['#fffe00', '#ff2000', '#ff7800']
+                backgroundColor: ['#fffe00', '#ff2000', '#0ca900']
             }],
             labels: ['Early', 'Late', 'On time']
         },
         options: {
             legend: {
                 position: 'bottom'
+            },
+            plugins: {
+                labels: {
+                    render: 'value',
+                    fontSize: 24,
+                    fontColor: '#000000',
+                    position: 'border'
+                }
             }
         }
     });
