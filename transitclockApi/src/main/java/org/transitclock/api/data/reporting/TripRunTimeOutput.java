@@ -1,5 +1,3 @@
-
-@XmlRootElement
 package org.transitclock.api.data.reporting;
 
 import org.slf4j.Logger;
