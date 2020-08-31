@@ -270,6 +270,19 @@ $("#route").change(function(evt) { drawRoute(evt.target.value) });
 
 // draw AVL data when submit button is clicked
 $("#submit").on("click", function() {
+
+	if ($("#early").val() > 1440) {
+		$("#early").val(1440);
+	}
+	if ($("#early").val() == "" || $("#early").val() < 0) {
+		$("#early").val(1.5)
+	}
+	if ($("#late").val() > 1440) {
+		$("#late").val(1440);
+	}
+	if ($("#late").val() == "" || $("#late").val() < 0) {
+		$("#late").val(2.5)
+	}
     /* Set request object to match new values */
     request.v = $("#vehicle").val();
     request.beginDate = $("#beginDate").val();
@@ -278,6 +291,7 @@ $("#submit").on("click", function() {
     request.early = $("#early").val() * 60000;
     request.late = $("#late").val() * -60000;
     request.r = $("#route").val();
+    request.includeHeadway = "true";
 
     var askConfirm = allVehiclesRequested() && (request.r == "All Routes" || request.r ==" ");
     var confirmYes = false;
