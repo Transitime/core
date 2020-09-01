@@ -9,7 +9,6 @@ import org.transitclock.utils.Time;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,26 +24,26 @@ public class TripRunTimeOutput implements Serializable {
         TripRunTimeData data = new TripRunTimeData();
         for(IpcRunTimeForTrip runTimeForTrip : sortRunTimes(runTimeForTrips)){
             data.getTripsList().add(getFormattedTripId(runTimeForTrip));
-            data.getFixedList().add(getValueAsBigDecimal(runTimeForTrip.getFixed()));
-            data.getVariableList().add(getValueAsBigDecimal(runTimeForTrip.getVariable()));
-            data.getDwellList().add(getValueAsBigDecimal(runTimeForTrip.getDwell()));
-            data.getScheduledList().add(getValueAsBigDecimal(runTimeForTrip.getScheduledTripCompletionTime()));
-            data.getNextTripStartList().add(getValueAsBigDecimal(runTimeForTrip.getNextScheduledTripStartTime()));
+            data.getFixedList().add(getValueAsLong(runTimeForTrip.getFixed()));
+            data.getVariableList().add(getValueAsLong(runTimeForTrip.getVariable()));
+            data.getDwellList().add(getValueAsLong(runTimeForTrip.getDwell()));
+            data.getScheduledList().add(getValueAsLong(runTimeForTrip.getScheduledTripCompletionTime()));
+            data.getNextTripStartList().add(getValueAsLong(runTimeForTrip.getNextScheduledTripStartTime()));
         }
         return new TripRunTimeMixedChart(data);
     }
 
-    private static BigDecimal getValueAsBigDecimal(Double value){
+    private static Long getValueAsLong(Double value){
         if(value != null){
             try{
-                return new BigDecimal(value).setScale(0,BigDecimal.ROUND_DOWN);
+                return value.longValue();
             } catch (NumberFormatException nfe){
-                logger.warn("Unable to convert {} to a BigDecimal do to a number format exception",value, nfe);
+                logger.warn("Unable to convert {} to a Long do to a number format exception",value, nfe);
             } catch(Exception e){
                 logger.warn("Hit unexpected issue converting value {} to Big Decimal", value, e);
             }
         }
-        return BigDecimal.ZERO;
+        return 0L;
     }
 
     private static String getFormattedTripId(IpcRunTimeForTrip runTimeForTrip){

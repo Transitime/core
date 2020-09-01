@@ -10,41 +10,41 @@ public class TripRunTimeData {
     private List<String> tripsList = new ArrayList<>();
 
     @XmlElement(name = "fixed")
-    private List<BigDecimal> fixedList = new ArrayList<>();
+    private List<Long> fixedList = new ArrayList<>();
 
     @XmlElement(name = "variable")
-    private List<BigDecimal> variableList = new ArrayList<>();
+    private List<Long> variableList = new ArrayList<>();
 
     @XmlElement(name = "dwell")
-    private List<BigDecimal> dwellList = new ArrayList<>();
+    private List<Long> dwellList = new ArrayList<>();
 
     @XmlElement(name = "scheduled")
-    private List<BigDecimal> scheduledList = new ArrayList<>();
+    private List<Long> scheduledList = new ArrayList<>();
 
     @XmlElement(name = "nextTripStart")
-    private List<BigDecimal> nextTripStartList = new ArrayList<>();
+    private List<Long> nextTripStartList = new ArrayList<>();
 
     public List<String> getTripsList() {
         return tripsList;
     }
 
-    public List<BigDecimal> getFixedList() {
+    public List<Long> getFixedList() {
         return fixedList;
     }
 
-    public List<BigDecimal> getVariableList() {
+    public List<Long> getVariableList() {
         return variableList;
     }
 
-    public List<BigDecimal> getDwellList() {
+    public List<Long> getDwellList() {
         return dwellList;
     }
 
-    public List<BigDecimal> getScheduledList() {
+    public List<Long> getScheduledList() {
         return scheduledList;
     }
 
-    public List<BigDecimal> getNextTripStartList() {
+    public List<Long> getNextTripStartList() {
         return nextTripStartList;
     }
 
