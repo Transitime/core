@@ -46,7 +46,7 @@ public class StopsForRouteDirectionJsonQuery {
 	 */
 	public static String getStopsJson(String agencyId, String routeId, String headsign) {
 
-		String sql = "SELECT s.name, sp.tripPatternId, sp.gtfsStopSeq " +
+		String sql = "SELECT s.id, s.name, sp.tripPatternId, sp.gtfsStopSeq " +
 				"FROM Stops s " +
 				"JOIN StopPaths sp ON s.id = sp.stopId " +
 				"JOIN TripPatterns tp ON sp.tripPatternId = tp.id AND sp.routeId = tp.routeId AND sp.configRev = tp.configRev AND tp.configRev = s.configRev " +
