@@ -33,11 +33,11 @@ public class IpcRunTimeForTrip extends IpcRunTime {
         return scheduledTripStartTime;
     }
 
-    public double getScheduledTripCompletionTime() {
+    public Double getScheduledTripCompletionTime() {
         return scheduledTripCompletionTime;
     }
 
-    public double getNextScheduledTripStartTime() {
+    public Double getNextScheduledTripStartTime() {
         return nextScheduledTripStartTime;
     }
 

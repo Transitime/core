@@ -44,7 +44,7 @@ public class TripRunTimeOutput implements Serializable {
                 logger.warn("Hit unexpected issue converting value {} to Big Decimal", value, e);
             }
         }
-        return new BigDecimal(0);
+        return BigDecimal.ZERO;
     }
 
     private static String getFormattedTripId(IpcRunTimeForTrip runTimeForTrip){
