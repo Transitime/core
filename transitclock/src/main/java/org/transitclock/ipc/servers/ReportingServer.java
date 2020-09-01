@@ -511,21 +511,27 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                 serviceType, timePointsOnly, DEFAULT_SCHEDULED_TIMES_ONLY, DEFAULT_DWELL_TIME_ONLY,
                 includeTrip, DEFAULT_INCLUDE_STOP, DEFAULT_INCLUDE_STOP_PATH, readOnly);
 
-        Set<Integer> configRevs = new HashSet<>();
-        Map<ArrivalDepartureTripKey, List<ArrivalDeparture>> arrivalDeparturesByTripMap =
-                groupArrivalDeparturesByUniqueTrip(arrivalDepartures, configRevs);
-        Collection<List<ArrivalDeparture>> arrivalDeparturesByTrip = arrivalDeparturesByTripMap.values();
+        if(arrivalDepartures.size() > 0) {
 
-        Map<String, TripStatistics> tripStatsByTripId = new HashMap<>();
-        for(List<ArrivalDeparture> arrivalDepartureList : arrivalDeparturesByTrip){
-            processTripStatsMap(tripStatsByTripId, arrivalDepartureList);
+            Set<Integer> configRevs = new HashSet<>();
+            Map<ArrivalDepartureTripKey, List<ArrivalDeparture>> arrivalDeparturesByTripMap =
+                    groupArrivalDeparturesByUniqueTrip(arrivalDepartures, configRevs);
+            Collection<List<ArrivalDeparture>> arrivalDeparturesByTrip = arrivalDeparturesByTripMap.values();
+
+            Map<String, TripStatistics> tripStatsByTripId = new HashMap<>();
+            for (List<ArrivalDeparture> arrivalDepartureList : arrivalDeparturesByTrip) {
+                processTripStatsMap(tripStatsByTripId, arrivalDepartureList);
+            }
+
+            List<Trip> trips = Trip.getTripsFromDb(routeId, headsign, configRevs, readOnly);
+            if (trips != null) {
+                Map<String, List<Trip>> tripsByConfigRev = trips.stream().collect(Collectors.groupingBy(Trip::getId));
+                List<IpcRunTimeForTrip> runTime = getRunTimeStatsForTrips(tripStatsByTripId, tripsByConfigRev, readOnly);
+                return runTime;
+            }
+
         }
-
-        List<Trip> trips = Trip.getTripsFromDb(routeId, headsign, configRevs, readOnly);
-        Map<String, List<Trip>> tripsByConfigRev = trips.stream().collect(Collectors.groupingBy(Trip::getId));
-        List<IpcRunTimeForTrip> runTime = getRunTimeStatsForTrips(tripStatsByTripId, tripsByConfigRev, readOnly);
-
-        return runTime;
+        return Collections.EMPTY_LIST;
     }
 
     private Map<ArrivalDepartureTripKey, List<ArrivalDeparture>> groupArrivalDeparturesByUniqueTrip(
