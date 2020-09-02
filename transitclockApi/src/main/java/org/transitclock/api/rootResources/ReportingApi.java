@@ -251,7 +251,7 @@ public class ReportingApi {
 
             ServiceType serviceTypeEnum = null;
 
-            if(StringUtils.isNotBlank(serviceType)){
+            if (StringUtils.isNotBlank(serviceType)) {
                 serviceTypeEnum = ServiceType.valueOf(serviceType.toUpperCase());
             }
 
@@ -269,6 +269,7 @@ public class ReportingApi {
             // If problem getting data then return a Bad Request
             throw WebUtils.badRequestException(e);
         }
+    }
 
     @Path("/report/live/dispatch")
     @GET

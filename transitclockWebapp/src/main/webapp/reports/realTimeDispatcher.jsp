@@ -93,33 +93,31 @@
 
 <script>
 
-    var data = [
-        {vehicle: '54321', last_report: '22:15:25', heading: '200', speed: '40 km/hr', route_assignment: '12', sched_adherence: '-2m', operator_id: '24', map_link: 'realTimeLiveMap.jsp?a=1&v=54321'},
-        {vehicle: '46022', last_report: '09:34:88', heading: '95', speed: '8 km/hr', route_assignment: '24589', sched_adherence: '6m', operator_id: '1004', map_link: 'realTimeLiveMap.jsp?a=1&v=46022'}
-    ];
-
     $(document).ready(function () {
+
         $('#resultsTable').DataTable({
             columns: [
-                { data: 'vehicle' },
-                { data: 'last_report' },
-                { data: 'heading' },
-                { data: 'speed' },
-                { data: 'route_assignment' },
-                { data: 'sched_adherence' },
-                { data: 'operator_id' },
+                { data: 'vehicle', defaultContent: "" },
+                { data: 'last_report', defaultContent: "" },
+                { data: 'heading', defaultContent: ""},
+                { data: 'speed', defaultContent: "" },
+                { data: 'route_assignment', defaultContent: "" },
+                { data: 'schedule_adherence', defaultContent: "" },
+                { data: 'operator_id', defaultContent: "" },
                 { data: 'map_link', render: function (data, type, row) {
-                    return '<a href="' + data + '">>></a>'
-                    }}
+                    return '<a href="realTimeLiveMap.jsp?a=1&v=' + row['vehicle'] + '">>></a>'
+                }}
             ],
-            data: data,
+            ajax: {
+                url: apiUrlPrefix + "/report/live/dispatch",
+                type: "get"
+            },
             dom: 'lrtip'
         });
     });
 
     function refreshTable() {
-        // $("#resultsTable").DataTable().ajax.reload();
-        $("#resultsTable").DataTable().draw();
+        $("#resultsTable").DataTable().ajax.reload();
     }
 
     $('#vehiclesSearch').on( 'keyup', function () {
