@@ -299,6 +299,8 @@
 
     function populateDirection() {
 
+        $("#submit").attr("disabled", true);
+
         $("#endStop").empty();
         $("#startStop").empty();
         $("#direction").removeAttr('disabled');
@@ -320,6 +322,7 @@
             },
             error: function(response) {
                 alert("Error retrieving directions for route " + response.r);
+                $("#submit").attr("disabled", false);
             }
         })
     }
@@ -348,6 +351,7 @@
             success: function (resp) {
                 if (resp.data.length == 0) {
                     alert("No stop data for selected route and headsign.");
+                    $("#submit").attr("disabled", false);
                 }
                 else {
                     $("#startStop").removeAttr('disabled');
@@ -391,6 +395,7 @@
             // When there is an AJAX problem alert the user
             error: function (request, status, error) {
                 alert(error + '. ' + request.responseText);
+                $("#submit").attr("disabled", false);
             }
         });
     }
@@ -402,6 +407,7 @@
         stops[$("#startStop").val()].endStops.forEach(function(endStop) {
             $("#endStop").append("<option value='" + endStop.id + "'>" + endStop.name + "</option>");
         })
+        $("#submit").attr("disabled", false);
     }
 
     function getParams(modal) {
@@ -569,7 +575,9 @@
     var highestPoints = [];
 
     function visualizeData() {
-        $(".visualizeButton").attr("disabled", true);
+        $("#submit").attr("disabled", true);
+        $("#visualizeButton").attr("disabled", true);
+
         highestPoints = [];
         request = getParams(false)
 
@@ -582,7 +590,9 @@
             dataType: "json",
             success: function (response) {
                 if (response.data.trips.length == 0) {
-                    alert("No trip breakdown available for selected run time data.")
+                    alert("No trip breakdown available for selected run time data.");
+                    $("#visualizeButton").attr("disabled", false);
+                    $("#submit").attr("disabled",  false);
                 }
                 else {
                     barGraph.data = {
@@ -631,15 +641,17 @@
                     barGraph.update();
 
                     $("#runTimeVisualization").show();
+                    $("#visualizeButton").attr("disabled", false);
+                    $("#submit").attr("disabled",  false);
                 }
 
             },
             error: function(e) {
                 alert("Error retrieving trip-by-trip summary.");
+                $("#visualizeButton").attr("disabled", false);
+                $("#submit").attr("disabled",  false);
             }
         })
-
-        $(".visualizeButton").attr("disabled", false);
     }
 
 
@@ -825,9 +837,7 @@
 
     $(".visualizeButton").click(function() {
         if (!($("#runTimeVisualization").is(":visible"))) {
-            $(".submit").attr("disabled", true);
             visualizeData();
-            $(".submit").attr("disabled", false);
         }
     })
 
