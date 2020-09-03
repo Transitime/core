@@ -237,8 +237,8 @@
         request.endDate = endDate;
         request.endTime = endTime;
         request.r = $("#route").val();
-        request.minEarlySec = $("#early").val() * 60;
-        request.minLateSec = $("#late").val() * 60;
+        request.minEarlyMSec = $("#early").val() * 60000;
+        request.minLateMSec = $("#late").val() * 60000;
         request.serviceType = $("#serviceDayType").val();
         request.timePointsOnly = $("#timePointsOnly")[0].checked;
 

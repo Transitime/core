@@ -53,9 +53,9 @@ public class ReportingApi {
             @Parameter(description="Retrives only arrivalDepartures belonging to the headsign specified.",required=false)
             @QueryParam(value = "headSign") String headsign,
             @Parameter(description="Begin date to use for retrieving arrival departures",required=false)
-            @QueryParam(value = "minEarlySec") @DefaultValue("90") int minEarlySec,
+            @QueryParam(value = "minEarlyMSec") @DefaultValue("90000") int minEarlyMSec,
             @Parameter(description="Begin date to use for retrieving arrival departures",required=false)
-            @QueryParam(value = "minLateSec") @DefaultValue("150") int minLateSec,
+            @QueryParam(value = "minLateMSec") @DefaultValue("150000") int minLateMSec,
             @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday",required=false)
             @QueryParam(value = "serviceType") String serviceType,
             @Parameter(description="if set, retrives only arrivalDepartures with stops that are timePoints",required=false)
@@ -86,7 +86,7 @@ public class ReportingApi {
 
             if(arrivalDepartures != null){
                 if(ChartType.valueOf(chartType.toUpperCase()).equals(ChartType.PIE)){
-                    response = OnTimePerformanceOutput.getOnTimePerformanceForRoutesPieChart(arrivalDepartures, minEarlySec, minLateSec);
+                    response = OnTimePerformanceOutput.getOnTimePerformanceForRoutesPieChart(arrivalDepartures, minEarlyMSec, minLateMSec);
                 }
             }
 

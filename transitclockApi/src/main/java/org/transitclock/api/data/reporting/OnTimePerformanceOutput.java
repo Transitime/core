@@ -23,9 +23,9 @@ public class OnTimePerformanceOutput {
     private static final String ON_TIME = "On-Time";
 
     public static PieChart getOnTimePerformanceForRoutesPieChart(List<IpcArrivalDepartureScheduleAdherence> arrivalDepartures,
-                                                                 int minEarlySec, int minLateSec){
+                                                                 int minEarlyMSec, int minLateMSec){
 
-        Map<String, Integer> labelsAndCountsMap = getOTPLabelsAndCounts(arrivalDepartures, minEarlySec, minLateSec);
+        Map<String, Integer> labelsAndCountsMap = getOTPLabelsAndCounts(arrivalDepartures, minEarlyMSec/1000, minLateMSec/1000);
 
         PieChartDataset dataset = new PieChartDataset();
         dataset.addData(labelsAndCountsMap.get(EARLY), labelsAndCountsMap.get(LATE), labelsAndCountsMap.get(ON_TIME));
