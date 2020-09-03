@@ -59,6 +59,30 @@
             margin-right: 10px;
         }
 
+        .loader {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            border: 16px solid #f3f3f3; /* Light grey */
+            border-top: 16px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+            z-index: 1000;
+        }
+
+        @-webkit-keyframes spin {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
     </style>
     <%--        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>--%>
     <link rel="stylesheet" type="text/css" href="../jquery.datepick.package-5.1.0/css/jquery.datepick.css">
@@ -260,7 +284,7 @@
             </div>
         </div>
         <div id="map" style="height: 90%; width: 90%; margin: auto;">
-
+            <div class="loader" hidden="true"></div>
         </div>
     </div>
 
@@ -307,7 +331,7 @@
     var stopOptions = {
         color: '#006600',
         opacity: 0.4,
-        radius: 4,
+        radius: 6,
         weight: 2,
         fillColor: '#006600',
         fillOpacity: 0.3,
@@ -406,6 +430,9 @@
     }
 
     function speedsCallback(data) {
+        if (data.stopPaths.length == 0) {
+            alert("No speed data available for selected parameters.")
+        }
         data.stopPaths.forEach(function(stopPath) {
             var options = speedOptions;
 
@@ -436,9 +463,14 @@
     }
 
     function stopsCallback(data) {
+        if (data.stops.length == 0) {
+            alert("No stops data available for selected parameters.");
+        }
+
         data.stops.forEach(function(stop) {
             // Create the stop Marker
             var stopMarker = L.circleMarker([stop.lat,stop.lon], stopOptions).addTo(routeGroup);
+            stopMarker.bringToFront();
 
             // Create popup for stop marker
 
@@ -460,9 +492,11 @@
                 var value = $("<td />").text(stop[keys[i]]);
                 content.append( $("<tr />").append(label, value) );
             }
-
             stopMarker.bindPopup(content[0]);
         })
+
+        $(".loader").hide();
+        $("#mainSubmit").removeAttr("disabled");
     }
 
     $("#mainSubmit").click(function() {
@@ -470,6 +504,7 @@
         $("#flyoutDatepicker").val("Date range")
         $("#avgRunTimeComparison").html("");
         $("#runTimesFlyout").hide();
+        $(".loader").show();
 
         request = {}
 
@@ -482,46 +517,6 @@
         }
 
         $.ajax({
-            url: apiUrlPrefix + "/report/speedmap/stops",
-            // Pass in query string parameters to page being requested
-            data: request,
-            // Needed so that parameters passed properly to page being requested
-            traditional: true,
-            dataType: "json",
-            success: function (response) {
-                $("#mainSubmit").removeAttr("disabled");
-                var beginDateArray = request.beginDate.split("-");
-                var endDateArray = request.endDate.split("-");
-                [beginDateArray[0], beginDateArray[1], beginDateArray[2]] = [beginDateArray[1], beginDateArray[2], beginDateArray[0]];
-                [endDateArray[0], endDateArray[1], endDateArray[2]] = [endDateArray[1], endDateArray[2], endDateArray[0]];
-                var beginDateString = beginDateArray.join("/");
-                var endDateString = endDateArray.join("/");
-
-                var timeRange = request.beginTime + " to " + request.endTime;
-
-                if (beginTime == "00:00:00" && endTime == "23:59:59") {
-                    timeRange = "All times";
-                }
-
-                var serviceDayString = request.serviceType;
-
-                if (serviceDayString == "") {
-                    serviceDayString = "All days";
-                }
-
-                $(".paramDetails").each(function() {
-                    $(this).html("<p style='font-size: 0.8em;'>Route " + request.r + " to " + request.headsign + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "</p>");
-                })
-
-                stopsCallback(response);
-            },
-            error: function () {
-                $("#mainSubmit").removeAttr("disabled");
-                alert("Error processing stop details.");
-            }
-        })
-
-        $.ajax({
             url: apiUrlPrefix + "/report/speedmap/stopPathsSpeed",
             // Pass in query string parameters to page being requested
             data: request,
@@ -530,8 +525,49 @@
             dataType: "json",
             success: function(response) {
                 speedsCallback(response);
+
+                $.ajax({
+                    url: apiUrlPrefix + "/report/speedmap/stops",
+                    // Pass in query string parameters to page being requested
+                    data: request,
+                    // Needed so that parameters passed properly to page being requested
+                    traditional: true,
+                    dataType: "json",
+                    success: function (response) {
+                        var beginDateArray = request.beginDate.split("-");
+                        var endDateArray = request.endDate.split("-");
+                        [beginDateArray[0], beginDateArray[1], beginDateArray[2]] = [beginDateArray[1], beginDateArray[2], beginDateArray[0]];
+                        [endDateArray[0], endDateArray[1], endDateArray[2]] = [endDateArray[1], endDateArray[2], endDateArray[0]];
+                        var beginDateString = beginDateArray.join("/");
+                        var endDateString = endDateArray.join("/");
+
+                        var timeRange = request.beginTime + " to " + request.endTime;
+
+                        if (beginTime == "00:00:00" && endTime == "23:59:59") {
+                            timeRange = "All times";
+                        }
+
+                        var serviceDayString = request.serviceType;
+
+                        if (serviceDayString == "") {
+                            serviceDayString = "All days";
+                        }
+
+                        $(".paramDetails").each(function() {
+                            $(this).html("<p style='font-size: 0.8em;'>Route " + request.r + " to " + request.headsign + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "</p>");
+                        })
+
+                        stopsCallback(response);
+                    },
+                    error: function () {
+                        $(".loader").hide();
+                        $("#mainSubmit").removeAttr("disabled");
+                        alert("Error processing stop details.");
+                    }
+                })
             },
             error: function () {
+                $(".loader").hide();
                 alert("Error processing speed details for stops.");
             }
         })
@@ -559,6 +595,8 @@
                 }
             },
             error: function () {
+                $(".loader").hide();
+                $("#mainSubmit").removeAttr("disabled");
                 alert("Error processing average trip run time.");
             }
         })
@@ -571,6 +609,7 @@
 
     $("#runTimeSubmit").click(function() {
         $(".submit").attr("disabled", "disabled");
+        $(".loader").show();
 
         getParams("#flyoutDatepicker");
 
@@ -582,8 +621,6 @@
             traditional: true,
             dataType: "json",
             success: function (response) {
-                $(".submit").removeAttr("disabled");
-
                 if (response.numberOfTrips == 0) {
                     $("#avgRunTimeComparison").html("<p style='font-size: 0.8em;'>Run Time Comparison: No average run time data.</p>");
                 }
@@ -595,8 +632,12 @@
                     }
                     $("#avgRunTimeComparison").html("<p style='font-size: 0.8em;'>Run Time Comparison: " + runTimeMinutes + ":" + runTimeSeconds + "</p>");
                 }
+                $(".loader").hide();
+                $(".submit").removeAttr("disabled");
             },
             error: function () {
+                $(".loader").hide();
+                $(".submit").removeAttr("disabled");
                 alert("Error processing average trip run time.");
             }
         })
