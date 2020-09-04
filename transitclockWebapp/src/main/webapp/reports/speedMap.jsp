@@ -45,10 +45,14 @@
             height: 100%;
             position: absolute;
             right: 0px;
-            z-index: 999;
+            z-index: 1001;
             border-left: 1px solid black;
             background-color: white;
             transition: all .5s ease
+        }
+
+        .datepick-popup {
+            z-index: 1002 !important;
         }
 
         .speedLegend {
@@ -88,6 +92,9 @@
     <link rel="stylesheet" type="text/css" href="../jquery.datepick.package-5.1.0/css/jquery.datepick.css">
     <script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.plugin.js"></script>
     <script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.datepick.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script>
 </head>
 <body>
     <%@include file="/template/header.jsp" %>
@@ -280,7 +287,7 @@
 
                 <input type="button" id="runTimeSubmit" class="submit" value="Submit" style="margin-top: 20px; margin-bottom: 20px;">
 
-                <div id="avgRunTimeComparison" style="margin-top: 40px;"></div>
+                <canvas id="comparisonChart" height="400" style="margin-top: 40px;"></canvas>
             </div>
         </div>
         <div id="map" style="height: 90%; width: 90%; margin: auto;">
@@ -340,6 +347,60 @@
     var routePolylineOptions = {clickable: false, color: "#00f", opacity: 0.5, weight: 4};
 
     var stopPopupOptions = {closeButton: false};
+
+    var runTimesChart = new Chart(comparisonChart, {
+        type: 'bar',
+        data: {
+            labels: ["Initial Query", "Comparison"],
+            datasets: [{
+                label: "Average Run Time",
+                backgroundColor: 'rgb(37,137,197)',
+                data: []
+            }]
+        },
+        options: {
+            title: {
+                display: true,
+                text: 'Run Time Comparison'
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        suggestedMax: 3600000,
+                        min: 0,
+                        stepSize: 300000,
+                        callback: function(value, index, values) {
+                            return msToMinsSecs(value);
+                        }
+                    }
+                }]
+            },
+            tooltips: {
+                callbacks: {
+                    label: function (tooltipItem, data) {
+                        return msToMinsSecs(data.datasets[0].data[tooltipItem.index]);
+                    }
+                }
+            },
+            plugins: {
+                labels: {
+                    render: function(args) {
+                        return msToMinsSecs(args.value);
+                    }
+                }
+            }
+        }
+    });
+
+    function msToMinsSecs(milliseconds) {
+        var minutes = parseInt(milliseconds / 60000).toString();
+        var seconds = parseInt(milliseconds % 60000 / 1000).toString();
+        if (seconds.length == 1) {
+            seconds = "0" + seconds;
+        }
+
+        return minutes + ":" + seconds;
+    }
 
     $("#route").attr("style", "width: 200px");
 
@@ -559,18 +620,23 @@
 
                         stopsCallback(response);
                     },
-                    error: function () {
+                    error: function (e) {
                         $(".loader").hide();
                         $("#mainSubmit").removeAttr("disabled");
                         alert("Error processing stop details.");
                     }
                 })
             },
-            error: function () {
+            error: function (e) {
                 $(".loader").hide();
+                $("#mainSubmit").removeAttr("disabled");
                 alert("Error processing speed details for stops.");
             }
         })
+
+        runTimesChart.data.datasets[0].data[0] = null;
+        runTimesChart.data.datasets[0].data[1] = null;
+        runTimesChart.update();
 
         $.ajax({
             url: apiUrlPrefix + "/report/speedmap/runTime",
@@ -586,12 +652,10 @@
                     $("#avgRunTimeTop").html("<p style='font-size: 0.8em; margin-bottom: 0em;'>No average run time data.</p>" + compareLink);
                 }
                 else {
-                    var runTimeMinutes = parseInt(response.averageRunTime / 60000).toString();
-                    var runTimeSeconds = parseInt(response.averageRunTime % 60000 / 1000).toString();
-                    if (runTimeSeconds.length == 1) {
-                        runTimeSeconds = "0" + runTimeSeconds;
-                    }
-                    $("#avgRunTimeTop").html("<p style='font-size: 0.8em; margin-bottom: 0em;'>Average Trip Run Time: " + runTimeMinutes + ":" + runTimeSeconds + "</p>" + compareLink);
+                    runTimesChart.data.datasets[0].data[0] = response.averageRunTime;
+                    runTimesChart.update();
+
+                    $("#avgRunTimeTop").html("<p style='font-size: 0.8em; margin-bottom: 0em;'>Average Trip Run Time: " + msToMinsSecs(response.averageRunTime) + "</p>" + compareLink);
                 }
             },
             error: function () {
@@ -622,15 +686,13 @@
             dataType: "json",
             success: function (response) {
                 if (response.numberOfTrips == 0) {
-                    $("#avgRunTimeComparison").html("<p style='font-size: 0.8em;'>Run Time Comparison: No average run time data.</p>");
+                    runTimesChart.data.datasets[0].data[1] = null;
+                    runTimesChart.update();
+                    alert("No average run time data for comparison dates.");
                 }
                 else {
-                    var runTimeMinutes = parseInt(response.averageRunTime / 60000).toString();
-                    var runTimeSeconds = parseInt(response.averageRunTime % 60000 / 1000).toString();
-                    if (runTimeSeconds.length == 1) {
-                        runTimeSeconds = "0" + runTimeSeconds;
-                    }
-                    $("#avgRunTimeComparison").html("<p style='font-size: 0.8em;'>Run Time Comparison: " + runTimeMinutes + ":" + runTimeSeconds + "</p>");
+                    runTimesChart.data.datasets[0].data[1] = response.averageRunTime;
+                    runTimesChart.update();
                 }
                 $(".loader").hide();
                 $(".submit").removeAttr("disabled");
