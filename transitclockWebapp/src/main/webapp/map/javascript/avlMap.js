@@ -331,12 +331,16 @@ function drawAvlData() {
 	    	var vehicles = processAvlCallback(resp);
 	    	// connect export to link to csv creation.
 	    	createExport(vehicles);
+
+	    	for (i in animations) {
+	    		animations[i].removeIcon();
+			}
+	    	animations = [];
 	    	if (!allVehiclesRequested() && vehicles.length)
-	    		prepareAnimation(vehicles[0].data); // only animate first vehicle returned.
+	    		prepareAnimations(vehicles); // only animate first vehicle returned.
 
 			if (allVehiclesRequested())
-                for (i in vehicles)
-                	prepareAnimation(vehicles[i].data);
+				prepareAnimations(vehicles);
 
 			else $("#playback").show();
 	    },
@@ -362,56 +366,84 @@ var busIcon =  L.icon({
     iconUrl:  contextPath + "/reports/images/bus.png", 
     iconSize: [25,25]
 });
-var animate = avlAnimation(animationGroup, busIcon, $("#playbackTime")[0]);
+
+var animation = avlAnimation(animationGroup, busIcon, $("#playbackTime")[0]);
+var animations = [];
 
 var playButton = contextPath + "/reports/images/playback/media-playback-start.svg",
 	pauseButton = contextPath + "/reports/images/playback/media-playback-pause.svg";
 
-animate.onEnd(function() {
+animation.onEnd(function() {
 	$("#playbackPlay").attr("src", playButton);
 })
 
 // Given a list of AVL positions, initialize the animation object.
-function prepareAnimation(avlData) {
+function prepareAnimations(avlsData) {
 
 	// Make sure animation controls are in their initial state.
 	$("#playbackPlay").attr("src", playButton);
 	$("#playbackRate").text("1X");
-	
-	animate(avlData);
 
+	for (i in avlsData) {
+		if (i == 0) {
+			animation(avlsData[i].data);
+			animations.push(animation);
+		}
+		else {
+			newAnimation = avlAnimation(animationGroup, busIcon, $("#playbackTime")[0]);
+			newAnimation(avlsData[i].data)
+			animations.push(newAnimation);
+		}
+	}
 }
 
 function playAnimation() {
 
-	if (!animate.paused()) {
-		animate.pause();
+	if (!animation.paused()) {
+		for (i in animations) {
+			animations[i].pause();
+		}
+
 		$("#playbackPlay").attr("src", playButton);
 	}
 	else { // need to start it
-		animate.start();
+		for (i in animations) {
+			animations[i].start();
+		}
 		$("#playbackPlay").attr("src", pauseButton);
 	}
 
 }
 
-$("#playbackNext").on("click", animate.next);
+$("#playbackNext").on("click", function() {
+	for (i in animations) {
+		animations[i].next();
+	}
+});
 
-$("#playbackPrev").on("click", animate.prev);
+$("#playbackPrev").on("click", function() {
+	for (i in animations) {
+		animations[i].prev();
+	}
+});
 
 $("#playbackPlay, #popupPlayback").on("click", function() {
 	playAnimation();
 });
 
 $("#playbackFF").on("click", function() {
-	var rate = animate.rate()*2;
-	animate.rate(rate);
+	var rate = animation.rate()*2;
+	for (i in animations) {
+		animations[i].rate(rate);
+	}
 	$("#playbackRate").text(rate + "X");
 });
 
 $("#playbackRew").on("click", function() {
-	var rate = animate.rate()/2;
-	animate.rate(rate);
+	var rate = animation.rate()/2;
+	for (i in animations) {
+		animations[i].rate(rate);
+	}
 	$("#playbackRate").text(rate + "X");
 });
 
