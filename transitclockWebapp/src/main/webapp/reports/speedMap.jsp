@@ -60,7 +60,7 @@
             width: 20px;
             height: 20px;
             border: 1px solid black;
-            margin-right: 10px;
+            margin-bottom: 5px;
         }
 
         .loader {
@@ -207,19 +207,22 @@
 
             <div id="speedParams">
                 <div class = "param">
-                    <div class="speedLegend" style="background-color: green;"></div>
+                    <div class="speedLegend" style="background-color: red;"></div>
+                    <div style ="vertical-align: top;display: inline-block;">Low Speed</div>
+                    <br>
                     <input id='lowSpeed' name='lowSpeed' type="range" min="0" max="98" step="0.1" value="0" oninput="lowSpeedSlider(this.value)">
                     <output id="lowSpeedOutput">mph max</output>
                 </div>
                 <div class="param">
                     <div class="speedLegend" style="background-color: yellow;"></div>
+                    <div style ="vertical-align: top;display: inline-block;">Mid Speed</div>
+                    <br>
                     <input id='midSpeed' name='midSpeed' type="range" min="1" max="99" step="0.1" value="1" oninput="midSpeedSlider(this.value)">
                     <output id="midSpeedOutput">mph max</output>
                 </div>
-                <div class="param">
-                    <div class="speedLegend" style="background-color: red;"></div>
-                    <input id='highSpeed' name='highSpeed' type="range" min="2" max="100" step="0.1" value="2" oninput="highSpeedSlider(this.value)">
-                    <output id="highSpeedOutput">mph max</output>
+                <div style="margin-top: 10px; margin-bottom: 10px;">
+                    <div class="speedLegend" style="background-color: green;"></div>
+                    <div style ="vertical-align: top;display: inline-block;">High Speed</div>
                 </div>
             </div>
         </div>
@@ -427,7 +430,6 @@
         $("#lowSpeedOutput").val(value + " mph max");
 
         $("#midSpeed").attr("min", (parseFloat(value) + 1));
-        $("#highSpeed").attr("min", (parseFloat(value) + 2));
 
         if ($("#midSpeed").val() <= (parseFloat(value) + 1)) {
             midSpeedSlider((parseFloat(value) + 1));
@@ -436,18 +438,6 @@
 
     function midSpeedSlider(value) {
         $("#midSpeedOutput").val(value + " mph max");
-
-        $("#highSpeed").attr("min", (parseFloat(value) + 1));
-
-        if ($("#highSpeed").val() <= (parseFloat(value) + 1)) {
-            highSpeedSlider((parseFloat(value) + 1));
-        }
-    }
-
-    function highSpeedSlider(value) {
-        $("#highSpeedOutput").val(value + " mph max");
-
-        $("#highSpeed").attr("min", (parseFloat($("#midSpeed").val()) + 1));
     }
 
     function getParams(dateParam) {
@@ -498,16 +488,13 @@
             var options = speedOptions;
 
             if (stopPath.speed < parseFloat($("#lowSpeed").val())) {
-                options.color = '#008000';
+                options.color = '#FF0000';
             }
             else if (stopPath.speed < parseFloat($("#midSpeed").val())) {
                 options.color = '#FFFF00';
             }
-            else if (stopPath.speed < parseFloat($("#highSpeed").val())) {
-                options.color = '#FF0000';
-            }
             else {
-                options.color = '#000000';
+                options.color = '#008000';
             }
 
             for (i = 0; i < stopPath.latlngs.length; i++) {
