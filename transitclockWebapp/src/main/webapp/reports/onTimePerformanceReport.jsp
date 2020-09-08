@@ -177,6 +177,7 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
         <script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script>
 
+        <h2 style="text-align: center; margin-top: 20px;">On Time Performance By Route</h2>
         <div id="reportResults" style="width: 79%; display: inline-block;">
             <canvas id="chartCanvas" style="margin-top: 10px;"></canvas>
         </div>
