@@ -341,7 +341,7 @@
     var stopOptions = {
         color: '#006600',
         opacity: 0.4,
-        radius: 6,
+        radius: 4,
         weight: 2,
         fillColor: '#006600',
         fillOpacity: 0.3,
@@ -476,7 +476,8 @@
 
         for (var i=0; i<route.shape.length; ++i) {
             var shape = route.shape[i];
-            L.polyline(shape.loc, routeOptions).addTo(routeGroup);
+            var routePoly = L.polyline(shape.loc, routeOptions).addTo(routeGroup);
+            map.fitBounds(routePoly.getLatLngs());
         }
     }
 
