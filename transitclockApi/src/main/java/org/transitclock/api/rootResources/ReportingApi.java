@@ -7,15 +7,18 @@ import org.transitclock.api.data.*;
 import org.transitclock.api.data.reporting.OnTimePerformanceOutput;
 import org.transitclock.api.data.reporting.TripRunTimeOutput;
 import org.transitclock.api.data.reporting.chartjs.ChartType;
+import org.transitclock.api.data.ApiDispatcher;
 import org.transitclock.api.utils.StandardParameters;
 import org.transitclock.api.utils.WebUtils;
 import org.transitclock.core.ServiceType;
 import org.transitclock.ipc.data.*;
 import org.transitclock.ipc.interfaces.ReportingInterface;
+import org.transitclock.ipc.interfaces.VehiclesInterface;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -308,7 +311,8 @@ public class ReportingApi {
                     stdParameters.getReportingInterface();
 
             ServiceType serviceTypeEnum = null;
-            if(StringUtils.isNotBlank(serviceType)){
+
+            if (StringUtils.isNotBlank(serviceType)) {
                 serviceTypeEnum = ServiceType.valueOf(serviceType.toUpperCase());
             }
 
@@ -320,6 +324,35 @@ public class ReportingApi {
 
             ApiRunTimeSummary apiRunTimeSummary = new ApiRunTimeSummary(ipcRunTime);
             response = apiRunTimeSummary;
+
+            return stdParameters.createResponse(response);
+        } catch (Exception e) {
+            // If problem getting data then return a Bad Request
+            throw WebUtils.badRequestException(e);
+        }
+    }
+
+    @Path("/report/live/dispatch")
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Operation(summary="Gets arrival / departures for date range and route",
+            description="Retrives a list of arrival departures for a specified date range "
+                    + "Optionally can be filered accorditn to routesIdOrShortNames params."
+                    + "Every trip is associated with a block.",tags= {"prediction","trip","block","route","vehicle"})
+    public Response getLiveDispatchView(@BeanParam StandardParameters stdParameters)
+            throws WebApplicationException {
+
+        // Make sure request is valid
+        stdParameters.validate();
+
+        try {
+            // Get vehicles interface
+            VehiclesInterface vehiclesInterface = stdParameters.getVehiclesInterface();
+            Collection<IpcVehicle> vehicles = vehiclesInterface.get();
+
+            Object response = null;
+            ApiDispatcher dispatcher = new ApiDispatcher(vehicles);
+            response = dispatcher;
 
             return stdParameters.createResponse(response);
         } catch (Exception e) {
