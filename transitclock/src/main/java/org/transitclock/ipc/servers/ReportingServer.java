@@ -9,7 +9,6 @@ import org.transitclock.config.DoubleConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.ServiceType;
 import org.transitclock.core.TemporalDifference;
-import org.transitclock.core.travelTimes.DataFetcher;
 import org.transitclock.core.travelTimes.TravelTimesProcessor;
 import org.transitclock.db.reporting.*;
 import org.transitclock.db.structs.*;
@@ -23,7 +22,6 @@ import org.transitclock.utils.Time;
 
 import java.time.*;
 import java.util.*;
-import java.util.Calendar;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -109,18 +107,17 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
             String routeIdOrShortName, ServiceType serviceType, boolean timePointsOnly,
             String headsign, boolean readOnly) throws Exception {
 
-        String routeId = null;
-        boolean  scheduledStopsOnly = true;
-
-        if(StringUtils.isNotBlank(routeIdOrShortName)){
-            Route dbRoute = getRoute(routeIdOrShortName);
-            if (dbRoute == null)
-                return null;
-            routeId = dbRoute.getId();
+        String routeShortName = getRouteShortName(routeIdOrShortName);
+        if(routeShortName == null){
+            return null;
         }
 
+        boolean  scheduledStopsOnly = true;
+
+
+
         List<ArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesFromDb(beginDate, endDate,
-                                                    beginTime, endTime, routeId, headsign, serviceType, timePointsOnly,
+                                                    beginTime, endTime, routeShortName, headsign, serviceType, timePointsOnly,
                                                     scheduledStopsOnly,DEFAULT_DWELL_TIME_ONLY, DEFAULT_INCLUDE_TRIP,
                                                     DEFAULT_INCLUDE_STOP, DEFAULT_INCLUDE_STOP_PATH, readOnly);
 
@@ -140,19 +137,16 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                                                 boolean timePointsOnly, String headsign,
                                                                 boolean readOnly) throws Exception {
 
-        String routeId = null;
-        if(StringUtils.isNotBlank(routeIdOrShortName)){
-            Route dbRoute = getRoute(routeIdOrShortName);
-            if (dbRoute == null)
-                return null;
-            routeId = dbRoute.getId();
+        String routeShortName = getRouteShortName(routeIdOrShortName);
+        if(routeShortName == null){
+            return null;
         }
 
         boolean dwellTimeOnly = true;
         boolean includeStop = true;
 
         List<ArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesFromDb(beginDate,
-                endDate, beginTime, endTime, routeId, headsign, serviceType, timePointsOnly, DEFAULT_SCHEDULED_TIMES_ONLY,
+                endDate, beginTime, endTime, routeShortName, headsign, serviceType, timePointsOnly, DEFAULT_SCHEDULED_TIMES_ONLY,
                 dwellTimeOnly, DEFAULT_INCLUDE_TRIP, includeStop, DEFAULT_INCLUDE_STOP_PATH, readOnly);
 
         List<IpcStopWithDwellTime> stopsWithAvgDwellTime = new ArrayList<>();
@@ -173,18 +167,15 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                                             String routeIdOrShortName, ServiceType serviceType,
                                                             String headsign, boolean readOnly) throws Exception{
 
-        String routeId = null;
-        if(StringUtils.isNotBlank(routeIdOrShortName)){
-            Route dbRoute = getRoute(routeIdOrShortName);
-            if (dbRoute == null)
-                return null;
-            routeId = dbRoute.getId();
+        String routeShortName = getRouteShortName(routeIdOrShortName);
+        if(routeShortName == null){
+            return null;
         }
 
         boolean includeStopPath = true;
 
         List<ArrivalDeparture> arrivalDeparturesList = ArrivalDeparture.getArrivalsDeparturesFromDb(beginDate,
-                endDate, beginTime, endTime, routeId, headsign, serviceType, DEFAULT_TIME_POINTS_ONLY,
+                endDate, beginTime, endTime, routeShortName, headsign, serviceType, DEFAULT_TIME_POINTS_ONLY,
                 DEFAULT_SCHEDULED_TIMES_ONLY, DEFAULT_DWELL_TIME_ONLY, DEFAULT_INCLUDE_TRIP, DEFAULT_INCLUDE_STOP,
                 includeStopPath, readOnly);
 
@@ -355,19 +346,16 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                     ServiceType serviceType, boolean timePointsOnly,
                                     String headsign, boolean readOnly) throws Exception {
 
-        String routeId = null;
-        if(StringUtils.isNotBlank(routeIdOrShortName)){
-            Route dbRoute = getRoute(routeIdOrShortName);
-            if (dbRoute == null)
-                return null;
-            routeId = dbRoute.getId();
+        String routeShortName = getRouteShortName(routeIdOrShortName);
+        if(routeShortName == null){
+            return null;
         }
 
         boolean includeTrip = true;
         boolean scheduledTimesOnly = true;
 
         List<ArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesFromDb(beginDate,
-                endDate, beginTime, endTime, routeId, headsign, serviceType, timePointsOnly, scheduledTimesOnly,
+                endDate, beginTime, endTime, routeShortName, headsign, serviceType, timePointsOnly, scheduledTimesOnly,
                 DEFAULT_DWELL_TIME_ONLY, includeTrip, DEFAULT_INCLUDE_STOP, DEFAULT_INCLUDE_STOP_PATH, readOnly);
 
         Map<TripDateKey, Long> runTimeByTripId = getRunTimeByTripId(arrivalDepartures);
@@ -459,18 +447,15 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                   boolean currentTripsOnly,boolean readOnly) throws Exception {
 
 
-        String routeId = null;
-        if(StringUtils.isNotBlank(routeIdOrShortName)){
-            Route dbRoute = getRoute(routeIdOrShortName);
-            if (dbRoute == null)
-                return null;
-            routeId = dbRoute.getId();
+        String routeShortName = getRouteShortName(routeIdOrShortName);
+        if(routeShortName == null){
+            return null;
         }
 
         boolean includeTrip = true;
 
         List<ArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesFromDb(
-                beginDate, endDate, beginTime, endTime, routeId, headsign, startStop, endStop, serviceType,
+                beginDate, endDate, beginTime, endTime, routeShortName, headsign, startStop, endStop, serviceType,
                 timePointsOnly, DEFAULT_SCHEDULED_TIMES_ONLY, DEFAULT_DWELL_TIME_ONLY, includeTrip,
                 DEFAULT_INCLUDE_STOP, DEFAULT_INCLUDE_STOP_PATH, readOnly);
 
@@ -496,18 +481,15 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                          ServiceType serviceType, boolean timePointsOnly,
                                          boolean currentTripsOnly, boolean readOnly) throws Exception {
 
-        String routeId = null;
-        if(StringUtils.isNotBlank(routeIdOrShortName)){
-            Route dbRoute = getRoute(routeIdOrShortName);
-            if (dbRoute == null)
-                return null;
-            routeId = dbRoute.getId();
+        String routeShortName = getRouteShortName(routeIdOrShortName);
+        if(routeShortName == null){
+            return null;
         }
 
         boolean includeTrip = true;
 
         List<ArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesFromDb(
-                beginDate, endDate, beginTime, endTime, routeId, headsign, startStop, endStop,
+                beginDate, endDate, beginTime, endTime, routeShortName, headsign, startStop, endStop,
                 serviceType, timePointsOnly, DEFAULT_SCHEDULED_TIMES_ONLY, DEFAULT_DWELL_TIME_ONLY,
                 includeTrip, DEFAULT_INCLUDE_STOP, DEFAULT_INCLUDE_STOP_PATH, readOnly);
 
@@ -523,7 +505,7 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                 processTripStatsMap(tripStatsByTripId, arrivalDepartureList);
             }
 
-            List<Trip> trips = Trip.getTripsFromDb(routeId, headsign, configRevs, readOnly);
+            List<Trip> trips = Trip.getTripsFromDb(routeShortName, headsign, configRevs, readOnly);
             if (trips != null) {
                 Map<String, List<Trip>> tripsByConfigRev = trips.stream().collect(Collectors.groupingBy(Trip::getId));
                 List<IpcRunTimeForTrip> runTime = getRunTimeStatsForTrips(tripStatsByTripId, tripsByConfigRev, readOnly);
@@ -807,16 +789,25 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
      * @param routeIdOrShortName
      * @return The Route, or null if no such route
      */
-    private Route getRoute(String routeIdOrShortName) {
-        DbConfig dbConfig = Core.getInstance().getDbConfig();
-        Route dbRoute =
-                dbConfig.getRouteByShortName(routeIdOrShortName);
-        if (dbRoute == null)
-            dbRoute = dbConfig.getRouteById(routeIdOrShortName);
-        if (dbRoute != null)
-            return dbRoute;
-        else return null;
+    private String getRouteShortName(String routeIdOrShortName) {
+        if(StringUtils.isNotBlank(routeIdOrShortName)){
+            DbConfig dbConfig = Core.getInstance().getDbConfig();
+            Route dbRoute =
+                    dbConfig.getRouteByShortName(routeIdOrShortName);
+            if (dbRoute == null)
+                dbRoute = dbConfig.getRouteById(routeIdOrShortName);
+            if (dbRoute != null){
+                String route = dbRoute.getShortName();
+                if(StringUtils.isNotBlank(route)){
+                    return route;
+                }
+            }
+        } else {
+            return "";
+        }
+        return null;
     }
+
 
     /**
      * Map Key Classes

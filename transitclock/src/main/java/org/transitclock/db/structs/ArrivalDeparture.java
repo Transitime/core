@@ -961,12 +961,12 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 
 	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(LocalDate beginDate, LocalDate endDate,
 																	 LocalTime beginTime, LocalTime endTime,
-																	 String routeId, String headsign,
+																	 String routeShortName, String headsign,
 																	 ServiceType serviceType, boolean timePointsOnly,
 																	 boolean scheduledTimesOnly, boolean dwellTimeOnly,
 																	 boolean includeTrip, boolean includeStop,
 																	 boolean includeStopPath, boolean readOnly) throws Exception {
-		return getArrivalsDeparturesFromDb(beginDate, endDate, beginTime, endTime, routeId, headsign,
+		return getArrivalsDeparturesFromDb(beginDate, endDate, beginTime, endTime, routeShortName, headsign,
 				null, null, serviceType, timePointsOnly, scheduledTimesOnly, dwellTimeOnly,
 				includeTrip, includeStop, includeStopPath, readOnly);
 	}
@@ -978,7 +978,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 *
 	 * @param beginTime
 	 * @param endTime
-	 * @param routeId
+	 * @param routeShortName
 	 * @param serviceType
 	 * @param timePointsOnly
 	 * @param readOnly
@@ -986,7 +986,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 */
 	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(LocalDate beginDate, LocalDate endDate,
 																	 LocalTime beginTime, LocalTime endTime,
-																	 String routeId, String headsign,
+																	 String routeShortName, String headsign,
 																	 String startStop, String endStop,
 																	 ServiceType serviceType, boolean timePointsOnly,
 																	 boolean scheduledTimesOnly, boolean dwellTimeOnly,
@@ -1011,7 +1011,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 					getStopPathsJoin(includeStopPath) +
 					"WHERE " +
 					getArrivalDepartureTimeWhere(beginDate, endDate, beginTime, endTime) +
-					getRouteIdWhere(routeId) +
+					getRouteWhere(routeShortName) +
 					getTripPatternWhere(startStop, endStop) +
 					getScheduledTimesWhere(scheduledTimesOnly) +
 					getTimePointsWhere(timePointsOnly) +
@@ -1118,9 +1118,9 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		return hql;
 	}
 
-	private static String getRouteIdWhere(String routeId){
-		if(routeId !=null) {
-			return String.format("AND ad.routeId = '%s' ", routeId);
+	private static String getRouteWhere(String routeShortName){
+		if(routeShortName !=null) {
+			return String.format("AND ad.routeShortName = '%s' ", routeShortName);
 		}
 		return "";
 	}
