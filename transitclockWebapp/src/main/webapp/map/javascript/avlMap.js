@@ -335,7 +335,7 @@ function drawAvlData() {
 	    	for (i in animations) {
 	    		animations[i].removeIcon();
 			}
-	    	animations = [];
+	    	animations = {};
 	    	if (!allVehiclesRequested() && vehicles.length)
 	    		prepareAnimations(vehicles); // only animate first vehicle returned.
 
@@ -368,7 +368,7 @@ var busIcon =  L.icon({
 });
 
 var animation = avlAnimation(animationGroup, busIcon, $("#playbackTime")[0]);
-var animations = [];
+var animations = {};
 
 var playButton = contextPath + "/reports/images/playback/media-playback-start.svg",
 	pauseButton = contextPath + "/reports/images/playback/media-playback-pause.svg";
@@ -387,17 +387,17 @@ function prepareAnimations(avlsData) {
 	for (i in avlsData) {
 		if (i == 0) {
 			animation(avlsData[i].data);
-			animations.push(animation);
+			animations[avlsData[i].id] = animation;
 		}
 		else {
 			newAnimation = avlAnimation(animationGroup, busIcon, $("#playbackTime")[0]);
 			newAnimation(avlsData[i].data)
-			animations.push(newAnimation);
+			animations[avlsData[i].id] = newAnimation;
 		}
 	}
 }
 
-function playAnimation() {
+function playAnimations() {
 
 	if (!animation.paused()) {
 		for (i in animations) {
@@ -412,7 +412,16 @@ function playAnimation() {
 		}
 		$("#playbackPlay").attr("src", pauseButton);
 	}
+}
 
+function playAnimation(vehicleId) {
+	for (i in animations) {
+		if (i != vehicleId) {
+			animations[i].removeIcon();
+		}
+	}
+
+	playAnimations();
 }
 
 $("#playbackNext").on("click", function() {
@@ -427,8 +436,11 @@ $("#playbackPrev").on("click", function() {
 	}
 });
 
-$("#playbackPlay, #popupPlayback").on("click", function() {
-	playAnimation();
+$("#playbackPlay").on("click", function() {
+	for (i in animations) {
+		animations[i].addIcon();
+	}
+	playAnimations();
 });
 
 $("#playbackFF").on("click", function() {

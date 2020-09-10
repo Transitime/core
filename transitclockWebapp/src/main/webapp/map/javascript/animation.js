@@ -38,7 +38,7 @@ function avlAnimation(map, icon, clock) {
 
 		var vehicleIdLabel = $("<td />").attr("class", "popupTableLabel").text("Vehicle ID: ");
 		var vehicleIdValue = $("<td />").text(data[0].vehicleId);
-		var playbackLink = $("<td><a href='#' onclick='playAnimation()'>Playback</a></td>");
+		var playbackLink = $("<td><a href='#' onclick='playAnimation(" + data[0].vehicleId + ")'>Playback</a></td>");
 		popupTable.append( $("<tr />").append(vehicleIdLabel, vehicleIdValue) );
 		popupTable.append( $("<tr />").append(playbackLink));
 		popupContent.append(popupTable);
@@ -154,6 +154,10 @@ function avlAnimation(map, icon, clock) {
         if (sprite)
             map.removeLayer(sprite);
     }
+
+    animation.addIcon = function() {
+		map.addLayer(sprite);
+	}
 		
 	function updateToIndex(i) {
 		if (i > positions.length - 1)
