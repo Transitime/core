@@ -5,7 +5,7 @@
     <head>
         <%@include file="/template/includes.jsp" %>
         <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-        <title>Service Delivery</title>
+        <title>On Time Performance</title>
 
         <!-- Load in Select2 files so can create fancy route selector -->
         <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
@@ -41,7 +41,7 @@
         <%@include file="/template/header.jsp" %>
         <div id="paramsSidebar">
             <div id="title" style="text-align: left; font-size:x-large">
-                Service Delivery Report
+                On Time Performance Report
             </div>
 
             <div id="paramsFields">
@@ -158,8 +158,8 @@
                 <hr>
 
                 <div class="param">
+                    <label for="serviceDayType" style="margin-top: 0px;">Service Day Type:</label>
                     <select id="serviceDayType" name="serviceDayType">
-                        <option value="">Service Day Type</option>
                         <option value="">All</option>
                         <option value="weekday">Weekday</option>
                         <option value="saturday">Saturday</option>
@@ -180,6 +180,7 @@
         <h2 style="text-align: center; margin-top: 20px;">On Time Performance By Route</h2>
         <div id="reportResults" style="width: 79%; display: inline-block;">
             <canvas id="chartCanvas" style="margin-top: 10px;"></canvas>
+            <div id="chartTotal" style="text-align: center;"></div>
         </div>
     </body>
 </html>
@@ -203,10 +204,13 @@
             },
             plugins: {
                 labels: {
-                    render: 'value',
+                    render: function(args) {
+                        return args.value + "\n(" + args.percentage + "%)";
+                    },
                     fontSize: 24,
                     fontColor: '#000000',
-                    position: 'border'
+                    position: 'border',
+                    precision: 1
                 }
             }
         }
@@ -256,7 +260,9 @@
 
     function drawChart(response) {
         $("#submit").removeAttr("disabled");
-        pieChart.data.datasets[0].data = response.data.datasets[0].data;
+        var values = response.data.datasets[0].data
+        pieChart.data.datasets[0].data = values;
         pieChart.update();
+        $("#chartTotal").html("Total count: " + values.reduce(function(total, num) {return total + num}));
     }
 </script>
