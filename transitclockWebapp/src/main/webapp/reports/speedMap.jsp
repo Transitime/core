@@ -341,12 +341,12 @@
     };
 
     var stopOptions = {
-        color: '#006600',
-        opacity: 0.4,
+        color: '#000000',
+        opacity: 1,
         radius: 4,
         weight: 2,
-        fillColor: '#006600',
-        fillOpacity: 0.3,
+        fillColor: '#ffffff',
+        fillOpacity: 1,
     };
 
     var routePolylineOptions = {clickable: false, color: "#00f", opacity: 0.5, weight: 4};
