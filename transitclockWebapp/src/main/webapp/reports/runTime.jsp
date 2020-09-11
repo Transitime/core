@@ -25,7 +25,7 @@
             }
 
             #paramsSidebar {
-                width: 29%;
+                width: 25%;
                 height: 100vh;
                 margin-left: 10px;
                 float:left;
@@ -174,18 +174,17 @@
                     <p style='font-size: 0.8em;'></p>
                 </div>
 
-                <div id="avgRunTime" style="margin-left: 20px; width: 35%; vertical-align: middle;">
-                    <p style="font-size: 0.9em;display: inline-block;"></p>
-                    <p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>
-                </div>
+                <br>
 
-                <div id="runTimeBreakdown" style="margin-left: 20px; width: 70%; vertical-align: middle;">
-                    <p style="font-size: 0.9em;display: inline-block;"></p>
-                    <p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>
-                    <p style="font-size: 0.9em;display: inline-block;"></p>
-                    <p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>
-                    <p style="font-size: 0.9em;display: inline-block;"></p>
-                    <p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>
+                <div id="avgRunTime" style="display: inline-block; margin-left: 20px; width: 90%; vertical-align: middle;">
+                    <p style="font-size: 0.8em;display: inline-block;"></p>
+                    <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
+                    <p style="font-size: 0.8em;display: inline-block;"></p>
+                    <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
+                    <p style="font-size: 0.8em;display: inline-block;"></p>
+                    <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
+                    <p style="font-size: 0.8em;display: inline-block;"></p>
+                    <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
                 </div>
 
                 <input type="button" id="visualizeButton" class="visualizeButton" value="Visualize trips" style="margin-top: 10px; margin-bottom: 10px;" hidden="true">
@@ -669,18 +668,15 @@
                 '<p style="font-size: 0.8em;"></p>' +
             '</div>' +
 
-            '<div id="comparisonAvgRunTime" style="margin-left: 20px; width: 35%; vertical-align: middle;">' +
-                '<p style="font-size: 0.9em;display: inline-block;"></p>' +
-                '<p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>' +
-            '</div>' +
-
-            '<div id="comparisonRunTimeBreakdown" style="margin-left: 20px; width: 70%; vertical-align: middle;">' +
-                '<p style="font-size: 0.9em;display: inline-block;"></p>' +
-                '<p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>' +
-                '<p style="font-size: 0.9em;display: inline-block;"></p>' +
-                '<p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>' +
-                '<p style="font-size: 0.9em;display: inline-block;"></p>' +
-                '<p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>' +
+            '<div id="comparisonAvgRunTime" style="display: inline-block; margin-left: 20px; width: 90%; vertical-align: middle;">' +
+                '<p style="font-size: 0.8em;display: inline-block;"></p>' +
+                '<p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>' +
+                '<p style="font-size: 0.8em;display: inline-block;"></p>' +
+                '<p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>' +
+                '<p style="font-size: 0.8em;display: inline-block;"></p>' +
+                '<p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>' +
+                '<p style="font-size: 0.8em;display: inline-block;"></p>' +
+                '<p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>' +
             '</div>'
         );
 
@@ -729,17 +725,14 @@
 
 
                     $("#avgRunTime").html(
-                        "<p style='font-size: 0.9em;display: inline-block; vertical-align: middle;'>Average run time</p>" +
-                        "<p style='font-size: 0.9em;display: inline-block; margin-left: 50px; width: 80px; height: 1.5em; background-color: gray; vertical-align: middle;'>" + avgRunTime + "</p>"
-                    );
-
-                    $("#runTimeBreakdown").html(
-                        "<p style='font-size: 0.9em;display: inline-block;'>Fixed</p>" +
-                        "<p style='font-size: 0.9em;display: inline-block; margin-left: 50px; width: 80px; height: 1.5em; background-color: gray; vertical-align: middle;'>" + avgFixed + "</p>" +
-                        "<p style='font-size: 0.9em;display: inline-block; margin-left: 40px; vertical-align: middle;'>Variable</p>" +
-                        "<p style='font-size: 0.9em;display: inline-block; margin-left: 40px; width: 80px; height: 1.5em; background-color: gray; vertical-align: middle;'>" + avgVar + "</p>" +
-                        "<p style='font-size: 0.9em;display: inline-block; margin-left: 40px; vertical-align: middle;'>Dwell</p>" +
-                        "<p style='font-size: 0.9em;display: inline-block; margin-left: 40px; width: 80px; height: 1.5em; background-color: gray; vertical-align: middle;'>" + avgDwell + "</p>"
+                        "<p style='font-size: 0.8em;display: inline-block; vertical-align: middle;'>Average run time</p>" +
+                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 50px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle;'>" + avgRunTime + "</p>" +
+                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 50px;'>Fixed</p>" +
+                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 50px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle;'>" + avgFixed + "</p>" +
+                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; vertical-align: middle;'>Variable</p>" +
+                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle;'>" + avgVar + "</p>" +
+                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; vertical-align: middle;'>Dwell</p>" +
+                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle;'>" + avgDwell + "</p>"
                     );
 
                     $("#mainResults").show();
@@ -796,7 +789,7 @@
                         serviceDayString = "All days";
                     }
 
-                    $("#comparisonParams").html("<p style='font-size: 0.8em;'>" + (request.r == "" ? "All routes" : "Route " + request.r)  + " to " + (request.headsign == "" ? "All directions" : request.headsign) + " | " + (request.startStop == "" && request.endStop == "" ? "All stops" : request.startStop + " to " + request.endStop) + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "<a id='compareLink' style='font-size: 0.8em; margin-bottom: 1em; margin-left: 4em; color: blue; text-decoration: underline; cursor: pointer' onclick='openModal()'>Compare</a></p>");
+                    $("#comparisonParams").html("<p style='font-size: 0.8em;'>" + (request.r == "" ? "All routes" : "Route " + request.r)  + " to " + (request.headsign == "" ? "All directions" : request.headsign) + " | " + (request.startStop == "" && request.endStop == "" ? "All stops" : request.startStop + " to " + request.endStop) + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "<a id='clearLink' style='font-size: 0.8em; margin-bottom: 1em; margin-left: 4em; color: blue; text-decoration: underline; cursor: pointer' onclick='clearComparison()'>Clear</a></p>");
 
                     var avgRunTime = typeof (response.avgRunTime) == 'undefined' ? "N/A" : (response.avgRunTime / 60000).toFixed(1);
                     var avgFixed = typeof (response.fixed) == 'undefined' ? "N/A" : (response.fixed / 60000).toFixed(1);
@@ -804,17 +797,14 @@
                     var avgDwell = typeof (response.dwell) == 'undefined' ? "N/A" : (response.dwell / 60000).toFixed(1);
 
                     $("#comparisonAvgRunTime").html(
-                        "<p style='font-size: 0.9em;display: inline-block; vertical-align: middle;'>Average run time</p>" +
-                        "<p style='font-size: 0.9em;display: inline-block; margin-left: 50px; width: 80px; height: 1.5em; background-color: gray; vertical-align: middle;'>" + avgRunTime + "</p>"
-                    );
-
-                    $("#comparisonRunTimeBreakdown").html(
-                        "<p style='font-size: 0.9em;display: inline-block;'>Fixed</p>" +
-                        "<p style='font-size: 0.9em;display: inline-block; margin-left: 50px; width: 80px; height: 1.5em; background-color: gray; vertical-align: middle;'>" + avgFixed + "</p>" +
-                        "<p style='font-size: 0.9em;display: inline-block; margin-left: 40px; vertical-align: middle;'>Variable</p>" +
-                        "<p style='font-size: 0.9em;display: inline-block; margin-left: 40px; width: 80px; height: 1.5em; background-color: gray; vertical-align: middle;'>" + avgVar + "</p>" +
-                        "<p style='font-size: 0.9em;display: inline-block; margin-left: 40px; vertical-align: middle;'>Dwell</p>" +
-                        "<p style='font-size: 0.9em;display: inline-block; margin-left: 40px; width: 80px; height: 1.5em; background-color: gray; vertical-align: middle;'>" + avgDwell + "</p>"
+                        "<p style='font-size: 0.8em;display: inline-block; vertical-align: middle;'>Average run time</p>" +
+                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 50px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle;'>" + avgRunTime + "</p>" +
+                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 50px;'>Fixed</p>" +
+                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 50px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle;'>" + avgFixed + "</p>" +
+                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; vertical-align: middle;'>Variable</p>" +
+                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle;'>" + avgVar + "</p>" +
+                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; vertical-align: middle;'>Dwell</p>" +
+                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle;'>" + avgDwell + "</p>"
                     );
 
                     $("#comparisonResults").show();
@@ -829,6 +819,10 @@
 
     function openModal() {
         $("#comparisonModal").show();
+    }
+
+    function clearComparison() {
+        $("#comparisonResults").hide();
     }
 
     $("#closeModal").click(function() {
