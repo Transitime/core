@@ -78,7 +78,7 @@ public class AvlJsonQuery {
 				+ onTimePerformanceSql
 				+ "FROM AvlReports a "
 				+ "JOIN "
-				+ "(SELECT vehicleId, tripId, routeShortName, avlTime, schedAdh, schedAdhMsec FROM VehicleStates "
+				+ "(SELECT vehicleId, tripId, routeShortName, avlTime, schedAdh, CAST(schedAdhMsec AS CHAR) + 0.0 as schedAdhMsec FROM VehicleStates "
 				+ "WHERE avlTime BETWEEN '" + beginDate + "' "
 				+ "AND TIMESTAMPADD(DAY,1,'" + beginDate + "') "
 				+ ") v "
