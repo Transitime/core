@@ -569,6 +569,7 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
         long departureTime = arrDep1.getTime();
 
         if (TravelTimesProcessor.shouldResetEarlyTerminalDepartures()
+                && arrDep1.isDeparture()
                 && arrDep1.getStopPathIndex() == 0
                 && arrDep1.getTime() < arrDep1.getScheduledTime()) {
             logger.debug("Note: for {} using scheduled departure time instead "
