@@ -8,7 +8,7 @@
  * extra elements that select2 adds 
  */
 #select2-drop, #routesDiv {
-  font-family: sans-serif; font-size: large;
+    font-size: large;
 }
 </style>
 

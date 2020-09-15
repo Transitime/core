@@ -46,6 +46,8 @@ $.getJSON(apiUrlPrefix + "/command/routes",
 	 		var configuredTitle = $( "#route" ).attr("title");
 	 		$( "#select2-route-container" ).tooltip({ content: configuredTitle,
 	 				position: { my: "left+10 center", at: "right center" } });
+
+	 		removeSpinner();
  	});
  	
 </script>
