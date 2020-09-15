@@ -826,6 +826,10 @@
         $("#comparisonResults").hide();
     }
 
+    function removeSpinner() {
+        $(".spinner").hide();
+    }
+
     $("#closeModal").click(function() {
         $("#comparisonModal").hide();
     })

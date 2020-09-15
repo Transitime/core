@@ -461,9 +461,7 @@
             $(".wrapper").removeClass("split");
         }
 
-        function removeSpinner() {
-            $(".spinner").hide();
-        }
+
 
         $(document).on('click', ".closeIcon", function(){closeSplit();});
 
