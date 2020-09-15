@@ -639,6 +639,7 @@
 
                     barGraph.update();
 
+                    $("#comparisonResults").hide();
                     $("#runTimeVisualization").show();
                     $("#visualizeButton").attr("disabled", false);
                     $("#submit").attr("disabled",  false);
