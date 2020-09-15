@@ -1194,7 +1194,7 @@ public class Trip implements Lifecycle, Serializable {
     return count;
   }
 
-	public static List<Trip> getTripsFromDb(String routeId, String headsign, Set<Integer> configRevs, boolean readOnly) {
+	public static List<Trip> getTripsFromDb(String routeShortName, String headsign, Set<Integer> configRevs, boolean readOnly) {
 		IntervalTimer timer = new IntervalTimer();
 
 		// Get the database session. This is supposed to be pretty light weight
@@ -1207,13 +1207,13 @@ public class Trip implements Lifecycle, Serializable {
 				"t " +
 				"FROM " +
 				"Trip t " +
-				"WHERE t.routeId = :routeId " +
+				"WHERE t.routeShortName = :routeShortName " +
 				"AND t.headsign = :headsign " +
 				"AND t.configRev IN (:configRevs) " +
 				"ORDER BY t.startTime";
 		try {
 			Query query = session.createQuery(hql);
-			query.setString("routeId", routeId);
+			query.setString("routeShortName", routeShortName);
 			query.setString("headsign", headsign);
 			query.setParameterList("configRevs", configRevs);
 
