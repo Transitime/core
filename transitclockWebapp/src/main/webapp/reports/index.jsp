@@ -128,6 +128,19 @@ finding specific issues with predictions.">
         Run Times</a></li>
 </ul>
 
+<div id="subtitle">Real Time Reports</div>
+<ul class="choicesList">
+    <li><a href="realTimeLiveMap.jsp?a=<%= agencyId %>"
+           title="Displays real time vehicle and stop information on a map.">
+        Real Time Live Map</a></li>
+    <li><a href="realTimeScheduleAdherence.jsp?a=<%= agencyId %>"
+           title="Displays real time schedule adherence information on a map.">
+        Real Time Schedule Adherence</a></li>
+    <li><a href="realTimeDispatcher.jsp?a=<%= agencyId %>"
+           title="Displays real time vehicle information in a table.">
+        Real Time Dispatcher View</a></li>
+</ul>
+
 </div>
 </body>
 </html>
