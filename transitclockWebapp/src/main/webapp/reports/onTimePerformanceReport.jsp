@@ -14,18 +14,26 @@
 
         <link href="params/reportParams.css" rel="stylesheet"/>
         <style>
+            header {
+                position: relative;
+                z-index: 3;
+            }
             .wrapper {
                 background: #f1f1f1f1;
                 font-family: 'Montserrat', sans-serif;
                 height: 100vh;
+                width: 100vw;
+                position: fixed;
             }
 
             .spinner {
                 display: inline-block;
+                width: 80px;
             }
 
             input {
                 -webkit-appearance: none;
+                width: -webkit-fill-available;
                 border: 1px solid #c1c1c1c1;
                 background-color: #fff;
                 line-height: 1.5;
@@ -33,6 +41,7 @@
                 color: #444;
                 padding: 0px 6px;
                 font-family: 'Montserrat', sans-serif;
+                font-size: 16px;
             }
 
             input::placeholder {
@@ -47,7 +56,7 @@
 
             label {
                 text-align: left;
-                width: auto;
+                /*width: auto;*/
                 font-family: 'Montserrat', sans-serif;
                 cursor: pointer;
             }
@@ -62,7 +71,7 @@
                 margin-bottom: 2px;
                 font-weight: normal;
                 text-align: center;
-                background: #4c6eaf;
+                background: #019932;
                 color: white;
                 padding: 8px;
                 font-size: 21px;
@@ -97,6 +106,7 @@
                 -webkit-appearance: none;
                 vertical-align: top;
                 box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.33);
+                border: 1px solid #c1c1c1c1;
             }
 
             .datepick-nav, .datepick-ctrl {
@@ -109,43 +119,73 @@
                 display: inline-block;
                 position: relative;
                 z-index: 2;
-                transition: width .75s ease-in-out;
+                transition: width .75s ease-in-out, max-width .75s ease-in-out;
+                font-size: 16px;
+                background-color: #fff;
+                border: #969696 solid 1px;
+                box-shadow: 3px 3px 4px rgba(0,0,0,0.3);
             }
             .split .paramsWrapper {
-                width: 33%;
+                width: 28%;
                 z-index: 2;
-                margin-left: 5vw;
+
             }
 
-            .split .paramsSidebar {
-                margin-top: 12px;
-                margin-left: 18px;
+            .split #route {
+                max-width: 200px;
             }
 
             #paramsSidebar {
-                max-width: 375px;
-                height: 75vh;
-                margin: 12px auto;
+                height: 100vh;
+                max-width: 420px;
+                width: 100%;
+                margin: auto;
                 display: flex;
                 align-items: center;
                 flex-flow: column;
                 background-color: #fff;
-                border-radius: 8px;
-                box-shadow: 3px 3px 4px rgba(0,0,0,0.3);
                 z-index: 2;
-                border: #969696 solid 1px;
+            }
+            .split #paramsSidebar {
             }
             #paramsSidebar > * {
                 display: flex;
             }
             #paramsFields {
                 flex-flow: column;
+                width: 80%;
+                max-width: 30vw;
             }
+
+            .param {
+                display: flex;
+                flex-flow: row;
+                justify-content: space-between;
+                margin-top: 6%;
+            }
+            .param > * {
+                font-size: 16px;
+            }
+            .param > span {
+                font-weight: 500;
+                padding-bottom: 12px;
+            }
+            /*.split .param > span {*/
+                /*width: 75% !important;*/
+            /*}*/
 
             .pair {
                 display: flex;
                 flex-flow: row;
                 justify-content: space-between;
+                margin-bottom: 6px;
+            }
+
+            .vertical {
+                flex-flow: column;
+                margin-top: 8%;
+                /* background-color: #f1f1f1f1; */
+                padding: 10px 0px;
             }
 
             #endTimeLabel {
@@ -167,18 +207,26 @@
             }
 
             #radioButtons label {
+                width: 50%;
+                margin: auto;
                 background-color: #f1f1f1f1;
                 font-size: 16px;
-                padding: 8px 20px;
-                margin-right: -1px;
+                padding: 8px;
                 border: 1px solid rgba(0, 0, 0, 0.2);
                 box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px rgba(255, 255, 255, 0.1);
                 transition: all 0.25s ease-in-out;
+                white-space: nowrap;
+                overflow: hidden;
+                text-align: center;
             }
 
             #radioButtons input:checked + label {
                 background-color: #4ddb4c9c;
                 box-shadow: none;
+            }
+
+            #timePointsOnlyLabel {
+                margin-left: -1px !important;
             }
 
             #serviceDayType {
@@ -194,14 +242,14 @@
             #reportResults {
                 visibility: hidden;
                 opacity: 0;
-                margin-left: -8vw;
+                margin-left: 2vw;
                 margin-top: 20vh;
-                height: 72vh;
-                width: 66%;
-                max-width: 900px;
+                height: 80vh;
+                width: 68%;
+                max-width: 1250px;
                 background-color: #fff;
-                border-radius: 8px;
-                box-shadow: 1px 2px 4px rgba(0,0,0,0.3);
+                border-radius: 4px;
+                box-shadow: 0px 4px 8px rgba(0,0,0,0.3);
                 transition: visibility .25s .75s ease-in-out, opacity .25s .75s ease-in-out;
             }
 
@@ -222,6 +270,7 @@
                 color: #fff;
             }
             .closeIcon {
+                display: none;
                 padding: 6px 12px;
                 margin-right: 12px;
                 float: right;
@@ -231,6 +280,7 @@
                 box-shadow: 0px 0px 6px #696969;
             }
             #submit {
+                margin: 10px;
                 background-color: #029932;
                 cursor: pointer;
                 width: 210px;
@@ -278,7 +328,7 @@
                     <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
 
 
-                    <jsp:include page="params/routeAllOrSingle.jsp" /><span class="spinner">loading...</span>
+                    <jsp:include page="params/routeAllOrSingle.jsp" />
     <%--                <jsp:include page="params/fromDateNumDaysTime.jsp" />--%>
 
                     <%-- For specifying a begin date, number of days, begin time, and end time --%>
@@ -365,46 +415,55 @@
                        <%----%>
                     <%--</div>--%>
 
-                    <div class="param">
+                    <div class="param vertical">
     <%--                    <i id="reportSettings" class="fa fa-caret-right"></i>Report Settings--%>
     <%--                    <button id="reportSettings" onclick="$('#radioButtons').toggle();"></button>--%>
-                        Report Settings
+                        <span>Report Settings</span>
 
                         <div id="radioButtons">
-                            <input type="radio" name="stopType" id="timePointsOnly"><label for="timePointsOnly">Timepoints Only</label>
                             <input type="radio" name="stopType" checked="checked" id="allStops"><label for="allStops">All stops</label>
+                            <input type="radio" name="stopType" id="timePointsOnly"><label for="timePointsOnly" id="timePointsOnlyLabel">Timepoints Only</label>
+
                         </div>
                     </div>
 
-                    <hr>
-                    OTP Definition
-                    <br>
+                    <div class="param vertical">
+                        <span>OTP Definition</span>
 
-                    <div class="param" style="display: inline-block">
-                        <label for="early">Min Early:</label>
-                        <input type="number" id="early" name="early" min="0" max="1440" step="0.5" value="1.5">
+                        <div class="pair">
+                            <label for="early">Min Early:</label>
+                            <input type="number" id="early" name="early" min="0" max="1440" step="0.5" value="1.5">
+                        </div>
+                        <div class="pair">
+                            <label for="late">Min Late:</label>
+                            <input type="number" id="late" name="late" min="0" max="1440" step="0.5" value="2.5">
+                        </div>
+
+
                     </div>
-                    <div class="param" style="display: inline-block">
-                        <label for="late">Min Late:</label>
-                        <input type="number" id="late" name="late" min="0" max="1440" step="0.5" value="2.5">
-                    </div>
+                    <%--<div class="param" style="display: inline-block">--%>
+
+                    <%--</div>--%>
 
                     <%--<hr>--%>
 
-                    <div class="param">
+                    <div class="param vertical">
                         <label for="serviceDayType">Service Day Type</label>
                         <select id="serviceDayType" name="serviceDayType">
                             <option value="">All</option>
                             <option value="weekday">Weekday</option>
                             <option value="saturday">Saturday</option>
                             <option value="sunday">Sunday</option>
+                            <span class="select2-selection__arrow">
+                                <b role="presentation"></b>
+                            </span>
                         </select>
                     </div>
 
                     <hr>
                 </div>
 
-                <input type="button" id="submit" value="Submit" style="margin-top: 36px; margin-bottom: 10px;">
+                <input type="button" id="submit" value="Submit">
 
             </div>
 
@@ -423,7 +482,7 @@
 </html>
 
     <script>
-        $("#route").attr("style", "width: 200px");
+        // $("#route").attr("style", "width: 200px");
 
     var canvas = $("#chartCanvas");
     var pieChart = new Chart(canvas, {
@@ -461,12 +520,18 @@
             $(".wrapper").removeClass("split");
         }
 
+        function removeSpinner() {
+            $(".spinner").hide();
+        }
+
 
 
         $(document).on('click', ".closeIcon", function(){closeSplit();});
 
         $("#submit").click(function() {
             $("#submit").attr("disabled","disabled");
+            $("#submit").attr("value","loading...");
+
 
             if ($("#beginDate").val() == "Date range") {
                 var today = new Date();
@@ -508,11 +573,13 @@
         })
 
     function drawChart(response) {
-        $("#submit").removeAttr("disabled");
+        $("#submit").removeAttr("disabled").attr("value", "Submit");
         var values = response.data.datasets[0].data
         pieChart.data.datasets[0].data = values;
         pieChart.update();
         $("#chartTotal").html("Total count: " + values.reduce(function(total, num) {return total + num}));
+
         showSplit();
+
     }
 </script>
