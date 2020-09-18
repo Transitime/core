@@ -36,6 +36,7 @@ import org.transitclock.ipc.clients.ConfigInterfaceFactory;
 import org.transitclock.ipc.clients.HoldingTimeInterfaceFactory;
 import org.transitclock.ipc.clients.PredictionAnalysisInterfaceFactory;
 import org.transitclock.ipc.clients.PredictionsInterfaceFactory;
+import org.transitclock.ipc.clients.RevisionInterfaceFactory;
 import org.transitclock.ipc.clients.ServerStatusInterfaceFactory;
 import org.transitclock.ipc.clients.VehiclesInterfaceFactory;
 import org.transitclock.ipc.interfaces.CacheQueryInterface;
@@ -44,6 +45,7 @@ import org.transitclock.ipc.interfaces.ConfigInterface;
 import org.transitclock.ipc.interfaces.HoldingTimeInterface;
 import org.transitclock.ipc.interfaces.PredictionAnalysisInterface;
 import org.transitclock.ipc.interfaces.PredictionsInterface;
+import org.transitclock.ipc.interfaces.RevisionInformationInterface;
 import org.transitclock.ipc.interfaces.ServerStatusInterface;
 import org.transitclock.ipc.interfaces.VehiclesInterface;
 
@@ -263,6 +265,21 @@ public class StandardParameters {
 
 		return serverStatusInterface;
 	}
+
+	/**
+	 * Query for metadata about dataset.
+	 * @return
+	 * @throws WebApplicationException
+	 */
+	public RevisionInformationInterface getRevisionInformationInterface() throws WebApplicationException {
+		RevisionInformationInterface revisionInformationInterface =
+				RevisionInterfaceFactory.get(agencyId);
+		if (revisionInformationInterface == null)
+			throw WebUtils.badRequestException("Agency ID " + agencyId + " is not valid");
+		return revisionInformationInterface;
+	}
+
+
 	/**
 	 * Gets the CacheQueryInterface for the specified agencyId. If not valid
 	 * then throws WebApplicationException.

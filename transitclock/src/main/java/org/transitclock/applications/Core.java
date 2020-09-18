@@ -400,6 +400,7 @@ public class Core {
 		VehiclesServer.start(agencyId, VehicleDataCache.getInstance());
 		ConfigServer.start(agencyId);
 		ServerStatusServer.start(agencyId);
+		RevisionInformationServer.start(agencyId);
 		CommandsServer.start(agencyId);
 		CacheQueryServer.start(agencyId);
 		PredictionAnalysisServer.start(agencyId);

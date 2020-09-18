@@ -18,6 +18,7 @@
 package org.transitclock.db.structs;
 
 import org.hibernate.HibernateException;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.annotations.DynamicUpdate;
@@ -27,6 +28,7 @@ import org.transitclock.db.hibernate.HibernateUtils;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 /**
  * For keeping track of information having to do with a configuration revision.
@@ -135,6 +137,12 @@ public class ConfigRevision {
 	
 	public String getNotes() {
 		return notes;
+	}
+
+	public static List<ConfigRevision> getConfigRevisions(Session session, int configRev) throws HibernateException {
+		String hql = "From ConfigRevision c ORDER by configRev";
+		Query query = session.createQuery(hql);
+		return query.list();
 	}
 
 }

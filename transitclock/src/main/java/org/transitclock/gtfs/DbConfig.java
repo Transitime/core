@@ -58,6 +58,12 @@ public class DbConfig {
 	// Following is for all the data read from the database
 	private List<Block> blocks;
 
+	/**
+	 * cache of known "configRev" ids.  ActiveRevision will be the
+	 * currently loaded one.
+	 */
+	private List<ConfigRevision> configRevisions;
+
 	// So can access blocks by service ID and block ID easily.
 	// Keyed on serviceId. Submap keyed on blockId
 	private Map<String, Map<String, Block>> blocksByServiceMap = null;
@@ -755,6 +761,7 @@ public class DbConfig {
 
 		timer = new IntervalTimer();
 		blocks = Block.getBlocks(globalSession, configRev);
+		configRevisions = ConfigRevision.getConfigRevisions(globalSession, configRev);
 		blocksByServiceMap = putBlocksIntoMap(blocks);
 		blocksByRouteMap = putBlocksIntoMapByRoute(blocks);
 		logger.debug("Reading blocks took {} msec", timer.elapsedMsec());
@@ -904,6 +911,14 @@ public class DbConfig {
 	 */
 	public List<Block> getBlocks() {
 		return Collections.unmodifiableList(blocks);
+	}
+
+	/**
+	 * Expose metadata about data loaded.
+	 * @return
+	 */
+	public List<ConfigRevision> getConfigRevisions() {
+		return Collections.unmodifiableList(configRevisions);
 	}
 
 	/**
