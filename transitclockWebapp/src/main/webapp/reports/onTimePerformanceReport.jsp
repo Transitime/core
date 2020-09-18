@@ -81,6 +81,12 @@
                 visibility: hidden;
             }
 
+            .vert-offset {
+                font-weight: 500;
+                margin-top: 20px;
+                margin-bottom: -10px;
+            }
+
             .select2-selection.select2-selection--single {
                 background-color: #fff;
                 box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.33);
@@ -126,7 +132,7 @@
                 box-shadow: 3px 3px 4px rgba(0,0,0,0.3);
             }
             .split .paramsWrapper {
-                width: 28%;
+                width: 25%;
                 z-index: 2;
 
             }
@@ -153,8 +159,9 @@
             }
             #paramsFields {
                 flex-flow: column;
-                width: 80%;
+                width: 90%;
                 max-width: 30vw;
+                margin-top: 10px;
             }
 
             .param {
@@ -170,6 +177,10 @@
                 font-weight: 500;
                 padding-bottom: 12px;
             }
+
+            .param > .select2 {
+                max-width: 75%;
+            }
             /*.split .param > span {*/
                 /*width: 75% !important;*/
             /*}*/
@@ -179,6 +190,10 @@
                 flex-flow: row;
                 justify-content: space-between;
                 margin-bottom: 6px;
+            }
+
+            .pair input {
+                max-width: 100px;
             }
 
             .vertical {
@@ -264,10 +279,13 @@
 
             #reportResults h2 {
                 text-align: center;
-                margin-top: 20px;
+                margin-top: 0px;
                 padding: 10px;
                 background-color: #019932;
                 color: #fff;
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+
             }
             .closeIcon {
                 display: none;
@@ -323,11 +341,10 @@
 
 
                 <div id="paramsFields">
-                    <div id="title"><span>Service Delivery Report</span></div>
+                    <%--<div id="title"><span>Service Delivery Report</span></div>--%>
                     <%-- For passing agency param to the report --%>
                     <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
-
-
+                    <span class="vert-offset">Route Options</span>
                     <jsp:include page="params/routeAllOrSingle.jsp" />
     <%--                <jsp:include page="params/fromDateNumDaysTime.jsp" />--%>
 
@@ -471,7 +488,7 @@
             <script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script>
         </div>
         <div id="reportResults">
-            <h2 style="text-align: center; margin-top: 20px;">On Time Performance By Route</h2>
+            <h2>On Time Performance By Route</h2>
             <div class="closeIcon">&times;</div>
             <canvas id="chartCanvas" style="margin-top: 10px;"></canvas>
             <div id="chartTotal"></div>
