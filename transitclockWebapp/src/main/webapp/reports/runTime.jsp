@@ -10,9 +10,70 @@
         <!-- Load in Select2 files so can create fancy route selector -->
         <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
         <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
 
         <link href="params/reportParams.css" rel="stylesheet"/>
         <style>
+
+            .wrapper {
+                background: #f1f1f1f1;
+                font-family: 'Montserrat', sans-serif !important;
+                height: 100vh;
+                width: 100vw;
+                position: fixed;
+                display: flex;
+                flex-flow: row;
+            }
+            .wrapper.split {
+                flex-flow: row;
+            }
+
+            #title {
+                margin-top: 40px;
+                margin-bottom: 2px;
+                font-weight: normal;
+                text-align: center;
+                background: #019932;
+                color: white;
+                padding: 8px;
+                font-size: 24px;
+                width: -webkit-fill-available;
+                display: inline-block !important;
+            }
+
+            #routesDiv {
+                font-family: 'Montserrat', sans-serif !important;
+            }
+
+            input {
+                -webkit-appearance: none;
+                width: -webkit-fill-available;
+                border: 1px solid #c1c1c1c1;
+                background-color: #fff;
+                line-height: 1.5;
+                box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.33);
+                color: #444;
+                padding: 0px 6px;
+                font-family: 'Montserrat', sans-serif;
+                font-size: 16px;
+            }
+
+            input::placeholder {
+                color: #44444469;
+            }
+
+            select {
+                width: -webkit-fill-available;
+                border: 1px solid #c1c1c1c1;
+                background-color: #fff;
+                line-height: 1.5;
+                box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.33);
+                color: #444;
+                padding: 0px 6px;
+                font-family: 'Montserrat', sans-serif;
+                font-size: 16px;
+            }
+
             label {
                 text-align: left;
                 width: auto;
@@ -24,12 +85,106 @@
                 margin-right: 5px;
             }
 
-            #paramsSidebar {
-                width: 25%;
+            .paramsWrapper {
+                width: 100%;
                 height: 100vh;
-                margin-left: 10px;
-                float:left;
-                border-right: 1px solid black;
+                transition: width .75s ease-in-out, max-width .75s ease-in-out;
+                font-size: 16px;
+                background-color: #fff;
+                border: #969696 solid 1px;
+                box-shadow: 3px 3px 4px rgba(0,0,0,0.3);
+                /* align-self: center; */
+                position: relative;
+                z-index: 8;
+            }
+            .split .paramsWrapper {
+                width: 22%;
+            }
+            #paramsSidebar {
+                height: 100vh;
+                max-width: 420px;
+                width: 100%;
+                margin: auto;
+                display: flex;
+                align-items: center;
+                flex-flow: column;
+                background-color: #fff;
+                z-index: 2;
+            }
+            .split #paramsSidebar {
+            }
+            #paramsSidebar > * {
+                display: flex;
+            }
+            #paramsFields {
+                flex-flow: column;
+                width: 90%;
+                max-width: 30vw;
+            }
+
+            .param {
+                display: flex;
+                flex-flow: row;
+                justify-content: space-between;
+                margin-top: 6%;
+            }
+            .param > * {
+                font-size: 16px;
+            }
+            .param > span {
+                font-weight: 500;
+                padding-bottom: 12px;
+            }
+
+            .pair {
+                display: flex;
+                flex-flow: row;
+                justify-content: space-between;
+                margin-bottom: 6px;
+            }
+
+            .vertical {
+                flex-flow: column;
+                margin-top: 8%;
+                /* background-color: #f1f1f1f1; */
+                padding: 10px 0px;
+            }
+
+
+            /*#paramsSidebar {*/
+                /*width: 25%;*/
+                /*height: 100vh;*/
+                /*margin-left: 10px;*/
+                /*float:left;*/
+                /*border-right: 1px solid black;*/
+            /*}*/
+
+            #mainPage {
+                visibility: hidden;
+                opacity: 0;
+                display: none;
+                margin-left: 2vw;
+                margin-top: 20vh;
+                height: 80vh;
+                width: 75%;
+                max-width: 1250px;
+                padding: 10px 0px;
+                background-color: #fff;
+                border-radius: 4px;
+                box-shadow: 0px 4px 8px rgba(0,0,0,0.3);
+                transition: visibility .25s .75s ease-in-out, opacity .25s .75s ease-in-out;
+            }
+
+            .split #mainPage {
+                display: inline-block;
+                position: relative;
+                visibility: visible;
+                opacity: 1;
+                margin-top: 2vh;
+            }
+
+            .inactive {
+                filter: blur(2px) grayscale(100%);
             }
 
             #comparisonModal {
@@ -43,6 +198,39 @@
                 left: 44%;
             }
 
+            #serviceDayType {
+                width: 100%;
+                height: 36px;
+                margin-top: 6px;
+                box-shadow: 0px 1px 4px #69696969;
+                font-family: 'Montserrat', sans-serif;
+            }
+
+            #beginTime, #endTime {
+                width: 50%;
+            }
+
+            .submit {
+                margin: 40px 24px;
+                background-color: #029932;
+                cursor: pointer;
+                width: 210px;
+                padding: 5px 70px;
+                color: #fff;
+                font-family: 'Montserrat', sans-serif;
+                box-shadow: 0 4px rgba(127, 127, 127, 0.8);
+            }
+
+            .submit:hover {
+                background-color: #02772c;
+            }
+
+            .submit:active {
+                box-shadow: 0 1px rgba(127, 127, 127, 0.33);
+                transform: translateY(3px);
+                outline: none;
+            }
+
         </style>
         <%--        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>--%>
         <link rel="stylesheet" type="text/css" href="../jquery.datepick.package-5.1.0/css/jquery.datepick.css">
@@ -51,218 +239,228 @@
     </head>
     <body>
         <%@include file="/template/header.jsp" %>
-        <div id="paramsSidebar">
-            <div id="title" style="text-align: left; font-size:xx-large; margin-bottom: 20px;">
-                Run Time Analysis
-            </div>
+        <div class="wrapper">
+            <div class="paramsWrapper">
+                <div id="paramsSidebar">
+                    <div id="title">
+                        Run Time Analysis
+                    </div>
 
-            <div id="paramsFields">
-                <%-- For passing agency param to the report --%>
-                <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
+                    <div id="paramsFields">
+                        <%-- For passing agency param to the report --%>
+                        <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
 
-                <jsp:include page="params/routeAllOrSingle.jsp" />
+                        <jsp:include page="params/routeAllOrSingle.jsp" />
 
-                <div class="param">
-                    <label for="direction">Direction:</label>
-                    <select id="direction" name="direction" disabled="true" style="width: 177px"></select>
-                </div>
+                        <div class="param">
+                            <label for="direction">Direction:</label>
+                            <select id="direction" name="direction" disabled="true" style="width: 177px"></select>
+                        </div>
 
-                <div class="param">
-                    <label for="startStop">Start Stop:</label>
-                    <select id="startStop" name="startStop" disabled="true" style="width: 177px"></select>
-                </div>
+                        <div class="param">
+                            <label for="startStop">Start Stop:</label>
+                            <select id="startStop" name="startStop" disabled="true" style="width: 177px"></select>
+                        </div>
 
-                <div class="param">
-                    <label for="endStop">End Stop:</label>
-                    <select id="endStop" name="endStop" disabled="true" style="width: 177px"></select>
-                </div>
+                        <div class="param">
+                            <label for="endStop">End Stop:</label>
+                            <select id="endStop" name="endStop" disabled="true" style="width: 177px"></select>
+                        </div>
 
-                <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
-                <link rel="stylesheet" type="text/css" href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
+                        <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
+                        <link rel="stylesheet" type="text/css" href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
 
-                <script>
-                    $(function() {
-                        var calendarIconTooltip = "Popup calendar to select date";
+                        <script>
+                            $(function() {
+                                var calendarIconTooltip = "Popup calendar to select date";
 
-                        $( "#datepicker" ).datepick({
-                            dateFormat: "yy-mm-dd",
-                            showOtherMonths: true,
-                            selectOtherMonths: true,
-                            // Show button for calendar
-                            buttonImage: "img/calendar.gif",
-                            buttonImageOnly: true,
-                            showOn: "both",
-                            // Don't allow going past current date
-                            maxDate: 0,
-                            // onClose is for restricting end date to be after start date,
-                            // though it is potentially confusing to user
-                            rangeSelect: true,
-                            showTrigger: '<button type="button" class="trigger">' +
-                                '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
-                            onClose: function( selectedDate ) {
-                                // Strangely need to set the title attribute for the icon again
-                                // so that don't revert back to a "..." tooltip
-                                // FIXME $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
-                            }
-                        });
+                                $( "#datepicker" ).datepick({
+                                    dateFormat: "yy-mm-dd",
+                                    showOtherMonths: true,
+                                    selectOtherMonths: true,
+                                    // Show button for calendar
+                                    buttonImage: "img/calendar.gif",
+                                    buttonImageOnly: true,
+                                    showOn: "both",
+                                    // Don't allow going past current date
+                                    maxDate: 0,
+                                    // onClose is for restricting end date to be after start date,
+                                    // though it is potentially confusing to user
+                                    rangeSelect: true,
+                                    showTrigger: '<button type="button" class="trigger">' +
+                                        '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
+                                    onClose: function( selectedDate ) {
+                                        // Strangely need to set the title attribute for the icon again
+                                        // so that don't revert back to a "..." tooltip
+                                        // FIXME $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
+                                    }
+                                });
 
-                        // Use a better tooltip than the default "..." for the calendar icon
-                        $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
+                                // Use a better tooltip than the default "..." for the calendar icon
+                                $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
 
-                        $("#beginTime, #endTime").timepicker({timeFormat: "H:i"})
-                            .on('change', function(evt) {
-                                if (evt.originalEvent) { // manual change
-                                    // validate that this looks like HH:MM
-                                    if (!evt.target.value.match(/^(([0,1][0-9])|(2[0-3])):[0-5][0-9]$/))
-                                        evt.target.value = evt.target.oldval ? evt.target.oldval : "";
-                                }
-                                evt.target.oldval = evt.target.value;
+                                $("#beginTime, #endTime").timepicker({timeFormat: "H:i"})
+                                    .on('change', function(evt) {
+                                        if (evt.originalEvent) { // manual change
+                                            // validate that this looks like HH:MM
+                                            if (!evt.target.value.match(/^(([0,1][0-9])|(2[0-3])):[0-5][0-9]$/))
+                                                evt.target.value = evt.target.oldval ? evt.target.oldval : "";
+                                        }
+                                        evt.target.oldval = evt.target.value;
+                                    });
+
                             });
+                        </script>
 
-                    });
-                </script>
+                        <div class="param">
+                            <label for="datepicker">Date:</label>
+                            <input type="text" id="datepicker" name="datepicker"
+                                   title="The range of dates that you want to examine data for.
+                                       <br><br> Begin date must be before the end date."
+                                   size="18"
+                                   value="Date range" />
+                        </div>
 
-                <div class="param">
-                    <label for="datepicker">Date:</label>
-                    <input type="text" id="datepicker" name="datepicker"
-                           title="The range of dates that you want to examine data for.
-                                   <br><br> Begin date must be before the end date."
-                           size="18"
-                           value="Date range" />
-                </div>
+                        <div class="param">
+                            <label for="beginTime">Begin Time:</label>
+                            <input id="beginTime" name="beginTime"
+                                   title="Optional begin time of day to limit query to. Useful if
+                                        want to see result just for rush hour, for example. Leave blank
+                                        if want data for entire day.
+                                        <br/><br/>Format: hh:mm, as in '07:00' for 7AM."
+                                   size="5"
+                                   placeholder="(hh:mm)"
+                                   value="" />
+                        </div>
 
-                <div class="param">
-                    <label for="beginTime">Begin Time:</label>
-                    <input id="beginTime" name="beginTime"
-                           title="Optional begin time of day to limit query to. Useful if
-                                    want to see result just for rush hour, for example. Leave blank
-                                    if want data for entire day.
-                                    <br/><br/>Format: hh:mm, as in '07:00' for 7AM."
-                           size="5"
-                           value="" /> <span class="note">(hh:mm)</span>
-                </div>
+                        <div class="param">
+                            <label for="endTime">End Time:</label>
+                            <input id="endTime" name="endTime"
+                                   title="Optional end time of day to limit query to. Useful if
+                                        want to see result just for rush hour, for example. Leave blank
+                                        if want data for entire day.
+                                        <br/><br/>Format: hh:mm, as in '09:00' for 9AM.
+                                        Use '23:59' for midnight."
+                                   size="5"
+                                   placeholder="(hh:mm)"
+                                   value="" />
+                        </div>
 
-                <div class="param">
-                    <label for="endTime">End Time:</label>
-                    <input id="endTime" name="endTime"
-                           title="Optional end time of day to limit query to. Useful if
-                                    want to see result just for rush hour, for example. Leave blank
-                                    if want data for entire day.
-                                    <br/><br/>Format: hh:mm, as in '09:00' for 9AM.
-                                    Use '23:59' for midnight."
-                           size="5"
-                           value="" /> <span class="note">(hh:mm)</span>
-                </div>
+                            <div class="param vertical">
+                                <label for="serviceDayType">Service Day Type</label>
+                                <select id="serviceDayType" name="serviceDayType">
+                                <option value="">All</option>
+                                <option value="weekday">Weekday</option>
+                                <option value="saturday">Saturday</option>
+                                <option value="sunday">Sunday</option>
+                                <span class="select2-selection__arrow">
+                                    <b role="presentation"></b>
+                                </span>
+                            </select>
+                        </div>
+                    </div>
 
-                <div class="param">
-                    <select id="serviceDayType" name="serviceDayType">
-                        <option value="">Service Day Type</option>
-                        <option value="">All</option>
-                        <option value="weekday">Weekday</option>
-                        <option value="saturday">Saturday</option>
-                        <option value="sunday">Sunday</option>
-                    </select>
+                    <input type="button" id="submit" class="submit" value="Submit">
                 </div>
             </div>
 
-            <input type="button" id="submit" class="submit" value="Submit" style="margin-top: 10px; margin-bottom: 10px;">
-        </div>
 
-        <div id="mainPage" style="width: 69%; height: 100%; display: inline-block; margin-left: 20px;">
-            <div id="mainResults">
-                <div id="paramDetails" class="paramDetails" style="float: left;">
-                    <p style='font-size: 0.8em;'></p>
-                </div>
-
-                <br>
-
-                <div id="avgRunTime" style="display: inline-block; margin-left: 20px; width: 90%; vertical-align: middle;">
-                    <p style="font-size: 0.8em;display: inline-block;"></p>
-                    <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
-                    <p style="font-size: 0.8em;display: inline-block;"></p>
-                    <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
-                    <p style="font-size: 0.8em;display: inline-block;"></p>
-                    <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
-                    <p style="font-size: 0.8em;display: inline-block;"></p>
-                    <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
-                </div>
-
-                <input type="button" id="visualizeButton" class="visualizeButton" value="Visualize trips" style="margin-top: 10px; margin-bottom: 10px;" hidden="true">
-            </div>
-
-            <div id="comparisonModal" hidden="true">
-                <div id="modalContents" style="margin-right: 30px; margin-left: 30px; margin-top: 10px;">
-                    <div id="modalHeader" style="text-align: left; vertical-align: middle; font-size: medium">
-                        Trip Run Time Comparison
-                        <button id='closeModal' type='button' style='float:right; margin-right: -10px;'>&times;</button>
-                    </div>
-                    <div id="paramDetailsModal" class="paramDetails" style="margin-top: 20px; margin-bottom: 20px;"></div>
-
-                    <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
-                    <link rel="stylesheet" type="text/css" href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
-
-                    <script>
-                        $(function() {
-                            var calendarIconTooltip = "Popup calendar to select date";
-
-                            $("#modalDatepicker").datepick({
-                                dateFormat: "yy-mm-dd",
-                                showOtherMonths: true,
-                                selectOtherMonths: true,
-                                // Show button for calendar
-                                buttonImage: "img/calendar.gif",
-                                buttonImageOnly: true,
-                                showOn: "both",
-                                // Don't allow going past current date
-                                maxDate: 0,
-                                // onClose is for restricting end date to be after start date,
-                                // though it is potentially confusing to user
-                                rangeSelect: true,
-                                showTrigger: '<button type="button" class="trigger">' +
-                                    '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
-                                onClose: function (selectedDate) {
-                                    // Strangely need to set the title attribute for the icon again
-                                    // so that don't revert back to a "..." tooltip
-                                    // FIXME $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
-                                }
-                            });
-
-                            // Use a better tooltip than the default "..." for the calendar icon
-                            $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
-                        })
-                    </script>
-
-                    <div style='font-size: medium;'>Select Comparison Range:</div>
-
-                    <div class="param" style="display: inline-block;">
-                        <label for="modalDatepicker">Date:</label>
-                        <input type="text" id="modalDatepicker" name="modalDatepicker"
-                               title="The range of dates that you want to examine data for.
-                                   <br><br> Begin date must be before the end date."
-                               size="18"
-                               value="Date range" />
+            <div id="mainPage">
+                <div id="mainResults">
+                    <div id="paramDetails" class="paramDetails" style="float: left;">
+                        <p style='font-size: 0.8em;'></p>
                     </div>
 
-                    <div class="param" style="display: inline-block; margin-left: 30px;">
-                        <select id="modalServiceDayType" name="modalServiceDayType">
-                            <option value="">Service Day Type</option>
-                            <option value="">All</option>
-                            <option value="weekday">Weekday</option>
-                            <option value="saturday">Saturday</option>
-                            <option value="sunday">Sunday</option>
-                        </select>
+                    <br>
+
+                    <div id="avgRunTime" style="display: inline-block; margin-left: 20px; width: 90%; vertical-align: middle;">
+                        <p style="font-size: 0.8em;display: inline-block;"></p>
+                        <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
+                        <p style="font-size: 0.8em;display: inline-block;"></p>
+                        <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
+                        <p style="font-size: 0.8em;display: inline-block;"></p>
+                        <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
+                        <p style="font-size: 0.8em;display: inline-block;"></p>
+                        <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
                     </div>
 
-                    <input type="button" id="modalSubmit" class="submit" value="Submit" style="display: block; margin-top: 20px; margin-bottom: 20px;">
+                    <input type="button" id="visualizeButton" class="visualizeButton" value="Visualize trips" style="margin-top: 10px; margin-bottom: 10px;" hidden="true">
                 </div>
-            </div>
 
-            <div id="comparisonResults" hidden="true"></div>
+                <div id="comparisonModal" hidden="true">
+                    <div id="modalContents" style="margin-right: 30px; margin-left: 30px; margin-top: 10px;">
+                        <div id="modalHeader" style="text-align: left; vertical-align: middle; font-size: medium">
+                            Trip Run Time Comparison
+                            <button id='closeModal' type='button' style='float:right; margin-right: -10px;'>&times;</button>
+                        </div>
+                        <div id="paramDetailsModal" class="paramDetails" style="margin-top: 20px; margin-bottom: 20px;"></div>
 
-            <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+                        <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
+                        <link rel="stylesheet" type="text/css" href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
 
-            <div id="runTimeVisualization" hidden="true">
-                <canvas id="visualizationCanvas" height="100" style="margin-top: 10px;"></canvas>
+                        <script>
+                            $(function() {
+                                var calendarIconTooltip = "Popup calendar to select date";
+
+                                $("#modalDatepicker").datepick({
+                                    dateFormat: "yy-mm-dd",
+                                    showOtherMonths: true,
+                                    selectOtherMonths: true,
+                                    // Show button for calendar
+                                    buttonImage: "img/calendar.gif",
+                                    buttonImageOnly: true,
+                                    showOn: "both",
+                                    // Don't allow going past current date
+                                    maxDate: 0,
+                                    // onClose is for restricting end date to be after start date,
+                                    // though it is potentially confusing to user
+                                    rangeSelect: true,
+                                    showTrigger: '<button type="button" class="trigger">' +
+                                        '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
+                                    onClose: function (selectedDate) {
+                                        // Strangely need to set the title attribute for the icon again
+                                        // so that don't revert back to a "..." tooltip
+                                        // FIXME $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
+                                    }
+                                });
+
+                                // Use a better tooltip than the default "..." for the calendar icon
+                                $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
+                            })
+                        </script>
+
+                        <div style='font-size: medium;'>Select Comparison Range:</div>
+
+                        <div class="param" style="display: inline-block;">
+                            <label for="modalDatepicker">Date:</label>
+                            <input type="text" id="modalDatepicker" name="modalDatepicker"
+                                   title="The range of dates that you want to examine data for.
+                                       <br><br> Begin date must be before the end date."
+                                   size="18"
+                                   value="Date range" />
+                        </div>
+
+                        <div class="param" style="display: inline-block; margin-left: 30px;">
+                            <select id="modalServiceDayType" name="modalServiceDayType">
+                                <option value="">Service Day Type</option>
+                                <option value="">All</option>
+                                <option value="weekday">Weekday</option>
+                                <option value="saturday">Saturday</option>
+                                <option value="sunday">Sunday</option>
+                            </select>
+                        </div>
+
+                        <input type="button" id="modalSubmit" class="submit" value="Submit">
+                    </div>
+                </div>
+
+                <div id="comparisonResults" hidden="true"></div>
+
+                <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+
+                <div id="runTimeVisualization" hidden="true">
+                    <canvas id="visualizationCanvas" height="100" style="margin-top: 10px;"></canvas>
+                </div>
             </div>
         </div>
     </body>
@@ -657,6 +855,7 @@
 
     $("#submit").click(function() {
         $("#submit").attr("disabled", "disabled");
+        $(".wrapper").addClass("split");
         $("#mainResults").hide();
         $("#runTimeVisualization").hide();
         $("#modalDatepicker").val("Date range")

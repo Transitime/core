@@ -57,12 +57,12 @@ div.avlTriangleearly {
 /* For the params menu */
 #params {
   background: lightgrey;
-  position:absolute;
-  top:10px;
-  right:10px;
-  border-radius: 25px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border-radius: 4px;
   padding: 2%;
-  border: 2px solid black;
+  box-shadow: 0px 2px 10px #696969;
 }
 
  /* Playback menu */
@@ -76,11 +76,11 @@ div.avlTriangleearly {
   position: relative;
   left: -50%;
   text-align: center;
-  border-radius: 25px;
+  border-radius: 4px;
   padding: 2%;
   font-family: monospace;
-  border: 2px solid black;
   width: 300px;
+  box-shadow: 0px 2px 10px #696969;
 }
 
 #playback input {
@@ -99,10 +99,10 @@ div.avlTriangleearly {
 /* For the params menu */
 #legend {
   background: lightgrey;
-  position:absolute;
-  left: 88%;
+  position: absolute;
+  right: 10px;
   bottom: 5%;
-  border-radius: 25px;
+  border-radius: 4px;
   padding: 1%;
-  border: 2px solid black;
+  box-shadow: 0px 2px 10px #696969;
 }

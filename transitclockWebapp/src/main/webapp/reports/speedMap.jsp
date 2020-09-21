@@ -10,6 +10,8 @@
     <!-- Load in Select2 files so can create fancy route selector -->
     <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
     <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+
 
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
     <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
@@ -32,13 +34,202 @@
             width: auto;
         }
 
-        #paramsSidebar {
-            width: 20%;
-            height: 100%;
-            margin-left: 10px;
-            float:left;
-            border-right: 1px solid black;
+        .wrapper {
+            background: #f1f1f1f1;
+            font-family: 'Montserrat', sans-serif;
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            display: flex;
+            flex-flow: row;
+            font-family: 'Montserrat', sans-serif;
         }
+        .wrapper.split {
+            flex-flow: row;
+        }
+
+        #title {
+            margin-top: 40px;
+            margin-bottom: 2px;
+            font-weight: normal;
+            text-align: center;
+            background: #019932;
+            color: white;
+            padding: 8px;
+            font-size: 24px;
+            width: -webkit-fill-available;
+            display: inline-block !important;
+        }
+
+        input {
+            -webkit-appearance: none;
+            width: -webkit-fill-available;
+            border: 1px solid #c1c1c1c1;
+            background-color: #fff;
+            line-height: 1.5;
+            box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.33);
+            color: #444;
+            padding: 0px 6px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+        }
+
+        select {
+            width: -webkit-fill-available;
+            border: 1px solid #c1c1c1c1;
+            background-color: #fff;
+            line-height: 1.5;
+            box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.33);
+            color: #444;
+            padding: 0px 6px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+        }
+
+        input::placeholder {
+            color: #44444469;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: slider-horizontal;
+            box-shadow: none;
+            border: none;
+        }
+
+        .paramsWrapper {
+            width: 100%;
+            height: 100vh;
+            transition: width .75s ease-in-out, max-width .75s ease-in-out;
+            font-size: 16px;
+            background-color: #fff;
+            border: #969696 solid 1px;
+            box-shadow: 3px 3px 4px rgba(0,0,0,0.3);
+            /* align-self: center; */
+            position: relative;
+            z-index: 8;
+        }
+        .split .paramsWrapper {
+            width: 22%;
+        }
+        #paramsSidebar {
+            height: 100vh;
+            max-width: 420px;
+            width: 100%;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            flex-flow: column;
+            background-color: #fff;
+            z-index: 2;
+        }
+        .split #paramsSidebar {
+        }
+        #paramsSidebar > * {
+            display: flex;
+        }
+        #paramsFields {
+            flex-flow: column;
+            width: 90%;
+            max-width: 30vw;
+        }
+
+        .param {
+            display: flex;
+            flex-flow: row;
+            justify-content: space-between;
+            margin-top: 6%;
+        }
+        .param > * {
+            font-size: 16px;
+        }
+        .param > span {
+            font-weight: 500;
+            padding-bottom: 12px;
+        }
+
+        .pair {
+            display: flex;
+            flex-flow: row;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .vertical {
+            flex-flow: column;
+            margin-top: 8%;
+            /* background-color: #f1f1f1f1; */
+            padding: 10px 0px;
+        }
+
+        .select2-selection.select2-selection--single {
+            background-color: #fff;
+            box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.33);
+            border: none;
+            -webkit-border-radius: 0px;
+            -moz-border-radius: 0px;
+            border-radius: 0px;
+        }
+
+        .select2-dropdown.select2-dropdown--below {
+            border: none;
+            -webkit-border-radius: 0px;
+            -moz-border-radius: 0px;
+            border-radius: 0px;
+            box-shadow: 0px 4px 4px rgba(0,0,0,0.3);
+        }
+        .select2-route-container{
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        #serviceDayType {
+            width: 100%;
+            height: 36px;
+            margin-top: 6px;
+            box-shadow: 0px 1px 4px #69696969;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+
+        #mainPage {
+            visibility: hidden;
+            opacity: 0;
+            display: none;
+            margin-left: 2vw;
+            margin-top: 20vh;
+            height: 80vh;
+            width: 75%;
+            max-width: 1250px;
+            padding: 10px 0px;
+            background-color: #fff;
+            border-radius: 4px;
+            box-shadow: 0px 4px 8px rgba(0,0,0,0.3);
+            transition: visibility .25s .75s ease-in-out, opacity .25s .75s ease-in-out;
+        }
+
+        .split #mainPage {
+            display: inline-block;
+            position: relative;
+            visibility: visible;
+            opacity: 1;
+            margin-top: 2vh;
+        }
+
+
+        #mainPage h2 {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #019932;
+            color: #fff;
+        }
+
+        .inactive {
+            filter: blur(2px) grayscale(100%);
+        }
+
+
+
+
 
         #runTimesFlyout {
             width: 20%;
@@ -57,10 +248,24 @@
 
         .speedLegend {
             display: inline-block;
-            width: 20px;
-            height: 20px;
+            width: 14px;
+            min-width: 14px;
+            height: 14px;
             border: 1px solid black;
             margin-bottom: 5px;
+        }
+
+        #speedParams .vertical {
+            margin-top: 0px;
+        }
+
+        #speedParams input[type="number"]{
+            max-width: 48px;
+        }
+
+        #speedParams .pair span {
+            width: 90%;
+            margin: auto;
         }
 
         .loader {
@@ -76,6 +281,28 @@
             animation: spin 2s linear infinite;
             z-index: 1000;
         }
+
+        .submit {
+            margin: 24px;
+            background-color: #029932;
+            cursor: pointer;
+            width: 210px;
+            padding: 5px 70px;
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            box-shadow: 0 4px rgba(127, 127, 127, 0.8);
+        }
+
+        .submit:hover {
+            background-color: #02772c;
+        }
+
+        .submit:active {
+            box-shadow: 0 1px rgba(127, 127, 127, 0.33);
+            transform: translateY(3px);
+            outline: none;
+        }
+
 
         @-webkit-keyframes spin {
             0% { -webkit-transform: rotate(0deg); }
@@ -98,142 +325,157 @@
 </head>
 <body>
     <%@include file="/template/header.jsp" %>
-    <div id="paramsSidebar">
-        <div id="title" style="text-align: left; font-size:x-large">
-            Speed Map
-        </div>
+    <div class="wrapper">
 
-        <div id="paramsFields">
-            <%-- For passing agency param to the report --%>
-            <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
+    <div class="paramsWrapper">
 
-            <jsp:include page="params/routeAllOrSingle.jsp" />
-
-            <div class="param">
-                <label for="direction">Direction:</label>
-                <select id="direction" name="direction" disabled="true" style="width: 177px">
-
-                </select>
+        <div id="paramsSidebar">
+            <div id="title">
+                Speed Map
             </div>
 
-            <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
-            <link rel="stylesheet" type="text/css" href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
+            <div id="paramsFields">
+                <%-- For passing agency param to the report --%>
+                <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
 
-            <script>
-                $(function() {
-                    var calendarIconTooltip = "Popup calendar to select date";
+                <jsp:include page="params/routeAllOrSingle.jsp" />
 
-                    $( "#mainDatepicker" ).datepick({
-                        dateFormat: "yy-mm-dd",
-                        showOtherMonths: true,
-                        selectOtherMonths: true,
-                        // Show button for calendar
-                        buttonImage: "img/calendar.gif",
-                        buttonImageOnly: true,
-                        showOn: "both",
-                        // Don't allow going past current date
-                        maxDate: 0,
-                        // onClose is for restricting end date to be after start date,
-                        // though it is potentially confusing to user
-                        rangeSelect: true,
-                        showTrigger: '<button type="button" class="trigger">' +
-                            '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
-                        onClose: function( selectedDate ) {
-                            // Strangely need to set the title attribute for the icon again
-                            // so that don't revert back to a "..." tooltip
-                            // FIXME $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
-                        }
-                    });
+                <div class="param">
+                    <label for="direction">Direction:</label>
+                    <select id="direction" name="direction" disabled="true">
 
-                    // Use a better tooltip than the default "..." for the calendar icon
-                    $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
+                    </select>
+                </div>
 
-                    $("#beginTime, #endTime").timepicker({timeFormat: "H:i"})
-                        .on('change', function(evt) {
-                            if (evt.originalEvent) { // manual change
-                                // validate that this looks like HH:MM
-                                if (!evt.target.value.match(/^(([0,1][0-9])|(2[0-3])):[0-5][0-9]$/))
-                                    evt.target.value = evt.target.oldval ? evt.target.oldval : "";
+                <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
+                <link rel="stylesheet" type="text/css" href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
+
+                <script>
+                    $(function() {
+                        var calendarIconTooltip = "Popup calendar to select date";
+
+                        $( "#mainDatepicker" ).datepick({
+                            dateFormat: "yy-mm-dd",
+                            showOtherMonths: true,
+                            selectOtherMonths: true,
+                            // Show button for calendar
+                            buttonImage: "img/calendar.gif",
+                            buttonImageOnly: true,
+                            showOn: "both",
+                            // Don't allow going past current date
+                            maxDate: 0,
+                            // onClose is for restricting end date to be after start date,
+                            // though it is potentially confusing to user
+                            rangeSelect: true,
+                            showTrigger: '<button type="button" class="trigger">' +
+                                '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
+                            onClose: function( selectedDate ) {
+                                // Strangely need to set the title attribute for the icon again
+                                // so that don't revert back to a "..." tooltip
+                                // FIXME $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
                             }
-                            evt.target.oldval = evt.target.value;
                         });
 
-                });
-            </script>
+                        // Use a better tooltip than the default "..." for the calendar icon
+                        $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
 
-            <div class="param">
-                <label for="mainDatepicker">Date:</label>
-                <input type="text" id="mainDatepicker" name="mainDatepicker"
-                       title="The range of dates that you want to examine data for.
-                               <br><br> Begin date must be before the end date."
-                       size="18"
-                       value="Date range" />
-            </div>
+                        $("#beginTime, #endTime").timepicker({timeFormat: "H:i"})
+                            .on('change', function(evt) {
+                                if (evt.originalEvent) { // manual change
+                                    // validate that this looks like HH:MM
+                                    if (!evt.target.value.match(/^(([0,1][0-9])|(2[0-3])):[0-5][0-9]$/))
+                                        evt.target.value = evt.target.oldval ? evt.target.oldval : "";
+                                }
+                                evt.target.oldval = evt.target.value;
+                            });
 
-            <div class="param">
-                <label for="beginTime">Begin Time:</label>
-                <input id="beginTime" name="beginTime"
-                       title="Optional begin time of day to limit query to. Useful if
-                                want to see result just for rush hour, for example. Leave blank
-                                if want data for entire day.
-                                <br/><br/>Format: hh:mm, as in '07:00' for 7AM."
-                       size="5"
-                       value="" /> <span class="note">(hh:mm)</span>
-            </div>
+                    });
+                </script>
 
-            <div class="param">
-                <label for="endTime">End Time:</label>
-                <input id="endTime" name="endTime"
-                       title="Optional end time of day to limit query to. Useful if
-                                want to see result just for rush hour, for example. Leave blank
-                                if want data for entire day.
-                                <br/><br/>Format: hh:mm, as in '09:00' for 9AM.
-                                Use '23:59' for midnight."
-                       size="5"
-                       value="" /> <span class="note">(hh:mm)</span>
-            </div>
-
-            <div class="param">
-                <select id="serviceDayType" name="serviceDayType">
-                    <option value="">Service Day Type</option>
-                    <option value="">All</option>
-                    <option value="weekday">Weekday</option>
-                    <option value="saturday">Saturday</option>
-                    <option value="sunday">Sunday</option>
-                </select>
-            </div>
-
-            <hr>
-
-            <div id="speedParams">
-                <div class = "param">
-                    <div class="speedLegend" style="background-color: red;"></div>
-                    <div style ="vertical-align: top;display: inline-block;">Low Speed</div>
-                    <br>
-                    <input id='lowSpeedSlider' name='lowSpeedSlider' type="range" min="0" max="98" step="0.1" value="0" oninput="lowSpeedSlider(this.value)">
-                    <input type="number" id="lowSpeedManual" name="lowSpeedManual" min="0" max="98" step="0.1" value="0" oninput="lowSpeedManual(this.value)">
-                    mph max
-                </div>
                 <div class="param">
-                    <div class="speedLegend" style="background-color: yellow;"></div>
-                    <div style ="vertical-align: top;display: inline-block;">Mid Speed</div>
-                    <br>
-                    <input id='midSpeedSlider' name='midSpeedSlider' type="range" min="1" max="99" step="0.1" value="1" oninput="midSpeedSlider(this.value)">
-                    <input type="number" id="midSpeedManual" name="midSpeedManual" min="1" max="99" step="0.1" value="1" oninput="midSpeedManual(this.value)">
-                    mph max
+                    <label for="mainDatepicker">Date:</label>
+                    <input type="text" id="mainDatepicker" name="mainDatepicker"
+                           title="The range of dates that you want to examine data for.
+                                   <br><br> Begin date must be before the end date."
+                           size="18"
+                           value="Date range" />
                 </div>
-                <div style="margin-top: 10px; margin-bottom: 10px;">
-                    <div class="speedLegend" style="background-color: green;"></div>
-                    <div style ="vertical-align: top;display: inline-block;">High Speed</div>
+
+                <div class="param">
+                    <label for="beginTime">Begin Time:</label>
+                    <input id="beginTime" name="beginTime"
+                           title="Optional begin time of day to limit query to. Useful if
+                                    want to see result just for rush hour, for example. Leave blank
+                                    if want data for entire day.
+                                    <br/><br/>Format: hh:mm, as in '07:00' for 7AM."
+                           size="5"
+                           placeholder="(hh:mm)"
+                           value="" />
+                </div>
+
+                <div class="param">
+                    <label for="endTime">End Time:</label>
+                    <input id="endTime" name="endTime"
+                           title="Optional end time of day to limit query to. Useful if
+                                    want to see result just for rush hour, for example. Leave blank
+                                    if want data for entire day.
+                                    <br/><br/>Format: hh:mm, as in '09:00' for 9AM.
+                                    Use '23:59' for midnight."
+                           size="5"
+                           placeholder="(hh:mm)"
+                           value="" />
+                </div>
+
+                <div class="param vertical">
+                    <label for="serviceDayType">Service Day Type</label>
+                    <select id="serviceDayType" name="serviceDayType">
+                        <option value="">All</option>
+                        <option value="weekday">Weekday</option>
+                        <option value="saturday">Saturday</option>
+                        <option value="sunday">Sunday</option>
+                    </select>
+                </div>
+
+                <hr>
+
+                <div id="speedParams">
+                    <div class = "param vertical">
+                        <div class="pair">
+                            <div class="speedLegend" style="background-color: red;"></div>
+                            <span>Low Speed (mph max)</span>
+                        </div>
+                        <div class="pair">
+                            <input id='lowSpeedSlider' name='lowSpeedSlider' type="range" min="0" max="98" step="0.1" value="0" oninput="lowSpeedSlider(this.value)">
+                            <input type="number" id="lowSpeedManual" name="lowSpeedManual" min="0" max="98" step="0.1" value="0" oninput="lowSpeedManual(this.value)">
+                        </div>
+                    </div>
+                    <div class = "param vertical">
+                        <div class="pair">
+                            <div class="speedLegend" style="background-color: yellow;"></div>
+                            <span>Mid Speed (mph max)</span>
+                        </div>
+                        <div class="pair">
+                            <input id='midSpeedSlider' name='midSpeedSlider' type="range" min="1" max="99" step="0.1" value="1" oninput="midSpeedSlider(this.value)">
+                            <input type="number" id="midSpeedManual" name="midSpeedManual" min="1" max="99" step="0.1" value="1" oninput="midSpeedManual(this.value)">
+
+                        </div>
+                    </div>
+                    <div class = "param vertical">
+                        <div class="pair">
+                            <div class="speedLegend" style="background-color: green;"></div>
+                            <span>High Speed (mph max)</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <input type="button" id="mainSubmit" class="submit" value="Submit" style="margin-top: 10px; margin-bottom: 10px;">
+            <input type="button" id="mainSubmit" class="submit" value="Submit">
+
+        </div>
 
     </div>
 
-    <div id="mainPage" style="width: 79%; height: 100%; display: inline-block;">
+    <div id="mainPage">
         <div id="paramDetailsTop" class="paramDetails" style="height: 3%; float: left; margin-left: 20px; width: 60%;">
             <p style='font-size: 0.8em;'></p>
         </div>
@@ -300,6 +542,8 @@
         </div>
     </div>
 
+    </div>
+
 <script>
     var map = L.map('map');
     L.control.scale({metric: false}).addTo(map);
@@ -307,6 +551,10 @@
         attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
         maxZoom: 19
     }).addTo(map);
+    // Calculate the offset
+    var offset = map.getSize().x*0.15;
+    // // Then move the map
+    // map.panBy(new L.Point(-offset, 0), {animate: false});
 
     //fit map to agency boundaries.
     $.getJSON(apiUrlPrefix + "/command/agencyGroup", function(agencies) {
@@ -583,14 +831,19 @@
 
         $(".loader").hide();
         $("#mainSubmit").removeAttr("disabled");
+        $("#mainSubmit").attr("value","Submit");
+        $("#mainPage").removeClass("inactive");
     }
 
     $("#mainSubmit").click(function() {
         $("#mainSubmit").attr("disabled", "disabled");
+        $("#mainSubmit").attr("value","loading...");
         $("#flyoutDatepicker").val("Date range")
         $("#avgRunTimeComparison").html("");
         $("#runTimesFlyout").hide();
         $(".loader").show();
+        $(".wrapper").addClass("split");
+        $("#mainPage").addClass("inactive");
 
         request = {}
 
@@ -648,6 +901,8 @@
                     error: function (e) {
                         $(".loader").hide();
                         $("#mainSubmit").removeAttr("disabled");
+                        $("#mainSubmit").attr("value","Submit");
+                        $("#mainPage").removeClass("inactive");
                         alert("Error processing stop details.");
                     }
                 })
@@ -655,6 +910,8 @@
             error: function (e) {
                 $(".loader").hide();
                 $("#mainSubmit").removeAttr("disabled");
+                $("#mainSubmit").attr("value","Submit");
+                $("#mainPage").removeClass("inactive");
                 alert("Error processing speed details for stops.");
             }
         })
@@ -686,6 +943,8 @@
             error: function () {
                 $(".loader").hide();
                 $("#mainSubmit").removeAttr("disabled");
+                $("#mainSubmit").attr("value","Submit");
+                $("#mainPage").removeClass("inactive");
                 alert("Error processing average trip run time.");
             }
         })

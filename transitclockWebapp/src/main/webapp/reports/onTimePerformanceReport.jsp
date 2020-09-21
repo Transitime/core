@@ -252,7 +252,9 @@
                 font-family: 'Montserrat', sans-serif;
             }
 
-
+            .inactive {
+                filter: blur(2px) grayscale(100%);
+            }
 
             #reportResults {
                 visibility: hidden;
@@ -548,6 +550,7 @@
         $("#submit").click(function() {
             $("#submit").attr("disabled","disabled");
             $("#submit").attr("value","loading...");
+            $("#reportResults").addClass("inactive");
 
 
             if ($("#beginDate").val() == "Date range") {
@@ -591,6 +594,7 @@
 
     function drawChart(response) {
         $("#submit").removeAttr("disabled").attr("value", "Submit");
+        $("#reportResults").removeClass("inactive");
         var values = response.data.datasets[0].data
         pieChart.data.datasets[0].data = values;
         pieChart.update();

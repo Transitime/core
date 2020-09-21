@@ -28,45 +28,84 @@ body {
 #mainDiv {
 	margin-left: auto;
 	margin-right: auto;
-	width: 700px;
+	/*width: 700px;*/
 }
 
 #title {
 	margin-top: 40px;
-	margin-bottom: 2px;
 	font-weight: normal;
 	font-size: xx-large;
 	text-align: center;
+	background: #696969;
+	color: white;
+	padding: 20px 0px;
+	width: 50%;
+	margin: auto;
 }
 
 #subtitle {
 	text-align: center;
 	font-size: x-large;
+	width: 50%;
+	margin: auto;
+	padding: 20px 0px 0px 0px;
+	color: black;
+	background: #dadadada;
 }
 
 /* For list of choices to be centered in page, e.g. list of reports
  */
 .choicesList {
-	width: 350px;
-	margin-left: auto;
-	margin-right: auto;
+	width: 50%;
+	height: auto;
 	line-height: 125%;
-	margin-top: 5px;
+	margin: 0px auto;
+	padding: 20px 0px 40px 0px;
+	background-color: #dadadada;
 }
+
+.choicesList li {
+	text-decoration: none;
+	list-style-type: none;
+	width: 60%;
+	margin: auto auto 6px auto;
+	text-align: center;
+	box-shadow: 0px 6px 10px #bbbbbb;
+	background: #fff;
+}
+
+.choicesList li:hover {
+	color: #fff;
+	background-color: #029932;
+}
+
+.choicesList li:hover > a {
+	color: #fff;
+}
+
+.choicesList li > a {
+	display: inline-block;
+	width: -webkit-fill-available;
+	padding: 8px;
+}
+
 
 /* Make links look better. No underlining, keep colors consistent. */
 a:link {
 	text-decoration: none;
-	color: #0000a6;
+	/*color: #0000a6;*/
+	color: #424242;
 }
 
 a:visited {
-	color: #0000a6;
+	/*color: #0000a6;*/
+	color: #424242;
 }
 
 a:hover {
-	color: #0000FF;
+	/*color: #0000FF;*/
 }
+
 
 .ui-tooltip {
 	/* Change background color of tooltips a bit and use a reasonable font size */
