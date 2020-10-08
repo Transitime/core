@@ -550,7 +550,7 @@
 <script>
     var mapTileUrl ='http://tile.openstreetmap.org/{z}/{x}/{y}.png'
     var map = L.map('map', {
-        minZoom: 10,
+        minZoom: 12,
         maxZoom: 16
     });
     L.control.scale({metric: false}).addTo(map);
@@ -559,7 +559,7 @@
         maxZoom: 19
     }).addTo(map);
     // Calculate the offset
-    var offset = map.getSize().x*0.15;
+    //var offset = map.getSize().x*0.15;
     // // Then move the map
     // map.panBy(new L.Point(-offset, 0), {animate: false});
 
@@ -861,6 +861,8 @@
             var url = apiUrlPrefix + "/command/routesDetails?r=" + request.r;
             $.getJSON(url, routeConfigCallback);
         }
+
+        setTimeout(function(){ map.invalidateSize(), map.setZoom(14)}, 500);
 
         $.ajax({
             url: apiUrlPrefix + "/report/speedmap/stopPathsSpeed",
