@@ -28,6 +28,7 @@
                 border-right: 1px solid black;
             }
 
+
             #links {
                 margin-top: 200px;
             }
@@ -39,13 +40,33 @@
             td {
                 text-align: center;
             }
+
+            #title {
+                margin-top: 40px;
+                margin-bottom: 10px;
+                margin-right: 10px;
+                font-weight: normal;
+                text-align: center;
+                background: #019932;
+                color: white;
+                padding: 8px;
+                font-size: 24px;
+                width: -webkit-fill-available;
+                display: inline-block !important;
+            }
+
+            #paramsFields {
+                flex-flow: column;
+                width: 90%;
+                max-width: 30vw;
+            }
         </style>
     </head>
     <body>
         <%@include file="/template/header.jsp" %>
         <div id="paramsSidebar">
             <div id="title" style="text-align: left; font-size:x-large">
-                Real-time Operations Dispatcher View
+                Dispatcher View
             </div>
 
             <div id="paramsFields">
