@@ -10,8 +10,8 @@ public class TripStatisticsForConfigRev {
     private final int tripIndex;
     private final String blockId;
     private final int expectedStopPathCount;
-    private Set<StopPathRunTimeKey> uniqueStopPathRunTimes= new HashSet<>();
-    private Set<StopPathRunTimeKey> uniqueStopPathDwellTimes=new HashSet<>();
+    private Set<StopPathRunTimeKey> uniqueStopPathRunTimes= new LinkedHashSet<>();
+    private Set<StopPathRunTimeKey> uniqueStopPathDwellTimes=new LinkedHashSet<>();
     private Map<StopPathRunTimeKey, StopPathStatistics> stopPathStatistics = new HashMap<>();
 
     public TripStatisticsForConfigRev(int configRev, String tripId, int expectedStopPathCount, int tripIndex, String blockId){
@@ -44,6 +44,10 @@ public class TripStatisticsForConfigRev {
 
     public String getBlockId() {
         return blockId;
+    }
+
+    public int getExpectedStopPathCount() {
+        return expectedStopPathCount;
     }
 
     public boolean hasAllStopPathsForRunTimes(){
@@ -120,7 +124,7 @@ public class TripStatisticsForConfigRev {
                 if(sps.isLastStop()){
                     continue;
                 }
-                else if(avgDwellTime == 0 || avgDwellTime == null){
+                else if(avgDwellTime == null){
                     return null;
                 }
                 tripDwellTime += avgDwellTime;

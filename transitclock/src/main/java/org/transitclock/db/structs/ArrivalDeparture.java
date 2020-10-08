@@ -1019,7 +1019,8 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 					getTripsWhere(headsign, includeTrip) +
 					getStopsWhere(includeStop) +
 					getStopPathsWhere(includeStopPath) +
-					getDwellTimesWhere(dwellTimeOnly);
+					getDwellTimesWhere(dwellTimeOnly) +
+					"ORDER BY ad.time, ad.stopPathIndex, ad.isArrival DESC";
 
 		try {
 			Query query = session.createQuery(hql);

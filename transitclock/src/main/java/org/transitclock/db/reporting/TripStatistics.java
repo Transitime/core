@@ -39,7 +39,7 @@ public class TripStatistics {
 
     public void addStopPathDwellTime(ArrivalDeparture ad, Double dwellTime){
         TripStatisticsForConfigRev tripStatsConf = getTripStatsConf(ad);
-        if(tripStatsConf != null){
+        if(tripStatsConf != null && ad.getStopPathIndex() < tripStatsConf.getExpectedStopPathCount()){
             StopPathRunTimeKey stopPathkey = new StopPathRunTimeKey(ad.getStopId(), ad.getStopPathId(), ad.getStopPathIndex());
             tripStatsConf.addStopPathDwellTime(stopPathkey, ad, dwellTime);
         }
