@@ -140,11 +140,19 @@
             margin-top: 6%;
         }
         .param > * {
-            font-size: 16px;
+            font-size: 14px;
         }
         .param > span {
             font-weight: 500;
             padding-bottom: 12px;
+        }
+
+        .param > input, .param > select {
+            height: 30px;
+        }
+
+        .param > label {
+            width: 130px;
         }
 
         .pair {
@@ -183,8 +191,8 @@
 
         #serviceDayType {
             width: 100%;
-            height: 36px;
-            margin-top: 6px;
+            height: 30px;
+            margin-top: 0px;
             box-shadow: 0px 1px 4px #69696969;
             font-family: 'Montserrat', sans-serif;
         }
@@ -197,8 +205,8 @@
             margin-left: 2vw;
             margin-top: 20vh;
             height: 80vh;
-            width: 75%;
-            max-width: 1250px;
+            width: 90%;
+            max-width: 1400px;
             padding: 10px 0px;
             background-color: #fff;
             border-radius: 4px;
@@ -227,12 +235,8 @@
             filter: blur(2px) grayscale(100%);
         }
 
-
-
-
-
         #runTimesFlyout {
-            width: 20%;
+            width: 23%;
             height: 100%;
             position: absolute;
             right: 0px;
@@ -397,8 +401,7 @@
                     <input type="text" id="mainDatepicker" name="mainDatepicker"
                            title="The range of dates that you want to examine data for.
                                    <br><br> Begin date must be before the end date."
-                           size="18"
-                           value="Date range" />
+                           value="Date range" style:/>
                 </div>
 
                 <div class="param">
@@ -426,8 +429,8 @@
                            value="" />
                 </div>
 
-                <div class="param vertical">
-                    <label for="serviceDayType">Service Day Type</label>
+                <div class="param">
+                    <label for="serviceDayType">Service Day:</label>
                     <select id="serviceDayType" name="serviceDayType">
                         <option value="">All</option>
                         <option value="weekday">Weekday</option>
@@ -455,8 +458,8 @@
                             <span>Mid Speed (mph max)</span>
                         </div>
                         <div class="pair">
-                            <input id='midSpeedSlider' name='midSpeedSlider' type="range" min="1" max="99" step="0.1" value="1" oninput="midSpeedSlider(this.value)">
-                            <input type="number" id="midSpeedManual" name="midSpeedManual" min="1" max="99" step="0.1" value="1" oninput="midSpeedManual(this.value)">
+                            <input id='midSpeedSlider' name='midSpeedSlider' type="range" min="1" max="99" step="0.1" value="10" oninput="midSpeedSlider(this.value)">
+                            <input type="number" id="midSpeedManual" name="midSpeedManual" min="1" max="99" step="0.1" value="10" oninput="midSpeedManual(this.value)">
 
                         </div>
                     </div>
@@ -546,7 +549,10 @@
 
 <script>
     var mapTileUrl ='http://tile.openstreetmap.org/{z}/{x}/{y}.png'
-    var map = L.map('map');
+    var map = L.map('map', {
+        minZoom: 10,
+        maxZoom: 16
+    });
     L.control.scale({metric: false}).addTo(map);
     L.tileLayer(mapTileUrl, {
         attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
