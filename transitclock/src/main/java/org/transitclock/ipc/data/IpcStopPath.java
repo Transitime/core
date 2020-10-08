@@ -56,7 +56,11 @@ public class IpcStopPath implements Serializable {
 		this.stopId = dbStopPath.getStopId();
 		Stop stop = Core.getInstance().getDbConfig()
 				.getStop(dbStopPath.getStopId());
-		this.stopName = stop.getName();
+		if(stop != null){
+			this.stopName = stop.getName();
+		} else {
+			this.stopName = "";
+		}
 		this.gtfsStopSeq = dbStopPath.getGtfsStopSeq();
 		this.layoverStop = dbStopPath.isLayoverStop();
 		this.waitStop = dbStopPath.isWaitStop();
