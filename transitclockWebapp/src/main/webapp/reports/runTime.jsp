@@ -128,12 +128,32 @@
                 justify-content: space-between;
                 margin-top: 6%;
             }
-            .param > * {
-                font-size: 16px;
+
+            .param-modal {
+                margin: 10px 0px;
             }
+
+            .param, .param-modal > * {
+                font-size: 14px;
+            }
+
+            .param > label, .param-modal > label {
+                width: 130px;
+            }
+
+
             .param > span {
                 font-weight: 500;
                 padding-bottom: 12px;
+            }
+
+            .param > input, .param > select {
+                height: 30px;
+            }
+
+            .param-modal > input, .param-modal > select {
+                height: 30px;
+                width: 200px;
             }
 
             .pair {
@@ -165,10 +185,10 @@
                 display: none;
                 margin-left: 2vw;
                 margin-top: 20vh;
-                height: 80vh;
-                width: 75%;
+                height: 100vh;
+                width: 90%;
                 max-width: 1250px;
-                padding: 10px 0px;
+                padding: 10px 30px;
                 background-color: #fff;
                 border-radius: 4px;
                 box-shadow: 0px 4px 8px rgba(0,0,0,0.3);
@@ -200,10 +220,11 @@
 
             #serviceDayType {
                 width: 100%;
-                height: 36px;
-                margin-top: 6px;
+                height: 30px;
+                margin-top: 0px;
                 box-shadow: 0px 1px 4px #69696969;
                 font-family: 'Montserrat', sans-serif;
+
             }
 
             #beginTime, #endTime {
@@ -254,17 +275,17 @@
 
                         <div class="param">
                             <label for="direction">Direction:</label>
-                            <select id="direction" name="direction" disabled="true" style="width: 177px"></select>
+                            <select id="direction" name="direction" disabled="true" "></select>
                         </div>
 
                         <div class="param">
                             <label for="startStop">Start Stop:</label>
-                            <select id="startStop" name="startStop" disabled="true" style="width: 177px"></select>
+                            <select id="startStop" name="startStop" disabled="true" ></select>
                         </div>
 
                         <div class="param">
                             <label for="endStop">End Stop:</label>
-                            <select id="endStop" name="endStop" disabled="true" style="width: 177px"></select>
+                            <select id="endStop" name></select>
                         </div>
 
                         <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
@@ -328,8 +349,8 @@
                                         want to see result just for rush hour, for example. Leave blank
                                         if want data for entire day.
                                         <br/><br/>Format: hh:mm, as in '07:00' for 7AM."
-                                   size="5"
                                    placeholder="(hh:mm)"
+                                   style="width:100%;"
                                    value="" />
                         </div>
 
@@ -341,13 +362,13 @@
                                         if want data for entire day.
                                         <br/><br/>Format: hh:mm, as in '09:00' for 9AM.
                                         Use '23:59' for midnight."
-                                   size="5"
                                    placeholder="(hh:mm)"
+                                   style="width:100%;"
                                    value="" />
                         </div>
 
-                            <div class="param vertical">
-                                <label for="serviceDayType">Service Day Type</label>
+                            <div class="param">
+                                <label for="serviceDayType">Service Day:</label>
                                 <select id="serviceDayType" name="serviceDayType">
                                 <option value="">All</option>
                                 <option value="weekday">Weekday</option>
@@ -373,7 +394,7 @@
 
                     <br>
 
-                    <div id="avgRunTime" style="display: inline-block; margin-left: 20px; width: 90%; vertical-align: middle;">
+                    <div id="avgRunTime" style="display: inline-block; width: 90%; vertical-align: middle; margin-left:auto; margin-right:auto;">
                         <p style="font-size: 0.8em;display: inline-block;"></p>
                         <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
                         <p style="font-size: 0.8em;display: inline-block;"></p>
@@ -383,8 +404,9 @@
                         <p style="font-size: 0.8em;display: inline-block;"></p>
                         <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
                     </div>
-
-                    <input type="button" id="visualizeButton" class="visualizeButton" value="Visualize trips" style="margin-top: 10px; margin-bottom: 10px;" hidden="true">
+                    <div style="width:100%; display: flex; justify-content: center;">
+                        <input type="button" id="visualizeButton" class="visualizeButton" value="Visualize Trips" style="margin-top: 10px; margin-bottom: 10px; margin-left:auto; margin-right:auto; width:70%" hidden="true">
+                    </div>
                 </div>
 
                 <div id="comparisonModal" hidden="true">
@@ -429,28 +451,29 @@
                             })
                         </script>
 
-                        <div style='font-size: medium;'>Select Comparison Range:</div>
+                        <div style='font-size: medium; margin-bottom: 2px;'>Select Comparison Range:</div>
 
-                        <div class="param" style="display: inline-block;">
+                        <div class="param-modal">
                             <label for="modalDatepicker">Date:</label>
                             <input type="text" id="modalDatepicker" name="modalDatepicker"
                                    title="The range of dates that you want to examine data for.
                                        <br><br> Begin date must be before the end date."
-                                   size="18"
+                                   size="14"
                                    value="Date range" />
                         </div>
 
-                        <div class="param" style="display: inline-block; margin-left: 30px;">
+                        <div class="param-modal">
+                            <label for="serviceDayType">Service Day:</label>
                             <select id="modalServiceDayType" name="modalServiceDayType">
-                                <option value="">Service Day Type</option>
                                 <option value="">All</option>
                                 <option value="weekday">Weekday</option>
                                 <option value="saturday">Saturday</option>
                                 <option value="sunday">Sunday</option>
                             </select>
                         </div>
-
-                        <input type="button" id="modalSubmit" class="submit" value="Submit">
+                        <div style="width:100%; display: flex; justify-content: center;">
+                            <input type="button" id="modalSubmit" class="submit" value="Submit">
+                        </div>
                     </div>
                 </div>
 
@@ -459,7 +482,7 @@
                 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 
                 <div id="runTimeVisualization" hidden="true">
-                    <canvas id="visualizationCanvas" height="100" style="margin-top: 10px;"></canvas>
+                    <canvas id="visualizationCanvas" maintainAspectRatio="false" responsive="true"></canvas>
                 </div>
             </div>
         </div>
@@ -926,13 +949,13 @@
 
                     $("#avgRunTime").html(
                         "<p style='font-size: 0.8em;display: inline-block; vertical-align: middle;'>Average run time</p>" +
-                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 50px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle;'>" + avgRunTime + "</p>" +
+                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 50px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle; text-align: center;'>" + avgRunTime + "</p>" +
                         "<p style='font-size: 0.8em;display: inline-block; margin-left: 50px;'>Fixed</p>" +
-                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 50px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle;'>" + avgFixed + "</p>" +
+                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 50px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle; text-align: center;'>" + avgFixed + "</p>" +
                         "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; vertical-align: middle;'>Variable</p>" +
-                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle;'>" + avgVar + "</p>" +
+                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle; text-align: center;'>" + avgVar + "</p>" +
                         "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; vertical-align: middle;'>Dwell</p>" +
-                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle;'>" + avgDwell + "</p>"
+                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle; text-align: center;'>" + avgDwell + "</p>"
                     );
 
                     $("#mainResults").show();
