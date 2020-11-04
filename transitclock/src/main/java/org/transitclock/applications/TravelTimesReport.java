@@ -122,7 +122,8 @@ public class TravelTimesReport {
         for (TravelTimesForTrip travelTimesForTrip : travelTimesForTrips) {
             String howSet = getHowSet(travelTimesForTrip);
             if (travelTimesForTrip.getTravelTimesForStopPaths().isEmpty()) {
-                addError(EMPTY_STOP_PATHS, travelTimesForTrip.getId(), howSet);
+                addError(EMPTY_STOP_PATHS, travelTimesForTrip.getId(), howSet,
+                        travelTimesForTrip.getId(), travelTimesForTrip.getConfigRev(), travelTimesForTrip.getTravelTimeRev());
                 continue;
             }
 
@@ -149,48 +150,55 @@ public class TravelTimesReport {
     private boolean validateStopPath(TravelTimesForStopPath stopPath, String howSet) {
         boolean dirty = false;
 
+        int id = stopPath.getInternalId();
+        String stopPathId = stopPath.getStopPathId();
+        int configRev = stopPath.getConfigRev();
+        int ttrev = stopPath.getTravelTimesRev();
+
         if (stopPath.getTravelTimeSegmentLength() == 0.0)
-            addError(ZERO_STOP_PATH_LENGTH, stopPath.getStopPathId(), howSet);
+            addError(ZERO_STOP_PATH_LENGTH, stopPathId, howSet, id, configRev, ttrev);
 
         if (stopPath.getTravelTimeSegmentLength() < 0)
-            addError(NEGATIVE_STOP_PATH_LENGTH, stopPath.getStopPathId(), howSet);
+            addError(NEGATIVE_STOP_PATH_LENGTH, stopPathId, howSet, id, configRev, ttrev);
 
         if (stopPath.getTravelTimeSegmentLength() > MAX_STOP_PATH_LENGTH.getValue())
-            addError(LARGE_STOP_PATH_LENGTH, stopPath.getStopPathId(), howSet);
+            addError(LARGE_STOP_PATH_LENGTH, stopPathId, howSet, id, configRev, ttrev);
 
         if (stopPath.getStopTimeMsec() < 0)
-            addError(NEGATIVE_STOP_TIME, stopPath.getStopPathId(), howSet);
+            addError(NEGATIVE_STOP_TIME, stopPathId, howSet, id, configRev, ttrev);
 
-        if (stopPath.getStopTimeMsec() > MAX_STOP_TIME.getValue())
-            addError(LARGE_STOP_TIME, stopPath.getStopPathId(), howSet);
+        if (stopPath.getStopTimeMsec() > MAX_STOP_TIME.getValue()) {
+            addError(LARGE_STOP_TIME, stopPathId, howSet, id, configRev, ttrev);
+        }
 
 
         int ttmIndex = 0;
-        List<Integer> badIndicies = new ArrayList<>();
+        List<Integer> invalidTravelTimesIndicies = new ArrayList<>();
         for (Integer ttm : stopPath.getTravelTimesMsec()) {
             if (ttm == null) {
-                addError(NULL_STOP_PATH_TRAVEL_TIME, stopPath.getStopPathId(), howSet);
+                addError(NULL_STOP_PATH_TRAVEL_TIME, stopPath.getStopPathId(), howSet, id, configRev, ttrev);
                 continue;
             }
             if (ttm == 0)
-                addError(ZERO_STOP_PATH_TRAVEL_TIME, stopPath.getStopPathId(), howSet);
+                addError(ZERO_STOP_PATH_TRAVEL_TIME, stopPath.getStopPathId(), howSet, id, configRev, ttrev);
 
             if (ttm < 0)
-                addError(NEGATIVE_STOP_PATH_TRAVEL_TIME, stopPath.getStopPathId(), howSet);
+                addError(NEGATIVE_STOP_PATH_TRAVEL_TIME, stopPath.getStopPathId(), howSet, id, configRev, ttrev);
 
             if (ttm > MAX_STOP_PATH_TRAVEL_TIME.getValue()) {
-                addError(LARGE_STOP_PATH_TRAVEL_TIME, stopPath.getStopPathId(), howSet);
+                addError(LARGE_STOP_PATH_TRAVEL_TIME, stopPath.getStopPathId(), howSet, id, configRev, ttrev);
                 if (repair) {
-                    badIndicies.add(ttmIndex);
+                    invalidTravelTimesIndicies.add(ttmIndex);
                 }
 
             }
             ttmIndex++;
         }
 
-        if (repair() && !badIndicies.isEmpty()) {
+        // TravelTimesForStopPath is final -- the only repair we can make is to the list of travel times
+        if (repair() && !invalidTravelTimesIndicies.isEmpty()) {
             logger.error("ACTION,stopPath,{},travelTimes post,{}", stopPath.getStopPathId(), stopPath.getTravelTimesMsec());
-            for (Integer badIndex : badIndicies) {
+            for (Integer badIndex : invalidTravelTimesIndicies) {
                 dirty = true;
                 stopPath.getTravelTimesMsec().set(badIndex, 0);
             }
@@ -199,8 +207,10 @@ public class TravelTimesReport {
         return dirty;
     }
 
-    private void addError(String errorType, Object id, String howSet) {
-
+    private void addError(String errorType, Object natrualKey, String howSet, Integer id, Integer configRev, Integer ttrev) {
+        if (ttrev != null)
+            logger.error("DETAILS,"+ howSet + "_" + errorType + "," + natrualKey + "," + id
+                    + "," + configRev  + "," + ttrev);
         this.errorsById.put(howSet + "_" + errorType, id);
     }
 
