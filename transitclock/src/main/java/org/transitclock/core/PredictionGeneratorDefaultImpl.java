@@ -32,6 +32,7 @@ import org.transitclock.core.predictiongenerator.bias.BiasAdjusterFactory;
 import org.transitclock.db.structs.*;
 import org.transitclock.ipc.data.IpcPrediction;
 import org.transitclock.ipc.data.IpcPrediction.ArrivalOrDeparture;
+import org.transitclock.monitoring.CloudwatchService;
 import org.transitclock.utils.Geo;
 import org.transitclock.utils.Time;
 
@@ -64,6 +65,8 @@ import java.util.*;
  * 
  */
 public class PredictionGeneratorDefaultImpl implements PredictionGenerator, PredictionComponentElementsGenerator{
+
+	private CloudwatchService monitoring = null;
 
 	private static BooleanConfigValue terminatePredictionsAtTripEnd =
 			new BooleanConfigValue("transitclock.core.terminatePredictionsAtTripEnd",
@@ -177,7 +180,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 
 	  boolean lateSoMarkAsUncertain, int tripCounter, Integer scheduleDeviation) {	 
 
-
+		getMonitoring().sumMetric("PredictionGenerationDefault");
 		 // Determine additional parameters for the prediction to be generated
 		
 		StopPath path = indices.getStopPath();
@@ -200,7 +203,8 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 		}
 						
 		// If should generate arrival time...
-		if ((indices.atEndOfTrip() || useArrivalTimes) && !indices.isWaitStop()) {	
+		if ((indices.atEndOfTrip() || useArrivalTimes) && !indices.isWaitStop()) {
+			getMonitoring().sumMetric("PredictionGenerationStop");
 			// Create and return arrival time for this stop
 			return new IpcPrediction(avlReport, stopId, gtfsStopSeq, trip,
 					predictionTime,	predictionTime, indices.atEndOfTrip(),
@@ -316,6 +320,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 								
 					long predictionForNextStopCalculation = expectedDepartureTime;
 					long predictionForUser = expectedDepartureTimeWithoutStopWaitTime;
+					getMonitoring().sumMetric("PredictionGenerationStop");
 					return new IpcPrediction(avlReport, stopId, gtfsStopSeq,
 							trip, predictionForUser,
 							predictionForNextStopCalculation,
@@ -324,6 +329,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 							freqStartTime, tripCounter,vehicleState.isCanceled());
 
 				} else {
+					getMonitoring().sumMetric("PredictionGenerationStop");
 					// Use the expected departure times, possibly adjusted for 
 					// stop wait times
 					return new IpcPrediction(avlReport, stopId, gtfsStopSeq,
@@ -334,6 +340,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 
 				}
 			} else {
+				getMonitoring().sumMetric("PredictionGenerationStop");
 				// Create and return the departure prediction for this 
 				// non-wait-stop stop
 				return new IpcPrediction(avlReport, stopId, gtfsStopSeq, trip,
@@ -708,4 +715,16 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 		}
 		return false;
 	}
+
+
+	/**
+	 * lazy load Cloudwatch Monitoring service.
+	 * @return
+	 */
+	protected CloudwatchService getMonitoring() {
+		if (monitoring == null)
+			monitoring = CloudwatchService.getInstance();
+		return monitoring;
+	}
+
 }

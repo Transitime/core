@@ -91,7 +91,11 @@ public class TravelTimeInfo {
 	public boolean isStopTimeValid() {
 		return stopTime != STOP_TIME_NOT_VALID && stopTime >= 0;
 	}
-	
+
+	public boolean isStopTimeValid(int maxStopTime) {
+		return stopTime != STOP_TIME_NOT_VALID && stopTime >= 0 && stopTime < maxStopTime;
+	}
+
 	public boolean areTravelTimesValid() {
 		if (travelTimes == null || travelTimes.isEmpty())
 			return false;
@@ -100,7 +104,17 @@ public class TravelTimeInfo {
 				return false;
 		return true;
 	}
-	
+
+	public boolean areTravelTimesValid(int maxTravelTime) {
+		if (travelTimes == null || travelTimes.isEmpty())
+			return false;
+		for (int time : travelTimes)
+			if (time < 0 || time > maxTravelTime)
+				return false;
+		return true;
+	}
+
+
 	public double getTravelTimeSegLength() {
 		return travelTimeSegLength;
 	}

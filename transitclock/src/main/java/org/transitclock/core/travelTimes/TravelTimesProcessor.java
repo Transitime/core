@@ -292,7 +292,7 @@ public class TravelTimesProcessor {
 
 		// If schedule adherence is really far off then ignore the data
 		// point because it would skew the results.
-		if (Math.abs(lateTimeMsec) > MAX_SCHED_ADH_FOR_FIRST_STOP_TIME) 
+		if (Math.abs(lateTimeMsec) > MAX_SCHED_ADH_FOR_FIRST_STOP_TIME)
 			return;
 		
 		// If configured to not use early departures then reset lateTimeMsec
@@ -301,7 +301,7 @@ public class TravelTimesProcessor {
 		// departures indicates a problem with travel times.
 		if (shouldResetEarlyTerminalDepartures() && lateTimeMsec < 0)
 			lateTimeMsec = 0;
-		
+
 		// Get the MapKey so can put stop time into map
 		ProcessedDataMapKey mapKeyForTravelTimes =
 				getKey(arrDep.getTripId(), arrDep.getStopPathIndex(),
@@ -639,7 +639,16 @@ public class TravelTimesProcessor {
 			// A low speed indicates a problem with the data.
 			double segmentSpeedMps = 
 					travelTimeSegmentLength * Time.MS_PER_SEC / segmentTime;
-			if (segmentSpeedMps < getMinSegmentSpeedMps()) {
+			if (segmentSpeedMps < 0.0) {
+				// arrival / departure were switched, clamp to 0 travel time
+				logger.error("For segmentIdx={} segment speed of {}m/s is "
+								+ "negative"
+								+ "Therefore it is being reset to zero. "
+								+ "arrDep1={} arrDep2={}",
+						i, StringUtils.twoDigitFormat(segmentSpeedMps),
+						arrDep1, arrDep2);
+				segmentTime = 0;
+			} else if (segmentSpeedMps < getMinSegmentSpeedMps()) {
 				logger.error("For segmentIdx={} segment speed of {}m/s is "
 						+ "below the limit of minSegmentSpeedMps={}m/s. "
 						+ "Therefore it is being reset to min segment speed. "

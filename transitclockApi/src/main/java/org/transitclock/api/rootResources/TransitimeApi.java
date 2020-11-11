@@ -48,6 +48,7 @@ import org.transitclock.api.data.ApiCurrentServerDate;
 import org.transitclock.api.data.ApiDirections;
 import org.transitclock.api.data.ApiIds;
 import org.transitclock.api.data.ApiPredictions;
+import org.transitclock.api.data.ApiRevisionInformation;
 import org.transitclock.api.data.ApiRmiServerStatus;
 import org.transitclock.api.data.ApiRoutes;
 import org.transitclock.api.data.ApiRoutesDetails;
@@ -73,6 +74,7 @@ import org.transitclock.ipc.data.IpcCalendar;
 import org.transitclock.ipc.data.IpcDirectionsForRoute;
 import org.transitclock.ipc.data.IpcPrediction;
 import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
+import org.transitclock.ipc.data.IpcRevisionInformation;
 import org.transitclock.ipc.data.IpcRoute;
 import org.transitclock.ipc.data.IpcRouteSummary;
 import org.transitclock.ipc.data.IpcSchedule;
@@ -84,6 +86,7 @@ import org.transitclock.ipc.data.IpcVehicleComplete;
 import org.transitclock.ipc.data.IpcVehicleConfig;
 import org.transitclock.ipc.interfaces.ConfigInterface;
 import org.transitclock.ipc.interfaces.PredictionsInterface;
+import org.transitclock.ipc.interfaces.RevisionInformationInterface;
 import org.transitclock.ipc.interfaces.ServerStatusInterface;
 import org.transitclock.ipc.interfaces.VehiclesInterface;
 
@@ -1727,6 +1730,22 @@ public class TransitimeApi {
 		}
 	}
 
+	@Path("/command/revisionInformation")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Retrives internal db metadata.",description="Retrives internal db include revision and data load date.",tags= {"configRev"})
+	public Response getConfigRev(@BeanParam StandardParameters stdParameters) throws WebApplicationException {
+		stdParameters.validate();
+		try {
+			RevisionInformationInterface inter = stdParameters.getRevisionInformationInterface();
+			IpcRevisionInformation ipcRevisionInformation = inter.get();
+
+			ApiRevisionInformation apiRevisionInformation = new ApiRevisionInformation(stdParameters.getAgencyId(), ipcRevisionInformation);
+			return stdParameters.createResponse(apiRevisionInformation);
+		} catch (Exception e) {
+			throw WebUtils.badRequestException(e);
+		}
+	}
 	/**
 	 * Returns info for this particular web server for each agency on how many
 	 * outstanding RMI calls there are.

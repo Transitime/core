@@ -49,6 +49,9 @@ import java.util.*;
  * 
  */
 public class UpdateTravelTimes {
+
+	public static final int MAX_TRAVEL_TIME = 20 * Time.MS_PER_MIN;
+	public static final int MAX_STOP_TIME = 20 * Time.MS_PER_MIN;
 	
 	// Read in configuration files. This should be done statically before
 	// the logback LoggerFactory.getLogger() is called so that logback can
@@ -130,7 +133,7 @@ public class UpdateTravelTimes {
 					// for first stop of trip. For this case should use
 					// previous value.
 					List<Integer> travelTimes;
-					if (travelTimeInfo.areTravelTimesValid()) {
+					if (travelTimeInfo.areTravelTimesValid(MAX_TRAVEL_TIME)) {
 						travelTimes = travelTimeInfo.getTravelTimes();
 					} else {
 						// Travel times not valid so use old values
@@ -148,7 +151,7 @@ public class UpdateTravelTimes {
 					// continue, stop getting AVL data for vehicle, etc. For 
 					// this situation use the old stop time.
 					int stopTime;
-					if (travelTimeInfo.isStopTimeValid()) {
+					if (travelTimeInfo.isStopTimeValid(MAX_STOP_TIME)) {
 						stopTime = travelTimeInfo.getStopTime();
 					} else {
 						// Stop time not valid so use old time
@@ -165,8 +168,8 @@ public class UpdateTravelTimes {
 									newTravelTimesRev,
 									trip.getStopPath(stopIdx).getId(), 
 									travelTimeInfo.getTravelTimeSegLength(),
-									travelTimes,
-									stopTime,
+									clampTravelTimes(travelTimes),
+									clampStopTime(stopTime),
 									-1,  // daysOfWeekOverride
 									travelTimeInfo.howSet(),
 									trip);
@@ -181,13 +184,15 @@ public class UpdateTravelTimes {
 
 					// Create copy of the original travel times but update the 
 					// travel time rev.
+					// while copying ensure the values are sane / prune out invalid values
 					ttForStopPathToUse = 
-							originalTravelTimes.clone(newTravelTimesRev);
+							originalTravelTimes.cloneAndClamp(newTravelTimesRev, MAX_STOP_TIME, MAX_TRAVEL_TIME);
 				}
 
 				// If already have created the exact same TravelTimesForStopPath 
 				// then use the existing one so don't generate too many db 
 				// objects.
+				// if we've clamped above this should return null
 				TravelTimesForStopPath cachedTTForStopPath =
 						ttForStopPathCache.get(ttForStopPathToUse);
 				if (cachedTTForStopPath == null) {
@@ -233,7 +238,28 @@ public class UpdateTravelTimes {
 		} // End of for each trip that is configured	
 		return newTravelTimesRev;
 	}
-	
+
+	// Make sure travelTimes aren't unreasonably large
+	private static List<Integer> clampTravelTimes(List<Integer> travelTimes) {
+		List<Integer> clampedTravelTimes = new ArrayList<>(travelTimes.size());
+		for (Integer tt : travelTimes) {
+			if (tt > MAX_TRAVEL_TIME) {
+				clampedTravelTimes.add(0);
+			} else {
+				clampedTravelTimes.add(tt);
+			}
+		}
+		return clampedTravelTimes;
+	}
+
+	// Make sure stopTime isn't unreasonably large
+	private static int clampStopTime(int stopTime) {
+		if (stopTime > MAX_STOP_TIME) {
+			stopTime = 0;
+		}
+		return stopTime;
+	}
+
 	/**
 	 * Writes the trips to the database.
 	 * 
@@ -324,7 +350,7 @@ public class UpdateTravelTimes {
 		logger.info("assigning travel times...");
 		// Update all the Trip objects with the new travel times
 		int travelTimesRev = setTravelTimesForAllTrips(session, tripMap, travelTimeInfoMap);
-		
+
 		logger.info("saving travel times...");
 		// Write out the trip objects, which also writes out the travel times
 		writeNewTripDataToDb(session, tripMap);

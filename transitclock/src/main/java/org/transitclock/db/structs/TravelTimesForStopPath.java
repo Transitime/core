@@ -28,6 +28,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -274,7 +275,26 @@ public class TravelTimesForStopPath implements Serializable {
 				stopPathId, travelTimeSegmentLength, travelTimesMsec,
 				stopTimeMsec, daysOfWeekOverride, howSet, null);
 	}
-	
+
+	public TravelTimesForStopPath cloneAndClamp(int newTravelTimesRev, int maxStopTimeMsec, int maxTravelTimeMsec) {
+		int clampedStopTimeMsec = Math.min(this.stopTimeMsec, maxStopTimeMsec);
+		List<Integer> clampedTravelTimesMsec = new ArrayList<>(this.travelTimesMsec.size());
+		for (Integer tt : this.travelTimesMsec) {
+			clampedTravelTimesMsec.add(Math.min(tt, maxTravelTimeMsec));
+		}
+		// if not dirty, return original list so strict equals comparison still works
+		if (CollectionUtils.isEqualCollection(this.travelTimesMsec, clampedTravelTimesMsec)) {
+			return new TravelTimesForStopPath(configRev, newTravelTimesRev,
+					stopPathId, travelTimeSegmentLength, travelTimesMsec,
+					clampedStopTimeMsec, daysOfWeekOverride, howSet, null);
+		} else {
+			return new TravelTimesForStopPath(configRev, newTravelTimesRev,
+					stopPathId, travelTimeSegmentLength, clampedTravelTimesMsec,
+					clampedStopTimeMsec, daysOfWeekOverride, howSet, null);
+		}
+	}
+
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -313,6 +333,8 @@ public class TravelTimesForStopPath implements Serializable {
 	}
 
 	/************************ Getter Methods *************************/	
+
+	public int getInternalId() { return id; }
 
 	public int getConfigRev() {
 		return configRev;		

@@ -340,7 +340,7 @@ public class GtfsRtTripFeed {
 				continue;
 			}
 
-			//Sort trip data according to sequnece
+			//Sort trip data according to sequence
 			Collections.sort(predsForTrip, comparator);
 
 			//  Need to check if predictions for frequency based trip and group by start time if they are.
