@@ -16,22 +16,6 @@
  */
 package org.transitclock.db.structs;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -125,13 +109,19 @@ public class Route implements Serializable {
 	@Transient
 	private Map<String, List<String>> orderedStopsPerDirectionMap = null;
 
+	// For getOrderedStopsByDirection()
+	@Transient
+	private Map<String, List<String>> unorderedUniqueStopsPerDirectionMap = null;
+
 	// For getStopOrder().
 	// Keeps track of stop order for each direction. Keyed on direction id. 
 	// The submap is keyed on stop id and contains list of stop orders.
 	// Need a list since a stop can be in a trip multiple times.
 	@Transient
 	private Map<String, Map<String, List<Integer>>> stopOrderByDirectionMap = null;
-	
+
+	private final Object unorderedStopsLock = new Object();
+
 	// Because Hibernate requires objects with composite Ids to be Serializable
 	private static final long serialVersionUID = 9037023420649883860L;
 
@@ -660,6 +650,40 @@ public class Route implements Serializable {
 		
 		// Return the newly created collection of stop paths
 		return stopPaths;
+	}
+
+	/**
+	 * For each GTFS direction ID returns list of unordered stops for the direction.
+	 * Groups all stops together without accounting for trip pattern order.
+	 * Synchronized block since can be access through multiple threads.
+	 *
+	 * @return Map keyed by direction ID and value of List of ordered stop IDs.
+	 */
+	public Map<String, List<String>> getUnorderedUniqueStopsByDirection() {
+		synchronized (unorderedStopsLock) {
+			// If already determined the stops return the cached map
+			if (unorderedUniqueStopsPerDirectionMap != null) {
+				return unorderedUniqueStopsPerDirectionMap;
+			}
+
+			// Haven't yet determined ordered stops so do so now
+			unorderedUniqueStopsPerDirectionMap = new HashMap<>();
+
+			// For each direction
+			for (String directionId : getDirectionIds()) {
+				// Determine ordered collection of stops for direction
+				Set<String> stopIdsForTripPatternList = new HashSet<>();
+				List<TripPattern> tripPatternsForDir = getTripPatterns(directionId);
+				for (TripPattern tripPattern : tripPatternsForDir) {
+					List<String> stopIdsForTripPattern = tripPattern.getStopIds();
+					for (String stopId : stopIdsForTripPattern) {
+						stopIdsForTripPatternList.add(stopId);
+					}
+				}
+				unorderedUniqueStopsPerDirectionMap.put(directionId, new ArrayList<>(stopIdsForTripPatternList));
+			}
+			return unorderedUniqueStopsPerDirectionMap;
+		}
 	}
 	
 	/**

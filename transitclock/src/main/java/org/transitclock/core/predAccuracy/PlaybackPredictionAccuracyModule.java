@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.utils.PlaybackIntervalTimer;
-import org.transitclock.utils.Time;
 
 public class PlaybackPredictionAccuracyModule extends PredictionAccuracyModule {
 	private static final Logger logger = LoggerFactory
@@ -32,7 +31,7 @@ public class PlaybackPredictionAccuracyModule extends PredictionAccuracyModule {
 			{
 				try {
 					// Process data
-					getAndProcessData(getRoutesAndStops(), Core.getInstance().getSystemDate());
+					getAndProcessData(getRoutesAndStops(Core.getInstance().getDbConfig().getRoutes()), Core.getInstance().getSystemDate());
 					
 					// Make sure old predictions that were never matched to an
 					// arrival/departure don't stick around taking up memory.

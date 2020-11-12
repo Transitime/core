@@ -17,20 +17,10 @@
 
 package org.transitclock.core.predAccuracy;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
+import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.dataCache.PredictionDataCache;
 import org.transitclock.db.structs.ArrivalDeparture;
@@ -43,6 +33,9 @@ import org.transitclock.modules.Module;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.MapKey;
 import org.transitclock.utils.Time;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Reads internal predictions every transitclock.predAccuracy.pollingRateMsec and
@@ -104,16 +97,26 @@ public class PredictionAccuracyModule extends Module {
 					5,
 					"Number of stops per trip pattern that should collect "
 					+ "prediction data for each polling cycle.");
+
+	private static int getStopsPerTrip() {
+		return stopsPerTrip.getValue();
+	}
+
+	private static final BooleanConfigValue includeStopsFromAllTripPatterns =
+			new BooleanConfigValue("transitclock.predAccuracy.includeStopsFromAllTripPatterns",
+					false,
+					"Include unique stops for all trip patterns when sampling instead of just using stops "
+							+ "for the longest trip pattern per route/direction");
+
+	private static boolean getIncludeStopsFromAllTripPatterns() {
+		return includeStopsFromAllTripPatterns.getValue();
+	}
 	
 	private static final IntegerConfigValue maxRandomStopSelectionsPerTrip = 
 			new IntegerConfigValue("transitclock.predAccuracy.maxRandomStopSelectionsPerTrip", 
 					100,
 					"Max number of random stops to look at to get the stopsPerTrip.");
 
-	
-	private static int getStopsPerTrip() {
-		return stopsPerTrip.getValue();
-	}
 
 	private static final IntegerConfigValue maxLatenessComparedToPredictionMsec = 
 			new IntegerConfigValue("transitclock.predAccuracy.maxLatenessComparedToPredictionMsec", 
@@ -204,10 +207,12 @@ public class PredictionAccuracyModule extends Module {
 		    timer = new IntervalTimer();
 				// Process data
 
-				
-
 		    logger.info("processing prediction accuracy....");
-				getAndProcessData(getRoutesAndStops(), Core.getInstance().getSystemDate());
+		    	if(getIncludeStopsFromAllTripPatterns()){
+					getAndProcessData(getAllRoutesAndStops(Core.getInstance().getDbConfig().getRoutes()), Core.getInstance().getSystemDate());
+				} else {
+					getAndProcessData(getRoutesAndStops(Core.getInstance().getDbConfig().getRoutes()), Core.getInstance().getSystemDate());
+				}
 				logger.info("processing prediction accuracy complete.");
 
 				// Make sure old predictions that were never matched to an
@@ -235,23 +240,23 @@ public class PredictionAccuracyModule extends Module {
 	/**
 	 * Returns the routes and stops that should store predictions in memory for.
 	 * Usually will be all routes for an agency, with a sampling of stops.
-	 * 
+	 * Only Includes stops for the longest trip pattern on the route.
+	 *
 	 * @return
 	 */
-	protected List<RouteAndStops> getRoutesAndStops() {
+	public List<RouteAndStops> getRoutesAndStops(List<Route> routes) {
 		// The value to be returned
 		List<RouteAndStops> list = new ArrayList<RouteAndStops>();
 		
 		// For each route...
-		List<Route> routes = Core.getInstance().getDbConfig().getRoutes();
 		for (Route route : routes) {
 			RouteAndStops routeStopInfo = new RouteAndStops();
 			list.add(routeStopInfo);
 			
 			routeStopInfo.routeId = route.getId();
-			
+
 			// For each direction for the route...
-			List<TripPattern> tripPatterns = 
+			List<TripPattern> tripPatterns =
 					route.getLongestTripPatternForEachDirection();
 			for (TripPattern tripPattern : tripPatterns) {
 				List<String> stopIdsForTripPattern = tripPattern.getStopIds();
@@ -264,16 +269,16 @@ public class PredictionAccuracyModule extends Module {
 				} else {
 					// Get stops for direction randomly
 					Set<String> stopsSet = new HashSet<String>();
-					int tries=0;
-					while (stopsSet.size() < getStopsPerTrip() && tries < maxRandomStopSelectionsPerTrip.getValue()) {
-						// Randomly get a stop ID for the trip pattern
-						int index = (int) (stopIdsForTripPattern.size() * 
-								Math.random());
-						String stopId = stopIdsForTripPattern.get(index);
-						if (!stopsSet.contains(stopId)) {
-							stopsSet.add(stopId);
+					Collections.shuffle(stopIdsForTripPattern);
+					int index=0;
+					while (index < stopIdsForTripPattern.size()
+							&& index < maxRandomStopSelectionsPerTrip.getValue()
+							&& stopsSet.size() < getStopsPerTrip()) {
+						String shuffledStopId = stopIdsForTripPattern.get(index);
+						if (!stopsSet.contains(shuffledStopId)) {
+							stopsSet.add(shuffledStopId);
 						}
-						tries++;
+						index++;
 					}
 					routeStopInfo.stopIds.put(tripPattern.getDirectionId(), 
 							stopsSet);
@@ -285,6 +290,62 @@ public class PredictionAccuracyModule extends Module {
 		// memory for
 		logger.debug("getRoutesAndStops() returning {}", list);
 		return list;		
+	}
+
+	/**
+	 * Returns the routes and stops that should store predictions in memory for.
+	 * Usually will be all routes for an agency, with a sampling of stops.
+	 * Includes all stops for all trip patterns.
+	 *
+	 * @return
+	 */
+	public List<RouteAndStops> getAllRoutesAndStops(List<Route> routes) {
+		// The value to be returned
+		List<RouteAndStops> list = new ArrayList<RouteAndStops>();
+
+		// For each route...
+		for (Route route : routes) {
+			RouteAndStops routeStopInfo = new RouteAndStops();
+			list.add(routeStopInfo);
+
+			routeStopInfo.routeId = route.getId();
+
+			// For each direction for the route...
+			Map<String, List<String>> stopsByDirection = route.getUnorderedUniqueStopsByDirection();
+
+			for (Map.Entry<String, List<String>> entry : stopsByDirection.entrySet()) {
+
+				String directionId = entry.getKey();
+				List<String> stopIdsForDirection = entry.getValue();
+
+				// If not that many stops for the trip then use all of them.
+				if (getStopsPerTrip() >= stopIdsForDirection.size()) {
+					// Use all stops for this trip pattern
+					routeStopInfo.stopIds.put(directionId, stopIdsForDirection);
+				} else {
+					// Get stops for direction randomly
+					Set<String> stopsSet = new HashSet<String>();
+					Collections.shuffle(stopIdsForDirection);
+					int index=0;
+					while (index < stopIdsForDirection.size()
+							&& index < maxRandomStopSelectionsPerTrip.getValue()
+							&& stopsSet.size() < getStopsPerTrip()) {
+						String shuffledStopId = stopIdsForDirection.get(index);
+						if (!stopsSet.contains(shuffledStopId)) {
+							stopsSet.add(shuffledStopId);
+						}
+						index++;
+					}
+					routeStopInfo.stopIds.put(directionId,
+							stopsSet);
+				}
+			}
+		}
+
+		// Return the routes/stops that predictions should be stored in
+		// memory for
+		logger.debug("getRoutesAndStops() returning {}", list);
+		return list;
 	}
 	
 	/**
