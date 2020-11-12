@@ -48,7 +48,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 			"Max number of historical days trips to include in Kalman prediction calculation.");
 
 	private static final IntegerConfigValue maxKalmanDaysToSearch = new IntegerConfigValue(
-			"transitclock.prediction.data.kalman.maxdaystoseach", new Integer(30),
+			"transitclock.prediction.data.kalman.maxdaystosearch", new Integer(30),
 			"Max number of days to look back for data. This will also be effected by how old the data in the cache is.");
 
 	private static final DoubleConfigValue initialErrorValue = new DoubleConfigValue(

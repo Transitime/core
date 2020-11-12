@@ -42,7 +42,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 			"Max number of historical days trips to include in Kalman prediction calculation.");
 
 	private static final IntegerConfigValue maxKalmanDaysToSearch = new IntegerConfigValue(
-			"transitclock.prediction.data.kalman.maxdaystoseach", new Integer(21),
+			"transitclock.prediction.data.kalman.maxdaystosearch", new Integer(21),
 			"Max number of days to look back for data. This will also be effected by how old the data in the cache is.");
 
 	private static final DoubleConfigValue initialErrorValue = new DoubleConfigValue(
@@ -89,6 +89,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 		VehicleState currentVehicleState = vehicleStateManager.getVehicleState(avlReport.getVehicleId());
 
 		try {
+			// this is our current vehicles travel dates for this trip so far
 			TravelTimeDetails travelTimeDetails = HistoricalPredictionLibrary.getLastVehicleTravelTime(currentVehicleState, indices);
 
 
@@ -103,9 +104,16 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 
 				Date nearestDay = DateUtils.truncate(avlReport.getDate(), Calendar.DAY_OF_MONTH);
 
-				List<TravelTimeDetails> lastDaysTimes = HistoricalPredictionLibrary.lastDaysTimes(tripCache, currentVehicleState.getTrip().getId(),currentVehicleState.getTrip().getDirectionId(),
-						indices.getStopPathIndex(), nearestDay, currentVehicleState.getTrip().getStartTime(),
-						maxKalmanDaysToSearch.getValue(), maxKalmanDays.getValue());
+				// lookup historical travel times for this trip independent of vehicle
+				List<TravelTimeDetails> lastDaysTimes = HistoricalPredictionLibrary.lastDaysTimes(
+								tripCache,
+								currentVehicleState.getTrip().getId(),
+								currentVehicleState.getTrip().getDirectionId(),
+								indices.getStopPathIndex(),
+								nearestDay,
+								currentVehicleState.getTrip().getStartTime(),
+								maxKalmanDaysToSearch.getValue(),
+								maxKalmanDays.getValue());
 
 				if(lastDaysTimes!=null)
 				{
@@ -154,6 +162,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 						//TODO this should also display the detail of which vehicle it choose as the last one.
 						logger.debug("Using last vehicle value: " + travelTimeDetails + " for : "+ indices.toString());
 
+						// perform the adjustment based on the history retrieved
 						kalmanPredictionResult = kalmanPrediction.predict(last_vehicle_segment, historical_segments_k,
 								last_prediction_error.getError());
 
