@@ -21,36 +21,6 @@
 			<name>bintray</name>
 			<url>http://dl.bintray.com/kevinlee/maven</url>
 		</repository>
-		<repository>
-			<id>snapshots.staging.obanyc.com</id>
-			<url>http://build.staging.obanyc.com/archiva/repository/snapshots/</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>snapshots.staging.obanyc.com</id>
-			<url>http://build.staging.obanyc.com/archiva/repository/snapshots/</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>releases.staging.obanyc.com</id>
-			<url>http://build.staging.obanyc.com/archiva/repository/releases/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
