@@ -344,7 +344,7 @@ public class PredictionAccuracyModule extends Module {
 
 		// Return the routes/stops that predictions should be stored in
 		// memory for
-		logger.debug("getRoutesAndStops() returning {}", list);
+		logger.debug("getAllRoutesAndStops() returning {}", list);
 		return list;
 	}
 	
