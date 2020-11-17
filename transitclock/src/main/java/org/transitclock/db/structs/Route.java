@@ -109,7 +109,6 @@ public class Route implements Serializable {
 	@Transient
 	private Map<String, List<String>> orderedStopsPerDirectionMap = null;
 
-	// For getOrderedStopsByDirection()
 	@Transient
 	private Map<String, List<String>> unorderedUniqueStopsPerDirectionMap = null;
 
@@ -120,6 +119,7 @@ public class Route implements Serializable {
 	@Transient
 	private Map<String, Map<String, List<Integer>>> stopOrderByDirectionMap = null;
 
+	@Transient
 	private final Object unorderedStopsLock = new Object();
 
 	// Because Hibernate requires objects with composite Ids to be Serializable
