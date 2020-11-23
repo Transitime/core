@@ -20,7 +20,7 @@ import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.core.AvlProcessor;
 import org.transitclock.modules.Module;
-import org.transitclock.monitoring.CloudwatchService;
+import org.transitclock.monitoring.MonitoringService;
 import org.transitclock.utils.threading.BoundedExecutor;
 import org.transitclock.utils.threading.NamedThreadFactory;
 
@@ -51,7 +51,7 @@ public class AvlSqsClientModule extends Module {
   private ArrayBlockingQueue<Message> _deserializeQueue;
   private ArrayBlockingQueue<Message> _acknowledgeQueue;
   private ArrayBlockingQueue<Message> _archiveQueue;
-  private CloudwatchService monitoring;
+  private MonitoringService monitoring;
   
   private final static int MAX_THREADS = 100;
 
@@ -114,7 +114,7 @@ public class AvlSqsClientModule extends Module {
   
     public AvlSqsClientModule(String agencyId) throws Exception {
       super(agencyId);
-      monitoring = CloudwatchService.getInstance();
+      monitoring = MonitoringService.getInstance();
       logger.info("loading AWS SQS credentials from environment");
       _sqsCredentials = new BasicAWSCredentials(sqsKey.getValue(), sqsSecret.getValue());
       connect();
@@ -330,19 +330,19 @@ public class AvlSqsClientModule extends Module {
                 recordCount++;
                 if (avlReport != null) {
                   if (avlReport.getTotalLatency() != null) {
-                    monitoring.saveMetric("PredictionTotalQueueLatencyInMillis", new Double(avlReport.getTotalLatency()), 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+                    monitoring.saveMetric("PredictionTotalQueueLatencyInMillis", new Double(avlReport.getTotalLatency()), 1, MonitoringService.MetricType.AVERAGE, MonitoringService.ReportingIntervalTimeUnit.MINUTE, false);
                   }
                   if (avlReport.getSqsLatency() != null) {
-                    monitoring.saveMetric("PredictionSQSQueueLatencyInMillis", new Double(avlReport.getSqsLatency()), 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+                    monitoring.saveMetric("PredictionSQSQueueLatencyInMillis", new Double(avlReport.getSqsLatency()), 1, MonitoringService.MetricType.AVERAGE, MonitoringService.ReportingIntervalTimeUnit.MINUTE, false);
                   }
                   if (avlReport.getAvlLatency() != null) {
-                    monitoring.saveMetric("PredictionAvlQueueLatencyInMillis", new Double(avlReport.getAvlLatency()), 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+                    monitoring.saveMetric("PredictionAvlQueueLatencyInMillis", new Double(avlReport.getAvlLatency()), 1, MonitoringService.MetricType.AVERAGE, MonitoringService.ReportingIntervalTimeUnit.MINUTE, false);
                   }
                   if (avlReport.getForwarderProcessingLatency() != null) {
-                    monitoring.saveMetric("PredictionForwarderProcessingLatencyInMillis", new Double(avlReport.getForwarderProcessingLatency()), 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+                    monitoring.saveMetric("PredictionForwarderProcessingLatencyInMillis", new Double(avlReport.getForwarderProcessingLatency()), 1, MonitoringService.MetricType.AVERAGE, MonitoringService.ReportingIntervalTimeUnit.MINUTE, false);
                   }
                   if (avlReport.getForwarderSendLatency() != null) {
-                    monitoring.saveMetric("PredictionForwarderSendLatencyInMillis", new Double(avlReport.getForwarderSendLatency()), 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+                    monitoring.saveMetric("PredictionForwarderSendLatencyInMillis", new Double(avlReport.getForwarderSendLatency()), 1, MonitoringService.MetricType.AVERAGE, MonitoringService.ReportingIntervalTimeUnit.MINUTE, false);
                   }
                 }
                   
@@ -444,10 +444,10 @@ public class AvlSqsClientModule extends Module {
                 _acknowledgeQueue.size(),
                 _archiveQueue.size());
             // lastAvlReportTime is already reported as LatestAvlReportAgeInSeconds
-            monitoring.saveMetric("PredictionReceiveQueueSize", new Double(_receiveQueue.size()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-            monitoring.saveMetric("PredictionDeserializeQueueSize", new Double(_deserializeQueue.size()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-            monitoring.saveMetric("PredictionAckQueueSize", new Double(_acknowledgeQueue.size()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-            monitoring.saveMetric("PredictionArchiveQueueSize", new Double(_archiveQueue.size()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+            monitoring.saveMetric("PredictionReceiveQueueSize", new Double(_receiveQueue.size()), 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+            monitoring.saveMetric("PredictionDeserializeQueueSize", new Double(_deserializeQueue.size()), 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+            monitoring.saveMetric("PredictionAckQueueSize", new Double(_acknowledgeQueue.size()), 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+            monitoring.saveMetric("PredictionArchiveQueueSize", new Double(_archiveQueue.size()), 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
             Thread.sleep(STATUS_FREQUENCY_SECONDS * 1000);
           } catch (Exception any) {
             logger.error("exception with status: ", any);

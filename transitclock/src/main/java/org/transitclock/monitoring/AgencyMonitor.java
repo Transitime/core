@@ -35,7 +35,7 @@ import java.util.Map;
  */
 public class AgencyMonitor {
 
-    private final CloudwatchService cloudwatchService;
+    private final MonitoringService monitoringService;
 
 	// So can send out notification email if monitor triggered
 	private final EmailSender emailSender;
@@ -65,14 +65,14 @@ public class AgencyMonitor {
 	 */
 	private AgencyMonitor(String agencyId) {
 		emailSender = new EmailSender();
-        cloudwatchService = CloudwatchService.getInstance();
+        monitoringService = MonitoringService.getInstance();
 
 		// Create all the monitors and add them to the monitors list
 		monitors = new ArrayList<MonitorBase>();
-		monitors.add(new AvlFeedMonitor(cloudwatchService, emailSender, agencyId));
-		monitors.add(new PredictabilityMonitor(cloudwatchService, emailSender, agencyId));
-        monitors.add(new DatabaseQueueMonitor(cloudwatchService, emailSender, agencyId));
-        monitors.add(new ActiveBlocksMonitor(cloudwatchService, emailSender, agencyId));
+		monitors.add(new AvlFeedMonitor(monitoringService, emailSender, agencyId));
+		monitors.add(new PredictabilityMonitor(monitoringService, emailSender, agencyId));
+        monitors.add(new DatabaseQueueMonitor(monitoringService, emailSender, agencyId));
+        monitors.add(new ActiveBlocksMonitor(monitoringService, emailSender, agencyId));
         if(enableSystemMonitoring != null && enableSystemMonitoring.equalsIgnoreCase("true")){
             monitors.add(new SystemMemoryMonitor(emailSender, agencyId));
             monitors.add(new SystemCpuMonitor(emailSender, agencyId));

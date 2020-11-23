@@ -37,7 +37,7 @@ import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Match;
 import org.transitclock.db.structs.StopPath;
 import org.transitclock.db.structs.Trip;
-import org.transitclock.monitoring.CloudwatchService;
+import org.transitclock.monitoring.MonitoringService;
 import org.transitclock.statistics.Statistics;
 import org.transitclock.utils.Geo;
 import org.transitclock.utils.IntervalTimer;
@@ -166,7 +166,7 @@ public class TravelTimesProcessor {
 	private static final Logger logger = 
 			LoggerFactory.getLogger(TravelTimesProcessor.class);
 
-	private CloudwatchService cloudwatchService;
+	private MonitoringService monitoringService;
 
   private boolean isEmpty = true;
 	
@@ -175,7 +175,7 @@ public class TravelTimesProcessor {
   }
   
 	public TravelTimesProcessor() {
-    cloudwatchService = CloudwatchService.getInstance();
+    monitoringService = MonitoringService.getInstance();
 	}
 	
 	/********************** Member Functions **************************/
@@ -1070,11 +1070,11 @@ public class TravelTimesProcessor {
 	
 	 public Long updateMetrics(Session session, int travelTimesRev) {
 	   Long count = Trip.countTravelTimesForTrips(session, travelTimesRev);
-	   cloudwatchService.saveMetric("PredictionLatestTravelTimeRev", travelTimesRev*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+	   monitoringService.saveMetric("PredictionLatestTravelTimeRev", travelTimesRev*1.0, 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
 	   if (count != null) {
-	     cloudwatchService.saveMetric("PredictionTravelTimesForTripsCount", count*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+	     monitoringService.saveMetric("PredictionTravelTimesForTripsCount", count*1.0, 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
 	   } else {
-	     cloudwatchService.saveMetric("PredictionTravelTimesForTripsCount", -1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+	     monitoringService.saveMetric("PredictionTravelTimesForTripsCount", -1.0, 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
 	   }
 	   return count;
 	  }
@@ -1082,10 +1082,10 @@ public class TravelTimesProcessor {
 
 	// cloudwatch reporting/monitoring
   private void reportStatus(int setSize, int matched, int unmatched, int invalid) {
-    cloudwatchService.saveMetric("TravelTimeTotal", setSize * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-    cloudwatchService.saveMetric("TravelTimeMatched", matched * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-    cloudwatchService.saveMetric("TravelTimeUnmatched", unmatched * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-    cloudwatchService.saveMetric("TravelTimeInvalid", invalid * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    monitoringService.saveMetric("TravelTimeTotal", setSize * 1.0 , 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    monitoringService.saveMetric("TravelTimeMatched", matched * 1.0 , 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    monitoringService.saveMetric("TravelTimeUnmatched", unmatched * 1.0 , 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    monitoringService.saveMetric("TravelTimeInvalid", invalid * 1.0 , 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
 
   }
 

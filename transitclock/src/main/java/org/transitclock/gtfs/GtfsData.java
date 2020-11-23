@@ -29,7 +29,7 @@ import org.transitclock.db.structs.Calendar;
 import org.transitclock.db.structs.*;
 import org.transitclock.gtfs.gtfsStructs.*;
 import org.transitclock.gtfs.readers.*;
-import org.transitclock.monitoring.CloudwatchService;
+import org.transitclock.monitoring.MonitoringService;
 import org.transitclock.utils.*;
 
 import java.text.DateFormat;
@@ -55,7 +55,7 @@ public class GtfsData {
 	private final Session session;
 	
 	// log metrics
-	private CloudwatchService cloudwatchService;
+	private MonitoringService monitoringService;
 	
 	// Various params set by constructor
 	private final ActiveRevisions revs;
@@ -266,7 +266,7 @@ public class GtfsData {
 				HibernateUtils.getSessionFactory(getAgencyId());
 		session = sessionFactory.openSession();
 		
-		cloudwatchService = CloudwatchService.getInstance();
+		monitoringService = MonitoringService.getInstance();
 		// Deal with the ActiveRevisions. First, store the original travel times
 		// rev since need it to read in old travel time data. 		
 		ActiveRevisions originalRevs = ActiveRevisions.get(session); 
@@ -2762,16 +2762,16 @@ public class GtfsData {
     SessionFactory sessionFactory =  
         HibernateUtils.getSessionFactory(getAgencyId());
     Session statsSession = sessionFactory.openSession();
-    cloudwatchService.saveMetric("PredictionLatestConfigRev", configRev*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-    cloudwatchService.saveMetric("PredictionLatestTravelTimesRev", travelTimesRev*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    monitoringService.saveMetric("PredictionLatestConfigRev", configRev*1.0, 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    monitoringService.saveMetric("PredictionLatestTravelTimesRev", travelTimesRev*1.0, 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
     Long count = Trip.countTravelTimesForTrips(statsSession, travelTimesRev);
     if (count != null) {
-      cloudwatchService.saveMetric("PredictionTravelTimesForTripsCount", count*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+      monitoringService.saveMetric("PredictionTravelTimesForTripsCount", count*1.0, 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
     } else {
-      cloudwatchService.saveMetric("PredictionTravelTimesForTripsCount", -1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+      monitoringService.saveMetric("PredictionTravelTimesForTripsCount", -1.0, 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
     }
-    cloudwatchService.saveMetric("PredictionTravelTimesForTripsExpectedCount", expectedTravelTimesCount*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-    cloudwatchService.saveMetric("PredictionTravelTimesForTripsOriginalCount", originalTravelTimesCount*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    monitoringService.saveMetric("PredictionTravelTimesForTripsExpectedCount", expectedTravelTimesCount*1.0, 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    monitoringService.saveMetric("PredictionTravelTimesForTripsOriginalCount", originalTravelTimesCount*1.0, 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
 
     logger.info("Found {} TravelTimesForTrips for {}:{} with expected={}, orginal={}", 
         count, configRev, travelTimesRev, expectedTravelTimesCount, originalTravelTimesCount);

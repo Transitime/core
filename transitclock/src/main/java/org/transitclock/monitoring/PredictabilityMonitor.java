@@ -29,10 +29,6 @@ import org.transitclock.db.structs.Block;
 import org.transitclock.utils.EmailSender;
 import org.transitclock.utils.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 /**
  * Monitors how many vehicles are predictable compared to how many active blocks
  * there currently are.
@@ -42,7 +38,7 @@ import java.util.List;
  */
 public class PredictabilityMonitor extends MonitorBase {
 
-    private CloudwatchService cloudwatchService;
+    private MonitoringService monitoringService;
 
 	private static DoubleConfigValue minPredictableBlocks =
 			new DoubleConfigValue(
@@ -78,9 +74,9 @@ public class PredictabilityMonitor extends MonitorBase {
 	 * @param emailSender
 	 * @param agencyId
 	 */
-	public PredictabilityMonitor(CloudwatchService cloudwatchService, EmailSender emailSender, String agencyId) {
+	public PredictabilityMonitor(MonitoringService monitoringService, EmailSender emailSender, String agencyId) {
 		super(emailSender, agencyId);
-        this.cloudwatchService = cloudwatchService;
+        this.monitoringService = monitoringService;
 	}
 
 	/**
@@ -101,7 +97,7 @@ public class PredictabilityMonitor extends MonitorBase {
 		if (activeBlocks.size() == 0) {
 			setMessage("No currently active blocks so predictability "
 					+ "considered to be OK.");
-            cloudwatchService.saveMetric("PredictionPredictablePercentageOfBlocks", 1d, 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+            monitoringService.saveMetric("PredictionPredictablePercentageOfBlocks", 1d, 1, MonitoringService.MetricType.AVERAGE, MonitoringService.ReportingIntervalTimeUnit.MINUTE, false);
 			return 1.0;
 		}
 
@@ -121,10 +117,10 @@ public class PredictabilityMonitor extends MonitorBase {
 		// Determine fraction of active blocks that have a predictable vehicle 
 		double fraction = ((double) Math.max(predictableVehicleCount,
 		minimumPredictableVehicles.getValue())) / activeBlocks.size();
-		cloudwatchService.saveMetric("PredictionActiveBlockCount", (double)Math.max(predictableVehicleCount,
-		    minimumPredictableVehicles.getValue()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-		cloudwatchService.saveMetric("PredictionTotalBlockCount", (double)activeBlocks.size() , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-    cloudwatchService.saveMetric("PredictablePercentageOfBlocks", fraction, 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+		monitoringService.saveMetric("PredictionActiveBlockCount", (double)Math.max(predictableVehicleCount,
+		    minimumPredictableVehicles.getValue()), 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+		monitoringService.saveMetric("PredictionTotalBlockCount", (double)activeBlocks.size() , 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    monitoringService.saveMetric("PredictablePercentageOfBlocks", fraction, 1, MonitoringService.MetricType.AVERAGE, MonitoringService.ReportingIntervalTimeUnit.MINUTE, false);
 
 		// Provide simple message explaining the situation
 		String message = "Predictable blocks fraction=" 

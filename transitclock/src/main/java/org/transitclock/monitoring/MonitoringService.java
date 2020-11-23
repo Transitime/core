@@ -15,9 +15,13 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
- * Created by dbenoff on 10/6/15.
+ * Provide a monitoring service to an external datastore, such as a CSV file or
+ * CloudWatch if configured
+ *
+ * @author dbenoff
+ * @author sheldonabrown
  */
-public class CloudwatchService {
+public class MonitoringService {
     private String environmentName = System.getProperty("transitclock.environmentName");
     private String accessKey = System.getProperty("transitclock.cloudwatch.awsAccessKey");
     private String secretKey = System.getProperty("transitclock.cloudwatch.awsSecretKey");
@@ -26,10 +30,10 @@ public class CloudwatchService {
     private Map<String, MetricDefinition> metricMap = new ConcurrentHashMap<>();
     private ScheduledExecutorService executor;
     private Integer _batchSize = 1000;
-    private boolean enabled = false;
+    private boolean isCloudWatchInitialized = false;
 
     private static final Logger logger = LoggerFactory
-            .getLogger(CloudwatchService.class);
+            .getLogger(MonitoringService.class);
 
     private ArrayBlockingQueue<MetricScalar> individualMetricsQueue = new ArrayBlockingQueue<MetricScalar>(
             100000);
@@ -76,35 +80,38 @@ public class CloudwatchService {
         DAY
     }
 
-    private static CloudwatchService singleton;
+    private static MonitoringService singleton;
 
-    private CloudwatchService() {
-        logger.info("Cloudwatch service starting up");
+    private MonitoringService() {
+        logger.info("MonitoringService service starting up");
 
         init();
 
         if(StringUtils.isBlank(environmentName) || StringUtils.isBlank(accessKey) || StringUtils.isBlank(secretKey) || StringUtils.isBlank(endpoint)) {
-            logger.warn("Cloudwatch monitoring not enabled, please specify environmentName, accessKey, secretKey and endpoint in configuration file");
+            logger.warn("MonitoringService monitoring not enabled, please specify environmentName, accessKey, secretKey and endpoint in configuration file");
         }else{
-            logger.info("starting Cloudwatch in env {} with accessKey {} and pass {}", environmentName, accessKey, secretKey);
+            logger.info("starting MonitoringService in env {} with accessKey {} and pass {}", environmentName, accessKey, secretKey);
             AmazonCloudWatchClient cloudWatch = new AmazonCloudWatchClient(new BasicAWSCredentials(accessKey, secretKey));
             cloudWatch.setEndpoint(endpoint);
             this.cloudWatch = cloudWatch;
-            executor = Executors.newSingleThreadScheduledExecutor();
-            executor.scheduleAtFixedRate(new PublishSummaryMetricsTask(), 0, 1, TimeUnit.MINUTES);
-            executor.scheduleAtFixedRate(new PublishIndividualMetricsTask(), 0, 1, TimeUnit.MINUTES);
-            enabled = true;
+            isCloudWatchInitialized = true;
         }
+
+        // start up threads regardess of cloudwatch status so logging is available
+        executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(new PublishSummaryMetricsTask(), 0, 1, TimeUnit.MINUTES);
+        executor.scheduleAtFixedRate(new PublishIndividualMetricsTask(), 0, 1, TimeUnit.MINUTES);
+
     }
 
     /**
-     * Returns the singleton CloudwatchService
+     * Returns the singleton MonitrongService
      *
      * @return
      */
-    public synchronized static CloudwatchService getInstance() {
+    public synchronized static MonitoringService getInstance() {
         if(singleton == null)
-            singleton = new CloudwatchService();
+            singleton = new MonitoringService();
         return singleton;
     }
 
@@ -114,7 +121,7 @@ public class CloudwatchService {
      * @param metricName the metric to increment
      */
     public void sumMetric(String metricName) {
-        saveMetric(metricName, 1.0, 1, CloudwatchService.MetricType.SUM, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+        saveMetric(metricName, 1.0, 1, MonitoringService.MetricType.SUM, MonitoringService.ReportingIntervalTimeUnit.MINUTE, false);
     }
 
     /**
@@ -123,7 +130,7 @@ public class CloudwatchService {
      * @param metricValue the value to merge in
      */
     public void averageMetric(String metricName, double metricValue) {
-        saveMetric(metricName, metricValue, 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+        saveMetric(metricName, metricValue, 1, MonitoringService.MetricType.AVERAGE, MonitoringService.ReportingIntervalTimeUnit.MINUTE, false);
     }
 
     /**
@@ -133,8 +140,8 @@ public class CloudwatchService {
      */
     public void rateMetric(String metricName, boolean hit) {
         double metricValue = (hit? 1.0: 0.0);
-        saveMetric(metricName, metricValue, 1, CloudwatchService.MetricType.SUM, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
-        saveMetric(metricName + "Rate", metricValue, 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, true);
+        saveMetric(metricName, metricValue, 1, MonitoringService.MetricType.SUM, MonitoringService.ReportingIntervalTimeUnit.MINUTE, false);
+        saveMetric(metricName + "Rate", metricValue, 1, MonitoringService.MetricType.AVERAGE, MonitoringService.ReportingIntervalTimeUnit.MINUTE, true);
 
     }
 
@@ -198,17 +205,22 @@ public class CloudwatchService {
     private void publishMetric(String metricName, Double metricValue){
       if (metricName == null || metricValue == null)
         return ;
-      
+
+        Date timestamp = new Date();
+
         MetricDatum datum = new MetricDatum().
                 withMetricName(metricName).
-                withTimestamp(new Date()).
+                withTimestamp(timestamp).
                 withValue(metricValue).
                 withUnit(StandardUnit.Count);
         PutMetricDataRequest putMetricDataRequest = new PutMetricDataRequest().
                 withNamespace(environmentName).
                 withMetricData(datum);
         try {
-          cloudWatch.putMetricData(putMetricDataRequest);
+            logger.info("COUNT,{},{},{}", metricName, timestamp.getTime()/1000, metricValue);
+            if (isCloudWatchInitialized) {
+                cloudWatch.putMetricData(putMetricDataRequest);
+            }
         } catch (Exception any) {
           logger.error("exception publishing for {}={}: {}", metricName, metricValue, any);
         }
@@ -220,19 +232,24 @@ public class CloudwatchService {
      * @param metricValue
      */
     private synchronized void publishMetricAsPercent(String metricName, Double metricValue){
-        if(cloudWatch == null || !enabled || metricName == null || metricValue == null)
+        if(metricName == null || metricValue == null)
           return;
+
+        Date timestamp = new Date();
 
         MetricDatum datum = new MetricDatum().
                 withMetricName(metricName).
-                withTimestamp(new Date()).
+                withTimestamp(timestamp).
                 withValue(metricValue * 100d).
                 withUnit(StandardUnit.Percent);
         PutMetricDataRequest putMetricDataRequest = new PutMetricDataRequest().
                 withNamespace(environmentName).
                 withMetricData(datum);
         try {
-          cloudWatch.putMetricData(putMetricDataRequest);
+            logger.info("PERCENT,{},{},{}", metricName, timestamp.getTime()/1000, metricValue);
+            if (isCloudWatchInitialized) {
+                cloudWatch.putMetricData(putMetricDataRequest);
+            }
         } catch (Exception any) {
           logger.error("exception publishing for {}={}: {}", metricName, metricValue, any);
         }
@@ -317,7 +334,7 @@ public class CloudwatchService {
     }
 
     public static void main(String[] args){
-        CloudwatchService cloudwatchService = CloudwatchService.getInstance();
+        MonitoringService cloudwatchService = MonitoringService.getInstance();
         int i = 0;
         while (i < 100){
             cloudwatchService.saveMetric("testing", Math.random(), 1, MetricType.AVERAGE, ReportingIntervalTimeUnit.MINUTE, false);

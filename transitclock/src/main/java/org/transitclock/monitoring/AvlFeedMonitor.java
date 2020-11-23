@@ -40,7 +40,7 @@ import java.util.List;
  */
 public class AvlFeedMonitor extends MonitorBase {
 
-    private CloudwatchService cloudwatchService;
+    private MonitoringService monitoringService;
 
 	private static IntegerConfigValue allowableNoAvlSecs =
 			new IntegerConfigValue(
@@ -68,9 +68,9 @@ public class AvlFeedMonitor extends MonitorBase {
 	 * @param emailSender
 	 * @param agencyId
 	 */
-	public AvlFeedMonitor(CloudwatchService cloudwatchService, EmailSender emailSender, String agencyId) {
+	public AvlFeedMonitor(MonitoringService monitoringService, EmailSender emailSender, String agencyId) {
 		super(emailSender, agencyId);
-        this.cloudwatchService = cloudwatchService;
+        this.monitoringService = monitoringService;
 	}
 	
 	/**
@@ -87,7 +87,7 @@ public class AvlFeedMonitor extends MonitorBase {
 		long lastAvlReportTime = AvlProcessor.getInstance().lastAvlReportTime();
 		long ageOfAvlReport = System.currentTimeMillis() - lastAvlReportTime;
 		Double ageOfAvlReportInSecs = new Double(ageOfAvlReport / Time.MS_PER_SEC );
-        cloudwatchService.saveMetric("PredictionLatestAvlReportAgeInSeconds", ageOfAvlReportInSecs, 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+        monitoringService.saveMetric("PredictionLatestAvlReportAgeInSeconds", ageOfAvlReportInSecs, 1, MonitoringService.MetricType.AVERAGE, MonitoringService.ReportingIntervalTimeUnit.MINUTE, false);
 
 		logger.debug("When monitoring AVL feed last AVL report={}",
 				AvlProcessor.getInstance().getLastAvlReport());

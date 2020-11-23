@@ -37,14 +37,14 @@ public class ActiveBlocksMonitor extends MonitorBase {
 
     private Date lastUpdate = new Date();
 
-    private CloudwatchService cloudwatchService;
+    private MonitoringService monitoringService;
 
     private static final Logger logger = LoggerFactory
             .getLogger(ActiveBlocksMonitor.class);
 
-	public ActiveBlocksMonitor(CloudwatchService cloudwatchService, EmailSender emailSender, String agencyId) {
+	public ActiveBlocksMonitor(MonitoringService monitoringService, EmailSender emailSender, String agencyId) {
 		super(emailSender, agencyId);
-        this.cloudwatchService = cloudwatchService;
+        this.monitoringService = monitoringService;
 	}
 
 	/* (non-Javadoc)
@@ -62,8 +62,8 @@ public class ActiveBlocksMonitor extends MonitorBase {
             if(activeBlockCount > 0){
                 activeBlockCountPercentage = activeBlockCount / totalBlockCount;
             }
-            cloudwatchService.saveMetric("PercentageActiveBlockCount", activeBlockCountPercentage , 1,
-                    CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, true);
+            monitoringService.saveMetric("PercentageActiveBlockCount", activeBlockCountPercentage , 1,
+                    MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, true);
             lastUpdate = new Date();
         }
         return false;

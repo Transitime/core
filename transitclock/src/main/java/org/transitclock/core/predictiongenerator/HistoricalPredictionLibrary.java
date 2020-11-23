@@ -31,7 +31,7 @@ import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.PredictionEvent;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
-import org.transitclock.monitoring.CloudwatchService;
+import org.transitclock.monitoring.MonitoringService;
 
 import java.util.*;
 
@@ -40,7 +40,7 @@ import java.util.*;
  */
 public class HistoricalPredictionLibrary {
 
-	private static CloudwatchService monitoring = null;
+	private static MonitoringService monitoring = null;
 
 	private static final IntegerConfigValue closestVehicleStopsAhead = new IntegerConfigValue(
 			"transitclock.prediction.closestvehiclestopsahead", new Integer(2),
@@ -291,9 +291,9 @@ public class HistoricalPredictionLibrary {
 	 * lazy load Cloudwatch Monitoring service.
 	 * @return
 	 */
-	protected static CloudwatchService getMonitoring() {
+	protected static MonitoringService getMonitoring() {
 		if (monitoring == null)
-			monitoring = CloudwatchService.getInstance();
+			monitoring = MonitoringService.getInstance();
 		return monitoring;
 	}
 

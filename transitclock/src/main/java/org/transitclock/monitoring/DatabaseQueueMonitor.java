@@ -32,7 +32,7 @@ import org.transitclock.utils.StringUtils;
  */
 public class DatabaseQueueMonitor extends MonitorBase {
 
-    private CloudwatchService cloudwatchService;
+    private MonitoringService monitoringService;
 
 	DoubleConfigValue maxQueueFraction = new DoubleConfigValue(
 			"transitclock.monitoring.maxQueueFraction", 
@@ -58,9 +58,9 @@ public class DatabaseQueueMonitor extends MonitorBase {
 	 * @param emailSender
 	 * @param agencyId
 	 */
-	public DatabaseQueueMonitor(CloudwatchService cloudwatchService, EmailSender emailSender, String agencyId) {
+	public DatabaseQueueMonitor(MonitoringService monitoringService, EmailSender emailSender, String agencyId) {
 		super(emailSender, agencyId);
-        this.cloudwatchService = cloudwatchService;
+        this.monitoringService = monitoringService;
 	}
 
 	/* (non-Javadoc)
@@ -82,7 +82,7 @@ public class DatabaseQueueMonitor extends MonitorBase {
 				+ ".",
 				dbLogger.queueLevel());
 
-        cloudwatchService.saveMetric("PredictionDatabaseQueuePercentageLevel", dbLogger.queueLevel(), 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+        monitoringService.saveMetric("PredictionDatabaseQueuePercentageLevel", dbLogger.queueLevel(), 1, MonitoringService.MetricType.AVERAGE, MonitoringService.ReportingIntervalTimeUnit.MINUTE, false);
 		
 		// Determine the threshold for triggering. If already triggered
 		// then lower the threshold by maxQueueFractionGap in order
