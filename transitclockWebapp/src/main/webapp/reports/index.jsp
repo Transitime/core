@@ -88,6 +88,9 @@ finding specific issues with predictions.">
     how early/late. The resulting bell curve shows the distribution of 
     early/late times. ">
             Schedule Adherence by how Early/Late</a></li>
+  <li><a href="onTimePerformanceReport.jsp?a=<%=agencyId%>"
+     title="Displays historic on time performance data in a chart for a given route.">
+      On Time Performance</a></li>
     </ul>
 
 
@@ -116,6 +119,31 @@ finding specific issues with predictions.">
                title="Shows how well system is running, including the AVL feed">
             Server Status</a></li>
     </ul>
+
+<div id="subtitle">Speed Reports</div>
+<ul class="choicesList">
+    <li><a href="speedMap.jsp?a=<%=agencyId%>" title="Displays historic average speed data on a map for a given route and headsign.">
+        Speed Map</a></li>
+</ul>
+
+<div id="subtitle">Run Time Reports</div>
+<ul class="choicesList">
+    <li><a href="runTime.jsp?a=<%=agencyId%>" title="Displays historic run time data for a given route and headsign.">
+        Run Times</a></li>
+</ul>
+
+<div id="subtitle">Real Time Reports</div>
+<ul class="choicesList">
+    <li><a href="realTimeLiveMap.jsp?a=<%= agencyId %>"
+           title="Displays real time vehicle and stop information on a map.">
+        Real Time Live Map</a></li>
+    <li><a href="realTimeScheduleAdherence.jsp?a=<%= agencyId %>"
+           title="Displays real time schedule adherence information on a map.">
+        Real Time Schedule Adherence</a></li>
+    <li><a href="realTimeDispatcher.jsp?a=<%= agencyId %>"
+           title="Displays real time vehicle information in a table.">
+        Real Time Dispatcher View</a></li>
+</ul>
 
 </div>
 </body>

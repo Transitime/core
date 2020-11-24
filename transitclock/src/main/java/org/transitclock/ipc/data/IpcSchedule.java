@@ -338,6 +338,36 @@ public class IpcSchedule implements Serializable {
 		// Return the sorted schedules
 		return scheduleList;
 	}
+
+	/**
+	 * Creates a IpcSchedule for a trip
+	 *
+	 * @param trip
+	 * @return
+	 */
+	public static List<IpcSchedule> createScheduleForTrip(Trip trip) {
+		String serviceId = trip.getServiceId();
+		String serviceName = serviceId;
+
+		String directionId = trip.getDirectionId();
+		String directionName = trip.getHeadsign();
+		Route route = trip.getRoute();
+
+		IpcSchedule ipcSchedule = new IpcSchedule(route, directionId,
+					directionName, serviceId, serviceName);
+
+		ipcSchedule.trips.add(trip);
+		ipcSchedule.processTrips();
+
+		// Convert to a list of IpcSchedules and sort them
+		List<IpcSchedule> scheduleList =
+				new ArrayList<IpcSchedule>(1);
+
+		scheduleList.add(ipcSchedule);
+
+		// Return the sorted schedules
+		return scheduleList;
+	}
 	
 	@Override
 	public String toString() {

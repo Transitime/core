@@ -82,13 +82,13 @@ public class TravelTimesProcessor {
 	// because if vehicle is really late then perhaps it is matched to
 	// wrong trip or such. At the very minimum it is an anomaly. In such a 
 	// case the data would only skew the stop time.
-	private final static int MAX_SCHED_ADH_FOR_FIRST_STOP_TIME = 
+	public final static int MAX_SCHED_ADH_FOR_FIRST_STOP_TIME =
 			10*Time.MS_PER_MIN;
 	
 	private final static int MAX_SCHED_ADH_SECS =
 			30*Time.SEC_PER_MIN;
 	
-	private static boolean shouldResetEarlyTerminalDepartures() {
+	public static boolean shouldResetEarlyTerminalDepartures() {
 		return resetEarlyTerminalDepartures.getValue();
 	}
 	

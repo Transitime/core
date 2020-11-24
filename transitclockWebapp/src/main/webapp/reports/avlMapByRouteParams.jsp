@@ -25,6 +25,7 @@
 <form action="avlMap.jsp" method="POST">
    <%-- For passing agency param to the report --%>
    <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
+   <input type="hidden" name="numDays" value="1" />
    
    <jsp:include page="params/routeSingle.jsp" />
     

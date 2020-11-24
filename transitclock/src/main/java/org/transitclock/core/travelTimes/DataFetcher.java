@@ -257,7 +257,7 @@ public class DataFetcher {
 		// The temporary list for the loop that contains a batch of results
 		
 		logger.info("counting arrival/departures");
-		Long count = ArrivalDeparture.getArrivalsDeparturesCountFromDb(dbName, beginTime, endTime, null);
+		Long count = ArrivalDeparture.getArrivalsDeparturesCountFromDb(dbName, beginTime, endTime, null, false);
 		logger.info("retrieving {} arrival/departures", count);
 		List<ArrivalDeparture> arrDepBatchList;
 		
@@ -275,7 +275,8 @@ public class DataFetcher {
 						// way that a vehicle travels.
 						"ORDER BY time", // SQL clause
 						null, null,
-						null); // arrivalOrDeparture. Null means read in both
+						null, // arrivalOrDeparture. Null means read in both
+						false);
 				
 				// Add arrivals/departures to map
 				for (ArrivalDeparture arrDep : arrDepBatchList) {
@@ -299,8 +300,8 @@ public class DataFetcher {
 						// way that a vehicle travels.
 						"ORDER BY time", // SQL clause
 						firstResult, batchSize,
-						null); // arrivalOrDeparture. Null means read in both
-				
+						null, // arrivalOrDeparture. Null means read in both
+						false);
 				// Add arrivals/departures to map
 				for (ArrivalDeparture arrDep : arrDepBatchList) {
 					addArrivalDepartureToMap(resultsMap, arrDep);

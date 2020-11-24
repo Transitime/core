@@ -19,6 +19,7 @@ package org.transitclock.ipc.data;
 
 import java.io.Serializable;
 
+import com.google.common.base.Objects;
 import org.transitclock.db.structs.Location;
 import org.transitclock.db.structs.Stop;
 
@@ -110,5 +111,24 @@ public class IpcStop implements Serializable {
 	
 	public String getDirectionId() {
 		return directionId;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		IpcStop ipcStop = (IpcStop) o;
+		return isUiStop == ipcStop.isUiStop &&
+				Objects.equal(id, ipcStop.id) &&
+				Objects.equal(name, ipcStop.name) &&
+				Objects.equal(code, ipcStop.code) &&
+				Objects.equal(loc, ipcStop.loc) &&
+				Objects.equal(directionId, ipcStop.directionId) &&
+				Objects.equal(stopPathLength, ipcStop.stopPathLength);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(id, name, code, loc, isUiStop, directionId, stopPathLength);
 	}
 }

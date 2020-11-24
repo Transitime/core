@@ -18,20 +18,9 @@ package org.transitclock.db.structs;
 
 import java.io.Serializable;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OrderColumn;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 import org.hibernate.CallbackException;
 import org.hibernate.HibernateException;
@@ -50,6 +39,7 @@ import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.gtfs.TitleFormatter;
 import org.transitclock.gtfs.gtfsStructs.GtfsTrip;
+import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
 
 
@@ -159,6 +149,9 @@ public class Trip implements Lifecycle, Serializable {
 	// The GTFS trips.txt shape_id
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private String shapeId;
+
+	@ManyToMany(mappedBy = "trips")
+	private List<Block> blocks;
 
 	@Transient
 	private Route route;
@@ -337,7 +330,7 @@ public class Trip implements Lifecycle, Serializable {
 	 * Hibernate requires no-arg constructor
 	 */
 	@SuppressWarnings("unused")
-	private Trip() {
+	public Trip() {
 		configRev = -1;
 		tripId = null;
 		tripShortName = null;
@@ -1200,5 +1193,66 @@ public class Trip implements Lifecycle, Serializable {
     }
     return count;
   }
-		
+
+	public static List<Trip> getTripsFromDb(String routeShortName, String headsign, Set<Integer> configRevs, boolean readOnly) {
+		IntervalTimer timer = new IntervalTimer();
+
+		// Get the database session. This is supposed to be pretty light weight
+		Session session = HibernateUtils.getSession(readOnly);
+
+		// Create the query. Table name is case sensitive and needs to be the
+		// class name instead of the name of the db table.
+
+		String hql = "SELECT " +
+				"t " +
+				"FROM " +
+				"Trip t " +
+				"WHERE t.routeShortName = :routeShortName " +
+				"AND t.headsign = :headsign " +
+				"AND t.configRev IN (:configRevs) " +
+				"ORDER BY t.startTime";
+		try {
+			Query query = session.createQuery(hql);
+			query.setString("routeShortName", routeShortName);
+			query.setString("headsign", headsign);
+			query.setParameterList("configRevs", configRevs);
+
+			List<Trip> results = query.list();
+
+			logger.debug("Getting trips from database took {} msec",
+					timer.elapsedMsec());
+
+			return results;
+
+		} catch (HibernateException e) {
+			// Log error to the Core logger
+			Core.getLogger().error("Unable to retrieve trips", e);
+			return null;
+		} finally {
+			// Clean things up. Not sure if this absolutely needed nor if
+			// it might actually be detrimental and slow things down.
+			session.close();
+		}
+	}
+
+	/**
+	 * Assumes only one block for Trip.
+	 * TODO - Fix this to return
+	 * @param readOnly
+	 * @return Block
+	 */
+	public Block getBlockFromDb(boolean readOnly){
+		Session session = HibernateUtils.getSession(readOnly);
+		try {
+			session.update(this);
+			return blocks.get(0);
+		}
+		catch (Exception e) {
+			Core.getLogger().error("Unable to retrieve block", e);
+			return null;
+		} finally {
+			session.close();
+		}
+	}
+
 }

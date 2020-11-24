@@ -25,13 +25,25 @@ var stopPopupOptions = {closeButton: false};
 
 function drawAvlMarker(avl) {
 	var latLng = L.latLng(avl.lat, avl.lon);
-	  
-	// Create the marker. Use a divIcon so that can have tooltips
+
+	// Set avl keys and values
+	var labels = ["Vehicle", "GPS Time", "Time Proc", "Lat/Lon", "Speed", "Heading", "Assignment ID", "Route", "Headsign", "Schedule Adherence", "OTP", "Headway Adherence"],
+		keys = ["vehicleId", "time", "timeProcessed", "latlon", "niceSpeed", "heading", "assignmentId", "routeShortName", "headsign", "schedAdh", "otp", "headway"];
+
+	// populate missing keys
+	avl.latlon = avl.lat + ", " + avl.lon
+	avl.niceSpeed =  Math.round(parseFloat(avl.speed) * 10)/10 + " kph";
+
+	if (typeof avl['otp'] == 'undefined') {
+		avl['otp'] = '';
+	}
+
+	// Create the marker. Use a divIcon so that can have tooltips. Set color according to OTP
   	var tooltip = avl.time.substring(avl.time.indexOf(' ') + 1);  
   	var avlMarker = L.rotatedMarker(avl, {
           icon: L.divIcon({
         	  className: 'avlMarker_',
-        	  html: "<div class='avlTriangle' />",
+        	  html: "<div class='avlTriangle" + avl['otp'] + "' />",
         	  iconSize: [7,7]
           }),
           angle: avl.heading,
@@ -39,21 +51,27 @@ function drawAvlMarker(avl) {
       }).addTo(vehicleGroup); 
 	
   	// Create popup with detailed info
-	
-	var labels = ["Vehicle", "GPS Time", "Time Proc", "Lat/Lon", "Speed", "Heading", "Assignment ID", "Route"],
-		keys = ["vehicleId", "time", "timeProcessed", "latlon", "niceSpeed", "heading", "assignmentId", "routeShortName"];
-	
-	// populate missing keys
-	avl.latlon = avl.lat + ", " + avl.lon
-	avl.niceSpeed =  Math.round(parseFloat(avl.speed) * 10)/10 + " kph";
-	
-	var content = $("<table />").attr("class", "popupTable");
+
+	var content = $("<div />");
+	var table = $("<table />").attr("class", "popupTable");
 	
 	for (var i = 0; i < labels.length; i++) {
 		var label = $("<td />").attr("class", "popupTableLabel").text(labels[i] + ": ");
 		var value = $("<td />").text(avl[keys[i]]);
-		content.append( $("<tr />").append(label, value) )
+		table.append( $("<tr />").append(label, value) )
 	}
+
+	// Links to schedule and google maps for vehicle
+	var links = $("<div />")
+
+	var mapsLink = 'http://google.com/maps?q=loc:' + avl.lat + ',' + avl.lon
+
+	links.append( $("<a data-toggle='modal' href='#schedule-modal' style='padding-right:10px;vertical-align: middle' class='schedule-link' onclick='scheduleAjax(" + avl['tripId'] + "); return false;'>Schedule</a>"))
+	links.append( $("<div style='border-left:2px solid black;height:20px;display:inline-block;vertical-align:middle'></div>"))
+	links.append( $("<a href=" + mapsLink + " target='_blank' style='padding-left:10px;vertical-align:middle'>View Location in Google Maps</a>"))
+
+	content.append(table)
+	content.append(links)
 		
 	avlMarker.bindPopup(content[0]);
   	
@@ -196,9 +214,10 @@ function createExport(vehicles) {
  
 //Add a new layer for only route/bus markers, so that it can be refreshed
 //when selections change without having to redraw tiles.
+var mapTileUrl ='http://tile.openstreetmap.org/{z}/{x}/{y}.png'
 var map = L.map('map');
 L.control.scale({metric: false}).addTo(map);
-L.tileLayer('http://api.tiles.mapbox.com/v4/transitime.j1g5bb0j/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoidHJhbnNpdGltZSIsImEiOiJiYnNWMnBvIn0.5qdbXMUT1-d90cv1PAIWOQ', {
+L.tileLayer(mapTileUrl, {
  attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
  maxZoom: 19
 }).addTo(map);
@@ -252,13 +271,28 @@ $("#route").change(function(evt) { drawRoute(evt.target.value) });
 
 // draw AVL data when submit button is clicked
 $("#submit").on("click", function() {
+
+	if ($("#early").val() > 1440) {
+		$("#early").val(1440);
+	}
+	if ($("#early").val() == "" || $("#early").val() < 0) {
+		$("#early").val(1.5)
+	}
+	if ($("#late").val() > 1440) {
+		$("#late").val(1440);
+	}
+	if ($("#late").val() == "" || $("#late").val() < 0) {
+		$("#late").val(2.5)
+	}
     /* Set request object to match new values */
     request.v = $("#vehicle").val();
     request.beginDate = $("#beginDate").val();
-    request.numDays = $("#numDays").val();
     request.beginTime = $("#beginTime").val();
     request.endTime = $("#endTime").val();
+    request.early = $("#early").val() * 60000;
+    request.late = $("#late").val() * -60000;
     request.r = $("#route").val();
+    request.includeHeadway = "true";
 
     var askConfirm = allVehiclesRequested() && (request.r == "All Routes" || request.r ==" ");
     var confirmYes = false;
@@ -298,13 +332,17 @@ function drawAvlData() {
 	    	var vehicles = processAvlCallback(resp);
 	    	// connect export to link to csv creation.
 	    	createExport(vehicles);
-	    	if (!allVehiclesRequested() && vehicles.length)
-	    		prepareAnimation(vehicles[0].data); // only animate first vehicle returned.
 
-			if (allVehiclesRequested()) {
-				$("#playback").hide();
-                animate.removeIcon();//clean up anything there already
+	    	for (i in animations) {
+	    		animations[i].removeIcon();
 			}
+	    	animations = {};
+	    	if (!allVehiclesRequested() && vehicles.length)
+	    		prepareAnimations(vehicles); // only animate first vehicle returned.
+
+			if (allVehiclesRequested())
+				prepareAnimations(vehicles);
+
 			else $("#playback").show();
 	    },
 	    // When there is an AJAX problem alert the user
@@ -329,53 +367,224 @@ var busIcon =  L.icon({
     iconUrl:  contextPath + "/reports/images/bus.png", 
     iconSize: [25,25]
 });
-var animate = avlAnimation(animationGroup, busIcon, $("#playbackTime")[0]);
+
+var animation = avlAnimation(animationGroup, busIcon, $("#playbackTime")[0]);
+var animations = {};
 
 var playButton = contextPath + "/reports/images/playback/media-playback-start.svg",
 	pauseButton = contextPath + "/reports/images/playback/media-playback-pause.svg";
 
-animate.onEnd(function() {
+animation.onEnd(function() {
 	$("#playbackPlay").attr("src", playButton);
 })
 
 // Given a list of AVL positions, initialize the animation object.
-function prepareAnimation(avlData) {
+function prepareAnimations(avlsData) {
 
 	// Make sure animation controls are in their initial state.
 	$("#playbackPlay").attr("src", playButton);
 	$("#playbackRate").text("1X");
-	
-	animate(avlData);
 
+	for (i in avlsData) {
+		if (i == 0) {
+			animation(avlsData[i].data);
+			animations[avlsData[i].id] = animation;
+		}
+		else {
+			newAnimation = avlAnimation(animationGroup, busIcon, $("#playbackTime")[0]);
+			newAnimation(avlsData[i].data)
+			animations[avlsData[i].id] = newAnimation;
+		}
+	}
 }
 
-$("#playbackNext").on("click", animate.next);
+function playAnimations() {
 
-$("#playbackPrev").on("click", animate.prev);
+	if (!animation.paused()) {
+		for (i in animations) {
+			animations[i].pause();
+		}
 
-$("#playbackPlay").on("click", function() {
-	
-	if (!animate.paused()) {
-		animate.pause();
 		$("#playbackPlay").attr("src", playButton);
 	}
 	else { // need to start it
-		animate.start();
+		for (i in animations) {
+			animations[i].start();
+		}
 		$("#playbackPlay").attr("src", pauseButton);
 	}
-	
+}
+
+function playAnimation(vehicleId) {
+	for (i in animations) {
+		if (i != vehicleId) {
+			animations[i].removeIcon();
+		}
+	}
+
+	playAnimations();
+}
+
+$("#playbackNext").on("click", function() {
+	for (i in animations) {
+		animations[i].next();
+	}
+});
+
+$("#playbackPrev").on("click", function() {
+	for (i in animations) {
+		animations[i].prev();
+	}
+});
+
+$("#playbackPlay").on("click", function() {
+	for (i in animations) {
+		animations[i].addIcon();
+	}
+	playAnimations();
 });
 
 $("#playbackFF").on("click", function() {
-	var rate = animate.rate()*2;
-	animate.rate(rate);
+	var rate = animation.rate()*2;
+	for (i in animations) {
+		animations[i].rate(rate);
+	}
 	$("#playbackRate").text(rate + "X");
 });
 
 $("#playbackRew").on("click", function() {
-	var rate = animate.rate()/2;
-	animate.rate(rate);
+	var rate = animation.rate()/2;
+	for (i in animations) {
+		animations[i].rate(rate);
+	}
 	$("#playbackRate").text(rate + "X");
 });
+
+function scheduleAjax(tripId) {
+	// var form = document.createElement("form");
+	// var agency = document.createElement("input");
+	// var route = document.createElement("input");
+	// var trip = document.createElement("input");
+	//
+	// form.action= "scheduleVertStopsReport.jsp";
+	// form.method = "POST";
+	// agency.name = "a";
+	// agency.value = "1";
+	// route.name= "r";
+	// route.value = routeName;
+	// trip.name = "t";
+	// trip.value = tripId;
+	//
+	// form.appendChild(agency);
+	// form.appendChild(route);
+	// form.appendChild(trip);
+	// document.body.appendChild(form);
+	//
+	// form.submit();
+
+	if ($("#schedule-modal").length == 0) {
+		var containerHeight = $(".leaflet-popup-content").height();
+		var scheduleModal =
+			$("<div class='modal' id='schedule-modal' style='display: none;z-index: -1;width: 200%;height: " + containerHeight + "px;overflow: auto;background-color: rgb(255,255,255);'>"
+				+ "<div class='modal-content' style='z-index: -1;'>"
+					+ "<div class='modal-header'>"
+						+ "<button type='button' class='close-modal' style='float:right;'>&times;</button>"
+					+ "</div>"
+					+ "<div class='modal-body'>"
+					+ "</div>"
+					+ "<div class='modal-footer' style='text-align: center;'>"
+						+ "<button type='button' class='btn btn-default close-modal' style='margin: 10px auto;'>Close</button>"
+					+ "</div>"
+				+ "</div>"
+			+ "</div>");
+
+		$(".leaflet-popup-content-wrapper").append(scheduleModal);
+	}
+
+	$.ajax({
+			// The page being requested
+			url: apiUrlPrefix + "/command/scheduleTripVertStops",
+			// Pass in query string parameters to page being requested
+			data: {t: tripId, a: 1},
+			// Needed so that parameters passed properly to page being requested
+			traditional: true,
+			dataType:"json",
+			success: dataReadCallback
+	})
+}
+
+function dataReadCallback(jsonData) {
+	// Set the title now that have the trip name from the API
+	if ($('.modal-title').length > 0) {
+		$('.modal-title').html("<h4 class='modal-title'>Schedule for trip " + jsonData.schedule[0].trip[0].tripShortName + "</h4>");
+	} else {
+		($('.modal-header').append("<h4 class='modal-title'>Schedule for trip " + jsonData.schedule[0].trip[0].tripShortName + "</h4>"));
+	}
+
+	// Only one schedule
+	var schedule = jsonData.schedule[0];
+
+	// Create title for schedule
+	$('.modal-body').html("<div id='scheduleTitle'>"
+		+ "Direction: " + schedule.directionId
+		+ ", Service: " + schedule.serviceName
+		+ "</div>");
+
+	if ($('#dataTable').length > 0) {
+		var table = $('.modal-body')[0].innerHTML($("<table id='dataTable'></table>"));
+	} else {
+		var table = $("<table id='dataTable'></table>").appendTo('.modal-body')[0];
+	}
+
+	// Create the columns. First column is stop name. And then there
+	// is one column per trip.
+	var headerRow = table.insertRow(0);
+	headerRow.insertCell(0).id = 'headerCell';
+
+	var trip = schedule.trip[0];
+	var tripName = trip.tripShortName;
+	if (tripName == null)
+		tripName = trip.tripId;
+	var tripNameTooLong = tripName.length > 6;
+	var html = tripNameTooLong ?
+		"Block<br/>" + trip.blockId : "Trip<br/>" + tripName;
+
+	var headerCell = headerRow.insertCell(1);
+	headerCell.id = 'headerCell';
+	headerCell.innerHTML = html;
+
+	// Add data for each row for the schedule. This is a bit complicated
+	// because the API provides data per trip but want each row in the
+	// schedule to be for a particular stop for all trips.
+	for (var stopIdx=0; stopIdx<schedule.timesForStop.length; ++stopIdx) {
+		var row = table.insertRow(stopIdx+1);
+
+		var timesForStop = schedule.timesForStop[stopIdx];
+
+		// Add stop name to row
+		var headerCell = row.insertCell(0);
+		headerCell.id = 'stopCell';
+		headerCell.innerHTML = timesForStop.stopName;
+
+		// Add the times for the stop to the row
+		for (var tripIdx=0; tripIdx<timesForStop.time.length; ++tripIdx) {
+			var time = timesForStop.time[tripIdx];
+			row.insertCell(tripIdx+1).innerHTML = time.timeStr ? time.timeStr : '';
+		}
+	}
+
+	$("#schedule-modal")[0].style.display = "block";
+
+	$(".close-modal").click(function() {
+		$("#schedule-modal")[0].style.display = "none";
+	})
+
+	$("#schedule-modal").hover(function() {
+			map.scrollWheelZoom.disable();
+		}, function() {
+			map.scrollWheelZoom.enable();
+		}
+	)
+}
 
 

@@ -71,7 +71,7 @@ public interface ConfigInterface extends Remote {
 	
 	/**
 	 * Obtains ordered list of route details
-	 * @param routeIdOrShortName
+	 * @param routeIdsOrShortNames
 	 * @return
 	 * @throws RemoteException
 	 */
@@ -152,7 +152,13 @@ public interface ConfigInterface extends Remote {
 	 * @throws RemoteException
 	 */
 	public List<Agency> getAgencies() throws RemoteException;
-	
+
+	/* (non-Javadoc)
+	 * @see org.transitclock.ipc.interfaces.ConfigInterface#getSchedulesForTrip(java.lang.String)
+	 */
+	List<IpcSchedule> getSchedulesForTrip(String tripId)
+			throws RemoteException;
+
 	/**
 	 * Returns list of Calendar objects that are currently active.
 	 * @return
