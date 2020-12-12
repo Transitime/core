@@ -2,8 +2,6 @@ package org.transitclock.feed.zmq.oba;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.nyc.transit_data.model.NycQueuedInferredLocationBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.avl.ZeroMQAvlModule;
@@ -28,7 +26,7 @@ public class NycQueueInferredLocationBeanReader implements ZmqQueueBeanReader {
     private static final Logger logger = LoggerFactory
             .getLogger(ZeroMQAvlModule.class);
     private static final ObjectMapper _mapper = new ObjectMapper();
-    private static final ObjectReader _reader =  _mapper.readerFor(NycQueuedInferredLocationBean.class);
+    private static final ObjectReader _reader =  _mapper.readerFor(NycQueueInferredLocationBeanReader.class);
 
     Date markTimestamp = new Date();
     private int processedCount = 0;
@@ -99,7 +97,7 @@ public class NycQueueInferredLocationBeanReader implements ZmqQueueBeanReader {
         if(routeId == null || routeFilterList.isEmpty() || (routeFilterList.size() > 0 && routeFilterList.contains("*")))
             return true;
         try {
-            String route = AgencyAndId.convertFromString(routeId).getId().toUpperCase();
+            String route = routeId.split("_")[1].toUpperCase(); // formerly AgencyAndId
             if (routeFilterList.contains(route)) {
                 return true;
             } else {

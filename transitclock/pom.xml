@@ -261,12 +261,7 @@
 			<version>2.12.3</version>
 		</dependency>
 
-		<!-- OBA Dependency -->
-		<dependency>
-			<groupId>org.onebusaway</groupId>
-			<artifactId>onebusaway-nyc-transit-data-federation</artifactId>
-			<version>2.26.1-SNAPSHOT</version>
-		</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>
