@@ -16,7 +16,12 @@
  */
 package org.transitclock.db.hibernate;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -116,7 +121,10 @@ public class DataDbLogger {
 	
 	// So can access agencyId for logging messages
 	private String agencyId;
-	
+
+	// keep track of primary key values to reduce database duplicate exceptions
+	private Map<String, String> vehicleToPrimayKeyMap = new HashMap<>();
+
 	private static final Logger logger = 
 			LoggerFactory.getLogger(DataDbLogger.class);
 
@@ -186,10 +194,24 @@ public class DataDbLogger {
 	}
 	
 	public boolean add(ArrivalDeparture ad) {
-	  return arrivalDepartureQueue.add(ad);
+		String key = "ad_" + ad.getVehicleId();
+		String hash = vehicleToPrimayKeyMap.get(key);
+		if (hash != null && hash.equals(hashArrivalDeparture(ad))) {
+			// we already have this value, prevent sql exception
+			return false;
+		}
+		vehicleToPrimayKeyMap.put(key, hash);
+		return arrivalDepartureQueue.add(ad);
 	}
 	public boolean add(AvlReport ar) {
-	  return avlReportQueue.add(ar);
+		String key = "ar_" + ar.getVehicleId();
+		String hash = vehicleToPrimayKeyMap.get(key);
+		if (hash != null && hash.equals(hashAvl(ar))) {
+			// we already have this value, prevent sql exception
+			return false;
+		}
+		vehicleToPrimayKeyMap.put(key, hash);
+		return avlReportQueue.add(ar);
 	}
 	public boolean add(VehicleConfig vc) {
 	  return vehicleConfigQueue.add(vc);
@@ -214,8 +236,15 @@ public class DataDbLogger {
       return vehicleEventQueue.add(ve);
     }
     public boolean add(VehicleState vs) {
-      return vehicleStateQueue.add(vs);
-    }
+			String key = "vs_" + vs.getVehicleId();
+			String hash = vehicleToPrimayKeyMap.get(key);
+			if (hash != null && hash.equals(hashVehicleState(vs))) {
+				// we already have this value, prevent sql exception
+				return false;
+			}
+			vehicleToPrimayKeyMap.put(key, hash);
+			return vehicleStateQueue.add(vs);
+		}
 
 	
 	/**
@@ -258,15 +287,68 @@ public class DataDbLogger {
 
 	// the predictionQueue is the largest queue, so report on it for now
 	public double queueLevel() {
-	  // TODO split this out into separate queues
-	  return predictionQueue.queueLevel();
+		Double[] queueLevelsArray = {
+						arrivalDepartureQueue.queueLevel(),
+						avlReportQueue.queueLevel(),
+						vehicleConfigQueue.queueLevel(),
+						predictionQueue.queueLevel(),
+						matchQueue.queueLevel(),
+						predictionAccuracyQueue.queueLevel(),
+						monitoringEventQueue.queueLevel(),
+						vehicleEventQueue.queueLevel(),
+						vehicleStateQueue.queueLevel(),
+						genericQueue.queueLevel()
+		};
 
+		List<Double> levels = Arrays.asList(queueLevelsArray);
+		Collections.sort(levels);
+		return levels.get(levels.size()-1);
 	}
 	
 	public int queueSize() {
-	  return predictionQueue.queueSize();
+		Integer[] sizesArray = {
+						arrivalDepartureQueue.queueSize(),
+						avlReportQueue.queueSize(),
+						vehicleConfigQueue.queueSize(),
+						predictionQueue.queueSize(),
+						matchQueue.queueSize(),
+						predictionAccuracyQueue.queueSize(),
+						monitoringEventQueue.queueSize(),
+						vehicleEventQueue.queueSize(),
+						vehicleStateQueue.queueSize(),
+						genericQueue.queueSize()
+		};
+
+		List<Integer> sizes = Arrays.asList(sizesArray);
+		Collections.sort(sizes);
+		return sizes.get(sizes.size()-1);
 	}
-	
+
+	private String hashAvl(AvlReport ar) {
+		// primary keys minus vehicleId
+		DateFormat simple =
+						new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		return simple.format(ar.getDate());
+	}
+
+	private String hashArrivalDeparture(ArrivalDeparture ad) {
+		// primary keys minus vehicleId
+		return
+						ad.getTripId() + "_"
+										+ ad.getTime() + "_"
+										+ ad.getStopId() + "_"
+										+ ad.isArrival() + "_"
+										+ ad.getGtfsStopSequence();
+	}
+
+	private String hashVehicleState(VehicleState vs) {
+		// primary keys minus vehicleId
+		DateFormat simple =
+						new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		return simple.format(vs.getAvlTime());
+
+	}
+
 	/**
 	 * Just for doing some testing
 	 * 
