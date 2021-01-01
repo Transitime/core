@@ -79,7 +79,7 @@ public class ArrDepGeneratorMissionBayImpl
 	 * API.
 	 */
 	protected Arrival createArrivalTime(VehicleState vehicleState,
-			long arrivalTime, Block block, int tripIndex, int stopPathIndex) {
+			long arrivalTime, Block block, int tripIndex, int stopPathIndex, String stopPathId) {
 		// Call parent class createArrivalTime()
 		Arrival arrival = super.createArrivalTime(vehicleState, arrivalTime, block,
 				tripIndex, stopPathIndex);
@@ -99,10 +99,10 @@ public class ArrDepGeneratorMissionBayImpl
 	 * written to the SFMTA API.
 	 */
 	protected Departure createDepartureTime(VehicleState vehicleState,
-			long departureTime, Block block, int tripIndex, int stopPathIndex) {
+			long departureTime, Block block, int tripIndex, int stopPathIndex, Long dwellTime) {
 		// Call parent class createDepartureTime()
 		Departure departure = super.createDepartureTime(vehicleState, departureTime, block,
-				tripIndex, stopPathIndex);
+				tripIndex, stopPathIndex, dwellTime);
 		
 		// If special SFMTA stop then write arrival/departure time to SFMTA API
 		if (sfmtaStopMap.containsKey(departure.getStopId())) {

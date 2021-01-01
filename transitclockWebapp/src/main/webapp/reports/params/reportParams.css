@@ -2,7 +2,7 @@
  * CSS styles for report parameter pages
  */
 label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-right: 10px;}
-.param {margin-top: 10px;}
+.param {margin-top: 12px;}
 .submitDiv{ margin-top: 40px; text-align: center; }
 #radioButtonsDiv {margin-top: 13px; text-align: center;}
 .note {font-size: small;}

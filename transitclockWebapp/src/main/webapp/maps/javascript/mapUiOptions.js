@@ -44,7 +44,7 @@ var minorStopOptions = {
 };
 
 var busIcon = L.icon({
-    iconUrl: 'images/bus-24.png',
+    iconUrl: '/web/maps/images/bus-24.png',
     iconRetinaUrl: 'images/bus-24@2x.png',
     iconSize: [24, 24],
     iconAnchor: [13, 12],
@@ -52,7 +52,7 @@ var busIcon = L.icon({
 });
 
 var streetcarIcon = L.icon({
-    iconUrl: 'images/rail-light-24.png',
+    iconUrl: '/web/maps/images/rail-light-24.png',
     iconRetinaUrl: 'images/rail-light-24@2x.png',
     iconSize: [24, 24],
     iconAnchor: [12, 12],
@@ -60,7 +60,7 @@ var streetcarIcon = L.icon({
 });
 
 var subwayIcon = L.icon({
-    iconUrl: 'images/rail-metro-24.png',
+    iconUrl: '/web/maps/images/rail-metro-24.png',
     iconRetinaUrl: 'images/rail-metro-24@2x.png',
     iconSize: [24, 24],
     iconAnchor: [12, 12],
@@ -68,7 +68,7 @@ var subwayIcon = L.icon({
 });
 
 var railIcon = L.icon({
-    iconUrl: 'images/rail-24.png',
+    iconUrl: '/web/maps/images/rail-24.png',
     iconRetinaUrl: 'images/rail-24@2x.png',
     iconSize: [24, 24],
     iconAnchor: [13, 12],
@@ -76,7 +76,7 @@ var railIcon = L.icon({
 });
 
 var ferryIcon = L.icon({
-    iconUrl: 'images/ferry-24.png',
+    iconUrl: '/web/maps/images/ferry-24.png',
     iconRetinaUrl: 'images/ferry-24@2x.png',
     iconSize: [24, 24],
     iconAnchor: [12, 12],
@@ -84,7 +84,7 @@ var ferryIcon = L.icon({
 });
 
 var layoverIcon = L.icon({
-    iconUrl: 'images/cafe-24.png',
+    iconUrl: '/web/maps/images/cafe-24.png',
     iconRetinaUrl: 'images/cafe-24@2x.png',
     iconSize: [24, 24],
     iconAnchor: [12, 12],
@@ -93,7 +93,7 @@ var layoverIcon = L.icon({
 });
 
 var arrowIcon = L.icon({
-	iconUrl: 'images/arrow.png',
+	iconUrl: '/web/maps/images/arrow.png',
 	iconSize: [30, 30],
 	iconAnchor: [15,15],
 });

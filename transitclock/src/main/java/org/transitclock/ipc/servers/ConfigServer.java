@@ -309,6 +309,24 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 				IpcSchedule.createSchedules(dbRoute, blocksForRoute);
 		return ipcSchedules;
 	}
+
+	/* (non-Javadoc)
+	 * @see org.transitclock.ipc.interfaces.ConfigInterface#getSchedulesForTrip(java.lang.String)
+	 */
+	@Override
+	public List<IpcSchedule> getSchedulesForTrip(String tripId)
+			throws RemoteException {
+		// Determine the trip
+		Trip trip = Core.getInstance().getDbConfig()
+				.getTrip(tripId);
+		if (trip == null)
+			return null;
+
+		// Convert trip to list of IpcSchedule objects and return
+		List<IpcSchedule> ipcSchedules =
+				IpcSchedule.createScheduleForTrip(trip);
+		return ipcSchedules;
+	}
 	
 	/* (non-Javadoc)
 	 * @see org.transitclock.ipc.interfaces.ConfigInterface#getCurrentCalendars()

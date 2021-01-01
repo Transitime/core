@@ -405,6 +405,7 @@ public class Core {
 		CacheQueryServer.start(agencyId);
 		PredictionAnalysisServer.start(agencyId);
 		HoldingTimeServer.start(agencyId);
+		ReportingServer.start(agencyId);
 	}
 	
 	static private void populateCaches() throws Exception

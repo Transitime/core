@@ -46,6 +46,7 @@ import org.transitclock.api.data.ApiBlocksTerse;
 import org.transitclock.api.data.ApiCalendars;
 import org.transitclock.api.data.ApiCurrentServerDate;
 import org.transitclock.api.data.ApiDirections;
+import org.transitclock.api.data.ApiHeadsigns;
 import org.transitclock.api.data.ApiIds;
 import org.transitclock.api.data.ApiPredictions;
 import org.transitclock.api.data.ApiRevisionInformation;
@@ -763,6 +764,50 @@ public class TransitimeApi {
 	}
 
 	/**
+	 * Handles the "headsigns" command. Returns summary data describing all of the
+	 * headsigns. Useful for creating a headsign selector as part of a UI.
+	 *
+	 * @param stdParameters
+	 * @return
+	 * @throws WebApplicationException
+	 */
+	@Path("/command/headsigns")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Gets the list of headsigns.", description="Gets a list of the existing headsigns in the server."
+			+ " It is filtered according to routeId or routeShortName.",
+			tags={"base data","headsign"} )
+	public Response getHeadsigns(@BeanParam StandardParameters stdParameters,
+							  @Parameter(description="Specifies the routeId or routeShortName." ,required=true)
+							  @QueryParam(value = "r") String routeIdOrShortName)
+			throws WebApplicationException {
+
+		// Make sure request is valid
+		stdParameters.validate();
+
+		try {
+			ConfigInterface inter = stdParameters.getConfigInterface();
+
+			// Get agency info so can also return agency name
+			List<Agency> agencies = inter.getAgencies();
+
+			// Get headsigns data from server
+			ApiHeadsigns headsignsData;
+
+			// Get specified headsigns
+			List<IpcTripPattern> ipcTripPatterns = inter.getTripPatterns(routeIdOrShortName);
+			headsignsData = new ApiHeadsigns(ipcTripPatterns, agencies.get(0));
+
+
+			// Create and return response
+			return stdParameters.createResponse(headsignsData);
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e);
+		}
+	}
+
+	/**
 	 * Handles the "routesDetails" command. Provides detailed information for a
 	 * route includes all stops and paths such that it can be drawn in a map.
 	 * 
@@ -855,7 +900,7 @@ public class TransitimeApi {
 	 * a stop from a list.
 	 * 
 	 * @param stdParameters
-	 * @param routeShortName
+	 * @param routesIdOrShortNames
 	 * @return
 	 * @throws WebApplicationException
 	 */
@@ -1505,6 +1550,50 @@ public class TransitimeApi {
 	}
 
 	/**
+	 * Handles the "scheduleVertStops" command which outputs schedule for the
+	 * specified route. The data is output such that the stops are listed
+	 * vertically (and the trips are horizontal). For when there are a good
+	 * number of stops but not as many trips, such as for commuter rail.
+	 *
+	 * @param stdParameters
+	 * @param tripId
+	 * @return
+	 * @throws WebApplicationException
+	 */
+	@Path("/command/scheduleTripVertStops")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Retrives schedule for the specified trip.",
+			description="Retrives schedule for the specified trip.  The data is output such that the stops are listed "
+					+ "vertically (and the trips are horizontal)."
+			,tags= {"base data","schedule"})
+	public Response getScheduleTripVertStops(@BeanParam StandardParameters stdParameters,
+										 @Parameter(description="Specifies the tripId",required=true)
+										 @QueryParam(value = "t") String tripId) throws WebApplicationException {
+
+		// Make sure request is valid
+		stdParameters.validate();
+
+		try {
+			// Get block data from server
+			ConfigInterface inter = stdParameters.getConfigInterface();
+			List<IpcSchedule> ipcSchedules = inter.getSchedulesForTrip(tripId);
+
+			// If the trip doesn't exist then throw exception such that
+			// Bad Request with an appropriate message is returned.
+			if (ipcSchedules == null)
+				throw WebUtils.badRequestException("trip=" + tripId + " does not exist.");
+
+			// Create and return ApiSchedules response
+			ApiSchedulesVertStops apiSchedules = new ApiSchedulesVertStops(ipcSchedules);
+			return stdParameters.createResponse(apiSchedules);
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e);
+		}
+	}
+
+	/**
 	 * Handles the "scheduleHorizStops" command which outputs schedule for the
 	 * specified route. The data is output such that the stops are listed
 	 * horizontally (and the trips are vertical). For when there are many more
@@ -1538,6 +1627,40 @@ public class TransitimeApi {
 			// Bad Request with an appropriate message is returned.
 			if (ipcSchedules == null)
 				throw WebUtils.badRequestException("route=" + routesIdOrShortNames + " does not exist.");
+
+			// Create and return ApiSchedules response
+			ApiSchedulesHorizStops apiSchedules = new ApiSchedulesHorizStops(ipcSchedules);
+			return stdParameters.createResponse(apiSchedules);
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e);
+		}
+	}
+
+	@Path("/command/scheduleTripHorizStops")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Retrives schedule for the specified trip.",
+			description="Retrives schedule for the specified trip.  The data is output such that the stops are listed "
+					+ "horizontally (and the trip are vertical). For when there are a good number of stops but not as"
+					+ " many trips, such as for commuter rail."
+			,tags= {"base data","schedule"})
+	public Response getScheduleTripHorizStops(@BeanParam StandardParameters stdParameters,
+										  @Parameter(description="Specifies the tripId",required=true)
+										  @QueryParam(value = "t") String tripId) throws WebApplicationException {
+
+		// Make sure request is valid
+		stdParameters.validate();
+
+		try {
+			// Get block data from server
+			ConfigInterface inter = stdParameters.getConfigInterface();
+			List<IpcSchedule> ipcSchedules = inter.getSchedulesForTrip(tripId);
+
+			// If the trip doesn't exist then throw exception such that
+			// Bad Request with an appropriate message is returned.
+			if (ipcSchedules == null)
+				throw WebUtils.badRequestException("tripId=" + tripId + " does not exist.");
 
 			// Create and return ApiSchedules response
 			ApiSchedulesHorizStops apiSchedules = new ApiSchedulesHorizStops(ipcSchedules);

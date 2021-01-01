@@ -37,6 +37,14 @@
   	<table id="paramsTable"></table>
   	<jsp:include page="params/vehicle.jsp" />
   	<jsp:include page="params/fromDateNumDaysTime.jsp" />
+    <div class="param">
+        <label for="late">Allowable late (mins):</label>
+        <input type="number" id="late" name="late" min="0" max="1440" step="0.5" value="2.5">
+    </div>
+    <div class="param">
+        <label for="early">Allowable early (mins):</label>
+        <input type="number" id="early" name="early" min="0" max="1440" step="0.5" value="1.5">
+    </div>
     <jsp:include page="params/routeAllOrSingle.jsp" /> <br>
     <input type="button" id="submit" value="Submit">
     <a href="#" id="exportData">Export</a>
@@ -53,6 +61,25 @@
 	    <div><span id="playbackRate">1X</span></div>
 	  	<div><span id="playbackTime">00:00:00</span></div>
 	  </div>
+  </div>
+  <div id="legend">
+      <p style="margin-block-start: 0em; margin-block-end: 0.5em; font-weight: bold;">AVL Marker Legend</p>
+      <div>
+          <div class="avlTriangleon-time" style="display: inline-block;"></div>
+          <text style="display: inline-block;">= On Time</text>
+      </div>
+      <div>
+          <div class="avlTrianglelate" style="display: inline-block;"></div>
+          <text style="display: inline-block;">= Late</text>
+      </div>
+      <div>
+          <div class="avlTriangleearly" style="display: inline-block;"></div>
+          <text style="display: inline-block;">= Early</text>
+      </div>
+      <div>
+          <div class="avlTriangle" style="display: inline-block;"></div>
+          <text style="display: inline-block;">= No Data</text>
+      </div>
   </div>
 </body>
 

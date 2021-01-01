@@ -25,7 +25,7 @@ html, body, #map {
 /* Set the title text here in css 
  */
 #mapTitle:before {
-	content: "Transitime";
+	content: "TransitClock";
 }
 	
 /* Center the route selector.

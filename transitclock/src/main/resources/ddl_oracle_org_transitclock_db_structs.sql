@@ -34,15 +34,18 @@
         blockId varchar2(60 char),
         configRev number(10,0),
         directionId varchar2(60 char),
+        dwellTime number(19,0),
         freqStartTime timestamp,
         routeId varchar2(60 char),
         routeShortName varchar2(60 char),
         scheduledTime timestamp,
         serviceId varchar2(60 char),
         stopOrder number(10,0),
+        stopPathId varchar2(120 char),
         stopPathIndex number(10,0),
         stopPathLength float,
         tripIndex number(10,0),
+        tripPatternId varchar2(120 char),
         primary key (vehicleId, tripId, time, stopId, isArrival, gtfsStopSeq)
     );
 
@@ -67,14 +70,14 @@
     );
 
     create table Block_to_Trip_joinTable (
-        Blocks_serviceId varchar2(60 char) not null,
-        Blocks_configRev number(10,0) not null,
-        Blocks_blockId varchar2(60 char) not null,
+        blocks_serviceId varchar2(60 char) not null,
+        blocks_configRev number(10,0) not null,
+        blocks_blockId varchar2(60 char) not null,
         trips_tripId varchar2(60 char) not null,
         trips_startTime number(10,0) not null,
         trips_configRev number(10,0) not null,
         listIndex number(10,0) not null,
-        primary key (Blocks_serviceId, Blocks_configRev, Blocks_blockId, listIndex)
+        primary key (blocks_serviceId, blocks_configRev, blocks_blockId, listIndex)
     );
 
     create table Blocks (
@@ -145,13 +148,13 @@
     );
 
     create table FeedInfo (
-        feedPublisherName varchar2(60 char) not null,
-        feedPublisherUrl varchar2(512 char) not null,
+        feedPublisherName varchar2(255 char) not null,
         configRev number(10,0) not null,
-        feedVersion varchar2(120 char),
-        feedLanguage varchar2(15 char) not null,
-        feedStartDate date,
         feedEndDate date,
+        feedLanguage varchar2(15 char),
+        feedPublisherUrl varchar2(512 char),
+        feedStartDate date,
+        feedVersion varchar2(120 char),
         primary key (feedPublisherName, configRev)
     );
 
@@ -250,6 +253,28 @@
         tripId varchar2(60 char),
         vehicleId varchar2(60 char),
         primary key (id)
+    );
+
+    create table PredictionEvents (
+        vehicleId varchar2(60 char) not null,
+        time timestamp not null,
+        eventType varchar2(60 char) not null,
+        arrivalTime timestamp,
+        arrivalstopid varchar2(60 char),
+        avlTime timestamp,
+        blockId varchar2(60 char),
+        departureTime timestamp,
+        departurestopid varchar2(60 char),
+        description varchar2(500 char),
+        lat double precision,
+        lon double precision,
+        referenceVehicleId varchar2(60 char),
+        routeId varchar2(60 char),
+        routeShortName varchar2(60 char),
+        serviceId varchar2(60 char),
+        stopId varchar2(60 char),
+        tripId varchar2(60 char),
+        primary key (vehicleId, time, eventType)
     );
 
     create table Predictions (
@@ -492,6 +517,8 @@
 
     create index ArrivalsDeparturesRouteTimeIndex on ArrivalsDepartures (routeShortName, time);
 
+    create index ArrivalsDeparturesTripPatternIdIndex on ArrivalsDepartures (tripPatternId);
+
     create index AvlReportsTimeIndex on AvlReports (time);
 
     create index HeadwayIndex on Headway (creationTime);
@@ -506,6 +533,8 @@
 
     create index PredictionAccuracyTimeIndex on PredictionAccuracy (arrivalDepartureTime);
 
+    create index PredictionEventsTimeIndex on PredictionEvents (time);
+
     create index PredictionTimeIndex on Predictions (creationTime);
 
     create index StopPathPredictionTimeIndex on StopPathPredictions (tripId, stopPathIndex);
@@ -519,14 +548,24 @@
 
     create index VehicleStateAvlTimeIndex on VehicleStates (avlTime);
 
+    alter table ArrivalsDepartures 
+        add constraint FK_m1eyesv8rr42fo6qpcrkcgjp3 
+        foreign key (stopId, configRev) 
+        references Stops;
+
+    alter table ArrivalsDepartures 
+        add constraint FK_axgfl7fxphggp7qcwy6h8vbs4 
+        foreign key (tripPatternId, stopPathId, configRev) 
+        references StopPaths;
+
     alter table Block_to_Trip_joinTable 
         add constraint FK_abaj8ke6oh4imbbgnaercsowo 
         foreign key (trips_tripId, trips_startTime, trips_configRev) 
         references Trips;
 
     alter table Block_to_Trip_joinTable 
-        add constraint FK_1c1e1twdap19vq0xkav0amvm 
-        foreign key (Blocks_serviceId, Blocks_configRev, Blocks_blockId) 
+        add constraint FK_kobr9qxbawdjnf5fced46rfpo 
+        foreign key (blocks_serviceId, blocks_configRev, blocks_blockId) 
         references Blocks;
 
     alter table StopPath_locations 
