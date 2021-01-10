@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.configData.DbSetupConfig;
 import org.transitclock.logging.Markers;
+import org.transitclock.monitoring.MonitoringService;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
 import org.transitclock.utils.threading.NamedThreadFactory;
@@ -476,7 +477,7 @@ public class DbQueue<T> {
    * at a time. Should be used when the batching encounters an exception. This
    * way can still store all of the good data from a batch.
    * 
-   * @param o
+   * @param objectToBeStored
    */
   private void processSingleObject(Object objectToBeStored) {
     Session session = null;
@@ -500,13 +501,18 @@ public class DbQueue<T> {
       while (!Thread.interrupted()) {
         try {
           processThroughput();
+          montiorQueue();
         } catch (Throwable t) {
           logger.error("monitor broke:{}", t, t);
         }
         Time.sleep(interval * Time.MS_PER_MIN);
       }
     }
-    
+
+    private void montiorQueue() {
+      MonitoringService.getInstance().averageMetric("PredictionQueue" + shortType + "Level", queueLevel());
+    }
+
     private void processThroughput() {
       long delta = (System.currentTimeMillis() - throughputTimestamp)/1000;
       if (throughputCount == 0) {
