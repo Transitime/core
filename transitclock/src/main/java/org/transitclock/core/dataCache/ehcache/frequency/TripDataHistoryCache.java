@@ -8,7 +8,6 @@ import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
@@ -25,6 +24,8 @@ import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
 
 import java.util.*;
+
+import static org.transitclock.core.dataCache.StopArrivalDepartureCacheInterface.smoothArrivalDepartures;
 
 /**
  * @author Sean Og Crudden 
@@ -191,9 +192,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	{
  		Criteria criteria =session.createCriteria(ArrivalDeparture.class);				
 		
-		@SuppressWarnings("unchecked")
-		List<ArrivalDeparture> results=criteria.add(Restrictions.between("time", startDate, endDate)).list();
-						
+		List<ArrivalDeparture> results = smoothArrivalDepartures(criteria, startDate, endDate);
 		for(ArrivalDeparture result : results)		
 		{						
 			// TODO this might be better done in the database.						

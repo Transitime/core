@@ -334,6 +334,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				dwellTime,
 				stopPathId);
 
+		departure = StopArrivalDepartureCacheFactory.getInstance().verifyDeparture(departure);
 		updateCache(vehicleState, departure);
 
 		logger.debug("Creating departure: {}", departure);
@@ -394,7 +395,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				stopPathIndex,
 				freqStartDate,
 				stopPathId);
-		
+
+		arrival = StopArrivalDepartureCacheFactory.getInstance().verifyArrival(arrival);
 		updateCache(vehicleState, arrival);
 		logger.debug("Creating arrival: {}", arrival);
 

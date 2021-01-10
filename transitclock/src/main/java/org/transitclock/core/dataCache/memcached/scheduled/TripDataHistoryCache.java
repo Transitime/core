@@ -13,12 +13,10 @@ import java.util.List;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.transitclock.applications.Core;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.StringConfigValue;
-import org.transitclock.core.dataCache.ArrivalDepartureComparator;
 import org.transitclock.core.dataCache.IpcArrivalDepartureComparator;
 import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.core.dataCache.TripDataHistoryCacheInterface;
@@ -31,6 +29,8 @@ import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
 
 import net.spy.memcached.MemcachedClient;
+
+import static org.transitclock.core.dataCache.StopArrivalDepartureCacheInterface.smoothArrivalDepartures;
 
 public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 
@@ -105,9 +105,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 	public void populateCacheFromDb(Session session, Date startDate, Date endDate) {
 		Criteria criteria =session.createCriteria(ArrivalDeparture.class);				
 		
-		@SuppressWarnings("unchecked")
-		List<ArrivalDeparture> results=criteria.add(Restrictions.between("time", startDate, endDate)).list();
-						
+		List<ArrivalDeparture> results = smoothArrivalDepartures(criteria, startDate, endDate);
 		for(ArrivalDeparture result : results)		
 		{						
 			// TODO this might be better done in the database.						
