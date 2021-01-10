@@ -7,8 +7,6 @@ import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.IntegerConfigValue;
@@ -118,7 +116,7 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 			}			
 									
 			cache.put(key,element);
-	
+
 			return key;
 		}else
 		{
@@ -133,15 +131,16 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 	public void populateCacheFromDb(Session session, Date startDate, Date endDate) {
 		Criteria criteria = session.createCriteria(ArrivalDeparture.class);
 
-		@SuppressWarnings("unchecked")
-		List<ArrivalDeparture> results = criteria.add(Restrictions.between("time", startDate, endDate)).addOrder(Order.asc("time")).list();
 
+		List<ArrivalDeparture> results = smoothArrivalDepartures(criteria, startDate, endDate);
 		int counter = 0;
 
 		for (ArrivalDeparture result : results) {
 			if(counter % 1000 == 0){
 				logger.info("{} out of {} Stop Arrival Departure Records for period {} to {} ({}%)", counter, results.size(), startDate, endDate, (int)((counter * 100.0f) / results.size()));
 			}
+
+			// as we are adding A/Ds, smooth any negative arrivals
 			StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(result);
 			//TODO might be better with its own populateCacheFromdb
 			try

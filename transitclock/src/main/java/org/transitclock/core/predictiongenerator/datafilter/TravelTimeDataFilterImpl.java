@@ -37,17 +37,14 @@ public class TravelTimeDataFilterImpl implements TravelTimeDataFilter {
 		if (arrival != null && departure != null) {
 			long traveltime = arrival .getTime().getTime() - departure.getTime().getTime();
 
-			if (arrival.getScheduledAdherence() == null 
-					|| (departure.getScheduledAdherence() != null && departure.getScheduledAdherence()
-					.isWithinBounds(minSceheduleAdherence.getValue(), maxSceheduleAdherence.getValue()))) {	
-				// TODO Arrival schedule adherence appears not to be set much. So
-				// only stop if set and outside range.
+			if (departure.getScheduledAdherence() == null || departure.getScheduledAdherence()
+					.isWithinBounds(minSceheduleAdherence.getValue(), maxSceheduleAdherence.getValue())) {
 				if (arrival.getScheduledAdherence() == null || arrival.getScheduledAdherence()
 						.isWithinBounds(minSceheduleAdherence.getValue(), maxSceheduleAdherence.getValue())) {
 					if (traveltime < maxTravelTimeAllowedInModel.getValue()
 							&& traveltime > minTravelTimeAllowedInModel.getValue()) {
 						return false;
-												
+
 					} else {
 						logger.warn("Travel time {} outside allowable range for {} to {}.", traveltime, departure, arrival);
 					}

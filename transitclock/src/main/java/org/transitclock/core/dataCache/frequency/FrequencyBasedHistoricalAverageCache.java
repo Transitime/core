@@ -3,7 +3,6 @@ package org.transitclock.core.dataCache.frequency;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
@@ -17,6 +16,9 @@ import org.transitclock.ipc.data.IpcArrivalDeparture;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static org.transitclock.core.dataCache.StopArrivalDepartureCacheInterface.smoothArrivalDepartures;
+
 /**
  * @author Sean Óg Crudden
  * This class is to hold the historical average for frequency based services. It puts them in buckets that represent increments of time. The start time of the trip is used to decide which 
@@ -136,7 +138,7 @@ public class FrequencyBasedHistoricalAverageCache {
 		}
 	}
 	public void putArrivalDeparture(ArrivalDeparture arrivalDeparture) throws Exception
-	{		
+	{
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
 				
 		Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
@@ -283,7 +285,7 @@ public class FrequencyBasedHistoricalAverageCache {
 	public void populateCacheFromDb(Session session, Date startDate, Date endDate) throws Exception 
 	{
 		Criteria criteria =session.createCriteria(ArrivalDeparture.class);
-		List<ArrivalDeparture> results=criteria.add(Restrictions.between("time", startDate, endDate)).list();
+		List<ArrivalDeparture> results = smoothArrivalDepartures(criteria, startDate, endDate);
 		Collections.sort(results, new ArrivalDepartureComparator());
 
 		int counter = 0;

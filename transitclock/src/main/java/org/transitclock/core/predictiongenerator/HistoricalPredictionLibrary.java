@@ -18,6 +18,8 @@
 package org.transitclock.core.predictiongenerator;
 
 import org.apache.commons.lang3.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.Indices;
@@ -46,6 +48,8 @@ public class HistoricalPredictionLibrary {
 			"transitclock.prediction.closestvehiclestopsahead", new Integer(2),
 			"Num stops ahead a vehicle must be to be considers in the closest vehicle calculation");
 
+	private static final Logger logger = LoggerFactory.getLogger(HistoricalPredictionLibrary.class);
+
 	public static TravelTimeDetails getLastVehicleTravelTime(VehicleState currentVehicleState, Indices indices) throws Exception {
 
 		StopArrivalDepartureCacheKey nextStopKey = new StopArrivalDepartureCacheKey(
@@ -73,7 +77,7 @@ public class HistoricalPredictionLibrary {
 							&& (currentVehicleState.getTrip().getDirectionId()==null || currentVehicleState.getTrip().getDirectionId().equals(currentArrivalDeparture.getDirectionId())))
 					{
 						IpcArrivalDeparture found;
-
+						// for this departure find the next arrival
 						if ((found = findMatchInList(nextStopList, currentArrivalDeparture)) != null) {
 							TravelTimeDetails travelTimeDetails=new TravelTimeDetails(currentArrivalDeparture, found);
 							if(travelTimeDetails.getTravelTime()>0)
@@ -97,11 +101,18 @@ public class HistoricalPredictionLibrary {
 							}
 						}else
 						{
+							// match not found
 							getMonitoring().rateMetric("PredictionStopArrivalDepartureHit", false);
 							return null;
 						}
+					} else {
+						logger.debug("vehicle/direction did not match {} != {}",
+										currentArrivalDeparture.getVehicleId(), currentVehicleState.getVehicleId());
 					}
 				}
+				logger.debug("fall through");
+			} else {
+				logger.debug("stop lists not populated");
 			}
 		}
 		getMonitoring().rateMetric("PredictionStopArrivalDepartureHit", false);
@@ -154,7 +165,7 @@ public class HistoricalPredictionLibrary {
 							}
 						}else
 						{
-							return null;
+							return null; // not matched in list
 						}
 					}
 				}
@@ -258,9 +269,21 @@ public class HistoricalPredictionLibrary {
 								times.add(travelTimeDetails);
 								num_found++;
 							}
+						} else {
+							// invalid travel time
+							logger.debug("invalid travel time {}", travelTimeDetails.getTravelTime());
 						}
+					} else {
+						//departure is null
+						logger.debug("departure is null for arrival {} ", arrival);
 					}
+				} else {
+					// arrival null
+					logger.debug("arrival is null for trip {}", tripKey);
 				}
+			} else {
+				// tripHistory null
+				logger.debug("history is empty for trip {}" + tripKey);
 			}
 		}
 		return times;

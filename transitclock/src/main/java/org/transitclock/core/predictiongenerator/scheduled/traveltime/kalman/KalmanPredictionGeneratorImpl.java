@@ -218,6 +218,8 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 						getMonitoring().averageMetric("PredictionKalmanHistorySize", lastDaysTimes.size());
 				}
 			} else {
+				// no travel time
+				logger.debug("no travel times for trip {}", vehicleState.getTrip().getId());
 				getMonitoring().rateMetric("PredictionKalmanHeadwayHit", false);
 			}
 		} catch (Exception e) {

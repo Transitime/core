@@ -411,7 +411,8 @@ public class Core {
 	static private void populateCaches() throws Exception
 	{
 		Session session = HibernateUtils.getSession();
-		Date endDate=Calendar.getInstance().getTime();
+		Date endDate=new Date(Time.getStartOfDay(Calendar.getInstance().getTime()));
+		endDate = DateUtils.addDays(endDate, 1); // go to end of day
 
 		if(cacheReloadStartTimeStr.getValue().length()>0&&cacheReloadEndTimeStr.getValue().length()>0)
 		{

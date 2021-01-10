@@ -8,7 +8,6 @@ import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
@@ -26,6 +25,8 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
+import static org.transitclock.core.dataCache.StopArrivalDepartureCacheInterface.smoothArrivalDepartures;
 
 /**
  * @author Sean Og Crudden 
@@ -93,7 +94,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	 */
 	@Override	
 	public TripKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
-		
+
 		logger.trace("Putting :"+arrivalDeparture.toString() + " in TripDataHistoryCache cache.");
 		/* just put todays time in for last three days to aid development. This means it will kick in in 1 days rather than 3. Perhaps be a good way to start rather than using default transiTime method but I doubt it. */
 		int days_back=1;
@@ -146,9 +147,8 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	@Override
 	public void populateCacheFromDb(Session session, Date startDate, Date endDate)
 	{
-	 		Criteria criteria =session.createCriteria(ArrivalDeparture.class);
-		List<ArrivalDeparture> results=criteria.add(Restrictions.between("time", startDate, endDate)).list();
-
+		Criteria criteria =session.createCriteria(ArrivalDeparture.class);
+		List<ArrivalDeparture> results = smoothArrivalDepartures(criteria, startDate, endDate);
 		int counter = 0;
 		for(ArrivalDeparture result : results)		
 		{
