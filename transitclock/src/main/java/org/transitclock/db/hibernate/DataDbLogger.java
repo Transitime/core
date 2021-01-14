@@ -16,13 +16,17 @@
  */
 package org.transitclock.db.hibernate;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.configData.CoreConfig;
 import org.transitclock.configData.DbSetupConfig;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.AvlReport;
@@ -30,6 +34,7 @@ import org.transitclock.db.structs.Match;
 import org.transitclock.db.structs.MonitoringEvent;
 import org.transitclock.db.structs.Prediction;
 import org.transitclock.db.structs.PredictionAccuracy;
+import org.transitclock.db.structs.PredictionEvent;
 import org.transitclock.db.structs.VehicleConfig;
 import org.transitclock.db.structs.VehicleEvent;
 import org.transitclock.db.structs.VehicleState;
@@ -81,6 +86,7 @@ public class DataDbLogger {
   private DbQueue<PredictionAccuracy> predictionAccuracyQueue;
   private DbQueue<MonitoringEvent> monitoringEventQueue;
   private DbQueue<VehicleEvent> vehicleEventQueue;
+	private DbQueue<PredictionEvent> predictionEventQueue;
   private DbQueue<VehicleState> vehicleStateQueue;
   private DbQueue<Object> genericQueue;
 	
@@ -116,7 +122,7 @@ public class DataDbLogger {
 	
 	// So can access agencyId for logging messages
 	private String agencyId;
-	
+
 	private static final Logger logger = 
 			LoggerFactory.getLogger(DataDbLogger.class);
 
@@ -180,6 +186,7 @@ public class DataDbLogger {
 	  predictionAccuracyQueue = new DbQueue<PredictionAccuracy>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, PredictionAccuracy.class.getSimpleName());
 	  monitoringEventQueue = new DbQueue<MonitoringEvent>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, MonitoringEvent.class.getSimpleName());
 	  vehicleEventQueue = new DbQueue<VehicleEvent>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, VehicleEvent.class.getSimpleName());
+		predictionEventQueue = new DbQueue<PredictionEvent>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, PredictionEvent.class.getSimpleName());
 	  vehicleStateQueue = new DbQueue<VehicleState>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, VehicleState.class.getSimpleName());
 	  genericQueue = new DbQueue<Object>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, Object.class.getSimpleName());
 		
@@ -213,6 +220,12 @@ public class DataDbLogger {
     public boolean add(VehicleEvent ve) {
       return vehicleEventQueue.add(ve);
     }
+    public boolean add(PredictionEvent pe) {
+			if (CoreConfig.storePredictionEventsInDatabase()) {
+				return predictionEventQueue.add(pe);
+			}
+			return false;
+		}
     public boolean add(VehicleState vs) {
       return vehicleStateQueue.add(vs);
     }
@@ -256,17 +269,48 @@ public class DataDbLogger {
 	}
 	
 
-	// the predictionQueue is the largest queue, so report on it for now
+	// as a summary of overall queue behaviour, return the highest queue level
 	public double queueLevel() {
-	  // TODO split this out into separate queues
-	  return predictionQueue.queueLevel();
+		Double[] queueLevelsArray = {
+						arrivalDepartureQueue.queueLevel(),
+						avlReportQueue.queueLevel(),
+						vehicleConfigQueue.queueLevel(),
+						predictionQueue.queueLevel(),
+						matchQueue.queueLevel(),
+						predictionAccuracyQueue.queueLevel(),
+						monitoringEventQueue.queueLevel(),
+						vehicleEventQueue.queueLevel(),
+						predictionEventQueue.queueLevel(),
+						vehicleStateQueue.queueLevel(),
+						genericQueue.queueLevel()
+		};
 
+		List<Double> levels = Arrays.asList(queueLevelsArray);
+		Collections.sort(levels);
+		return levels.get(levels.size()-1);
 	}
-	
+
+	// as a summary of queue sizes, return the largest queue size
 	public int queueSize() {
-	  return predictionQueue.queueSize();
+		Integer[] sizesArray = {
+						arrivalDepartureQueue.queueSize(),
+						avlReportQueue.queueSize(),
+						vehicleConfigQueue.queueSize(),
+						predictionQueue.queueSize(),
+						matchQueue.queueSize(),
+						predictionAccuracyQueue.queueSize(),
+						monitoringEventQueue.queueSize(),
+						vehicleEventQueue.queueSize(),
+						predictionEventQueue.queueSize(),
+						vehicleStateQueue.queueSize(),
+						genericQueue.queueSize()
+		};
+
+		List<Integer> sizes = Arrays.asList(sizesArray);
+		Collections.sort(sizes);
+		return sizes.get(sizes.size()-1);
 	}
-	
+
 	/**
 	 * Just for doing some testing
 	 * 
