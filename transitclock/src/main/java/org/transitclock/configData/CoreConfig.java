@@ -66,8 +66,22 @@ public class CoreConfig {
 					"want to store generated data such as arrivals/" +
 					"departures, events, and such to the database because " +
 					"only debugging.");
-	
-	
+
+	/**
+	 * Prediction events represent debugging information that adds additional load
+	 * to datbase queue subsystem.  Enable for debugging purposes only or with caution.
+	 * @return
+	 */
+	public static boolean storePredictionEventsInDatabase() {
+		return storePredictionEventsInDatabase.getValue();
+	}
+	private static BooleanConfigValue storePredictionEventsInDatabase =
+					new BooleanConfigValue("transitclock.db.storePredictionEventsInDatabase",
+									false,
+									"PredictionEvents represent debugging information " +
+													"and can cause large load on database queues.  " +
+													"Enable with caution.");
+
 	/**
 	 * When batching large amount of AVL data through system to generate
 	 * improved schedule time (as has been done for Zhengzhou) it takes huge

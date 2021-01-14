@@ -28,6 +28,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.configData.CoreConfig;
 import org.transitclock.configData.DbSetupConfig;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.AvlReport;
@@ -35,6 +36,7 @@ import org.transitclock.db.structs.Match;
 import org.transitclock.db.structs.MonitoringEvent;
 import org.transitclock.db.structs.Prediction;
 import org.transitclock.db.structs.PredictionAccuracy;
+import org.transitclock.db.structs.PredictionEvent;
 import org.transitclock.db.structs.VehicleConfig;
 import org.transitclock.db.structs.VehicleEvent;
 import org.transitclock.db.structs.VehicleState;
@@ -86,6 +88,7 @@ public class DataDbLogger {
   private DbQueue<PredictionAccuracy> predictionAccuracyQueue;
   private DbQueue<MonitoringEvent> monitoringEventQueue;
   private DbQueue<VehicleEvent> vehicleEventQueue;
+	private DbQueue<PredictionEvent> predictionEventQueue;
   private DbQueue<VehicleState> vehicleStateQueue;
   private DbQueue<Object> genericQueue;
 	
@@ -188,6 +191,7 @@ public class DataDbLogger {
 	  predictionAccuracyQueue = new DbQueue<PredictionAccuracy>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, PredictionAccuracy.class.getSimpleName());
 	  monitoringEventQueue = new DbQueue<MonitoringEvent>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, MonitoringEvent.class.getSimpleName());
 	  vehicleEventQueue = new DbQueue<VehicleEvent>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, VehicleEvent.class.getSimpleName());
+		predictionEventQueue = new DbQueue<PredictionEvent>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, PredictionEvent.class.getSimpleName());
 	  vehicleStateQueue = new DbQueue<VehicleState>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, VehicleState.class.getSimpleName());
 	  genericQueue = new DbQueue<Object>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, Object.class.getSimpleName());
 		
@@ -235,6 +239,12 @@ public class DataDbLogger {
     public boolean add(VehicleEvent ve) {
       return vehicleEventQueue.add(ve);
     }
+    public boolean add(PredictionEvent pe) {
+		if (CoreConfig.storePredictionEventsInDatabase()) {
+			return predictionEventQueue.add(pe);
+		}
+		return false;
+		}
     public boolean add(VehicleState vs) {
 			String key = "vs_" + vs.getVehicleId();
 			String hash = vehicleToPrimayKeyMap.get(key);
@@ -296,6 +306,7 @@ public class DataDbLogger {
 						predictionAccuracyQueue.queueLevel(),
 						monitoringEventQueue.queueLevel(),
 						vehicleEventQueue.queueLevel(),
+						predictionEventQueue.queueLevel(),
 						vehicleStateQueue.queueLevel(),
 						genericQueue.queueLevel()
 		};
@@ -316,6 +327,7 @@ public class DataDbLogger {
 						predictionAccuracyQueue.queueSize(),
 						monitoringEventQueue.queueSize(),
 						vehicleEventQueue.queueSize(),
+						predictionEventQueue.queueSize(),
 						vehicleStateQueue.queueSize(),
 						genericQueue.queueSize()
 		};
