@@ -511,7 +511,12 @@ public class DbQueue<T> {
 
     private void monitorQueue() {
       // report the queue level as a percentage of full
-      MonitoringService.getInstance().averageMetric("PredictionQueue" + shortType + "Level", queueLevel() * 100);
+      MonitoringService.getInstance().saveMetric("PredictionDatabase" + shortType + "QueuePercentageLevel",
+              queueLevel(),
+              1,
+              MonitoringService.MetricType.AVERAGE,
+              MonitoringService.ReportingIntervalTimeUnit.MINUTE,
+              false);
     }
 
     private void processThroughput() {
