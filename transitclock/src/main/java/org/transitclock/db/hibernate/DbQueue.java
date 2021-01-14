@@ -501,7 +501,7 @@ public class DbQueue<T> {
       while (!Thread.interrupted()) {
         try {
           processThroughput();
-          montiorQueue();
+          monitorQueue();
         } catch (Throwable t) {
           logger.error("monitor broke:{}", t, t);
         }
@@ -509,8 +509,9 @@ public class DbQueue<T> {
       }
     }
 
-    private void montiorQueue() {
-      MonitoringService.getInstance().averageMetric("PredictionQueue" + shortType + "Level", queueLevel());
+    private void monitorQueue() {
+      // report the queue level as a percentage of full
+      MonitoringService.getInstance().averageMetric("PredictionQueue" + shortType + "Level", queueLevel() * 100);
     }
 
     private void processThroughput() {
