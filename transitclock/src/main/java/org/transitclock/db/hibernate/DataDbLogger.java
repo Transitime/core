@@ -285,7 +285,7 @@ public class DataDbLogger {
 	}
 	
 
-	// the predictionQueue is the largest queue, so report on it for now
+	// as a summary of overall queue behaviour, return the highest queue level
 	public double queueLevel() {
 		Double[] queueLevelsArray = {
 						arrivalDepartureQueue.queueLevel(),
@@ -304,7 +304,8 @@ public class DataDbLogger {
 		Collections.sort(levels);
 		return levels.get(levels.size()-1);
 	}
-	
+
+	// as a summary of queue sizes, return the largest queue size
 	public int queueSize() {
 		Integer[] sizesArray = {
 						arrivalDepartureQueue.queueSize(),
