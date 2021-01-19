@@ -22,6 +22,7 @@ import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.configData.AgencyConfig;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.logging.Markers;
+import org.transitclock.monitoring.MonitoringService;
 import org.transitclock.utils.Time;
 import org.transitclock.utils.threading.NamedThreadFactory;
 
@@ -185,7 +186,13 @@ public class AvlExecutor {
 		Runnable avlClient = !testing ? 
 				new AvlClient(newAvlReport) : new AvlClientTester(newAvlReport);
 
-		avlClientExecutor.execute(avlClient);		
+		// monitor queue capacity
+		int size = this.avlClientExecutor.getQueue().size();
+		int capacity = this.avlClientExecutor.getMaximumPoolSize();
+		MonitoringService.getInstance().averageMetric("PredictionWorkQueueSize", (double) size / capacity);
+
+
+		avlClientExecutor.execute(avlClient);
 	}
 
 	/**
