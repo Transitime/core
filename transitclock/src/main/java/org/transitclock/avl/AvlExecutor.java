@@ -188,8 +188,8 @@ public class AvlExecutor {
 
 		// monitor queue capacity
 		int size = this.avlClientExecutor.getQueue().size();
-		int capacity = this.avlClientExecutor.getMaximumPoolSize();
-		MonitoringService.getInstance().averageMetric("PredictionWorkQueueSize", (double) size / capacity);
+		int capacity = avlQueueSize.getValue();
+		MonitoringService.getInstance().averageMetric("PredictionAvlWorkQueuePercentageLevel", (double) size / capacity);
 
 
 		avlClientExecutor.execute(avlClient);
