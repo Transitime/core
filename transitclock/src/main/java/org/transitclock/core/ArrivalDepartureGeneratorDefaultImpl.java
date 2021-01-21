@@ -400,6 +400,10 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		updateCache(vehicleState, arrival);
 		logger.debug("Creating arrival: {}", arrival);
 
+		// Remember this arrival time so that can make sure that subsequent
+		// departures are for after the arrival time.
+		if (arrival.getTime() > vehicleState.getLastArrivalTime())
+			vehicleState.setLastArrivalTime(arrivalTime);
 		return arrival;
 	}
 
@@ -815,6 +819,12 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				}
 				departureTime = newDepartureTime;
 				arrivalTime = newArrivalTime;
+				if (arrivalTime < vehicleState.getLastDepartureTime()) {
+					logger.error("vehicle={} generated illegal arrival time less than next departure {}"
+					+ " but not greater than previous departure {}", vehicleId, Time.dateTimeStrMsec(departureTime),
+									Time.dateTimeStrMsec(vehicleState.getLastDepartureTime()));
+					// TODO: attempt to untangle out-of-order ADs
+				}
 				arrivalToStoreInDb = arrivalToStoreInDb
 						.withUpdatedTime(new Date(arrivalTime));
 			}
@@ -862,7 +872,12 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		}
 
 		Long dwellTime = recalculateDwellTimeUsingThresholds(departureTime - arrivalTime);
-		return createDepartureTime(vehicleState, departureTime, block, tripIndex, stopPathIndex, dwellTime);
+		Departure verifiedDeparture = createDepartureTime(vehicleState, departureTime, block, tripIndex, stopPathIndex, dwellTime);
+		// remember this departure time to ensure subsequent arrivals are in order
+		if (verifiedDeparture.getTime() > vehicleState.getLastDepartureTime()) {
+			vehicleState.setLastDepartureTime(verifiedDeparture.getTime());
+		}
+		return verifiedDeparture;
 	}
 
 	/**
@@ -1115,6 +1130,17 @@ public class ArrivalDepartureGeneratorDefaultImpl
 					Time.dateTimeStrMsec(previousAvlReport.getTime()),
 					Time.dateTimeStrMsec(previousAvlReport.getTime() + 1));
 			arrivalTime = previousAvlReport.getTime() + 1;
+		}
+
+		if (arrivalTime < vehicleState.getLastDepartureTime()) {
+			// our time check above didn't catch an out-of-order arrivalTime
+			logger.debug("For vehicle={} arrival time determined to be " +
+							"{} but that is less than or equal to previous departure " +
+							"time of {}.  Setting arrival time to {}.",
+							vehicleId,
+							Time.dateTimeStrMsec(arrivalTime),
+							Time.dateTimeStrMsec(vehicleState.getLastDepartureTime()));
+			arrivalTime = vehicleState.getLastArrivalTime() + 1;
 		}
 
 		// Create the arrival time

@@ -22,8 +22,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import static org.transitclock.core.dataCache.StopArrivalDepartureCacheInterface.smoothArrivalDepartures;
-
 /**
  * @author Sean Óg Crudden
  * 
@@ -166,7 +164,7 @@ public class ScheduleBasedHistoricalAverageCache {
 	public void populateCacheFromDb(Session session, Date startDate, Date endDate) throws Exception 
 	{
 		Criteria criteria =session.createCriteria(ArrivalDeparture.class);
-		List<ArrivalDeparture> results = smoothArrivalDepartures(criteria, startDate, endDate);
+		List<ArrivalDeparture> results = StopArrivalDepartureCacheInterface.createArrivalDeparturesCriteria(criteria, startDate, endDate);
 		Collections.sort(results, new ArrivalDepartureComparator());
 
 		int counter = 0;

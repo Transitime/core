@@ -65,8 +65,10 @@ public class HistoricalPredictionLibrary {
 					new Date(currentVehicleState.getMatch().getAvlTime()));
 
 			List<IpcArrivalDeparture> currentStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(currentStopKey);
+			getMonitoring().rateMetric("PredictionStopADCurrentHit", (currentStopList==null||currentStopList.isEmpty()?false:true));
 
 			List<IpcArrivalDeparture> nextStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(nextStopKey);
+			getMonitoring().rateMetric("PredictionStopADNextHit", (nextStopList==null||nextStopList.isEmpty()?false:true));
 
 			if (currentStopList != null && nextStopList != null) {
 				// lists are already sorted when put into cache.
@@ -76,17 +78,22 @@ public class HistoricalPredictionLibrary {
 							&& !currentArrivalDeparture.getVehicleId().equals(currentVehicleState.getVehicleId())
 							&& (currentVehicleState.getTrip().getDirectionId()==null || currentVehicleState.getTrip().getDirectionId().equals(currentArrivalDeparture.getDirectionId())))
 					{
+						// this appears bound by percentage of service filled
+						getMonitoring().rateMetric("PredictionStopADVehicleHit", true);
 						IpcArrivalDeparture found;
 						// for this departure find the next arrival
 						if ((found = findMatchInList(nextStopList, currentArrivalDeparture)) != null) {
+							getMonitoring().rateMetric("PredictionStopADTTHit", true);
 							TravelTimeDetails travelTimeDetails=new TravelTimeDetails(currentArrivalDeparture, found);
 							if(travelTimeDetails.getTravelTime()>0)
 							{
-								getMonitoring().rateMetric("PredictionStopArrivalDepartureHit", true);
+								getMonitoring().rateMetric("PredictionStopADHit", true);
+								getMonitoring().rateMetric("PredictionStopADValidTTHit", true);
 								return travelTimeDetails;
 
 							}else
 							{
+								getMonitoring().rateMetric("PredictionStopADValidTTHit", false);
 								String description=found + " : " + currentArrivalDeparture;
 								PredictionEvent.create(currentVehicleState.getAvlReport(), currentVehicleState.getMatch(), PredictionEvent.TRAVELTIME_EXCEPTION,
 										description,
@@ -96,13 +103,14 @@ public class HistoricalPredictionLibrary {
 										travelTimeDetails.getArrival().getTime(),
 										travelTimeDetails.getDeparture().getTime()
 								);
-								getMonitoring().rateMetric("PredictionStopArrivalDepartureHit", false);
+								getMonitoring().rateMetric("PredictionStopADHit", false);
 								return null;
 							}
 						}else
 						{
 							// match not found
-							getMonitoring().rateMetric("PredictionStopArrivalDepartureHit", false);
+							getMonitoring().rateMetric("PredictionStopADHit", false);
+							getMonitoring().rateMetric("PredictionStopADTTHit", false);
 							return null;
 						}
 					} else {
@@ -110,12 +118,13 @@ public class HistoricalPredictionLibrary {
 										currentArrivalDeparture.getVehicleId(), currentVehicleState.getVehicleId());
 					}
 				}
+				getMonitoring().rateMetric("PredictionStopADVehicleHit", false);
 				logger.debug("fall through");
 			} else {
 				logger.debug("stop lists not populated");
 			}
 		}
-		getMonitoring().rateMetric("PredictionStopArrivalDepartureHit", false);
+		getMonitoring().rateMetric("PredictionStopADHit", false);
 		return null;
 	}
 

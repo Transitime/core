@@ -14,6 +14,8 @@ import org.transitclock.applications.Core;
 import org.transitclock.db.structs.Arrival;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Departure;
+import org.transitclock.db.structs.StopPath;
+import org.transitclock.db.structs.Trip;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
 
@@ -28,7 +30,7 @@ public abstract class StopArrivalDepartureCacheInterface {
 	public void populateCacheFromDb(Session session, Date startDate, Date endDate) {
 		Criteria criteria = session.createCriteria(ArrivalDeparture.class);
 
-		List<ArrivalDeparture> results = smoothArrivalDepartures(criteria, startDate, endDate);
+		List<ArrivalDeparture> results = createArrivalDeparturesCriteria(criteria, startDate, endDate);
 		for (ArrivalDeparture result : results) {
 			this.putArrivalDeparture(result);
 			//TODO might be better with its own populateCacheFromdb
@@ -99,7 +101,7 @@ public abstract class StopArrivalDepartureCacheInterface {
 		return ad.withUpdatedTime(new Date(lastTime));
 	}
 
-	public static List<ArrivalDeparture> smoothArrivalDepartures(Criteria criteria, Date startDate, Date endDate) {
+	public static List<ArrivalDeparture> createArrivalDeparturesCriteria(Criteria criteria, Date startDate, Date endDate) {
 		@SuppressWarnings("unchecked")
 		List<ArrivalDeparture> results = criteria.add(Restrictions.between("time", startDate, endDate))
 						.addOrder(Order.asc("tripId"))
@@ -121,14 +123,14 @@ public abstract class StopArrivalDepartureCacheInterface {
 
 		StopArrivalDepartureCacheKey key = new StopArrivalDepartureCacheKey(departure.getStopId(), new Date(Time.getStartOfDay(departure.getAvlTime())));
 		List<IpcArrivalDeparture> stopHistory = getStopHistory(key);
-		ArrivalDeparture arrival = findArrivalForDeparture(stopHistory, departure);
-		if (arrival == null) {
+		ArrivalDeparture arrivalForDeparture = findArrivalForDeparture(stopHistory, departure);
+		if (arrivalForDeparture == null) {
 			logger.debug("no arrival found for departure {}", departure);
 			return departure;
 		}
-		if (arrival.getTime() >= departure.getTime()) {
-			logger.debug("adjusting departure time by {}", arrival.getTime() - departure.getTime() + 1);
-			return createDeparture(departure, arrival.getTime() + 1);
+		if (arrivalForDeparture.getTime() >= departure.getTime()) {
+			logger.debug("adjusting departure time by {}", arrivalForDeparture.getTime() - departure.getTime() + 1);
+			return createDeparture(departure, arrivalForDeparture.getTime() + 1);
 		}
 		return departure;
 	}
@@ -136,27 +138,39 @@ public abstract class StopArrivalDepartureCacheInterface {
 	public Arrival verifyArrival(Arrival arrival) {
 		if (!StopArrivalDepartureCacheFactory.enableVerification()) return arrival;
 
-		StopArrivalDepartureCacheKey key = new StopArrivalDepartureCacheKey(arrival.getStopId(), new Date(Time.getStartOfDay(arrival.getAvlTime())));
+		Trip trip = Core.getInstance().getDbConfig().getTrip(arrival.getTripId());
+		if (trip == null) {
+			return arrival;
+		}
+		// go back one to stop path to find last departure
+		StopPath stopPath = trip.getStopPath(arrival.getStopPathIndex() - 1);
+		if (stopPath == null) {
+			return arrival;
+		}
+		StopArrivalDepartureCacheKey key = new StopArrivalDepartureCacheKey(stopPath.getStopId(), new Date(Time.getStartOfDay(arrival.getAvlTime())));
+
 		List<IpcArrivalDeparture> stopHistory = getStopHistory(key);
-		ArrivalDeparture departure = findLastDeparture(stopHistory, arrival);
-		if (departure == null) {
+		ArrivalDeparture lastDeparture = findLastDeparture(stopHistory, stopPath.getStopId(), arrival.getVehicleId(), arrival.getStopPathIndex());
+		if (lastDeparture == null) {
 			logger.debug("no previous departure for arrival {}", arrival);
 			return arrival;
 		}
-		if (arrival.getTime() >= departure.getTime()) {
-			logger.debug("adjusting arrival time by {}", arrival.getTime() - departure.getTime() + 1);
-			return createArrival(arrival, departure.getTime() + 1);
+		if (arrival.getTime() <= lastDeparture.getTime()) {
+			logger.debug("adjusting arrival time by {}", arrival.getTime() - lastDeparture.getTime() + 1);
+			return createArrival(arrival, lastDeparture.getTime() + 1);
 		}
 		return arrival;
 	}
 
-	private ArrivalDeparture findLastDeparture(List<IpcArrivalDeparture> stopHistory, Arrival arrival) {
+	private ArrivalDeparture findLastDeparture(List<IpcArrivalDeparture> stopHistory, String departureStopId, String arrivalVehicleId, int arrivalStopPathIndex) {
 		ArrivalDeparture lastArrivalDeparture = null;
 		for (IpcArrivalDeparture ad : stopHistory) {
-			if (ad.getVehicleId().equals(arrival.getVehicleId())
-							&& ad.getStopId().equals(arrival.getStopId())
-							&& ad.getStopPathIndex() < arrival.getStopPathIndex()) {
-				lastArrivalDeparture = createArrivalDeparture(ad);
+			if (ad.getVehicleId().equals(arrivalVehicleId)
+							&& ad.getStopId().equals(departureStopId)
+							&& ad.getStopPathIndex() < arrivalStopPathIndex) {
+				if (lastArrivalDeparture == null || ad.getStopPathIndex() > lastArrivalDeparture.getStopPathIndex()) {
+					lastArrivalDeparture = createArrivalDeparture(ad);
+				}
 			}
 		}
 		return lastArrivalDeparture;

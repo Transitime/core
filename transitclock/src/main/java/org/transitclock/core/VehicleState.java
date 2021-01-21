@@ -65,6 +65,8 @@ public class VehicleState {
 	// So can make sure that departure time is after the arrival time
 	private Arrival arrivalToStoreToDb;
 	private long lastArrivalTime = 0;
+	// verify new arrival is greater than last departure
+	private long lastDepartureTime = 0;
 	private Date lastAvlTime = null;
 
 	// So can keep track of whether assigning vehicle to same block that
@@ -998,6 +1000,21 @@ public class VehicleState {
 		return lastArrivalTime;
 	}
 
+	/**
+	 * Stores the last departure time so we can verify subsequent arrivals
+	 * are always increasing.
+	 * @param departureTime
+	 */
+	public void setLastDepartureTime(long departureTime) { lastDepartureTime = departureTime; }
+
+	/**
+	 * Returns the last departure time so we can verify subsequent arrivals
+	 * are always increasing.
+	 * @return
+	 */
+	public long getLastDepartureTime() {
+		return lastDepartureTime;
+	}
 	public Date getLastAvlTime() {
 		return lastAvlTime;
 	}
