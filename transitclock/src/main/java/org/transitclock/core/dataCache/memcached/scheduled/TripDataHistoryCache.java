@@ -1,7 +1,6 @@
 package org.transitclock.core.dataCache.memcached.scheduled;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,6 +17,7 @@ import org.transitclock.applications.Core;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.core.dataCache.IpcArrivalDepartureComparator;
+import org.transitclock.core.dataCache.StopArrivalDepartureCacheInterface;
 import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.core.dataCache.TripDataHistoryCacheInterface;
 import org.transitclock.core.dataCache.TripKey;
@@ -29,8 +29,6 @@ import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
 
 import net.spy.memcached.MemcachedClient;
-
-import static org.transitclock.core.dataCache.StopArrivalDepartureCacheInterface.smoothArrivalDepartures;
 
 public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 
@@ -105,7 +103,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 	public void populateCacheFromDb(Session session, Date startDate, Date endDate) {
 		Criteria criteria =session.createCriteria(ArrivalDeparture.class);				
 		
-		List<ArrivalDeparture> results = smoothArrivalDepartures(criteria, startDate, endDate);
+		List<ArrivalDeparture> results = StopArrivalDepartureCacheInterface.createArrivalDeparturesCriteria(criteria, startDate, endDate);
 		for(ArrivalDeparture result : results)		
 		{						
 			// TODO this might be better done in the database.						

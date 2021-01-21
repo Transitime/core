@@ -26,8 +26,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import static org.transitclock.core.dataCache.StopArrivalDepartureCacheInterface.smoothArrivalDepartures;
-
 /**
  * @author Sean Og Crudden 
  * 		   This is a Cache to hold historical arrival departure data for schedule based trips. It
@@ -148,7 +146,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	public void populateCacheFromDb(Session session, Date startDate, Date endDate)
 	{
 		Criteria criteria =session.createCriteria(ArrivalDeparture.class);
-		List<ArrivalDeparture> results = smoothArrivalDepartures(criteria, startDate, endDate);
+		List<ArrivalDeparture> results = StopArrivalDepartureCacheInterface.createArrivalDeparturesCriteria(criteria, startDate, endDate);
 		int counter = 0;
 		for(ArrivalDeparture result : results)		
 		{

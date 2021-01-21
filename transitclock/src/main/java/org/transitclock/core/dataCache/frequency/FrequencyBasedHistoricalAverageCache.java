@@ -17,8 +17,6 @@ import org.transitclock.ipc.data.IpcArrivalDeparture;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.transitclock.core.dataCache.StopArrivalDepartureCacheInterface.smoothArrivalDepartures;
-
 /**
  * @author Sean Óg Crudden
  * This class is to hold the historical average for frequency based services. It puts them in buckets that represent increments of time. The start time of the trip is used to decide which 
@@ -285,7 +283,7 @@ public class FrequencyBasedHistoricalAverageCache {
 	public void populateCacheFromDb(Session session, Date startDate, Date endDate) throws Exception 
 	{
 		Criteria criteria =session.createCriteria(ArrivalDeparture.class);
-		List<ArrivalDeparture> results = smoothArrivalDepartures(criteria, startDate, endDate);
+		List<ArrivalDeparture> results = StopArrivalDepartureCacheInterface.createArrivalDeparturesCriteria(criteria, startDate, endDate);
 		Collections.sort(results, new ArrivalDepartureComparator());
 
 		int counter = 0;

@@ -132,7 +132,7 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 		Criteria criteria = session.createCriteria(ArrivalDeparture.class);
 
 
-		List<ArrivalDeparture> results = smoothArrivalDepartures(criteria, startDate, endDate);
+		List<ArrivalDeparture> results = createArrivalDeparturesCriteria(criteria, startDate, endDate);
 		int counter = 0;
 
 		for (ArrivalDeparture result : results) {

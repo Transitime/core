@@ -21,7 +21,7 @@ public class StopArrivalDepartureCacheFactory {
 
 	private static BooleanConfigValue verifyArrivalDepartures =
 					new BooleanConfigValue("transitclock.core.cache.verifyStopArrivalDepartures",
-									false,
+									true,
 									"Correct for non-linear arrivals and departures on writing");
 
 	public static boolean enableSmoothinng() {
