@@ -163,6 +163,7 @@ public abstract class StopArrivalDepartureCacheInterface {
 	}
 
 	private ArrivalDeparture findLastDeparture(List<IpcArrivalDeparture> stopHistory, String departureStopId, String arrivalVehicleId, int arrivalStopPathIndex) {
+		if (stopHistory == null) return null;
 		ArrivalDeparture lastArrivalDeparture = null;
 		for (IpcArrivalDeparture ad : stopHistory) {
 			if (ad.getVehicleId().equals(arrivalVehicleId)
@@ -177,6 +178,7 @@ public abstract class StopArrivalDepartureCacheInterface {
 	}
 
 	private ArrivalDeparture findArrivalForDeparture(List<IpcArrivalDeparture> stopHistory, Departure departure) {
+		if (stopHistory == null) return null;
 		for (IpcArrivalDeparture ad : stopHistory) {
 			if (ad.getVehicleId().equals(departure.getVehicleId())
 							&& ad.getStopId().equals(departure.getStopId())

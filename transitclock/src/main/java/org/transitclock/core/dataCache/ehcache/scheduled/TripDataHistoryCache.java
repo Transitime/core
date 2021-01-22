@@ -172,7 +172,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 		synchronized (cache) {
 			Collections.sort(arrivalDepartures, new IpcArrivalDepartureComparator());
 			for (IpcArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) {
-				if (tocheck.getStopId().equals(current.getStopId()) && (current.isDeparture() && tocheck.isArrival())) {
+				if (tocheck.getStopId() != null && tocheck.getStopId().equals(current.getStopId()) && (current.isDeparture() && tocheck.isArrival())) {
 					return tocheck;
 				}
 			}
