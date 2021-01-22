@@ -276,13 +276,18 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		{
 			Trip trip = block.getTrip(tripIndex);
 			StopPath stopPath = trip.getStopPath(stopPathIndex);
-			this.tripPatternId = stopPath.getTripPatternId();
-			String stopId = stopPath.getStopId();
+			if (stopPath != null) {
+				this.tripPatternId = stopPath.getTripPatternId();
+				String stopId = stopPath.getStopId();
 			// Determine and store stop order
 			this.stopOrder =
 					trip.getRoute().getStopOrder(trip.getDirectionId(), stopId,
 							stopPathIndex);
-			
+			} else {
+				this.tripPatternId = null;
+				this.stopOrder = null;
+			}
+
 			// Determine the schedule time, which is a bit complicated.
 			// Of course, only do this for schedule based assignments.
 			// The schedule time will only be set if the schedule info was available
