@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.db.structs.Arrival;
 import org.transitclock.db.structs.ArrivalDeparture;
+import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.Departure;
 import org.transitclock.db.structs.StopPath;
 import org.transitclock.db.structs.Trip;
@@ -191,12 +192,16 @@ public abstract class StopArrivalDepartureCacheInterface {
 	}
 
 	private ArrivalDeparture createArrivalDeparture(IpcArrivalDeparture ad) {
+		Block block = Core.getInstance().getDbConfig().getBlock(ad.getServiceId(), ad.getBlockId());
+		Trip trip = block.getTrip(ad.getTripId());
+		int tripIndex = block.getTripIndex(trip);
+
 		if (ad.isArrival()) {
 			Arrival a = new Arrival(ad.getVehicleId(),
 							ad.getTime(),
 							ad.getAvlTime(),
-							Core.getInstance().getDbConfig().getBlock(ad.getServiceId(), ad.getBlockId()),
-							ad.getTripIndex(),
+							block,
+							tripIndex,
 							ad.getStopPathIndex(),
 							ad.getFreqStartTime(),
 							null /* stopPathId not present */);
@@ -205,8 +210,8 @@ public abstract class StopArrivalDepartureCacheInterface {
 		Departure d = new Departure(ad.getVehicleId(),
 						ad.getTime(),
 						ad.getAvlTime(),
-						Core.getInstance().getDbConfig().getBlock(ad.getServiceId(), ad.getBlockId()),
-						ad.getTripIndex(),
+						block,
+						tripIndex,
 						ad.getStopPathIndex(),
 						ad.getFreqStartTime(),
 						ad.getDwellTime(),
