@@ -12,7 +12,7 @@
 <%
 // todo this code should be in a struts action
 String startDateStr = request.getParameter("beginDate");
-String numDaysStr = request.getParameter("numDays");
+String numDaysStr = StringUtils.isBlank(request.getParameter("numDays")) ? "1" : request.getParameter("numDays");
 String startTime = request.getParameter("beginTime");
 String endTime = request.getParameter("endTime");
 String earlyLimitStr = request.getParameter("allowableEarly");

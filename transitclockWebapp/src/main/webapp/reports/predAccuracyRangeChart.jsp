@@ -2,6 +2,7 @@
     pageEncoding="ISO-8859-1"%>
 <%@ page import="org.transitclock.utils.web.WebUtils" %>
 <%@page import="org.transitclock.db.webstructs.WebAgency"%>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%     
 // Determine all the parameters from the query string
 
@@ -27,7 +28,7 @@ String sourceParam = request.getParameter("source");
 String source = (sourceParam != null && !sourceParam.isEmpty()) ? 
 	", " + sourceParam + " predictions" : ""; 
 String beginDate = request.getParameter("beginDate");
-String numDays = request.getParameter("numDays");
+String numDays = StringUtils.isBlank(request.getParameter("numDays")) ? "1" : request.getParameter("numDays");
 if (numDays == null) numDays = "1";
 String beginTime = request.getParameter("beginTime");
 String endTime = request.getParameter("endTime");
