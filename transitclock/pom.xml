@@ -187,12 +187,6 @@
 			<artifactId>commons-beanutils</artifactId>
 			<version>1.9.2</version>
 		</dependency>
-		<!-- for calculating shape snapping of traffic data -->
-		<dependency>
-			<groupId>org.locationtech.jts</groupId>
-			<artifactId>jts-core</artifactId>
-			<version>1.18.0</version>
-		</dependency>
 		<!-- JUnit testing of course -->
 		<dependency>
 			<groupId>junit</groupId>

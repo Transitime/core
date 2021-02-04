@@ -2,7 +2,6 @@
     create table ActiveRevisions (
         id number(10,0) not null,
         configRev number(10,0),
-        trafficRev number(10,0),
         travelTimesRev number(10,0),
         primary key (id)
     );
@@ -370,41 +369,6 @@
         primary key (id, configRev)
     );
 
-    create table TrafficPath_locations (
-        TrafficPath_trafficRev number(10,0) not null,
-        TrafficPath_trafficPathId varchar2(120 char) not null,
-        lat double precision,
-        lon double precision,
-        locations_ORDER number(10,0) not null,
-        primary key (TrafficPath_trafficRev, TrafficPath_trafficPathId, locations_ORDER)
-    );
-
-    create table TrafficPath_to_StopPath_joinTable (
-        TrafficPaths_trafficRev number(10,0) not null,
-        TrafficPaths_trafficPathId varchar2(120 char) not null,
-        stopPaths_tripPatternId varchar2(120 char) not null,
-        stopPaths_stopPathId varchar2(120 char) not null,
-        stopPaths_configRev number(10,0) not null,
-        listIndex number(10,0) not null,
-        primary key (TrafficPaths_trafficRev, TrafficPaths_trafficPathId, listIndex)
-    );
-
-    create table TrafficPaths (
-        trafficRev number(10,0) not null,
-        trafficPathId varchar2(120 char) not null,
-        pathLength float,
-        primary key (trafficRev, trafficPathId)
-    );
-
-    create table TrafficSensor (
-        trafficRev number(10,0) not null,
-        id varchar2(60 char) not null,
-        description varchar2(255 char),
-        externalId varchar2(60 char),
-        trafficPathId varchar2(120 char),
-        primary key (trafficRev, id)
-    );
-
     create table Transfers (
         toStopId varchar2(60 char) not null,
         fromStopId varchar2(60 char) not null,
@@ -575,9 +539,6 @@
 
     create index StopPathPredictionTimeIndex on StopPathPredictions (tripId, stopPathIndex);
 
-    alter table TrafficPath_to_StopPath_joinTable 
-        add constraint UK_ohqplmhw0t46tipi7i9bxuur8  unique (stopPaths_tripPatternId, stopPaths_stopPathId, stopPaths_configRev);
-
     create index TravelTimesRevIndex on TravelTimesForTrips (travelTimesRev);
 
     alter table TripPattern_to_Path_joinTable 
@@ -611,21 +572,6 @@
         add constraint FK_sdjt3vtd3w0cl07p0doob6khi 
         foreign key (StopPath_tripPatternId, StopPath_stopPathId, StopPath_configRev) 
         references StopPaths;
-
-    alter table TrafficPath_locations 
-        add constraint FK_j3otbyk8qsh9rg02q8kk8931q 
-        foreign key (TrafficPath_trafficRev, TrafficPath_trafficPathId) 
-        references TrafficPaths;
-
-    alter table TrafficPath_to_StopPath_joinTable 
-        add constraint FK_ohqplmhw0t46tipi7i9bxuur8 
-        foreign key (stopPaths_tripPatternId, stopPaths_stopPathId, stopPaths_configRev) 
-        references StopPaths;
-
-    alter table TrafficPath_to_StopPath_joinTable 
-        add constraint FK_6aib4u1tr2wfpxoog3a5ycou9 
-        foreign key (TrafficPaths_trafficRev, TrafficPaths_trafficPathId) 
-        references TrafficPaths;
 
     alter table TravelTimesForTrip_to_TravelTimesForPath_joinTable 
         add constraint FK_hh5uepurijcqj0pyc6e3h5mqw 

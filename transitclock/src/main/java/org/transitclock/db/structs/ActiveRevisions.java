@@ -61,12 +61,6 @@ public class ActiveRevisions {
 	@Column
 	private int travelTimesRev;
 
-
-	// For the traffic configuration data.  Updated independently of
-	// configRev and travelTimesRev.
-	@Column
-	private Integer trafficRev;
-
 	private static final Logger logger = 
 			LoggerFactory.getLogger(ActiveRevisions.class);
 
@@ -78,7 +72,6 @@ public class ActiveRevisions {
 	public ActiveRevisions() {
 		configRev = -1;
 		travelTimesRev = -1;
-		trafficRev = null;
 	}
 	
 	/**
@@ -191,12 +184,6 @@ public class ActiveRevisions {
 		return configRev;
 	}
 
-	public Integer getTrafficRev() { return trafficRev; }
-
-	public void setTrafficRev(Integer trafficRev) {
-		this.trafficRev = trafficRev;
-	}
-
 	public int getTravelTimesRev() {
 		return travelTimesRev;
 	}
@@ -212,8 +199,7 @@ public class ActiveRevisions {
 	public String toString() {
 		return "ActiveRevisions [" 
 				+ "configRev=" + configRev 
-				+ ", travelTimesRev=" + travelTimesRev
-				+ ", trafficRev=" + trafficRev
+				+ ", travelTimesRev=" + travelTimesRev 
 				+ "]";
 	}
 
