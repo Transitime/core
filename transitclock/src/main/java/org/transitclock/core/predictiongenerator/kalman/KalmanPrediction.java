@@ -5,7 +5,7 @@ import org.transitclock.config.BooleanConfigValue;
 /**
  * The theory behind the Kalman Filter application to link travel times is provided
  * https://scholarcommons.usf.edu/cgi/viewcontent.cgi?article=1342&context=jpt
- * 
+ *
  * From the above paper we need to understand the following terminology:
  * * "g" (gain) equals the filter gain
  * * "a" (loopGain) is the loop gain
@@ -43,129 +43,129 @@ import org.transitclock.config.BooleanConfigValue;
  *
  */
 public class KalmanPrediction {
-		
-	private static final BooleanConfigValue useAverage = new BooleanConfigValue (
-			"transitclock.prediction.kalman.useaverage", new Boolean(true), 
-			"Will use average travel time as opposed to last historical vehicle in Kalman prediction calculation."
-	);
 
-	/**
-	 * @param lastVehicleSegment The last vehicle info for the time taken to cover the same segment
-	 * @param historicalSegments The last 3 days for info relating to the time taken for the vehicle handling the same service/trip
-	 * @param lastPredictionError From the previous segments calculation result
-	 * @return KalmanPredictionResult contains the predicted time and the lastPredictionError to be used in the next prediction calculation
-	 * @throws Exception
-	 */
-	public KalmanPredictionResult predict(TripSegment lastVehicleSegment,
-																				TripSegment historicalSegments[],
-																				double lastPredictionError) throws Exception {
-		double average = historicalAverage(historicalSegments);
-		double variance = historicalVariance(historicalSegments, average);
-		double gain = gain(average, variance, lastPredictionError );
-		double loopGain = 1 - gain;
-		
-		return new KalmanPredictionResult(
-						prediction(
-							gain,
-							loopGain,
-							historicalSegments,
-							lastVehicleSegment,
-							average),
-						filterError(variance, gain));
-	}
+  private static final BooleanConfigValue useAverage = new BooleanConfigValue (
+          "transitclock.prediction.kalman.useaverage", new Boolean(true),
+          "Will use average travel time as opposed to last historical vehicle in Kalman prediction calculation."
+  );
 
-	private double historicalAverage(TripSegment historicalSegments[]) throws Exception {
-		if (historicalSegments.length>0) {
-			long total=0;
-			for(int i=0;i<historicalSegments.length;i++) {
-				long duration = historicalSegments[i].getDestination().getTime() - historicalSegments[i].getOrigin().getTime();
-				total=total+duration;
-			}
-			return (double) (total / historicalSegments.length);
-		} else {
-			throw new Exception("Cannot average nothing");
-		}				
-	}
+  /**
+   * @param lastVehicleSegment The last vehicle info for the time taken to cover the same segment
+   * @param historicalSegments The last 3 days for info relating to the time taken for the vehicle handling the same service/trip
+   * @param lastPredictionError From the previous segments calculation result
+   * @return KalmanPredictionResult contains the predicted time and the lastPredictionError to be used in the next prediction calculation
+   * @throws Exception
+   */
+  public KalmanPredictionResult predict(TripSegment lastVehicleSegment,
+                                        TripSegment historicalSegments[],
+                                        double lastPredictionError) throws Exception {
+    double average = historicalAverage(historicalSegments);
+    double variance = historicalVariance(historicalSegments, average);
+    double gain = gain(average, variance, lastPredictionError );
+    double loopGain = 1 - gain;
 
-	private double historicalVariance(TripSegment historicalSegments[], double average) {
-		double total=0;
-		
-		for(int i=0;i<historicalSegments.length;i++) {
-			long duration = historicalSegments[i].getDestination().getTime() - historicalSegments[i].getOrigin().getTime();
-			
-			double diff = duration - average;
-			double longDiffSquared=diff*diff;
-			total=total+longDiffSquared;
-		}		
-		return total/historicalSegments.length;		
-	}
+    return new KalmanPredictionResult(
+            prediction(
+                    gain,
+                    loopGain,
+                    historicalSegments,
+                    lastVehicleSegment,
+                    average),
+            filterError(variance, gain));
+  }
 
-	private double filterError(double variance, double loopGain) {
-		return variance*loopGain;
-	}
-	
-	private double gain(double average, double variance, double lastPredictionError ) {
-		double gain = (lastPredictionError + variance) / (lastPredictionError + (2 * variance));
-		return gain;				
-	}
-	
-	private double prediction(double gain,
-														double loopGain,
-														TripSegment historicalSegments[],
-														TripSegment lastVehicleSegment,
-														double averageDuration) {
-				
-		double historicalDuration=averageDuration;
+  private double historicalAverage(TripSegment historicalSegments[]) throws Exception {
+    if (historicalSegments.length>0) {
+      long total=0;
+      for(int i=0;i<historicalSegments.length;i++) {
+        long duration = historicalSegments[i].getDestination().getTime() - historicalSegments[i].getOrigin().getTime();
+        total=total+duration;
+      }
+      return (double) (total / historicalSegments.length);
+    } else {
+      throw new Exception("Cannot average nothing");
+    }
+  }
 
-		/* This may be better use the historical average rather than just the vehicle on previous day. This would damping issues with last days value being dramatically different. */
-		if(useAverage.getValue()==false) {
-			historicalDuration = historicalSegments[historicalSegments.length-1].getDestination().getTime()
-							- historicalSegments[historicalSegments.length-1].getOrigin().getTime();
-		}
-		long lastVehicleDuration=lastVehicleSegment.getDestination().getTime() - lastVehicleSegment.getOrigin().getTime();
-				
-		return (loopGain * lastVehicleDuration) + (gain * historicalDuration);
-	}
+  private double historicalVariance(TripSegment historicalSegments[], double average) {
+    double total=0;
 
-	public static void main(String [ ] args) {
-		KalmanPrediction kalmanPrediction = new KalmanPrediction();
-		
-		Vehicle vehicle=new Vehicle("RIY 30");
-		
-		VehicleStopDetail originDetail=new VehicleStopDetail(null, 0, vehicle); 
-		VehicleStopDetail destinationDetail_1_k=new VehicleStopDetail(null, 380, vehicle);
-		VehicleStopDetail destinationDetail_2_k=new VehicleStopDetail(null, 420, vehicle);
-		VehicleStopDetail destinationDetail_3_k=new VehicleStopDetail(null, 400, vehicle);
-		
-		VehicleStopDetail destinationDetail_0_k_1=new VehicleStopDetail(null, 300, vehicle);
-				
-		
-		TripSegment ts_day_1_k=new TripSegment(originDetail, destinationDetail_1_k);  
-		TripSegment ts_day_2_k=new TripSegment(originDetail, destinationDetail_2_k);
-		TripSegment ts_day_3_k=new TripSegment(originDetail, destinationDetail_3_k);
-		
-		TripSegment ts_day_0_k_1=new TripSegment(originDetail, destinationDetail_0_k_1);							
-				
-		TripSegment historicalSegments_k[]={ts_day_1_k, ts_day_2_k, ts_day_3_k};
-						
-		TripSegment lastVehicleSegment=ts_day_0_k_1;
-					
-		try {
-			KalmanPredictionResult result = kalmanPrediction.predict(lastVehicleSegment, historicalSegments_k,  72.40);
-			
-			if(result!=null) {
-				if((result.getResult() > 355 && result.getResult() < 356) && (result.getFilterError()>149 && result.getFilterError()<150))
-				{
-					System.out.println("Successful Kalman Filter Prediction.");
-				} else {
-					System.out.println("UnSuccessful Kalman Filter Prediction.");
-				}
-			} else {
-				System.out.println("No result.");
-			}
-		} catch (Exception e) {			
-			System.out.println("Whoops");
-			e.printStackTrace();
-		}		
-	}
+    for(int i=0;i<historicalSegments.length;i++) {
+      long duration = historicalSegments[i].getDestination().getTime() - historicalSegments[i].getOrigin().getTime();
+
+      double diff = duration - average;
+      double longDiffSquared=diff*diff;
+      total=total+longDiffSquared;
+    }
+    return total/historicalSegments.length;
+  }
+
+  private double filterError(double variance, double loopGain) {
+    return variance*loopGain;
+  }
+
+  private double gain(double average, double variance, double lastPredictionError ) {
+    double gain = (lastPredictionError + variance) / (lastPredictionError + (2 * variance));
+    return gain;
+  }
+
+  private double prediction(double gain,
+                            double loopGain,
+                            TripSegment historicalSegments[],
+                            TripSegment lastVehicleSegment,
+                            double averageDuration) {
+
+    double historicalDuration=averageDuration;
+
+    /* This may be better use the historical average rather than just the vehicle on previous day. This would damping issues with last days value being dramatically different. */
+    if(useAverage.getValue()==false) {
+      historicalDuration = historicalSegments[historicalSegments.length-1].getDestination().getTime()
+              - historicalSegments[historicalSegments.length-1].getOrigin().getTime();
+    }
+    long lastVehicleDuration=lastVehicleSegment.getDestination().getTime() - lastVehicleSegment.getOrigin().getTime();
+
+    return (loopGain * lastVehicleDuration) + (gain * historicalDuration);
+  }
+
+  public static void main(String [ ] args) {
+    KalmanPrediction kalmanPrediction = new KalmanPrediction();
+
+    Vehicle vehicle=new Vehicle("RIY 30");
+
+    VehicleStopDetail originDetail=new VehicleStopDetail(null, 0, vehicle);
+    VehicleStopDetail destinationDetail_1_k=new VehicleStopDetail(null, 380, vehicle);
+    VehicleStopDetail destinationDetail_2_k=new VehicleStopDetail(null, 420, vehicle);
+    VehicleStopDetail destinationDetail_3_k=new VehicleStopDetail(null, 400, vehicle);
+
+    VehicleStopDetail destinationDetail_0_k_1=new VehicleStopDetail(null, 300, vehicle);
+
+
+    TripSegment ts_day_1_k=new TripSegment(originDetail, destinationDetail_1_k);
+    TripSegment ts_day_2_k=new TripSegment(originDetail, destinationDetail_2_k);
+    TripSegment ts_day_3_k=new TripSegment(originDetail, destinationDetail_3_k);
+
+    TripSegment ts_day_0_k_1=new TripSegment(originDetail, destinationDetail_0_k_1);
+
+    TripSegment historicalSegments_k[]={ts_day_1_k, ts_day_2_k, ts_day_3_k};
+
+    TripSegment lastVehicleSegment=ts_day_0_k_1;
+
+    try {
+      KalmanPredictionResult result = kalmanPrediction.predict(lastVehicleSegment, historicalSegments_k,  72.40);
+
+      if(result!=null) {
+        if((result.getResult() > 355 && result.getResult() < 356) && (result.getFilterError()>149 && result.getFilterError()<150))
+        {
+          System.out.println("Successful Kalman Filter Prediction.");
+        } else {
+          System.out.println("UnSuccessful Kalman Filter Prediction.");
+        }
+      } else {
+        System.out.println("No result.");
+      }
+    } catch (Exception e) {
+      System.out.println("Whoops");
+      e.printStackTrace();
+    }
+  }
 }
