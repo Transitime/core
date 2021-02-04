@@ -210,7 +210,7 @@ function getDataAndDrawChart() {
     getDataTable();
     if (globalDataTable != null) {
 		drawChart();
-		//showSummary();
+		showSummary();
     }
 	
     // Now that chart has been drawn faceout the loading image

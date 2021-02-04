@@ -50,7 +50,7 @@ public class StopsForRouteDirectionJsonQuery {
 				"FROM Stops s " +
 				"JOIN StopPaths sp ON s.id = sp.stopId " +
 				"JOIN TripPatterns tp ON sp.tripPatternId = tp.id AND sp.routeId = tp.routeId AND sp.configRev = tp.configRev AND tp.configRev = s.configRev " +
-				"WHERE tp.routeShortName = '" + routeId + "' AND tp.headsign = '" + headsign + "' AND s.configRev = 6 " +
+				"WHERE tp.routeId = '" + routeId + "' AND tp.headsign = '" + headsign + "' AND s.configRev = (select configRev from ActiveRevisions limit 1) " +
 				"ORDER BY sp.tripPatternId, sp.gtfsStopSeq;";
 
 		String json = GenericJsonQuery.getJsonString(agencyId, sql);

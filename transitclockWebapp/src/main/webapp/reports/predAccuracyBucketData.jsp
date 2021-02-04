@@ -4,13 +4,14 @@
 <%@ page import="java.text.ParseException" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.HashMap" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
 
 <%
     // Get params from the query string
     String agencyId = request.getParameter("a");
 
 	String beginDate = request.getParameter("beginDate");
-    String numDays = request.getParameter("numDays");
+    String numDays = StringUtils.isBlank(request.getParameter("numDays")) ? "1" : request.getParameter("numDays");
     String beginTime = request.getParameter("beginTime");
     String endTime = request.getParameter("endTime");
 
@@ -89,8 +90,8 @@
 		}
 	}
 
-    if (agencyId == null || beginDate == null || numDays == null ) {
-		response.getWriter().write("For predAccuracyRangeData.jsp must "
+    if (agencyId == null || beginDate == null ) {
+		response.getWriter().write("For predAccuracyBucketData.jsp must "
 			+ "specify parameters 'a' (agencyId), 'beginDate', "
 			+ "and 'numDays'."); 
 		return;
