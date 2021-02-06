@@ -95,7 +95,7 @@ public class Route implements Serializable {
 	
 	@Transient // Later will probably want to store this in database, 
 	           // but not yet sure. This means it is not available to application!
-	private final List<TripPattern> tripPatternsForRoute;
+	private List<TripPattern> tripPatternsForRoute;
 
 	// For getStops()
 	@Transient
@@ -121,6 +121,9 @@ public class Route implements Serializable {
 
 	@Transient
 	private final Object unorderedStopsLock = new Object();
+
+	@Transient
+	private List<String> directionIds =  null;
 
 	// Because Hibernate requires objects with composite Ids to be Serializable
 	private static final long serialVersionUID = 9037023420649883860L;
@@ -192,7 +195,7 @@ public class Route implements Serializable {
 			this.name = titleFormatter.processTitle(this.shortName);
 		}
 		
-		this.tripPatternsForRoute = tripPatternsForRoute;	
+		this.tripPatternsForRoute = tripPatternsForRoute;
 		this.maxDistance = gtfsRoute.getMaxDistance();  
 		
 		// Determine the extent of the route by looking at the extent
@@ -348,7 +351,7 @@ public class Route implements Serializable {
 		String tripPatternIds = "not set"; 
 		if (tripPatternsForRoute != null) {
 			tripPatternIds = "[";
-			for (TripPattern tp : tripPatternsForRoute) 
+			for (TripPattern tp : tripPatternsForRoute)
 				tripPatternIds += tp.toShortString() + ", ";
 			tripPatternIds += "]";
 		}
@@ -580,15 +583,30 @@ public class Route implements Serializable {
 	 * @return
 	 */
 	public List<TripPattern> getTripPatterns(String directionId) {
-		List<TripPattern> tripPatternsForRoute = Core.getInstance()
-				.getDbConfig().getTripPatternsForRoute(getId());
-		List<TripPattern> tripPatternsForDir = new ArrayList<TripPattern>();
-		for (TripPattern tripPattern : tripPatternsForRoute) {
-			if (Objects.equals(tripPattern.getDirectionId(), directionId))
-				tripPatternsForDir.add(tripPattern);
+		List<TripPattern> tripPatternsForRoute = getTripPatterns();
+			List<TripPattern> tripPatternsForDir = new ArrayList<TripPattern>();
+			for (TripPattern tripPattern : tripPatternsForRoute) {
+				if (Objects.equals(tripPattern.getDirectionId(), directionId))
+					tripPatternsForDir.add(tripPattern);
 		}
-		
+
 		return tripPatternsForDir;
+	}
+
+	public List<TripPattern> getTripPatterns() {
+		if (tripPatternsForRoute == null) {
+			tripPatternsForRoute = Core.getInstance()
+							.getDbConfig().getTripPatternsForRoute(getId());
+		}
+		return tripPatternsForRoute;
+	}
+
+	/**
+	 * unit test access.
+	 * @param patterns
+	 */
+	public void setTripPatterns(List<TripPattern> patterns) {
+		this.tripPatternsForRoute = patterns;
 	}
 	
 	/**
@@ -597,16 +615,26 @@ public class Route implements Serializable {
 	 * @return
 	 */
 	public List<String> getDirectionIds() {
-		List<String> directionIds = new ArrayList<String>();
-		List<TripPattern> tripPatternsForRoute = Core.getInstance()
-                .getDbConfig().getTripPatternsForRoute(getId());
-		if (tripPatternsForRoute == null) return directionIds;
-		for (TripPattern tripPattern : tripPatternsForRoute) {
-			String directionId = tripPattern.getDirectionId();
-			if (!directionIds.contains(directionId))
-				directionIds.add(directionId);	
+		if (directionIds == null) {
+			directionIds = new ArrayList<String>();
+			List<TripPattern> tripPatternsForRoute = Core.getInstance()
+							.getDbConfig().getTripPatternsForRoute(getId());
+			if (tripPatternsForRoute == null) return directionIds;
+			for (TripPattern tripPattern : tripPatternsForRoute) {
+				String directionId = tripPattern.getDirectionId();
+				if (!directionIds.contains(directionId))
+					directionIds.add(directionId);
+			}
 		}
 		return directionIds;
+	}
+
+	/**
+	 * for unit testing access.
+	 * @param ids
+	 */
+	public void setDirectionIds(List<String> ids) {
+		this.directionIds = ids;
 	}
 
 	/**

@@ -77,7 +77,7 @@ public class Core {
 	private final TimeoutHandlerModule timeoutHandlerModule;
 
 	private final ServiceUtils service;
-	private final Time time;
+	private Time time;
 
 	// So that can access the current time, even when in playback mode
 	private SystemTime systemTime = new SystemCurrentTime();
@@ -218,6 +218,16 @@ public class Core {
 	}
 
 	/**
+	 * For testing access.  Not to be used in production!
+	 * @param agencyId
+	 * @return
+	 */
+	synchronized public static Core createTestCore(String agencyId) {
+		Core core = new Core(agencyId);
+		Core.singleton = core;
+		return core;
+	}
+	/**
 	 * For obtaining singleton Core object.
 	 * Synchronized to prevent race conditions if starting lots of optional modules.
 	 *
@@ -266,6 +276,13 @@ public class Core {
 	 */
 	public Time getTime() {
 		return time;
+	}
+
+	/**
+	 * unit test access, otherwise this is constructed internally.
+	 */
+	public void setTime(Time time) {
+		this.time = time;
 	}
 
 	/**
