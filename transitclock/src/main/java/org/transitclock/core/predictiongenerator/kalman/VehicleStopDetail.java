@@ -7,16 +7,25 @@ public class VehicleStopDetail {
 	public String toString() {
 		return "VehicleStopDetail [stop=" + stop + ", time=" + time + ", vehicle=" + vehicle + "]";
 	}
-protected Stop stop;
- protected long time=-1L;
- protected Vehicle vehicle;
- public VehicleStopDetail(Stop stop, long time, Vehicle vehicle) {
-	super();
-	this.stop = stop;
-	this.time = time;
-	this.vehicle = vehicle;
+
+	protected Stop stop;
+  protected long time=-1L;
+  protected Vehicle vehicle;
+  protected Long trafficTime = null;
+
+  public VehicleStopDetail(Stop stop, long time, Vehicle vehicle) {
+		this.stop = stop;
+		this.time = time;
+		this.vehicle = vehicle;
  }
-/**
+	public VehicleStopDetail(Stop stop, long time, Long trafficTime, Vehicle vehicle) {
+		this.stop = stop;
+		this.time = time;
+		this.trafficTime = trafficTime;
+		this.vehicle = vehicle;
+	}
+
+	/**
  * @return the stop
  */
 public Stop getStop() {
@@ -90,5 +99,10 @@ public Vehicle getVehicle() {
 public void setVehicle(Vehicle vehicle) {
 	this.vehicle = vehicle;
 }
+
+public Long getTrafficTime() {
+	return trafficTime;
+}
+public void setTrafficTime(long trafficTime) { this.trafficTime = trafficTime; }
 
 }

@@ -16,6 +16,8 @@
  */
 package org.transitclock.db.structs;
 
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.DynamicUpdate;
@@ -96,6 +98,14 @@ public class TrafficPath implements Serializable {
     this.trafficRev = null;
     this.pathLength = -1.0f;
     stopPaths = new ArrayList<>();
+  }
+
+  public static List<TrafficPath> getTrafficPaths(Session session, Integer trafficRev) {
+    String hql = "FROM TrafficPath " +
+            " WHERE trafficRev = :trafficRev";
+    Query query = session.createQuery(hql);
+    query.setInteger("trafficRev", trafficRev);
+    return query.list();
   }
 
 

@@ -35,7 +35,7 @@ public class TrafficSensorData implements Serializable {
 
   @Column
   @Id
-  private final int trafficSensorId;
+  private final String trafficSensorId;
 
   @Column
   @Id
@@ -49,7 +49,7 @@ public class TrafficSensorData implements Serializable {
   private Double speed;
 
   @Column
-  private Integer delayMillis;
+  private Double delayMillis;
 
   @Column
   private Double confidence;
@@ -67,11 +67,11 @@ public class TrafficSensorData implements Serializable {
    * @param confidence
    * @param travelTimeMillis
    */
-  public TrafficSensorData(int trafficSensorId,
+  public TrafficSensorData(String trafficSensorId,
                            int trafficRev,
                            Date time,
                            Double speed,
-                           Integer delayMillis,
+                           Double delayMillis,
                            Double confidence,
                            Integer travelTimeMillis) {
     this.trafficSensorId = trafficSensorId;
@@ -87,7 +87,7 @@ public class TrafficSensorData implements Serializable {
    * Hibernate requires no-arg constructor
    */
   public TrafficSensorData() {
-    trafficSensorId = -1;
+    trafficSensorId = null;
     trafficRev = -1;
     time = null;
     speed = null;
@@ -95,4 +95,10 @@ public class TrafficSensorData implements Serializable {
     confidence = null;
     travelTimeMillis = null;
   }
+
+  public String getTrafficSensorId() { return trafficSensorId; }
+  public double getSpeed() {
+    return speed;
+  }
+
 }

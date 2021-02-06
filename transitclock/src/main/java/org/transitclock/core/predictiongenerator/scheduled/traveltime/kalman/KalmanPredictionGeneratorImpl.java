@@ -66,6 +66,10 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
           "transitclock.prediction.data.kalman.tresholdForDifferenceEventLog", new Integer(60000),
           "This is the threshold in milliseconds that the difference has to be over before it will consider the percentage difference.");
 
+  private static final BooleanConfigValue trafficDataEanbled = new BooleanConfigValue("transitclock.traffic.enabled",
+          true,
+          "Enable Traffic Data integration");
+
   private static final Logger logger = LoggerFactory.getLogger(KalmanPredictionGeneratorImpl.class);
 
   /*
@@ -253,11 +257,12 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
                                                   TravelTimeDetails travelTimeDetails,
                                                   Indices indices) {
     Vehicle vehicle = new Vehicle(avlReport.getVehicleId());
-    VehicleStopDetail originDetail = new VehicleStopDetail(null, 0, vehicle);
+    VehicleStopDetail originDetail = new VehicleStopDetail(null, 0, getTrafficForIndices(indices), vehicle);
     TripSegment[] historical_segments_k = new TripSegment[lastDaysTimes.size()];
     for (int i = 0; i < lastDaysTimes.size() && i < maxKalmanDays.getValue(); i++) {
       logger.debug("Kalman is using historical value : "+lastDaysTimes.get(i) +" for : " + indices.toString());
       VehicleStopDetail destinationDetail = new VehicleStopDetail(null, lastDaysTimes.get(i).getTravelTime(),
+              getTrafficHistory(indices, avlReport.getTime(), i),
               vehicle);
       // TODO: why do we insert into array in reverse order?
       historical_segments_k[lastDaysTimes.size()-i-1] = new TripSegment(originDetail, destinationDetail);
@@ -266,6 +271,31 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
     TripSegment ts_day_0_k_1 = new TripSegment(originDetail, destinationDetail_0_k_1);
     TripSegment last_vehicle_segment = ts_day_0_k_1;
     return new LinkTravelTimes(last_vehicle_segment, historical_segments_k);
+  }
+
+  private Long getTrafficHistory(Indices indices, long time, int numDaysBack) {
+    if (!isTrafficEnabled()) return null;
+    // find stopPath, see if there is a traffic path for it
+    // if so, retrieve the historical traffic travel time for that segment
+    Date historicalTime = DateUtils.addDays(new Date(time), -1 * numDaysBack);
+    if (TrafficManager.getInstance().hasTrafficData(indices.getStopPath())) {
+      return TrafficManager.getInstance().getHistoricalTravelTime(indices.getStopPath(), historicalTime.getTime());
+    }
+    return null;
+  }
+
+  private boolean isTrafficEnabled() {
+    return trafficDataEanbled.getValue();
+  }
+
+  private Long getTrafficForIndices(Indices indices) {
+    if (!isTrafficEnabled()) return null;
+    // find stopPath, see if there is a traffic path for it
+    // if so, retrieve the traffic travel time for that segment
+    if (TrafficManager.getInstance().hasTrafficData(indices.getStopPath())) {
+      return TrafficManager.getInstance().getTravelTime(indices.getStopPath());
+    }
+    return null;
   }
 
   private KalmanError getKalmanErrorForIndices(ErrorCache cache, Indices indices) {

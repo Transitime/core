@@ -27,6 +27,7 @@ import org.transitclock.configData.AgencyConfig;
 import org.transitclock.logging.Markers;
 import org.transitclock.modules.Module;
 import org.transitclock.utils.IntervalTimer;
+import org.transitclock.utils.JsonUtils;
 import org.transitclock.utils.Time;
 
 import java.io.BufferedReader;
@@ -118,17 +119,7 @@ public abstract class PollUrlTripModule extends Module {
      */
     protected String getJsonString(InputStream in) throws IOException,
             JSONException {
-        BufferedReader streamReader =
-                new BufferedReader(new InputStreamReader(in, "UTF-8"));
-        StringBuilder responseStrBuilder = new StringBuilder();
-
-        String inputStr;
-        while ((inputStr = streamReader.readLine()) != null)
-            responseStrBuilder.append(inputStr);
-
-        String responseStr = responseStrBuilder.toString();
-        logger.debug("JSON={}", responseStr);
-        return responseStr;
+        return JsonUtils.getJsonString(in);
     }
 
     /**

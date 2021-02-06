@@ -40,6 +40,7 @@ import org.transitclock.traffic.FeatureData;
 import org.transitclock.traffic.FeatureGeometry;
 import org.transitclock.traffic.TrafficWriter;
 import org.transitclock.utils.Geo;
+import org.transitclock.utils.JsonUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -580,17 +581,7 @@ public class LoadTrafficSensors {
    */
   protected String getJsonString(InputStream in) throws IOException,
           JSONException {
-    BufferedReader streamReader =
-            new BufferedReader(new InputStreamReader(in, "UTF-8"));
-    StringBuilder responseStrBuilder = new StringBuilder();
-
-    String inputStr;
-    while ((inputStr = streamReader.readLine()) != null)
-      responseStrBuilder.append(inputStr);
-
-    String responseStr = responseStrBuilder.toString();
-    logger.debug("JSON={}", responseStr);
-    return responseStr;
+    return JsonUtils.getJsonString(in);
   }
 
 
