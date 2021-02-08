@@ -332,36 +332,6 @@ public class ReportingApi {
         }
     }
 
-    @Path("/report/live/dispatch")
-    @GET
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    @Operation(summary="Gets arrival / departures for date range and route",
-            description="Retrives a list of arrival departures for a specified date range "
-                    + "Optionally can be filered accorditn to routesIdOrShortNames params."
-                    + "Every trip is associated with a block.",tags= {"prediction","trip","block","route","vehicle"})
-    public Response getLiveDispatchView(@BeanParam StandardParameters stdParameters)
-            throws WebApplicationException {
-
-        // Make sure request is valid
-        stdParameters.validate();
-
-        try {
-            // Get vehicles interface
-            VehiclesInterface vehiclesInterface = stdParameters.getVehiclesInterface();
-            Collection<IpcVehicle> vehicles = vehiclesInterface.get();
-
-            Object response = null;
-            ApiDispatcher dispatcher = new ApiDispatcher(vehicles);
-            response = dispatcher;
-
-            return stdParameters.createResponse(response);
-        } catch (Exception e) {
-            // If problem getting data then return a Bad Request
-            throw WebUtils.badRequestException(e);
-        }
-
-    }
-
     @Path("/report/runTime/avgTripRunTimes")
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -412,6 +382,36 @@ public class ReportingApi {
                     false, false);
 
             Object response = TripRunTimeOutput.getAvgTripRunTimes(ipcRunTimeTrips);
+
+            return stdParameters.createResponse(response);
+        } catch (Exception e) {
+            // If problem getting data then return a Bad Request
+            throw WebUtils.badRequestException(e);
+        }
+
+    }
+
+    @Path("/report/live/dispatch")
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Operation(summary="Gets arrival / departures for date range and route",
+            description="Retrives a list of arrival departures for a specified date range "
+                    + "Optionally can be filered accorditn to routesIdOrShortNames params."
+                    + "Every trip is associated with a block.",tags= {"prediction","trip","block","route","vehicle"})
+    public Response getLiveDispatchView(@BeanParam StandardParameters stdParameters)
+            throws WebApplicationException {
+
+        // Make sure request is valid
+        stdParameters.validate();
+
+        try {
+            // Get vehicles interface
+            VehiclesInterface vehiclesInterface = stdParameters.getVehiclesInterface();
+            Collection<IpcVehicle> vehicles = vehiclesInterface.get();
+
+            Object response = null;
+            ApiDispatcher dispatcher = new ApiDispatcher(vehicles);
+            response = dispatcher;
 
             return stdParameters.createResponse(response);
         } catch (Exception e) {

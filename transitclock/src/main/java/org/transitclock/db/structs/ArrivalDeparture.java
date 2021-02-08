@@ -30,6 +30,7 @@ import org.transitclock.configData.DbSetupConfig;
 import org.transitclock.core.ServiceType;
 import org.transitclock.core.TemporalDifference;
 import org.transitclock.db.hibernate.HibernateUtils;
+import org.transitclock.db.query.ArrivalDepartureQuery;
 import org.transitclock.logging.Markers;
 import org.transitclock.utils.Geo;
 import org.transitclock.utils.IntervalTimer;
@@ -1043,6 +1044,66 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		}
 	}
 
+
+	/**
+	 * Reads the arrivals/departures for the timespan and routeId specified
+	 * Can specify whether you want to retrieve the data from a readOnly db
+	 *
+	 * @param adQuery {@link org.transitclock.db.query.ArrivalDepartureQuery}
+	 * @return List<ArrivalDeparture>
+	 */
+	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(ArrivalDepartureQuery adQuery) throws Exception {
+		IntervalTimer timer = new IntervalTimer();
+
+		// Get the database session. This is supposed to be pretty light weight
+		Session session = HibernateUtils.getSession(adQuery.isReadOnly());
+
+		// Create the query. Table name is case sensitive and needs to be the
+		// class name instead of the name of the db table.
+
+		String hql = "SELECT " +
+				"ad " +
+				"FROM " +
+				"ArrivalDeparture ad " +
+				getTimePointsJoin(adQuery.isTimePointsOnly()) +
+				getServiceTypeJoin(adQuery.getServiceType()) +
+				getStopsJoin(adQuery.isIncludeStop()) +
+				getTripsJoin(adQuery.getHeadsign(), adQuery.isIncludeTrip()) +
+				getStopPathsJoin(adQuery.isIncludeStopPath()) +
+				"WHERE " +
+				getArrivalDepartureTimeWhere(adQuery.getBeginDate(), adQuery.getEndDate(), adQuery.getBeginTime(), adQuery.getEndTime()) +
+				getRouteWhere(adQuery.getRouteShortName()) +
+				getTripPatternWhere(adQuery.getStartStop(), adQuery.getEndStop()) +
+				getScheduledTimesWhere(adQuery.isScheduledTimesOnly()) +
+				getTimePointsWhere(adQuery.isTimePointsOnly()) +
+				getServiceTypeWhere(adQuery.getServiceType()) +
+				getTripsWhere(adQuery.getHeadsign(), adQuery.isIncludeTrip()) +
+				getStopsWhere(adQuery.isIncludeStop()) +
+				getStopPathsWhere(adQuery.isIncludeStopPath()) +
+				getDwellTimesWhere(adQuery.isDwellTimeOnly()) +
+				"ORDER BY ad.time, ad.stopPathIndex, ad.isArrival DESC";
+
+		try {
+			Query query = session.createQuery(hql);
+
+			List<ArrivalDeparture> results = query.list();
+
+			logger.debug("Getting arrival/departures from database took {} msec",
+					timer.elapsedMsec());
+
+			return results;
+
+		} catch (HibernateException e) {
+			// Log error to the Core logger
+			Core.getLogger().error("Unable to retrieve arrival departures", e);
+			return null;
+		} finally {
+			// Clean things up. Not sure if this absolutely needed nor if
+			// it might actually be detrimental and slow things down.
+			session.close();
+		}
+	}
+
 	/**
 	 * Helper HQL methods for getArrivalsDeparturesFromDb
 	 * Broken down into JOIN methods and WHERE methods
@@ -1120,7 +1181,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	}
 
 	private static String getRouteWhere(String routeShortName){
-		if(routeShortName !=null) {
+		if(StringUtils.isNotBlank(routeShortName) && routeShortName !=null) {
 			return String.format("AND ad.routeShortName = '%s' ", routeShortName);
 		}
 		return "";
