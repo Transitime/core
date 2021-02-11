@@ -73,8 +73,7 @@ public class RunTimeService {
 
         List<ArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesFromDb(adQuery);
 
-
-        Map<TripDateKey, Long> runTimeByTripId = getRunTimeByTripId(arrivalDepartures);
+        Map<TripDateKey, Long> runTimeByTripId = getRunTimeByTripDateKey(arrivalDepartures);
 
         return getAverageRunTimeForAllTrips(runTimeByTripId);
     }
@@ -87,17 +86,20 @@ public class RunTimeService {
      * TODO - May want to refactor to be smarter about including the entire trip if
      *  the trip is part of the selected time range
      */
-    private Map<TripDateKey, Long> getRunTimeByTripId(List<ArrivalDeparture> arrivalDepartures){
+    private Map<TripDateKey, Long> getRunTimeByTripDateKey(List<ArrivalDeparture> arrivalDepartures){
 
-        Map<TripDateKey, Long> runTimeByTripId = new LinkedHashMap<>();
-        Map<TripDateKey, List<ArrivalDeparture>> arrivalDeparturesByTripKey = getArrivalDeparturesByTripKey(arrivalDepartures);
+        Map<TripDateKey, Long> runTimeByTripDate = new LinkedHashMap<>();
 
-        for(Map.Entry<TripDateKey, List<ArrivalDeparture>> adByTrip : arrivalDeparturesByTripKey.entrySet()){
-            TripDateKey key =adByTrip.getKey();
-            List<ArrivalDeparture> arrivalDeparturesForTrip  = adByTrip.getValue();
+        Map<TripDateKey, List<ArrivalDeparture>> arrivalDeparturesByTripKey = getArrivalDeparturesByTripDateKey(arrivalDepartures);
+
+        for(Map.Entry<TripDateKey, List<ArrivalDeparture>> arrivalDepartureByTripAndDate : arrivalDeparturesByTripKey.entrySet()){
+            TripDateKey key = arrivalDepartureByTripAndDate.getKey();
+            List<ArrivalDeparture> arrivalDeparturesForTrip  = arrivalDepartureByTripAndDate.getValue();
+
             if(arrivalDeparturesForTrip != null && arrivalDeparturesForTrip.size() > 0){
                 Long firstStopDepartureTime = null;
                 Long lastStopArrivalTime = null;
+
                 Trip trip = arrivalDeparturesForTrip.get(0).getTripFromDb();
                 int lastStopPathIndex = trip.getNumberStopPaths() - 1;
 
@@ -117,19 +119,19 @@ public class RunTimeService {
                 }
 
                 if(firstStopDepartureTime != null && lastStopArrivalTime != null){
-                    runTimeByTripId.put(key,lastStopArrivalTime - firstStopDepartureTime);
+                    runTimeByTripDate.put(key,lastStopArrivalTime - firstStopDepartureTime);
                 }
             }
         }
 
-        return runTimeByTripId;
+        return runTimeByTripDate;
     }
 
     /*
      *  Groups Arrival Departures by Trip/Date key
      *  Allows us to retrieve first and last arrival/departure per trip
      */
-    private Map<TripDateKey, List<ArrivalDeparture>> getArrivalDeparturesByTripKey(List<ArrivalDeparture> arrivalDepartures){
+    private Map<TripDateKey, List<ArrivalDeparture>> getArrivalDeparturesByTripDateKey(List<ArrivalDeparture> arrivalDepartures){
         Map<TripDateKey, List<ArrivalDeparture>> arrivalDeparturesByTripKey = new LinkedHashMap<>();
 
         for(ArrivalDeparture ad : arrivalDepartures){
