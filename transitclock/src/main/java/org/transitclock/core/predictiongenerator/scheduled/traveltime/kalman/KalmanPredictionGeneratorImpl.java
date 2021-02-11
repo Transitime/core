@@ -66,9 +66,6 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
           "transitclock.prediction.data.kalman.tresholdForDifferenceEventLog", new Integer(60000),
           "This is the threshold in milliseconds that the difference has to be over before it will consider the percentage difference.");
 
-  private static final BooleanConfigValue trafficDataEanbled = new BooleanConfigValue("transitclock.traffic.enabled",
-          true,
-          "Enable Traffic Data integration");
 
   private static final Logger logger = LoggerFactory.getLogger(KalmanPredictionGeneratorImpl.class);
 
@@ -274,7 +271,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
   }
 
   private Long getTrafficHistory(Indices indices, long time, int numDaysBack) {
-    if (!isTrafficEnabled()) return null;
+    if (!isTrafficDataEnabled()) return null;
     // find stopPath, see if there is a traffic path for it
     // if so, retrieve the historical traffic travel time for that segment
     Date historicalTime = DateUtils.addDays(new Date(time), -1 * numDaysBack);
@@ -284,12 +281,12 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
     return null;
   }
 
-  private boolean isTrafficEnabled() {
-    return trafficDataEanbled.getValue();
+  private boolean isTrafficDataEnabled() {
+    return TrafficManager.trafficDataEnabled.getValue();
   }
 
   private Long getTrafficForIndices(Indices indices) {
-    if (!isTrafficEnabled()) return null;
+    if (!isTrafficDataEnabled()) return null;
     // find stopPath, see if there is a traffic path for it
     // if so, retrieve the traffic travel time for that segment
     if (TrafficManager.getInstance().hasTrafficData(indices.getStopPath())) {

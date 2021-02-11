@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * Test implementation of TripDataHistoryCache that does nothing.
  */
-public class TestTripDataHistoryCache implements TripDataHistoryCacheInterface {
+public class TripDataHistoryTestCache implements TripDataHistoryCacheInterface {
   @Override
   public List<IpcArrivalDeparture> getTripHistory(TripKey tripKey) {
     return null;

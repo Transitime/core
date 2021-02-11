@@ -17,46 +17,41 @@
 package org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman;
 
 import org.hibernate.Session;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
-import org.transitclock.config.StringConfigValue;
-import org.transitclock.configData.CoreConfig;
+import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.db.structs.ActiveRevisions;
 import org.transitclock.db.structs.StopPath;
 import org.transitclock.db.structs.TrafficPath;
 import org.transitclock.db.structs.TrafficSensorData;
-import org.transitclock.utils.JsonUtils;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Manage traffic data access, retrieval, and storage;
  */
 public class TrafficManager {
 
-  private static final StringConfigValue TRAFFIC_URL
-          = new StringConfigValue("transitclock.traffic.shapeUrl",
-          "https://pulse-io.blyncsy.com/geoservices/project_route_data/rest/services/81/FeatureServer/0/query?f=json&returnGeometry=false",
-          "URL of traffic sensor shapes");
+  public static final BooleanConfigValue trafficDataEnabled
+          = new BooleanConfigValue("transitclock.traffic.enabled",
+          true,
+          "Enable Traffic Data integration");
 
   private static final Logger logger =
           LoggerFactory.getLogger(TrafficManager.class);
+
   private static TrafficManager INSTANCE;
-  private Map<StopPath, TrafficPath> stopPathTrafficPathMap = new HashMap<>();
-  private Map<String, TrafficPath> sensorIdToTrafficPath = new HashMap<>();
+  private TrafficDataMapper mapper;
+  private TrafficDataCache cache;
+  private TrafficDataHistoricalCache historicalCache;
 
   private Integer trafficRev = null;
 
+
+  /**
+   * Static access via getInstance() as is the convention with TTC.
+   */
   protected TrafficManager() {
   }
 
@@ -68,134 +63,114 @@ public class TrafficManager {
     return INSTANCE;
   }
 
+  private boolean testingEnable = false;
+  public void setEnabled(boolean b) {
+    testingEnable = true;
+  }
+  public boolean isEnabled() {
+    return testingEnable || trafficDataEnabled.getValue();
+  }
+
+  /**
+   * for testing.
+   * @param mapper
+   */
+  public void setMapper(TrafficDataMapper mapper) {
+    this.mapper = mapper;
+  }
+  /**
+   * for testing.
+   * @param trafficRev
+   */
   public void setTrafficRev(int trafficRev) {
     this.trafficRev = trafficRev;
   }
+  // for testing.
+  public void setCache(TrafficDataCache cache) {
+    this.cache = cache;
+  }
+  // for testing.
+  public void setHistoricalCache(TrafficDataHistoricalCache historicalCache) {
+    this.historicalCache = historicalCache;
+  }
 
+  /**
+   * load internal state and setup the caches.
+   */
   private void init() {
     Session session = Core.getInstance().getDbConfig().getGlobalSession();
     ActiveRevisions activeRevisions = ActiveRevisions.get(session);
 
     trafficRev = activeRevisions.getTrafficRev();
+
+    mapper = new TrafficDataMapper();
     if (trafficRev == null) {
       // no traffic data -- nothing to do
       return;
     }
+
+    // setup mapping for fast retrieval
     List<TrafficPath> allTrafficPaths = TrafficPath.getTrafficPaths(session, trafficRev);
     for (TrafficPath trafficPath : allTrafficPaths) {
-      this.sensorIdToTrafficPath.put(trafficPath.getTrafficPathId(), trafficPath);
+      mapper.addTrafficPath(trafficPath);
       for (StopPath stopPath : trafficPath.getStopPaths()) {
-        if (stopPathTrafficPathMap.containsKey(stopPath)) {
+        if (mapper.has(stopPath)){
           throw new IllegalStateException("duplicate mapping "
                   + stopPath.toString() + " to "
                   + trafficPath.toString());
         }
-        this.stopPathTrafficPathMap.put(stopPath, trafficPath);
+        mapper.mapStopPath(stopPath, trafficPath);
       }
     }
+
+    // initialize our caches
+    historicalCache = new TrafficDataHistoricalCache(mapper, trafficRev);
+    cache = new TrafficDataCache(historicalCache, mapper, trafficRev);
 
   }
 
 
   public boolean hasTrafficData(StopPath stopPath) {
-    return this.stopPathTrafficPathMap.containsKey(stopPath);
+    if (!isEnabled()) return false;
+    return mapper.has(stopPath);
   }
 
+  /**
+   * Retrieve the current travel time in millis for the given
+   * StopPath.
+   * @param stopPath
+   * @return
+   */
   public Long getTravelTime(StopPath stopPath) {
-    TrafficPath trafficPath = this.stopPathTrafficPathMap.get(stopPath);
+    if (!isEnabled()) return null;
+    TrafficPath trafficPath = mapper.get(stopPath);
     TrafficSensorData data = getTrafficSensorData(trafficPath);
+    if (data == null) return null;
+    if (data.getSpeed() == null) return null;
     double speed = data.getSpeed();
+    // time = velocity * length
     return new Double(stopPath.getLength() * speed).longValue();
   }
 
-  private Map<TrafficPath, TrafficSensorData> trafficSensorDataMap = new HashMap<>();
 
   private TrafficSensorData getTrafficSensorData(TrafficPath trafficPath) {
-    TrafficSensorData trafficSensorData = trafficSensorDataMap.get(trafficPath);
-    if (trafficSensorData == null) {
-      refresh();
-      trafficSensorData = trafficSensorDataMap.get(trafficPath);
-    }
-    return trafficSensorData;
+    if (!isEnabled()) return null;
+    return cache.get(trafficPath);
   }
 
-  private synchronized void refresh() {
-    List<TrafficSensorData> sensorData = null;
-    try {
-      sensorData = loadData();
-      addtoQueue(sensorData);
-    } catch (Exception e) {
-      logger.error("loading error:", e);
-    }
-    for (TrafficSensorData data : sensorData) {
-      this.trafficSensorDataMap.put(mapSensorToStopPath(data), data);
-    }
-  }
-
-  private void addtoQueue(List<TrafficSensorData> sensorData) {
-    if (!CoreConfig.storeDataInDatabase()) return;
-
-    for (TrafficSensorData data : sensorData) {
-      Core.getInstance().getDbLogger().add(data);
-    }
-  }
-
-  private TrafficPath mapSensorToStopPath(TrafficSensorData data) {
-    return sensorIdToTrafficPath.get(data.getTrafficSensorId());
-  }
-
-  List<TrafficSensorData> loadData() throws Exception {
-    List<TrafficSensorData> elements = new ArrayList<>();
-
-    URL urlObj = new URL(TRAFFIC_URL.getValue());
-    URLConnection connection = urlObj.openConnection();
-    InputStream in = connection.getInputStream();
-    String jsonStr = JsonUtils.getJsonString(in);
-
-    JSONObject descriptor = new JSONObject(jsonStr);
-    JSONArray features = (JSONArray) descriptor.get("features");
-    for (int i = 0; i < features.length(); i++) {
-      try {
-        TrafficSensorData data = parseData(features.getJSONObject(i), trafficRev);
-        if (data != null) {
-          elements.add(data);
-        }
-      } catch (Exception any) {
-        try {
-          logger.warn("exception parsing feature {}", features.getJSONObject(i));
-        } catch (Exception bury) {}
-      }
-    }
-    return elements;
-  }
-
+  /**
+   * Retrieve the travel time in millis for the StopPath at the given
+   * time period, if it exists.  The precision of thetime parameter is implicitly
+   * shifted to the appropriate value.
+   * @param stopPath
+   * @param time
+   * @return
+   */
   public Long getHistoricalTravelTime (StopPath stopPath, long time) {
-    return null;
+    if (!isEnabled()) return null;
+    return historicalCache.getHistoricalTravelTime(stopPath, time);
   }
 
-  private TrafficSensorData parseData(JSONObject o, int trafficRev) {
-    JSONObject a = o.getJSONObject("attributes");
-    if (!a.has("mph"))
-      return null;
-    long time = a.getLong("time");
-    String externalId = String.valueOf(a.getInt("id"));
-    double speed = toMetersPerSecond(a.getDouble("mph"));
-    double delayMillis = a.getDouble("delaySeconds") * 1000;
-    Integer travelTimeMillis = a.getInt("travelTime");
-    double confidence = a.getDouble("confidence");
-    TrafficSensorData data = new TrafficSensorData(
-      externalId,
-      trafficRev,
-      new Date(time),
-      speed,
-      delayMillis,
-      confidence,
-      travelTimeMillis
-    );
-    return data;
-  }
 
-  private double toMetersPerSecond(double mph) {
-    return (mph / 0.61) * 1000;
-  }
+
 }

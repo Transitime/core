@@ -97,8 +97,11 @@ public class TrafficSensorData implements Serializable {
   }
 
   public String getTrafficSensorId() { return trafficSensorId; }
-  public double getSpeed() {
+  public Double getSpeed() {
     return speed;
   }
 
+  public Date getTime() {
+    return time;
+  }
 }

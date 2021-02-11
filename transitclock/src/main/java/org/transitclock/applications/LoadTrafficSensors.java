@@ -189,7 +189,7 @@ public class LoadTrafficSensors {
     return fd;
   }
 
-  // calculate the lenght of a shape
+  // calculate the length of a shape
   private double calculateLength(FeatureGeometry fg) {
     Coordinate[] points = fg.getAsCoordinateArray();
     double length = 0.0;
@@ -416,7 +416,7 @@ public class LoadTrafficSensors {
    * @param stopPathLineString
    * @param matches
    */
-  private void debugLink(Coordinate[] featureLineString, Coordinate[] stopPathLineString, Coordinate[] matches) {
+  void debugLink(Coordinate[] featureLineString, Coordinate[] stopPathLineString, Coordinate[] matches) {
     StringBuffer sb = new StringBuffer();
     sb.append("http://developer.onebusaway.org/maps/debug.html?polyline=");
     for (Coordinate c : featureLineString) {

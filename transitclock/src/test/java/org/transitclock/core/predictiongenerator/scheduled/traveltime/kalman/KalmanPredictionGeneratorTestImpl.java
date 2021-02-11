@@ -32,14 +32,15 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Test extensison of KalmanPredictionGeneratorImpl that overrides some of the
+ * This is a supporting class to KalmanPredictionGeneratorImplTest
+ * It is an extension of KalmanPredictionGeneratorImpl that overrides some of the
  * otherwise static references / object lookups.
  */
-public class TestKalmanPredictionGeneratorImpl extends KalmanPredictionGeneratorImpl {
+public class KalmanPredictionGeneratorTestImpl extends KalmanPredictionGeneratorImpl {
 
   private KalmanDataGenerator test;
-  private TestTripDataHistoryCache tripDataHistoryCache = new TestTripDataHistoryCache();
-  private TestKalmanErrorCache kalmanErrorCache;
+  private TripDataHistoryTestCache tripDataHistoryCache = new TripDataHistoryTestCache();
+  private KalmanErrorTestCache kalmanErrorCache;
   private long referenceTime;
 
   public void setReferenceTime(long time) {
@@ -59,7 +60,7 @@ public class TestKalmanPredictionGeneratorImpl extends KalmanPredictionGenerator
   @Override
   protected ErrorCache getKalmanErrorCache() {
     if (kalmanErrorCache == null) {
-      kalmanErrorCache = new TestKalmanErrorCache(test);
+      kalmanErrorCache = new KalmanErrorTestCache(test);
     }
     return kalmanErrorCache;
   }
@@ -96,7 +97,7 @@ public class TestKalmanPredictionGeneratorImpl extends KalmanPredictionGenerator
 
   private ErrorCache getTestKalmanErrorCache() {
     if (kalmanErrorCache == null) {
-      kalmanErrorCache = new TestKalmanErrorCache(test);
+      kalmanErrorCache = new KalmanErrorTestCache(test);
     }
     return kalmanErrorCache;
   }

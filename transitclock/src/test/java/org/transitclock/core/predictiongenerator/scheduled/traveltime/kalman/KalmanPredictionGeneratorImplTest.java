@@ -38,7 +38,7 @@ public class KalmanPredictionGeneratorImplTest {
   public void setup() {
     long referenceTime = new Date().getTime();
     dataGenerator = new KalmanDataGenerator(referenceTime);
-    generator = new TestKalmanPredictionGeneratorImpl();
+    generator = new KalmanPredictionGeneratorTestImpl();
 
     /**
      * time needs to be populated for ArrivalDeparture creation

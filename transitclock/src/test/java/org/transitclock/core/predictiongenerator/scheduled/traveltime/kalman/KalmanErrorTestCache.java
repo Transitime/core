@@ -29,10 +29,10 @@ import java.util.Map;
  * Testing implementation of KalmanErrorCache that integrates
  * with the testing data generator.
  */
-public class TestKalmanErrorCache implements ErrorCache {
+public class KalmanErrorTestCache implements ErrorCache {
 
   private KalmanDataGenerator test = null;
-  public TestKalmanErrorCache(KalmanDataGenerator test) {
+  public KalmanErrorTestCache(KalmanDataGenerator test) {
     this.test = test;
   }
 

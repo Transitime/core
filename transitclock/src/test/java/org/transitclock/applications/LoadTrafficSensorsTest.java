@@ -181,9 +181,17 @@ public class LoadTrafficSensorsTest {
     allStopPaths.add(createStopPath("shape1", STOP_PATH_SHAPE_1));
     app.mapFeatureToStopPaths(fd, allStopPaths);
     List<StopPath> results = fd.getStopPaths();
+    // this is one of the more interesting shapes.  To see it
+    // uncomment this statement
+    //debugMatch(STOP_PATH_SHAPE_1, SENSOR_SHAPE_1, MATCHES_1);
     assertNotNull(results);
     // it didn't match!  No results
     assertEquals(0, results.size());
+  }
+
+  private void debugMatch(String stopPathShape1, String sensorShape1, String matches1) {
+    app.debugMatch(toLineString(sensorShape1), toLineString(stopPathShape1), toLineString(matches1));
+
   }
 
   /**

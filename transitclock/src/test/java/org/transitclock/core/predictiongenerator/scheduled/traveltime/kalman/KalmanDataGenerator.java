@@ -233,7 +233,7 @@ public class KalmanDataGenerator {
   }
 
   public GtfsData getGtfsData() {
-    GtfsData gd = new TestGtfsData(
+    GtfsData gd = new GtfsTestData(
             getAvlTime(),
             CONFIG_REV,
             null,

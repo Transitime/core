@@ -26,11 +26,11 @@ import java.util.Date;
 /**
  * Testing version of GtfsData that allows some hooks for test data.
  */
-public class TestGtfsData extends GtfsData {
+public class GtfsTestData extends GtfsData {
   public KalmanDataGenerator dataGenerator;
   private long referenceTime;
 
-  public TestGtfsData(long referenceTime, int configRev, String notes, Date zipFileLastModifiedTime, boolean shouldStoreNewRevs, boolean shouldDeleteRevs, String projectId, String gtfsDirectoryName, String supplementDir, double pathOffsetDistance, double maxStopToPathDistance, double maxDistanceForEliminatingVertices, int defaultWaitTimeAtStopMsec, double maxSpeedKph, double maxTravelTimeSegmentLength, boolean trimPathBeforeFirstStopOfTrip, TitleFormatter titleFormatter) {
+  public GtfsTestData(long referenceTime, int configRev, String notes, Date zipFileLastModifiedTime, boolean shouldStoreNewRevs, boolean shouldDeleteRevs, String projectId, String gtfsDirectoryName, String supplementDir, double pathOffsetDistance, double maxStopToPathDistance, double maxDistanceForEliminatingVertices, int defaultWaitTimeAtStopMsec, double maxSpeedKph, double maxTravelTimeSegmentLength, boolean trimPathBeforeFirstStopOfTrip, TitleFormatter titleFormatter) {
     super(configRev, notes, zipFileLastModifiedTime, shouldStoreNewRevs, shouldDeleteRevs, projectId, gtfsDirectoryName, supplementDir, pathOffsetDistance, maxStopToPathDistance, maxDistanceForEliminatingVertices, defaultWaitTimeAtStopMsec, maxSpeedKph, maxTravelTimeSegmentLength, trimPathBeforeFirstStopOfTrip, titleFormatter);
     this.referenceTime = referenceTime;
     this.dataGenerator = new KalmanDataGenerator(referenceTime);
