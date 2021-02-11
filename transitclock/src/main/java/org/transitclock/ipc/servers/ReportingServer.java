@@ -10,6 +10,7 @@ import org.transitclock.ipc.servers.reporting.service.OnTimePerformanceService;
 import org.transitclock.ipc.servers.reporting.service.RunTimeService;
 import org.transitclock.ipc.servers.reporting.service.SpeedMapService;
 
+import javax.inject.Inject;
 import java.time.*;
 import java.util.*;
 
@@ -24,35 +25,21 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
     // Should only be accessed as singleton class
     private static ReportingServer singleton;
 
+    @Inject
     private SpeedMapService speedMapService;
 
+    @Inject
     private RunTimeService runTimeService;
 
+    @Inject
     private OnTimePerformanceService onTimePerformanceService;
 
     private static final Logger logger =
             LoggerFactory.getLogger(ReportingServer.class);
 
-    private ReportingServer(String agencyId) {
-        super(agencyId, ReportingInterface.class.getSimpleName());
-        speedMapService = new SpeedMapService();
-        runTimeService = new RunTimeService();
-        onTimePerformanceService = new OnTimePerformanceService();
-    }
 
-    public static ReportingServer start(String agencyId) {
-        if (singleton == null) {
-            singleton = new ReportingServer(agencyId);
-        }
-
-        if (!singleton.getAgencyId().equals(agencyId)) {
-            logger.error("Tried calling ReportingServer.start() for " +
-                            "agencyId={} but the singleton was created for agencyId={}",
-                    agencyId, singleton.getAgencyId());
-            return null;
-        }
-
-        return singleton;
+    public void start(String agencyId){
+        start(agencyId, ReportingInterface.class.getSimpleName());
     }
 
     // Speed Map Reports

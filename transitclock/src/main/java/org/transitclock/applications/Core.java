@@ -16,6 +16,8 @@
  */
 package org.transitclock.applications;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Session;
@@ -41,6 +43,7 @@ import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.db.structs.ActiveRevisions;
 import org.transitclock.db.structs.Agency;
 import org.transitclock.gtfs.DbConfig;
+import org.transitclock.guice.modules.ReportingModule;
 import org.transitclock.ipc.servers.*;
 import org.transitclock.modules.Module;
 import org.transitclock.monitoring.PidFile;
@@ -405,7 +408,10 @@ public class Core {
 		CacheQueryServer.start(agencyId);
 		PredictionAnalysisServer.start(agencyId);
 		HoldingTimeServer.start(agencyId);
-		ReportingServer.start(agencyId);
+
+		Injector injector = Guice.createInjector(new ReportingModule());
+		ReportingServer reportingServer = injector.getInstance(ReportingServer.class);
+		reportingServer.start(agencyId);
 	}
 	
 	static private void populateCaches() throws Exception
