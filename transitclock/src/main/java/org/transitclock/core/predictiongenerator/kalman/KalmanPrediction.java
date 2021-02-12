@@ -61,7 +61,7 @@ public class KalmanPrediction {
                                         double lastPredictionError) throws Exception {
     double average = historicalAverage(historicalSegments);
     double variance = historicalVariance(historicalSegments, average);
-    double gain = gain(average, variance, lastPredictionError );
+    double gain = gain(average, variance, lastPredictionError);
     double loopGain = 1 - gain;
 
     return new KalmanPredictionResult(
@@ -78,7 +78,8 @@ public class KalmanPrediction {
     if (historicalSegments.length>0) {
       long total=0;
       for(int i=0;i<historicalSegments.length;i++) {
-        long duration = historicalSegments[i].getDestination().getTime() - historicalSegments[i].getOrigin().getTime();
+        long duration = getAdjustedDuration(historicalSegments[i].getDestination(),
+                historicalSegments[i].getOrigin());
         total=total+duration;
       }
       return (double) (total / historicalSegments.length);
@@ -87,11 +88,29 @@ public class KalmanPrediction {
     }
   }
 
+  // calculate the duration considering traffic travel times if present
+  private long getAdjustedDuration(VehicleStopDetail destination, VehicleStopDetail origin) {
+    long busDuration = destination.getTime() - origin.getTime();
+    Long trafficDuration = null;
+    if (destination.getTrafficTime() != null && origin.getTrafficTime() != null) {
+      trafficDuration = destination.getTrafficTime() - origin.getTrafficTime();
+    }
+    if (trafficDuration != null) {
+      return new Float(((1-getTrafficWeight()) * busDuration)
+                + getTrafficWeight() * trafficDuration).longValue();
+    }
+    return busDuration;
+  }
+
+  private float getTrafficWeight() {
+    return 0.5f;
+  }
+
   private double historicalVariance(TripSegment historicalSegments[], double average) {
     double total=0;
 
     for(int i=0;i<historicalSegments.length;i++) {
-      long duration = historicalSegments[i].getDestination().getTime() - historicalSegments[i].getOrigin().getTime();
+      long duration = getAdjustedDuration(historicalSegments[i].getDestination(), historicalSegments[i].getOrigin());
 
       double diff = duration - average;
       double longDiffSquared=diff*diff;
@@ -119,10 +138,10 @@ public class KalmanPrediction {
 
     /* This may be better use the historical average rather than just the vehicle on previous day. This would damping issues with last days value being dramatically different. */
     if(useAverage.getValue()==false) {
-      historicalDuration = historicalSegments[historicalSegments.length-1].getDestination().getTime()
-              - historicalSegments[historicalSegments.length-1].getOrigin().getTime();
+      historicalDuration = getAdjustedDuration(historicalSegments[historicalSegments.length-1].getDestination(),
+              historicalSegments[historicalSegments.length-1].getOrigin());
     }
-    long lastVehicleDuration=lastVehicleSegment.getDestination().getTime() - lastVehicleSegment.getOrigin().getTime();
+    long lastVehicleDuration= getAdjustedDuration(lastVehicleSegment.getDestination(), lastVehicleSegment.getOrigin());
 
     return (loopGain * lastVehicleDuration) + (gain * historicalDuration);
   }

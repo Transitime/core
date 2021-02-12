@@ -26,6 +26,8 @@ import org.transitclock.db.structs.StopPath;
 import org.transitclock.db.structs.TrafficPath;
 import org.transitclock.db.structs.TrafficSensorData;
 
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -171,6 +173,17 @@ public class TrafficManager {
     return historicalCache.getHistoricalTravelTime(stopPath, time);
   }
 
+/**
+ * load data on startup populating internal caches.
+ */
+  public void populateCacheFromDb(Session session, Date startDate, Date endDate) {
+    Iterator<TrafficSensorData> iterator
+            = TrafficSensorData.getTrafficSensorDataIteratorFromDb(
+                    session, startDate, endDate);
 
-
+    while (iterator.hasNext()) {
+      TrafficSensorData element = iterator.next();
+      historicalCache.put(element);
+    }
+  }
 }

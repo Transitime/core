@@ -16,6 +16,8 @@
  */
 package org.transitclock.db.structs;
 
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.Column;
@@ -24,6 +26,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Iterator;
 
 /**
  * Represents one sample of traffic data from a single traffic sensor.
@@ -104,4 +107,23 @@ public class TrafficSensorData implements Serializable {
   public Date getTime() {
     return time;
   }
+
+  /**
+   * do bulk load of data.
+   * @param session
+   * @param startDate
+   * @param endDate
+   * @return
+   */
+  public static Iterator<TrafficSensorData> getTrafficSensorDataIteratorFromDb(Session session, Date startDate, Date endDate) {
+    String hql = "FROM TrafficSensorData " +
+            " WHERE time >= :beginDate " +
+            " AND time < :endDate";
+    Query query = session.createQuery(hql);
+    query.setTimestamp("beginDate", startDate);
+    query.setTimestamp("endDate", endDate);
+
+    return query.iterate();
+  }
+
 }

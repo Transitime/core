@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
+import org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman.TrafficManager;
 import org.transitclock.db.hibernate.HibernateUtils;
 
 import java.util.Date;
@@ -25,7 +26,8 @@ public class CacheTask implements ParallelTask {
         TripDataHistoryCacheFactory,
         StopArrivalDepartureCacheFactory,
         FrequencyBasedHistoricalAverageCache,
-        ScheduleBasedHistoricalAverageCache
+        ScheduleBasedHistoricalAverageCache,
+        TrafficDataHistoryCache
     }
 
     private Date startDate;
@@ -57,6 +59,8 @@ public class CacheTask implements ParallelTask {
                 case ScheduleBasedHistoricalAverageCache:
                     ScheduleBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, startDate, endDate);
                     break;
+                case TrafficDataHistoryCache:
+                    TrafficManager.getInstance().populateCacheFromDb(session, startDate, endDate);
                 default:
                     throw new IllegalArgumentException("unknown type=" + type);
             }

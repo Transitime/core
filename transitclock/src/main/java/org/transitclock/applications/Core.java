@@ -36,6 +36,7 @@ import org.transitclock.core.dataCache.VehicleDataCache;
 import org.transitclock.core.dataCache.ehcache.CacheManagerFactory;
 import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
+import org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman.TrafficManager;
 import org.transitclock.db.hibernate.DataDbLogger;
 import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.db.structs.ActiveRevisions;
@@ -450,6 +451,10 @@ public class Core {
 				logger.info("Populating StopArrivalDepartureCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
 				StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
 			}
+
+			if (TrafficManager.getInstance() != null) {
+				TrafficManager.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
+			}
 		}else
 		{
 			ParallelProcessor pp = new ParallelProcessor();
@@ -480,6 +485,11 @@ public class Core {
 				if(ScheduleBasedHistoricalAverageCache.getInstance()!=null)
 				{
 					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.ScheduleBasedHistoricalAverageCache);
+					pp.enqueue(ct);
+				}
+
+				if (i < 5 && TrafficManager.getInstance() != null && TrafficManager.getInstance().isEnabled()) {
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.TrafficDataHistoryCache);
 					pp.enqueue(ct);
 				}
 

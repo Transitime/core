@@ -405,6 +405,17 @@
         primary key (trafficRev, id)
     );
 
+    create table TrafficSensorData (
+        trafficSensorId varchar(255) not null,
+        trafficRev int4 not null,
+        time timestamp not null,
+        confidence float8,
+        delayMillis float8,
+        speed float8,
+        travelTimeMillis int4,
+        primary key (trafficSensorId, trafficRev, time)
+    );
+
     create table Transfers (
         toStopId varchar(60) not null,
         fromStopId varchar(60) not null,

@@ -46,25 +46,35 @@ public class TrafficDataHistoricalCache {
   }
 
   /**
-   * Accept traffic data for storage.
+   * Accept traffic data en masse for storage.
    * @param data
    * @return
    */
   public boolean put(List<TrafficSensorData> data) {
     int mapped = 0;
     for (TrafficSensorData element : data) {
-      // we spend the effort now to make the retrieval easy
-      TrafficDataKey key = hash(element);
-      if (key != null) {
-        mapped++;
-        cache.put(key, element);
-      }
+      boolean success = put(element);
+      if (success) mapped++;
     }
     logger.info("mapped {} sensors of {}",
             mapped, data.size());
     return mapped > 0;
   }
 
+  /**
+   * Accept traffic for storage.
+   * @param element
+   * @return
+   */
+  public boolean put(TrafficSensorData element) {
+    // we spend the effort now to make the retrieval easy
+    TrafficDataKey key = hash(element);
+    if (key != null) {
+      cache.put(key, element);
+      return true;
+    }
+    return false;
+  }
   /**
    * create a key of the data element for fast retrieval.
    * @param data
@@ -103,6 +113,7 @@ public class TrafficDataHistoricalCache {
     return null;
 
   }
+
 
 
 }
