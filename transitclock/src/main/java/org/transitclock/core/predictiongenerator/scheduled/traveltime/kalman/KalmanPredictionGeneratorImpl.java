@@ -275,26 +275,25 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
     VehicleStopDetail originDetail = new VehicleStopDetail(null, 0, 0l, vehicle);
     TripSegment[] historical_segments_k = new TripSegment[lastDaysTimes.size()];
     for (int i = 0; i < lastDaysTimes.size() && i < maxKalmanDays.getValue(); i++) {
+      // We don't have historical AVL times so guess at it based on now
+      Long historicalAvlTime = DateUtils.addDays(new Date(avlReport.getTime()), -1 * i).getTime();
       logger.debug("Kalman is using historical value : "+lastDaysTimes.get(i) +" for : " + indices.toString());
       VehicleStopDetail destinationDetail = new VehicleStopDetail(null, lastDaysTimes.get(i).getTravelTime(),
-              (i==0? trafficTravelTime: getTrafficHistory(indices, avlReport.getTime(), i)),
+              getTrafficHistory(indices, historicalAvlTime),
               vehicle);
       // TODO: why do we insert into array in reverse order?
       historical_segments_k[lastDaysTimes.size()-i-1] = new TripSegment(originDetail, destinationDetail);
     }
-    VehicleStopDetail destinationDetail_0_k_1 = new VehicleStopDetail(null, travelTimeDetails.getTravelTime(), vehicle);
+    VehicleStopDetail destinationDetail_0_k_1 = new VehicleStopDetail(null, travelTimeDetails.getTravelTime(), trafficTravelTime, vehicle);
     TripSegment ts_day_0_k_1 = new TripSegment(originDetail, destinationDetail_0_k_1);
     TripSegment last_vehicle_segment = ts_day_0_k_1;
     return new LinkTravelTimes(last_vehicle_segment, historical_segments_k);
   }
 
-  private Long getTrafficHistory(Indices indices, long time, int numDaysBack) {
-    if (!isTrafficDataEnabled()) return null;
-    // find stopPath, see if there is a traffic path for it
-    // if so, retrieve the historical traffic travel time for that segment
-    Date historicalTime = DateUtils.addDays(new Date(time), -1 * numDaysBack);
+  private Long getTrafficHistory(Indices indices, Long historicalTime) {
+    if (!isTrafficDataEnabled() || historicalTime == null) return null;
     if (TrafficManager.getInstance().hasTrafficData(indices.getStopPath())) {
-      return TrafficManager.getInstance().getHistoricalTravelTime(indices.getStopPath(), historicalTime.getTime());
+      return TrafficManager.getInstance().getHistoricalTravelTime(indices.getStopPath(), historicalTime);
     }
     return null;
   }
