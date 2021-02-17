@@ -37,6 +37,7 @@ import org.transitclock.db.structs.MonitoringEvent;
 import org.transitclock.db.structs.Prediction;
 import org.transitclock.db.structs.PredictionAccuracy;
 import org.transitclock.db.structs.PredictionEvent;
+import org.transitclock.db.structs.TrafficSensorData;
 import org.transitclock.db.structs.VehicleConfig;
 import org.transitclock.db.structs.VehicleEvent;
 import org.transitclock.db.structs.VehicleState;
@@ -90,6 +91,7 @@ public class DataDbLogger {
   private DbQueue<VehicleEvent> vehicleEventQueue;
 	private DbQueue<PredictionEvent> predictionEventQueue;
   private DbQueue<VehicleState> vehicleStateQueue;
+  private DbQueue<TrafficSensorData> trafficSensorDataQueue;
   private DbQueue<Object> genericQueue;
 	
 	private static final int QUEUE_CAPACITY = 5000000;
@@ -193,6 +195,7 @@ public class DataDbLogger {
 	  vehicleEventQueue = new DbQueue<VehicleEvent>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, VehicleEvent.class.getSimpleName());
 		predictionEventQueue = new DbQueue<PredictionEvent>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, PredictionEvent.class.getSimpleName());
 	  vehicleStateQueue = new DbQueue<VehicleState>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, VehicleState.class.getSimpleName());
+	  trafficSensorDataQueue = new DbQueue<TrafficSensorData>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, TrafficSensorData.class.getSimpleName());
 	  genericQueue = new DbQueue<Object>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, Object.class.getSimpleName());
 		
 	}
@@ -256,6 +259,10 @@ public class DataDbLogger {
 			return vehicleStateQueue.add(vs);
 		}
 
+		public boolean add(TrafficSensorData data) {
+			return trafficSensorDataQueue.add(data);
+		}
+
 	
 	/**
 	 * Determines set of class names in the queue. Useful for logging
@@ -308,6 +315,7 @@ public class DataDbLogger {
 						vehicleEventQueue.queueLevel(),
 						predictionEventQueue.queueLevel(),
 						vehicleStateQueue.queueLevel(),
+						trafficSensorDataQueue.queueLevel(),
 						genericQueue.queueLevel()
 		};
 
@@ -329,6 +337,7 @@ public class DataDbLogger {
 						vehicleEventQueue.queueSize(),
 						predictionEventQueue.queueSize(),
 						vehicleStateQueue.queueSize(),
+						trafficSensorDataQueue.queueSize(),
 						genericQueue.queueSize()
 		};
 
