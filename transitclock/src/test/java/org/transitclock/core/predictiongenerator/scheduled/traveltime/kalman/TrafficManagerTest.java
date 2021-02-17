@@ -18,11 +18,13 @@ package org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.transitclock.db.structs.Location;
 import org.transitclock.db.structs.StopPath;
 import org.transitclock.db.structs.TrafficPath;
 import org.transitclock.db.structs.TrafficSensorData;
 import org.transitclock.utils.Time;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -76,6 +78,7 @@ public class TrafficManagerTest {
     List<TrafficSensorData> sensorData = cache.loadData();
     cache.updateCache(sensorData);
     cache.archive(sensorData);
+    assertNotNull(cache.get(tp));
     long now = System.currentTimeMillis();
     travelTime = tm.getTravelTime(sp);
     assertNotNull(travelTime);
@@ -97,7 +100,7 @@ public class TrafficManagerTest {
     String pathId = "p1";
     String stopId = "s1";
     String routeId = "r1";
-    return new StopPath(-1,
+    StopPath sp = new StopPath(-1,
             pathId,
             stopId,
     0,
@@ -109,6 +112,17 @@ public class TrafficManagerTest {
     null,
     null,
     null);
+    sp.setLocations(createLocations());
+
+    assertTrue(sp.getLength() > 1.0);
+    return sp;
+  }
+
+  private ArrayList<Location> createLocations() {
+    ArrayList<Location> list = new ArrayList<>();
+    list.add(new Location(38.8141,-77.1339));
+    list.add(new Location(38.8123,-77.1217));
+    return list;
   }
 
   private TrafficSensorData findSensorId(List<TrafficSensorData> sensorData, String id) {

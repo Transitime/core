@@ -1,5 +1,7 @@
 package org.transitclock.core.predictiongenerator.kalman;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitclock.config.BooleanConfigValue;
 
 /**
@@ -43,6 +45,8 @@ import org.transitclock.config.BooleanConfigValue;
  *
  */
 public class KalmanPrediction {
+
+  private static final Logger logger = LoggerFactory.getLogger(KalmanPrediction.class);
 
   private static final BooleanConfigValue useAverage = new BooleanConfigValue (
           "transitclock.prediction.kalman.useaverage", new Boolean(true),
@@ -93,9 +97,13 @@ public class KalmanPrediction {
     long busDuration = destination.getTime() - origin.getTime();
     Long trafficDuration = null;
     if (destination.getTrafficTime() != null && origin.getTrafficTime() != null) {
-      trafficDuration = destination.getTrafficTime() - origin.getTrafficTime();
+      trafficDuration = destination.getTrafficTime()/* - origin.getTrafficTime()*/;
     }
     if (trafficDuration != null) {
+      logger.info("bus tt {} vs traffic tt {}; {} % diff",
+              busDuration,
+              trafficDuration,
+              (((double)trafficDuration-busDuration)/busDuration));
       return new Float(((1-getTrafficWeight()) * busDuration)
                 + getTrafficWeight() * trafficDuration).longValue();
     }

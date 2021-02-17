@@ -61,6 +61,7 @@ public class CacheTask implements ParallelTask {
                     break;
                 case TrafficDataHistoryCache:
                     TrafficManager.getInstance().populateCacheFromDb(session, startDate, endDate);
+                    break;
                 default:
                     throw new IllegalArgumentException("unknown type=" + type);
             }

@@ -15,6 +15,7 @@ import org.transitclock.core.predictiongenerator.kalman.*;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.PredictionEvent;
 import org.transitclock.db.structs.PredictionForStopPath;
+import org.transitclock.db.structs.TrafficSensorData;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -254,12 +255,29 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
                                                   TravelTimeDetails travelTimeDetails,
                                                   Indices indices) {
     Vehicle vehicle = new Vehicle(avlReport.getVehicleId());
-    VehicleStopDetail originDetail = new VehicleStopDetail(null, 0, getTrafficForIndices(indices), vehicle);
+
+    Long trafficTravelTime = getTrafficForIndices(indices);
+    if (logger.isInfoEnabled() && trafficTravelTime != null) {
+      TrafficSensorData sensorData = TrafficManager.getInstance().getTrafficSensorDataForStopPath(indices.getStopPath());
+      double length = indices.getStopPath().getLength();
+      long busTravelTime = lastDaysTimes.get(0).getTravelTime();
+      Double trafficSpeedInMPH = sensorData.getSpeed();
+      Double busSpeedInMPH = length / busTravelTime * 1000 * 2.237  /* m/s to mph */;
+
+      if (trafficTravelTime != null && trafficTravelTime > 0) {
+        logger.info("traffic adjusted speed {}mph, bus speed {}mph, {}% diff",
+                trafficSpeedInMPH,
+                busSpeedInMPH,
+                (trafficSpeedInMPH - busSpeedInMPH)/busSpeedInMPH);
+      }
+    }
+
+    VehicleStopDetail originDetail = new VehicleStopDetail(null, 0, 0l, vehicle);
     TripSegment[] historical_segments_k = new TripSegment[lastDaysTimes.size()];
     for (int i = 0; i < lastDaysTimes.size() && i < maxKalmanDays.getValue(); i++) {
       logger.debug("Kalman is using historical value : "+lastDaysTimes.get(i) +" for : " + indices.toString());
       VehicleStopDetail destinationDetail = new VehicleStopDetail(null, lastDaysTimes.get(i).getTravelTime(),
-              getTrafficHistory(indices, avlReport.getTime(), i),
+              (i==0? trafficTravelTime: getTrafficHistory(indices, avlReport.getTime(), i)),
               vehicle);
       // TODO: why do we insert into array in reverse order?
       historical_segments_k[lastDaysTimes.size()-i-1] = new TripSegment(originDetail, destinationDetail);

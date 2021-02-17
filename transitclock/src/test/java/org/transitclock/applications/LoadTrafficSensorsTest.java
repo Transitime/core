@@ -17,6 +17,7 @@
 package org.transitclock.applications;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.transitclock.db.structs.Location;
@@ -187,6 +188,22 @@ public class LoadTrafficSensorsTest {
     assertNotNull(results);
     // it didn't match!  No results
     assertEquals(0, results.size());
+  }
+
+  @Test
+  @Ignore
+  public void testLengthOfShape() throws Exception {
+    List<FeatureData> featureDataList = app.loadFeatureDataFromURL(app.getTrafficUrl());
+    FeatureData fd = findFeature(featureDataList, "938");
+    assertEquals(fd.getLength(), app.calculateLengthInMeters(fd.getFeatureGeometry().getAsCoordinateArray()), 0.001);
+  }
+
+  private FeatureData findFeature(List<FeatureData> featureDataList, String s) {
+    for (FeatureData fd : featureDataList) {
+      if (fd.getId().equals(s))
+        return fd;
+    }
+    return null;
   }
 
   private void debugMatch(String stopPathShape1, String sensorShape1, String matches1) {

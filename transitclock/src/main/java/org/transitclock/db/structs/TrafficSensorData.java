@@ -60,6 +60,14 @@ public class TrafficSensorData implements Serializable {
   @Column
   private Integer travelTimeMillis;
 
+  @Column
+  /**
+   * An estimated length of the traffic sensor
+   * based on the geometry.  This is NOT accuracte
+   * enough for travel time calculation.
+   */
+  private Double length;
+
   /**
    * Simple constructor
    * @param trafficSensorId
@@ -69,6 +77,7 @@ public class TrafficSensorData implements Serializable {
    * @param delayMillis
    * @param confidence
    * @param travelTimeMillis
+   * @param length
    */
   public TrafficSensorData(String trafficSensorId,
                            int trafficRev,
@@ -76,7 +85,8 @@ public class TrafficSensorData implements Serializable {
                            Double speed,
                            Double delayMillis,
                            Double confidence,
-                           Integer travelTimeMillis) {
+                           Integer travelTimeMillis,
+                           Double length) {
     this.trafficSensorId = trafficSensorId;
     this.trafficRev = trafficRev;
     this.time = time;
@@ -84,6 +94,7 @@ public class TrafficSensorData implements Serializable {
     this.delayMillis = delayMillis;
     this.confidence = confidence;
     this.travelTimeMillis = travelTimeMillis;
+    this.length = length;
   }
 
   /**
@@ -97,13 +108,24 @@ public class TrafficSensorData implements Serializable {
     delayMillis = null;
     confidence = null;
     travelTimeMillis = null;
+    length = null;
   }
 
   public String getTrafficSensorId() { return trafficSensorId; }
   public Double getSpeed() {
     return speed;
   }
+  public Integer getTravelTimeMillis() {
+    return travelTimeMillis;
+  }
 
+  /**
+   * estimated length of the traffic sensor shape.
+   * @return
+   */
+  public double getLength() {
+    return length;
+  }
   public Date getTime() {
     return time;
   }
@@ -125,5 +147,6 @@ public class TrafficSensorData implements Serializable {
 
     return query.iterate();
   }
+
 
 }

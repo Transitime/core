@@ -43,7 +43,7 @@ import java.util.List;
  * that defines the shape of a traffic sensor.  StopPaths are then mapped
  * to these TrafficPaths where overlap occurs.
  */
-@Entity(name="TrafficPaths")
+@Entity(name="TrafficPath")
 @DynamicUpdate
 @Table(name="TrafficPaths")
 public class TrafficPath implements Serializable {

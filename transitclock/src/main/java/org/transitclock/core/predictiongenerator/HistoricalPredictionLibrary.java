@@ -84,6 +84,7 @@ public class HistoricalPredictionLibrary {
 						// for this departure find the next arrival
 						if ((found = findMatchInList(nextStopList, currentArrivalDeparture)) != null) {
 							getMonitoring().rateMetric("PredictionStopADTTHit", true);
+							// NOTE: this constructor is departure, arrival!!!!
 							TravelTimeDetails travelTimeDetails=new TravelTimeDetails(currentArrivalDeparture, found);
 							if(travelTimeDetails.getTravelTime()>0)
 							{

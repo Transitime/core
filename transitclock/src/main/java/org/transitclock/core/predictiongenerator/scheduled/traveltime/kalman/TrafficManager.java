@@ -117,11 +117,11 @@ public class TrafficManager {
       mapper.addTrafficPath(trafficPath);
       for (StopPath stopPath : trafficPath.getStopPaths()) {
         if (mapper.has(stopPath)){
-          throw new IllegalStateException("duplicate mapping "
-                  + stopPath.toString() + " to "
-                  + trafficPath.toString());
+          logger.info("ignoring duplicate stopPath {} to tripPath {} mapping",
+                  stopPath, trafficPath);
+        } else {
+          mapper.mapStopPath(stopPath, trafficPath);
         }
-        mapper.mapStopPath(stopPath, trafficPath);
       }
     }
 
@@ -149,11 +149,45 @@ public class TrafficManager {
     TrafficSensorData data = getTrafficSensorData(trafficPath);
     if (data == null) return null;
     if (data.getSpeed() == null) return null;
-    double speed = data.getSpeed();
-    // time = velocity * length
-    return new Double(stopPath.getLength() * speed).longValue();
+    // time = distance / velocity
+    return new Double(stopPath.getLength()
+                      / (data.getSpeed() / 2.23694)).longValue() * 1000;
   }
 
+  public TrafficSensorData getTrafficSensorDataForStopPath(StopPath stopPath) {
+    if (!isEnabled()) return null;
+    TrafficPath trafficPath = mapper.get(stopPath);
+    return getTrafficSensorData(trafficPath);
+  }
+
+  public Double getSpeed(StopPath stopPath) {
+    if (!isEnabled()) return null;
+    TrafficPath trafficPath = mapper.get(stopPath);
+    TrafficSensorData data = getTrafficSensorData(trafficPath);
+    if (data == null) return null;
+    return data.getSpeed();
+  }
+
+  /**
+   * estimated length of traffic sensor.
+   * @param stopPath
+   * @return
+   */
+  public Double getLength(StopPath stopPath) {
+    if (!isEnabled()) return null;
+    TrafficPath trafficPath = mapper.get(stopPath);
+    TrafficSensorData data = getTrafficSensorData(trafficPath);
+    if (data == null) return null;
+    return data.getLength();
+  }
+
+  public Integer getTotalTravelTime(StopPath stopPath) {
+    if (!isEnabled()) return null;
+    TrafficPath trafficPath = mapper.get(stopPath);
+    TrafficSensorData data = getTrafficSensorData(trafficPath);
+    if (data == null) return null;
+    return data.getTravelTimeMillis();
+  }
 
   private TrafficSensorData getTrafficSensorData(TrafficPath trafficPath) {
     if (!isEnabled()) return null;

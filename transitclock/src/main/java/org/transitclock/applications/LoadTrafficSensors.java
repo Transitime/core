@@ -42,10 +42,8 @@ import org.transitclock.traffic.TrafficWriter;
 import org.transitclock.utils.Geo;
 import org.transitclock.utils.JsonUtils;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -92,7 +90,7 @@ public class LoadTrafficSensors {
           DEFAULT_MIN_STOP_SEGMENT_LENGTH_FOR_GAP_CHECK,
           "Minimum number of segments in stop path to apply gap check algorithmn to");
 
-  private String getTrafficUrl() { return TRAFFIC_URL.getValue(); }
+  protected String getTrafficUrl() { return TRAFFIC_URL.getValue(); }
   private double getSnapTolerance() { return SNAP_TOLERANCE.getValue(); }
   private double getMinSnapScore() { return MIN_SNAP_SCORE.getValue();}
   private int getMaxGapSize() { return MAX_GAP_SIZE.getValue(); }
@@ -185,13 +183,17 @@ public class LoadTrafficSensors {
     fd.setLabel(label);
     fd.setId(externalId);
     fd.setFeatureGeometry(fg);
-    fd.setLength((float)calculateLength(fg));
+    fd.setLength((float) calculateLengthInMeters(fg));
     return fd;
   }
 
   // calculate the length of a shape
-  private double calculateLength(FeatureGeometry fg) {
+  double calculateLengthInMeters(FeatureGeometry fg) {
     Coordinate[] points = fg.getAsCoordinateArray();
+    return calculateLengthInMeters(points);
+  }
+
+  double calculateLengthInMeters(Coordinate[] points) {
     double length = 0.0;
     for (int i = 1; i< points.length; i++) {
       length += Geo.distanceHaversine(toLocation(points[i-1]),
@@ -217,7 +219,7 @@ public class LoadTrafficSensors {
   }
 
   // call out to webservice and parse into POJOs
-  private List<FeatureData> loadFeatureDataFromURL(String urlStr)
+  List<FeatureData> loadFeatureDataFromURL(String urlStr)
   throws Exception {
     List<FeatureData> elements = new ArrayList<>();
 

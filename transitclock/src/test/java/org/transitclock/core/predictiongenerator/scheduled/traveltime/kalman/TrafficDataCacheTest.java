@@ -46,7 +46,8 @@ public class TrafficDataCacheTest {
                     null,
                     null,
                     null,
-                null);
+                    null,
+                    null);
     assertTrue(cache.isLatent(oldElement));
 
     TrafficSensorData newElement
@@ -54,6 +55,7 @@ public class TrafficDataCacheTest {
             "1",
             -1,
             new Date(now),
+            null,
             null,
             null,
             null,

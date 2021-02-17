@@ -18,14 +18,18 @@ package org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.locationtech.jts.geom.Coordinate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.configData.CoreConfig;
+import org.transitclock.db.structs.Location;
 import org.transitclock.db.structs.TrafficPath;
 import org.transitclock.db.structs.TrafficSensorData;
+import org.transitclock.traffic.FeatureGeometry;
+import org.transitclock.utils.Geo;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.JsonUtils;
 import org.transitclock.utils.Time;
@@ -50,6 +54,11 @@ public class TrafficDataCache {
   private static final StringConfigValue TRAFFIC_URL
           = new StringConfigValue("transitclock.traffic.shapeUrl",
           "https://pulse-io.blyncsy.com/geoservices/project_route_data/rest/services/81/FeatureServer/0/query?f=json&returnGeometry=false",
+          "URL of traffic sensor shapes");
+
+  private static final StringConfigValue TRAFFIC_URL_WITH_FEATURES
+          = new StringConfigValue("transitclock.traffic.shapeUrl",
+          "https://pulse-io.blyncsy.com/geoservices/project_route_data/rest/services/81/FeatureServer/0/query?f=json&returnGeometry=true",
           "URL of traffic sensor shapes");
 
   private static final IntegerConfigValue MAX_TRAFFIC_LATENCY_MINUTES
@@ -167,8 +176,9 @@ public class TrafficDataCache {
     synchronized (trafficSensorDataCache) {
       updateCache(sensorData);
     }
-    logger.info("Traffic data cache update complete in {} msec",
-            updateTimer.elapsedMsec());
+    logger.info("Traffic data cache update complete in {} msec, total in {} msec",
+            updateTimer.elapsedMsec(),
+            loadTimer.elapsedMsec());
   }
 
   void updateCache(List<TrafficSensorData> sensorData) {
@@ -181,9 +191,6 @@ public class TrafficDataCache {
         cache(trafficPath, data);
       }
     }
-    logger.info("mapped {} traffic sensors of {}",
-            mapped,
-            sensorData.size());
   }
 
   /**
@@ -194,7 +201,7 @@ public class TrafficDataCache {
   List<TrafficSensorData> loadData() throws Exception {
     List<TrafficSensorData> elements = new ArrayList<>();
 
-    URL urlObj = new URL(TRAFFIC_URL.getValue());
+    URL urlObj = new URL(TRAFFIC_URL_WITH_FEATURES.getValue());
     URLConnection connection = urlObj.openConnection();
     InputStream in = connection.getInputStream();
     String jsonStr = JsonUtils.getJsonString(in);
@@ -209,7 +216,7 @@ public class TrafficDataCache {
         }
       } catch (Exception any) {
         try {
-          logger.warn("exception parsing feature {}", features.getJSONObject(i));
+          logger.warn("exception parsing feature {}, {}", features.getJSONObject(i), any, any);
         } catch (Exception bury) {}
       }
     }
@@ -232,6 +239,8 @@ public class TrafficDataCache {
     double delayMillis = a.getDouble("delaySeconds") * 1000;
     Integer travelTimeMillis = a.getInt("travelTime");
     double confidence = a.getDouble("confidence");
+    Coordinate[] shape = getShape(o.getJSONObject("geometry"));
+    Double length = getLength(shape);
     TrafficSensorData data = new TrafficSensorData(
             externalId,
             trafficRev,
@@ -239,9 +248,36 @@ public class TrafficDataCache {
             speed,
             delayMillis,
             confidence,
-            travelTimeMillis
+            travelTimeMillis,
+            length
     );
     return data;
+  }
+
+  private Double getLength(Coordinate[] points) {
+    double length = 0.0;
+    for (int i = 1; i< points.length; i++) {
+      length += Geo.distanceHaversine(toLocation(points[i-1]),
+              toLocation(points[i]));
+    }
+    return length;
+  }
+
+  private Location toLocation(Coordinate point) {
+    return new Location(point.x, point.y);
+  }
+
+  private Coordinate[] getShape(JSONObject geometry) {
+    List<Coordinate> list = new ArrayList<>();
+    JSONArray paths = geometry.getJSONArray("paths");
+    // we have an anonymous array -- we only support the first path
+    JSONArray perPaths = paths.getJSONArray(0);
+    FeatureGeometry fg = new FeatureGeometry();
+    for (int i = 0; i < perPaths.length(); i++) {
+      JSONArray coordinate = perPaths.getJSONArray(i);
+      list.add(new Coordinate(coordinate.getDouble(1), coordinate.getDouble(0)));
+    }
+    return list.toArray(new Coordinate[list.size()]);
   }
 
   private double toMetersPerSecond(double mph) {
