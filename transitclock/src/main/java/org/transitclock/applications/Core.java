@@ -498,7 +498,7 @@ public class Core {
 			// don't continue until caches are ready!
 			while (!pp.isDone()) {
 				try {
-					logger.info("waiting on caching to complete with {} in run queue, {} in wait queue ", pp.getRunQueueSize(), pp.getWaitQueueSize() );
+					logger.info("waiting on caching to complete with {} in run queue, {} in wait queue; {} running ", pp.getRunQueueSize(), pp.getWaitQueueSize(), pp.getDebugInfo() );
 					Thread.sleep(10 * 1000);
 				} catch (InterruptedException ie) {
 					return;

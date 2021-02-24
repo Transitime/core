@@ -41,6 +41,11 @@ public class CacheTask implements ParallelTask {
     }
 
     @Override
+    public String toString() {
+        return type.toString();
+    }
+
+    @Override
     public void run() throws Exception {
         Session session = null;
         try {
