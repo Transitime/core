@@ -22,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LineSegment;
 import org.locationtech.jts.operation.overlay.snap.LineStringSnapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -89,6 +92,7 @@ public class LoadTrafficSensors {
           = new IntegerConfigValue("transitclock.traffic.MinStopSegmentLengthForGapCheck",
           DEFAULT_MIN_STOP_SEGMENT_LENGTH_FOR_GAP_CHECK,
           "Minimum number of segments in stop path to apply gap check algorithmn to");
+  private static final int MAX_OPPOSING_DEGREES = 120;
 
   protected String getTrafficUrl() { return TRAFFIC_URL.getValue(); }
   private double getSnapTolerance() { return SNAP_TOLERANCE.getValue(); }
@@ -115,6 +119,8 @@ public class LoadTrafficSensors {
   private double highScore = -1.0;
   // count of most stopPats attached to a single traffic sensor
   private int mostMatches = 0;
+  // track stop paths to traffic paths independent of shape
+  private Set<String> hashOfJoins = new HashSet<>();
 
   /**
    * public entry point into object.
@@ -313,6 +319,7 @@ public class LoadTrafficSensors {
     Coordinate[] sensorLineString = toLineString(fd);
     // LineStringSnapper from JTS helps us with the GIS snapping
     LineStringSnapper snapper = new LineStringSnapper(sensorLineString, getSnapTolerance());
+    int sensorBearing = getBearing(sensorLineString);
 
     // check all stop paths against this feature
     for (StopPath sp : allStopPaths) {
@@ -346,7 +353,8 @@ public class LoadTrafficSensors {
                   score, fd.getLabel(), sp.getId());
           highScore = score;
         }
-        if (score > getMinSnapScore()) {
+        int stopPathBearing = getBearing(stopPathLineString);
+        if (score > getMinSnapScore() && Math.abs(sensorBearing - stopPathBearing) < MAX_OPPOSING_DEGREES) {
           logger.info("match score {} for sensor {} to stop path {}",
                   score, fd.getLabel(), sp.getId());
           if (logger.isDebugEnabled()) {
@@ -380,6 +388,18 @@ public class LoadTrafficSensors {
     return highScore;
   }
 
+  private int getBearing(Coordinate[] stopPathLineString) {
+    if (stopPathLineString.length < 2) return 0;
+    int j = stopPathLineString.length -1;
+    LineSegment lastSegment = new LineSegment(stopPathLineString[0].x,
+            stopPathLineString[0].y,
+            stopPathLineString[j].x,
+            stopPathLineString[j].y);
+
+    return (int) (lastSegment.angle() * (180/Math.PI));
+
+  }
+
   /**
    * Often route shapes contain the stops they pass by. Remove them from the
    * match as they are "noise".
@@ -396,6 +416,10 @@ public class LoadTrafficSensors {
       }
     }
     return filtered.toArray(new Coordinate[filtered.size()]);
+  }
+
+  private void debugJoin(TrafficPath tp, StopPath sp) {
+    debugLink(toLineString(tp), toLineString(sp), null);
   }
 
   /**
@@ -551,6 +575,15 @@ public class LoadTrafficSensors {
     return fd.getFeatureGeometry().getAsCoordinateArray();
   }
 
+  Coordinate[] toLineString(TrafficPath tp) {
+    ArrayList<Coordinate> list = new ArrayList<>();
+
+    for (Location l : tp.getLocations()) {
+      list.add(new Coordinate(l.getLat(), l.getLon()));
+    }
+    return list.toArray(new Coordinate[list.size()]);
+  }
+
   Coordinate[] toLineString(StopPath sp) {
     ArrayList<Coordinate> list = new ArrayList<>();
 
@@ -610,22 +643,37 @@ public class LoadTrafficSensors {
 
     tp.setLocations(new ArrayList());
 
-    for (StopPath sp : fd.getStopPaths()) {
-      joinStopPathToTrafficPath(tp, sp);
-    }
     for (Coordinate c :fd.getFeatureGeometry().getAsCoordinateArray()) {
       tp.getLocations().add(new Location(c.x, c.y));
     }
+
+    for (StopPath sp : fd.getStopPaths()) {
+      joinStopPathToTrafficPath(tp, sp);
+    }
+
     return tp;
   }
 
+
   private void joinStopPathToTrafficPath(TrafficPath tp, StopPath sp) {
+    String hash = hash(tp, sp);
+    if (!hashOfJoins.contains(hash)) {
+      debugJoin(tp, sp);
+      hashOfJoins.add(hash);
+  }
     logger.info("joining {}:{} to {}:{}:{}",
             tp.getTrafficPathId(), tp.getTrafficRev(),
             sp.getTripPatternId(),
             sp.getId(),
             sp.getConfigRev());
     tp.getStopPaths().add(sp);
+  }
+
+  private String hash(TrafficPath tp, StopPath sp) {
+    return tp.getTrafficPathId() + "."
+            + tp.getTrafficRev() + "."
+            + sp.getId() + "."
+            + sp.getConfigRev();
   }
 
   private TrafficSensor createTrafficSensor(FeatureData featureData, TrafficPath trafficPath) {
