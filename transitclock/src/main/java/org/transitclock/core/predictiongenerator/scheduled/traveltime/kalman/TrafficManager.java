@@ -211,11 +211,16 @@ public class TrafficManager {
  * load data on startup populating internal caches.
  */
   public void populateCacheFromDb(Session session, Date startDate, Date endDate) {
-    Iterator<TrafficSensorData> iterator
-            = TrafficSensorData.getTrafficSensorDataIteratorFromDb(
-                    session, startDate, endDate);
 
+    List<TrafficSensorData> list = TrafficSensorData.getTrafficSensorDataFromDb(session, startDate, endDate);
+    Iterator<TrafficSensorData> iterator = list.iterator();
+
+    int i = 0;
     while (iterator.hasNext()) {
+      i++;
+      if (i % 1000 == 0) {
+        logger.info("loaded {} traffic sensors for {}", i, startDate);
+      }
       TrafficSensorData element = iterator.next();
       historicalCache.put(element);
     }

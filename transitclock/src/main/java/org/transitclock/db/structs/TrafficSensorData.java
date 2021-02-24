@@ -27,6 +27,7 @@ import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Represents one sample of traffic data from a single traffic sensor.
@@ -144,9 +145,19 @@ public class TrafficSensorData implements Serializable {
     Query query = session.createQuery(hql);
     query.setTimestamp("beginDate", startDate);
     query.setTimestamp("endDate", endDate);
-
+    //iterator performance on mysql is poor!
     return query.iterate();
   }
 
+  public static List<TrafficSensorData> getTrafficSensorDataFromDb(Session session, Date startDate, Date endDate) {
+    String hql = "FROM TrafficSensorData " +
+            " WHERE time >= :beginDate " +
+            " AND time < :endDate";
+    Query query = session.createQuery(hql);
+    query.setTimestamp("beginDate", startDate);
+    query.setTimestamp("endDate", endDate);
+
+    return query.list();
+  }
 
 }
