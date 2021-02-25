@@ -50,7 +50,7 @@ public class TrafficSensorData implements Serializable {
   private final Date time;
 
   @Column
-  private Double speed;
+  private Double speed; // in meters per second!
 
   @Column
   private Double delayMillis;
@@ -113,6 +113,11 @@ public class TrafficSensorData implements Serializable {
   }
 
   public String getTrafficSensorId() { return trafficSensorId; }
+
+  /**
+   * speed in meters per second.
+   * @return
+   */
   public Double getSpeed() {
     return speed;
   }

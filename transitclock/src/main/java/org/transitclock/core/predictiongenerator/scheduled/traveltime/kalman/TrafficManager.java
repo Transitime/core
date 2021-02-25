@@ -149,9 +149,9 @@ public class TrafficManager {
     TrafficSensorData data = getTrafficSensorData(trafficPath);
     if (data == null) return null;
     if (data.getSpeed() == null) return null;
-    // time = distance / velocity
+    // time = distance(m) / velocity (m/s)
     return new Double(stopPath.getLength()
-                      / (data.getSpeed() / 2.23694)).longValue() * 1000;
+                      / data.getSpeed()).longValue() * 1000;
   }
 
   public TrafficSensorData getTrafficSensorDataForStopPath(StopPath stopPath) {

@@ -261,7 +261,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
       TrafficSensorData sensorData = TrafficManager.getInstance().getTrafficSensorDataForStopPath(indices.getStopPath());
       double length = indices.getStopPath().getLength();
       long busTravelTime = lastDaysTimes.get(0).getTravelTime();
-      Double trafficSpeedInMPH = sensorData.getSpeed();
+      Double trafficSpeedInMPH = sensorData.getSpeed() * 2.237  /* m/s to mph */;
       Double busSpeedInMPH = length / busTravelTime * 1000 * 2.237  /* m/s to mph */;
 
       if (trafficTravelTime != null && trafficTravelTime > 0) {
