@@ -12,7 +12,8 @@ String agencyId = request.getParameter("a");
 // Note that can specify multiple routes.
 String stopIds[] = request.getParameterValues("s");
 String routeIds[] = request.getParameterValues("r");
-String titleRoutes = "";
+String titleRoutes = request.getParameter("t");
+if (titleRoutes == null) titleRoutes = "";
 if (routeIds != null && !routeIds[0].isEmpty()) {
     titleRoutes += ", route ";
     if (routeIds.length > 1) 
@@ -131,7 +132,7 @@ function getDataTable() {
      // When there is an AJAX problem alert the user
      error: function(request, status, error) {
         console.log(request.responseText)
-        var msg = $("<p>").html("<br>No data for requested parameters. Hit back button to try other parameters.")
+        var msg = $("<p>").html("<br>No data for requested parameters. Hit back button to try other parameters.\n\n" + request.responseText);
      	$("#errorMessage").append(msg);
         $("#errorMessage").fadeIn("slow");
        },
@@ -210,7 +211,7 @@ function getDataAndDrawChart() {
     getDataTable();
     if (globalDataTable != null) {
 		drawChart();
-		//showSummary();
+		showSummary();
     }
 	
     // Now that chart has been drawn faceout the loading image
