@@ -37,7 +37,7 @@ public class TrafficManager {
 
   public static final BooleanConfigValue trafficDataEnabled
           = new BooleanConfigValue("transitclock.traffic.enabled",
-          true,
+          false,
           "Enable Traffic Data integration");
 
   private static final Logger logger =
