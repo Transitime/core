@@ -35,7 +35,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.jooq.tools.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.transitclock.api.data.ApiActiveBlocks;
 import org.transitclock.api.data.ApiActiveBlocksRoutes;
 import org.transitclock.api.data.ApiAdherenceSummary;
