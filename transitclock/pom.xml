@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>TheTransitClock</groupId>
 		<artifactId>transitclock</artifactId>
-		<version>2.0.48-traffic-SNAPSHOT</version>
+		<version>2.0.48-cs-SNAPSHOT</version>
 	</parent>
 	<artifactId>transitclockCore</artifactId>
 	<name>transitclockCore</name>
@@ -32,12 +32,12 @@
 		<dependency>
 			<groupId>TheTransitClock</groupId>
 			<artifactId>transitclockBarefootClient</artifactId>
-			<version>2.0.48-traffic-SNAPSHOT</version>
+			<version>2.0.48-cs-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>TheTransitClock</groupId>
 			<artifactId>transitclockTraccarClient</artifactId>
-			<version>2.0.48-traffic-SNAPSHOT</version>
+			<version>2.0.48-cs-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.esri.geometry</groupId>
@@ -186,6 +186,12 @@
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
 			<version>1.9.2</version>
+		</dependency>
+		<!-- for calculating shape snapping of traffic data -->
+		<dependency>
+			<groupId>org.locationtech.jts</groupId>
+			<artifactId>jts-core</artifactId>
+			<version>1.18.0</version>
 		</dependency>
 		<!-- JUnit testing of course -->
 		<dependency>

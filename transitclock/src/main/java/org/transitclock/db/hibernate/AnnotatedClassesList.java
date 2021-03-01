@@ -80,6 +80,10 @@ public class AnnotatedClassesList {
 		// For website
 		ApiKey.class,
 		WebAgency.class,
+		// for traffic data
+		TrafficSensor.class,
+		TrafficPath.class,
+		TrafficSensorData.class
 	};
 	
 	/********************** Member Functions **************************/
