@@ -8,18 +8,15 @@ import org.transitclock.core.travelTimes.TravelTimesProcessor;
 import org.transitclock.db.query.ArrivalDepartureQuery;
 import org.transitclock.db.query.TripQuery;
 import org.transitclock.db.structs.*;
-import org.transitclock.exceptions.InvalidRouteException;
 import org.transitclock.ipc.data.IpcRunTimeForStopPath;
 import org.transitclock.reporting.keys.StopPathRunTimeKey;
 import org.transitclock.reporting.StopPathStatistics;
 import org.transitclock.reporting.TripStatistics;
-import org.transitclock.reporting.TripStatisticsForConfigRev;
 import org.transitclock.ipc.data.IpcDoubleSummaryStatistics;
 import org.transitclock.ipc.data.IpcRunTime;
 import org.transitclock.ipc.data.IpcRunTimeForTrip;
 import org.transitclock.reporting.keys.ArrivalDepartureTripKey;
 import org.transitclock.reporting.keys.TripDateKey;
-import org.transitclock.utils.IntervalTimer;
 
 import java.time.*;
 import java.util.*;
