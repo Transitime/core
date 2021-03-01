@@ -192,7 +192,7 @@ public class PredictionAccuracyModuleTest {
         for(int i=indexStart; i < indexStart + numberOfStops; i++){
             stopPaths.add(new StopPath(-1, null, Integer.toString(i), i, false, routeId,
                     false, false, false, null, null,
-                    null, null));
+                    null));
         }
         return stopPaths;
     }
