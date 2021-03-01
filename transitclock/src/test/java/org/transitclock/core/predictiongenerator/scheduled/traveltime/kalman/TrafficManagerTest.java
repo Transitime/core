@@ -17,6 +17,7 @@
 package org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.transitclock.db.structs.Location;
 import org.transitclock.db.structs.StopPath;
@@ -51,6 +52,7 @@ public class TrafficManagerTest {
   }
 
   @Test
+  @Ignore // run this only if integrating with traffic data
   public void loadData() throws Exception {
     List<TrafficSensorData> sensorData = cache.loadData();
     assertNotNull(sensorData);
@@ -61,6 +63,7 @@ public class TrafficManagerTest {
   }
 
   @Test
+  @Ignore
   public void getTravelTime() throws Exception {
     Long travelTime = tm.getTravelTime(null);
     assertNull(travelTime);
