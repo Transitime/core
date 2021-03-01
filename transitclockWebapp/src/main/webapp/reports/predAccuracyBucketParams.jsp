@@ -22,8 +22,9 @@
 <div id="mainDiv">
 <form action="predAccuracyBucketChart.jsp" method="POST">
    <%-- For passing agency param to the report --%>
-   <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
-   
+   <input type="hidden" name="a" value="<%= request.getParameter("a")%>" />
+   <input type="hidden" name="numDays" value="1" />
+
    <jsp:include page="params/routeMultiple.jsp" />
 
    <jsp:include page="params/fromDateNumDaysTime.jsp" />

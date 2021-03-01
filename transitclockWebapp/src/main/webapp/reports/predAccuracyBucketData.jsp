@@ -11,6 +11,7 @@
 
 	String beginDate = request.getParameter("beginDate");
     String numDays = request.getParameter("numDays");
+    if (numDays == null) numDays = "1";
     String beginTime = request.getParameter("beginTime");
     String endTime = request.getParameter("endTime");
 
@@ -89,12 +90,12 @@
 		}
 	}
 
-    if (agencyId == null || beginDate == null || numDays == null ) {
-		response.getWriter().write("For predAccuracyRangeData.jsp must "
-			+ "specify parameters 'a' (agencyId), 'beginDate', "
-			+ "and 'numDays'."); 
+	if (agencyId == null || beginDate == null || numDays == null ) {
+		response.getWriter().write("For predAccuracyBucketData.jsp must "
+				+ "specify parameters 'a' (agencyId=" +  agencyId + "), 'beginDate' (" + beginDate + ") , "
+				+ "and 'numDays' (" + numDays + ") + .");
 		return;
-    }
+	}
 	
 	// Make sure not trying to get data for too long of a time span since
 	// that could bog down the database.
