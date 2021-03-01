@@ -2,9 +2,9 @@ package org.transitclock.guice.modules;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
-import org.transitclock.ipc.servers.reporting.service.OnTimePerformanceService;
-import org.transitclock.ipc.servers.reporting.service.RunTimeService;
-import org.transitclock.ipc.servers.reporting.service.SpeedMapService;
+import org.transitclock.reporting.service.OnTimePerformanceService;
+import org.transitclock.reporting.service.RunTimeService;
+import org.transitclock.reporting.service.SpeedMapService;
 
 public class ReportingModule extends AbstractModule {
     @Override

@@ -4,6 +4,8 @@ import org.transitclock.core.ServiceType;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.Set;
 
 public class ArrivalDepartureQuery {
     private LocalDate beginDate;
@@ -14,6 +16,8 @@ public class ArrivalDepartureQuery {
     private String headsign;
     private String startStop;
     private String endStop;
+    private String tripPatternId;
+    private Set<String> tripIds;
     private ServiceType serviceType;
     private boolean timePointsOnly;
     private boolean scheduledTimesOnly;
@@ -32,6 +36,8 @@ public class ArrivalDepartureQuery {
         this.headsign = builder.headsign;
         this.startStop = builder.startStop;
         this.endStop = builder.endStop;
+        this.tripPatternId = builder.tripPatternId;
+        this.tripIds = builder.tripIds;
         this.serviceType = builder.serviceType;
         this.timePointsOnly = builder.timePointsOnly;
         this.scheduledTimesOnly = builder.scheduledTimesOnly;
@@ -46,128 +52,72 @@ public class ArrivalDepartureQuery {
         return beginDate;
     }
 
-    public void setBeginDate(LocalDate beginDate) {
-        this.beginDate = beginDate;
-    }
-
     public LocalDate getEndDate() {
         return endDate;
-    }
-
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
     }
 
     public LocalTime getBeginTime() {
         return beginTime;
     }
 
-    public void setBeginTime(LocalTime beginTime) {
-        this.beginTime = beginTime;
-    }
-
     public LocalTime getEndTime() {
         return endTime;
-    }
-
-    public void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
     }
 
     public String getRouteShortName() {
         return routeShortName;
     }
 
-    public void setRouteShortName(String routeShortName) {
-        this.routeShortName = routeShortName;
-    }
-
     public String getHeadsign() {
         return headsign;
-    }
-
-    public void setHeadsign(String headsign) {
-        this.headsign = headsign;
     }
 
     public String getStartStop() {
         return startStop;
     }
 
-    public void setStartStop(String startStop) {
-        this.startStop = startStop;
-    }
-
     public String getEndStop() {
         return endStop;
     }
 
-    public void setEndStop(String endStop) {
-        this.endStop = endStop;
+    public String getTripPatternId() {
+        return tripPatternId;
+    }
+
+    public Set<String> getTripIds() {
+        return tripIds;
     }
 
     public ServiceType getServiceType() {
         return serviceType;
     }
 
-    public void setServiceType(ServiceType serviceType) {
-        this.serviceType = serviceType;
-    }
-
     public boolean isTimePointsOnly() {
         return timePointsOnly;
-    }
-
-    public void setTimePointsOnly(boolean timePointsOnly) {
-        this.timePointsOnly = timePointsOnly;
     }
 
     public boolean isScheduledTimesOnly() {
         return scheduledTimesOnly;
     }
 
-    public void setScheduledTimesOnly(boolean scheduledTimesOnly) {
-        this.scheduledTimesOnly = scheduledTimesOnly;
-    }
-
     public boolean isDwellTimeOnly() {
         return dwellTimeOnly;
-    }
-
-    public void setDwellTimeOnly(boolean dwellTimeOnly) {
-        this.dwellTimeOnly = dwellTimeOnly;
     }
 
     public boolean isIncludeTrip() {
         return includeTrip;
     }
 
-    public void setIncludeTrip(boolean includeTrip) {
-        this.includeTrip = includeTrip;
-    }
-
     public boolean isIncludeStop() {
         return includeStop;
-    }
-
-    public void setIncludeStop(boolean includeStop) {
-        this.includeStop = includeStop;
     }
 
     public boolean isIncludeStopPath() {
         return includeStopPath;
     }
 
-    public void setIncludeStopPath(boolean includeStopPath) {
-        this.includeStopPath = includeStopPath;
-    }
-
     public boolean isReadOnly() {
         return readOnly;
-    }
-
-    public void setReadOnly(boolean readOnly) {
-        this.readOnly = readOnly;
     }
 
     public static class Builder{
@@ -180,6 +130,8 @@ public class ArrivalDepartureQuery {
         private String headsign;
         private String startStop;
         private String endStop;
+        private String tripPatternId;
+        private Set<String> tripIds;
         private ServiceType serviceType;
         private boolean timePointsOnly = false;
         private boolean scheduledTimesOnly = false;
@@ -228,6 +180,16 @@ public class ArrivalDepartureQuery {
 
         public Builder endStop(String endStop) {
             this.endStop = endStop;
+            return this;
+        }
+
+        public Builder tripPatternId(String tripPatternId){
+            this.tripPatternId = tripPatternId;
+            return this;
+        }
+
+        public Builder tripIds(Set<String> tripIds){
+            this.tripIds = tripIds;
             return this;
         }
 

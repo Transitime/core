@@ -1013,7 +1013,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 					"WHERE " +
 					getArrivalDepartureTimeWhere(beginDate, endDate, beginTime, endTime) +
 					getRouteWhere(routeShortName) +
-					getTripPatternWhere(startStop, endStop) +
+					getTripPatternWhere(null) +
 					getScheduledTimesWhere(scheduledTimesOnly) +
 					getTimePointsWhere(timePointsOnly) +
 					getServiceTypeWhere(serviceType) +
@@ -1073,7 +1073,8 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 				"WHERE " +
 				getArrivalDepartureTimeWhere(adQuery.getBeginDate(), adQuery.getEndDate(), adQuery.getBeginTime(), adQuery.getEndTime()) +
 				getRouteWhere(adQuery.getRouteShortName()) +
-				getTripPatternWhere(adQuery.getStartStop(), adQuery.getEndStop()) +
+				getTripPatternWhere(adQuery.getTripPatternId()) +
+				getTripIdsWhere(adQuery.getTripIds()) +
 				getScheduledTimesWhere(adQuery.isScheduledTimesOnly()) +
 				getTimePointsWhere(adQuery.isTimePointsOnly()) +
 				getServiceTypeWhere(adQuery.getServiceType()) +
@@ -1085,6 +1086,9 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 
 		try {
 			Query query = session.createQuery(hql);
+			if(adQuery.getTripIds() != null) {
+				query.setParameterList("tripIds", adQuery.getTripIds());
+			}
 
 			List<ArrivalDeparture> results = query.list();
 
@@ -1156,26 +1160,40 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	public static String getArrivalDepartureTimeWhere(LocalDate beginDate, LocalDate endDate, LocalTime beginTime, LocalTime endTime) {
 		String hql = "";
 
-		List<LocalDate> dates = new ArrayList<>();
-		while (!beginDate.isAfter(endDate)) {
-			dates.add(beginDate);
-			beginDate = beginDate.plusDays(1);
-		}
-
-		for(int i=0; i < dates.size(); i++){
-			if(i == 0){
-				hql += " (";
-
-			} else {
-				hql += " OR ";
+		if(beginTime != null && endTime != null) {
+			List<LocalDate> dates = new ArrayList<>();
+			while (!beginDate.isAfter(endDate)) {
+				dates.add(beginDate);
+				beginDate = beginDate.plusDays(1);
 			}
-			LocalDateTime startDateTime = LocalDateTime.of(dates.get(i), beginTime);
-			LocalDateTime endDateTime = LocalDateTime.of(dates.get(i), endTime);
+
+			for (int i = 0; i < dates.size(); i++) {
+				if (i == 0) {
+					hql += " (";
+
+				} else {
+					hql += " OR ";
+				}
+				LocalDateTime startDateTime = LocalDateTime.of(dates.get(i), beginTime);
+				LocalDateTime endDateTime = LocalDateTime.of(dates.get(i), endTime);
+				hql += String.format(" ad.time between '%s' AND '%s' ",
+						startDateTime.format(isoDateTimeFormat), endDateTime.format(isoDateTimeFormat));
+				if (i == dates.size() - 1) {
+					hql += ") ";
+				}
+			}
+		}
+		else if(!beginDate.isAfter(endDate)) {
+			LocalDateTime startDateTime = beginDate.atStartOfDay();
+			LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
 			hql += String.format(" ad.time between '%s' AND '%s' ",
 					startDateTime.format(isoDateTimeFormat), endDateTime.format(isoDateTimeFormat));
-			if(i == dates.size() -1){
-				hql += ") ";
-			}
+		}
+		else{
+			LocalDateTime startDateTime = beginDate.atStartOfDay();
+			LocalDateTime endDateTime = beginDate.atTime(LocalTime.MAX);
+			hql += String.format(" ad.time between '%s' AND '%s' ",
+					startDateTime.format(isoDateTimeFormat), endDateTime.format(isoDateTimeFormat));
 		}
 		return hql;
 	}
@@ -1187,9 +1205,16 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		return "";
 	}
 
-	private static String getTripPatternWhere(String startStop, String endStop){
-		if(StringUtils.isNotBlank(startStop) && StringUtils.isNotBlank(endStop)) {
-			return String.format("AND ad.tripPatternId LIKE 'shape_%%_%s_to_%s_%%' ", startStop, endStop);
+	private static String getTripPatternWhere(String tripPatternId){
+		if(StringUtils.isNotBlank(tripPatternId)) {
+			return String.format("AND ad.tripPatternId = '%s' ", tripPatternId);
+		}
+		return "";
+	}
+
+	private static String getTripIdsWhere(Set<String> tripIds){
+		if(tripIds != null) {
+			return "AND ad.tripId IN (:tripIds)";
 		}
 		return "";
 	}

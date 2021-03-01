@@ -1,4 +1,4 @@
-package org.transitclock.ipc.servers.reporting.service;
+package org.transitclock.reporting.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,7 +6,6 @@ import org.transitclock.core.ServiceType;
 import org.transitclock.db.query.ArrivalDepartureQuery;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.ipc.data.IpcArrivalDepartureScheduleAdherence;
-import org.transitclock.utils.IntervalTimer;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

@@ -76,77 +76,25 @@ public class HibernateUtils {
 				dbName);
 		
 		// Create a Hibernate configuration based on customized config file
-		Configuration config = new Configuration();
-		
-		// Want to be able to specify a configuration file for now
-		// since developing in Eclipse and want all config files
-		// to be in same place. But the Config.configure(String) 
-		// method can't seem to work with a Windows directory name such
-		// as C:/users/Mike/software/hibernate.cfg.xml . Therefore create
-		// a File object for that file name and pass in the File object
-		// to configure().
-		String fileName = DbSetupConfig.getHibernateConfigFileName();
-		logger.info("Configuring Hibernate for dbName={} using config file={}",
-				dbName, fileName);
-		File f = new File(fileName);
-		if (!f.exists()) {
-			logger.info("The Hibernate file {} doesn't exist as a regular file "
-					+ "so seeing if it is in classpath.", fileName);
-			
-			// Couldn't find file directly so look in classpath for it
-			ClassLoader classLoader = HibernateUtils.class.getClassLoader();
-			URL url = classLoader.getResource(fileName);
-			if (url != null)
-				f = new File(url.getFile());
-		}
-		if (f.exists())
-			config.configure(f);
-		else {
-			logger.error("Could not load in hibernate config file {}", fileName);
-		}
+		Configuration config = getConfiguration(dbName);
 		
 		// Add the annotated classes so that they can be used
 		AnnotatedClassesList.addAnnotatedClasses(config);
 
-		// Set the db info for the URL, user name, and password. Uses the 
-		// property hibernate.connection.url if it is set so that everything
-		// can be overwritten in a standard way. If that property not set then
-		// uses values from DbSetupConfig if set. If they are not set then the 
-		// values will be obtained from the hibernate.cfg.xml config file.
-		String dbUrl = config.getProperty("hibernate.connection.url");
-		if (readOnly) {
-			dbUrl = config.getProperty("hibernate.ro.connection.url");
-			// override the configured url so its picked up by the driver
+		String dbUrl = getDbUrl(config, dbName, readOnly);
+		if(dbUrl != null) {
 			config.setProperty("hibernate.connection.url", dbUrl);
-			logger.info("using read only connection url {}", dbUrl);
 		}
-		if (dbUrl == null || dbUrl.isEmpty()) {
-			dbUrl = "jdbc:" + DbSetupConfig.getDbType() + "://" +
-					DbSetupConfig.getDbHost() +
-					"/" + dbName;
-			
-			// If socket timeout specified then add that to the URL
-			Integer timeout = DbSetupConfig.getSocketTimeoutSec();
-			if (timeout != null && timeout != 0) {
-				// If mysql then timeout specified in msec instead of secs
-				if (DbSetupConfig.getDbType().equals("mysql"))
-					timeout *= 1000;
-				
-				dbUrl += "?connectTimeout=" + timeout + "&socketTimeout=" + timeout;
-			}
-			config.setProperty("hibernate.connection.url", dbUrl);			
+
+		String dbUserName = getDbUser(config);
+		if(dbUserName != null) {
+			config.setProperty("hibernate.connection.username", dbUserName);
 		}
-		
-		String dbUserName = DbSetupConfig.getDbUserName();
-		if (dbUserName != null) {
-			config.setProperty("hibernate.connection.username",	dbUserName);
-		} else {
-			dbUserName = config.getProperty("hibernate.connection.username");
+
+		String dbPassword = getDbPassword();
+		if (dbPassword != null) {
+			config.setProperty("hibernate.connection.password", dbPassword);
 		}
-		
-		if (DbSetupConfig.getDbPassword() != null)
-			config.setProperty("hibernate.connection.password", 
-					DbSetupConfig.getDbPassword());
 		
 		// Log info, but don't log password. This can just be debug logging
 		// even though it is important because the C3P0 connector logs the info.
@@ -163,6 +111,99 @@ public class HibernateUtils {
 		// Return the factory
 		return sessionFactory;
 	}
+
+	public static Configuration getConfiguration(String dbName){
+		// Create a Hibernate configuration based on customized config file
+		Configuration config = new Configuration();
+
+		// Want to be able to specify a configuration file for now
+		// since developing in Eclipse and want all config files
+		// to be in same place. But the Config.configure(String)
+		// method can't seem to work with a Windows directory name such
+		// as C:/hibernate.cfg.xml . Therefore create
+		// a File object for that file name and pass in the File object
+		// to configure().
+		String fileName = DbSetupConfig.getHibernateConfigFileName();
+		logger.info("Configuring Hibernate for dbName={} using config file={}", dbName, fileName);
+
+		File f = new File(fileName);
+		if (!f.exists()) {
+			logger.info("The Hibernate file {} doesn't exist as a regular file so seeing if it is in classpath.", fileName);
+
+			// Couldn't find file directly so look in classpath for it
+			ClassLoader classLoader = HibernateUtils.class.getClassLoader();
+			URL url = classLoader.getResource(fileName);
+			if (url != null)
+				f = new File(url.getFile());
+		}
+		if (f.exists())
+			config.configure(f);
+		else {
+			logger.error("Could not load in hibernate config file {}", fileName);
+		}
+
+		return config;
+	}
+
+	public static String getDbName(){
+		return DbSetupConfig.getDbName();
+	}
+
+	/**
+	 * Get the db info for the URL, user name, and password. Uses the
+	 * property hibernate.connection.url if it is set so that everything
+	 * can be overwritten in a standard way. If that property not set then
+	 * uses values from DbSetupConfig if set. If they are not set then the
+	 * values will be obtained from the hibernate.cfg.xml config file.
+	 *
+	 * @param config
+	 * @param dbName
+	 * @param readOnly
+	 * @return
+	 */
+	public static String getDbUrl(Configuration config, String dbName, boolean readOnly){
+
+		String dbUrl = config.getProperty("hibernate.connection.url");
+		if (readOnly && config.getProperty("hibernate.ro.connection.url") != null) {
+			dbUrl = config.getProperty("hibernate.ro.connection.url");
+			// override the configured url so its picked up by the driver
+			config.setProperty("hibernate.connection.url", dbUrl);
+			logger.info("using read only connection url {}", dbUrl);
+		}
+		if (dbUrl == null || dbUrl.isEmpty()) {
+			dbUrl = "jdbc:" + DbSetupConfig.getDbType() + "://" +
+					DbSetupConfig.getDbHost() +
+					"/" + dbName;
+
+			// If socket timeout specified then add that to the URL
+			Integer timeout = DbSetupConfig.getSocketTimeoutSec();
+			if (timeout != null && timeout != 0) {
+				// If mysql then timeout specified in msec instead of secs
+				if (DbSetupConfig.getDbType().equals("mysql"))
+					timeout *= 1000;
+
+				dbUrl += "?connectTimeout=" + timeout + "&socketTimeout=" + timeout;
+			}
+		}
+		return dbUrl;
+	}
+
+	public static String getDbUser(Configuration config){
+		String dbUserName = DbSetupConfig.getDbUserName();
+		if (dbUserName == null) {
+			dbUserName = config.getProperty("hibernate.connection.username");
+		}
+		return dbUserName;
+	}
+
+	public static String getDbPassword(){
+		return DbSetupConfig.getDbPassword();
+	}
+
+	public static String getDbType(){
+		return DbSetupConfig.getDbType();
+	}
+
 	
 	/**
 	 * Returns a cached Hibernate SessionFactory. Returns null if there is a

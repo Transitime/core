@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 import org.transitclock.db.hibernate.HibernateUtils;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
@@ -55,6 +57,8 @@ public class ConfigRevision {
 	
 	@Column(length=512)
 	private final String notes;
+
+	private static DateTimeFormatter isoDateTimeFormat = DateTimeFormatter.ISO_DATE_TIME;
 
 	// Logging
 	public static final Logger logger = 
@@ -142,6 +146,43 @@ public class ConfigRevision {
 	public static List<ConfigRevision> getConfigRevisions(Session session, int configRev) throws HibernateException {
 		String hql = "From ConfigRevision c ORDER by configRev";
 		Query query = session.createQuery(hql);
+		return query.list();
+	}
+
+	public static List<ConfigRevision> getConfigRevisionsForDateRange(LocalDateTime startTime,
+																	  LocalDateTime endTime,
+																	  boolean readOnly) throws HibernateException {
+
+
+		String hql = "FROM ConfigRevision c " +
+				     "WHERE c.processedTime between " +
+					 "(" +
+					 	"SELECT MAX(c2.procssedTime) " +
+						"FROM ConfigRevision c2 " +
+						"WHERE c2.processedTime < :start " +
+					 ") " +
+					 "AND :end " +
+					 "ORDER BY c.processedTime DESC";
+
+		Session session = HibernateUtils.getSession(readOnly);
+		Query query = session.createQuery(hql);
+		query.setParameter("start", startTime);
+		query.setParameter("end", endTime);
+		return query.list();
+	}
+
+	public static List<ConfigRevision> getConfigRevisionsForMaxDate( LocalDateTime endTime,
+																	 boolean readOnly) throws HibernateException {
+
+
+		String hql = "FROM ConfigRevision c " +
+				"WHERE c.processedTime < :end " +
+				"ORDER BY c.processedTime DESC";
+
+		Session session = HibernateUtils.getSession(readOnly);
+		Query query = session.createQuery(hql);
+		query.setParameter("end", java.sql.Timestamp.valueOf(endTime));
+		query.setMaxResults(1);
 		return query.list();
 	}
 

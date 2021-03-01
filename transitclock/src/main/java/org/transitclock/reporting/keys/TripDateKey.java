@@ -1,4 +1,4 @@
-package org.transitclock.ipc.servers.reporting.keys;
+package org.transitclock.reporting.keys;
 
 import com.google.common.base.Objects;
 

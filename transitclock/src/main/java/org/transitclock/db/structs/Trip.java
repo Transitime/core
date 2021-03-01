@@ -22,6 +22,7 @@ import java.util.*;
 
 import javax.persistence.*;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.CallbackException;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -36,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.db.hibernate.HibernateUtils;
+import org.transitclock.db.query.TripQuery;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.gtfs.TitleFormatter;
 import org.transitclock.gtfs.gtfsStructs.GtfsTrip;
@@ -1194,11 +1196,11 @@ public class Trip implements Lifecycle, Serializable {
     return count;
   }
 
-	public static List<Trip> getTripsFromDb(String routeShortName, String headsign, Set<Integer> configRevs, boolean readOnly) {
+	public static List<Trip> getTripsFromDb(TripQuery tripQuery) {
 		IntervalTimer timer = new IntervalTimer();
 
 		// Get the database session. This is supposed to be pretty light weight
-		Session session = HibernateUtils.getSession(readOnly);
+		Session session = HibernateUtils.getSession(tripQuery.isReadOnly());
 
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.
@@ -1208,14 +1210,15 @@ public class Trip implements Lifecycle, Serializable {
 				"FROM " +
 				"Trip t " +
 				"WHERE t.routeShortName = :routeShortName " +
-				"AND t.headsign = :headsign " +
 				"AND t.configRev IN (:configRevs) " +
+				getHeadsignWhere(tripQuery) +
+				getDirectionWhere(tripQuery) +
+				getStartTimeWhere(tripQuery) +
 				"ORDER BY t.startTime";
 		try {
 			Query query = session.createQuery(hql);
-			query.setString("routeShortName", routeShortName);
-			query.setString("headsign", headsign);
-			query.setParameterList("configRevs", configRevs);
+			query.setString("routeShortName", tripQuery.getRouteShortName());
+			query.setParameterList("configRevs", tripQuery.getConfigRevs());
 
 			List<Trip> results = query.list();
 
@@ -1234,6 +1237,36 @@ public class Trip implements Lifecycle, Serializable {
 			session.close();
 		}
 	}
+
+
+
+	private static String getHeadsignWhere(TripQuery tripQuery){
+		if(StringUtils.isNotBlank(tripQuery.getHeadsign())){
+			return  String.format("AND t.headsign = '%s' ", tripQuery.getHeadsign());
+		}
+		return "";
+	}
+
+	private static String getDirectionWhere(TripQuery tripQuery){
+		if(StringUtils.isNotBlank(tripQuery.getDirection())){
+			return String.format("AND t.directionId = '%s' ", tripQuery.getDirection());
+		}
+		return "";
+	}
+
+	private static String getStartTimeWhere(TripQuery tripQuery){
+  		String startTime = "";
+  		if(tripQuery.getFirstStartTime() != null
+				&& (tripQuery.getLastStartTime() == null || tripQuery.getFirstStartTime() < tripQuery.getLastStartTime())){
+			startTime += String.format("AND t.startTime >= %s ", tripQuery.getFirstStartTime());
+		}
+		if(tripQuery.getLastStartTime() != null
+				&& (tripQuery.getFirstStartTime() == null || tripQuery.getFirstStartTime() < tripQuery.getLastStartTime())){
+			startTime += String.format("AND t.startTime <= %s ", tripQuery.getLastStartTime());
+		}
+		return startTime;
+	}
+
 
 	/**
 	 * Assumes only one block for Trip.

@@ -1,4 +1,4 @@
-package org.transitclock.ipc.servers.reporting.service;
+package org.transitclock.reporting.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,11 +11,12 @@ import org.transitclock.db.structs.Stop;
 import org.transitclock.db.structs.StopPath;
 import org.transitclock.ipc.data.IpcStopPathWithSpeed;
 import org.transitclock.ipc.data.IpcStopWithDwellTime;
-import org.transitclock.ipc.servers.reporting.keys.ArrivalDepartureTripKey;
-import org.transitclock.ipc.util.GtfsDbDataUtil;
+import org.transitclock.reporting.keys.ArrivalDepartureTripKey;
 import org.transitclock.utils.Geo;
+import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
 
+import javax.inject.Inject;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -29,6 +30,7 @@ public class SpeedMapService {
 
     private static final Logger logger =
             LoggerFactory.getLogger(SpeedMapService.class);
+
 
     /**
      *
@@ -66,7 +68,9 @@ public class SpeedMapService {
                 .readOnly(readOnly)
                 .build();
 
+        IntervalTimer timer = new IntervalTimer();
         List<ArrivalDeparture> arrivalDeparturesList = ArrivalDeparture.getArrivalsDeparturesFromDb(adQuery);
+        System.out.println(timer.elapsedMsecStr());
 
         Map<ArrivalDepartureTripKey, List<ArrivalDeparture>> resultsMap = new HashMap<>();
         Map<String, StopPath> stopPathsMap = new HashMap<>();
@@ -76,7 +80,6 @@ public class SpeedMapService {
 
         // Get Average Speed Data for StopPaths
         Map<String, DoubleSummaryStatistics> stopPathsSpeedsMap = getStopPathsSpeedMap(resultsMap.values());
-
 
         List<IpcStopPathWithSpeed> ipcStopPathsWithSpeed = new ArrayList<>();
         for(Map.Entry<String, StopPath> stopPath : stopPathsMap.entrySet()){
@@ -90,7 +93,7 @@ public class SpeedMapService {
 
     private void processSpeedDataIntoMaps(List<ArrivalDeparture> arrivalDeparturesList,
                                           Map<ArrivalDepartureTripKey,
-                                          List<ArrivalDeparture>> resultsMap,
+                                                  List<ArrivalDeparture>> resultsMap,
                                           Map<String, StopPath> stopPathsMap,
                                           String agencyId){
 
@@ -154,7 +157,8 @@ public class SpeedMapService {
         return stopPathsSpeedsMap;
     }
 
-    private Double getSpeedDataBetweenTwoArrivalDepartures(ArrivalDeparture arrDep1, ArrivalDeparture arrDep2) {
+    private Double getSpeedDataBetweenTwoArrivalDepartures(ArrivalDeparture arrDep1,
+                                                           ArrivalDeparture arrDep2) {
 
         Double travelSpeedForStopPath = null;
 
@@ -193,7 +197,8 @@ public class SpeedMapService {
         return travelSpeedForStopPath;
     }
 
-    private Double determineTravelSpeedForStopPath(ArrivalDeparture arrDep1, ArrivalDeparture arrDep2) {
+    private Double determineTravelSpeedForStopPath(ArrivalDeparture arrDep1,
+                                                   ArrivalDeparture arrDep2) {
         // Determine departure time. If shouldn't use departures times
         // for terminal departure that are earlier then schedule time
         // then use the scheduled departure time. This prevents creating

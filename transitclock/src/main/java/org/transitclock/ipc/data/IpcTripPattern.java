@@ -41,6 +41,8 @@ public class IpcTripPattern implements Serializable {
 	private final String routeShortName;
 	private final Extent extent;
 	private final String shapeId;
+	private final String firstStopName;
+	private final String lastStopName;
 	private final List<IpcStopPath> stopPaths;
 
 	private static final long serialVersionUID = 5631162916487757340L;
@@ -56,6 +58,9 @@ public class IpcTripPattern implements Serializable {
 		this.routeShortName = dbTripPattern.getRouteShortName();
 		this.extent = dbTripPattern.getExtent();
 		this.shapeId = dbTripPattern.getShapeId();
+		this.firstStopName = dbTripPattern.getStopName(0);
+		this.lastStopName = dbTripPattern.getStopName(dbTripPattern.getNumberStopPaths() - 1);
+
 		
 		this.stopPaths = new ArrayList<IpcStopPath>();
 		for (StopPath stopPath : dbTripPattern.getStopPaths())
@@ -107,6 +112,14 @@ public class IpcTripPattern implements Serializable {
 	
 	public String getShapeId() {
 		return shapeId;
+	}
+
+	public String getFirstStopName() {
+		return firstStopName;
+	}
+
+	public String getLastStopName() {
+		return lastStopName;
 	}
 
 	public List<IpcStopPath> getStopPaths() {
