@@ -30,6 +30,7 @@ import org.transitclock.configData.DbSetupConfig;
 import org.transitclock.core.ServiceType;
 import org.transitclock.core.TemporalDifference;
 import org.transitclock.db.hibernate.HibernateUtils;
+import org.transitclock.db.query.ArrivalDepartureQuery;
 import org.transitclock.logging.Markers;
 import org.transitclock.utils.Geo;
 import org.transitclock.utils.IntervalTimer;
@@ -1012,7 +1013,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 					"WHERE " +
 					getArrivalDepartureTimeWhere(beginDate, endDate, beginTime, endTime) +
 					getRouteWhere(routeShortName) +
-					getTripPatternWhere(startStop, endStop) +
+					getTripPatternWhere(null) +
 					getScheduledTimesWhere(scheduledTimesOnly) +
 					getTimePointsWhere(timePointsOnly) +
 					getServiceTypeWhere(serviceType) +
@@ -1024,6 +1025,70 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 
 		try {
 			Query query = session.createQuery(hql);
+
+			List<ArrivalDeparture> results = query.list();
+
+			logger.debug("Getting arrival/departures from database took {} msec",
+					timer.elapsedMsec());
+
+			return results;
+
+		} catch (HibernateException e) {
+			// Log error to the Core logger
+			Core.getLogger().error("Unable to retrieve arrival departures", e);
+			return null;
+		} finally {
+			// Clean things up. Not sure if this absolutely needed nor if
+			// it might actually be detrimental and slow things down.
+			session.close();
+		}
+	}
+
+
+	/**
+	 * Reads the arrivals/departures for the timespan and routeId specified
+	 * Can specify whether you want to retrieve the data from a readOnly db
+	 *
+	 * @param adQuery {@link org.transitclock.db.query.ArrivalDepartureQuery}
+	 * @return List<ArrivalDeparture>
+	 */
+	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(ArrivalDepartureQuery adQuery) throws Exception {
+		IntervalTimer timer = new IntervalTimer();
+
+		// Get the database session. This is supposed to be pretty light weight
+		Session session = HibernateUtils.getSession(adQuery.isReadOnly());
+
+		// Create the query. Table name is case sensitive and needs to be the
+		// class name instead of the name of the db table.
+
+		String hql = "SELECT " +
+				"ad " +
+				"FROM " +
+				"ArrivalDeparture ad " +
+				getTimePointsJoin(adQuery.isTimePointsOnly()) +
+				getServiceTypeJoin(adQuery.getServiceType()) +
+				getStopsJoin(adQuery.isIncludeStop()) +
+				getTripsJoin(adQuery.getHeadsign(), adQuery.isIncludeTrip()) +
+				getStopPathsJoin(adQuery.isIncludeStopPath()) +
+				"WHERE " +
+				getArrivalDepartureTimeWhere(adQuery.getBeginDate(), adQuery.getEndDate(), adQuery.getBeginTime(), adQuery.getEndTime()) +
+				getRouteWhere(adQuery.getRouteShortName()) +
+				getTripPatternWhere(adQuery.getTripPatternId()) +
+				getTripIdsWhere(adQuery.getTripIds()) +
+				getScheduledTimesWhere(adQuery.isScheduledTimesOnly()) +
+				getTimePointsWhere(adQuery.isTimePointsOnly()) +
+				getServiceTypeWhere(adQuery.getServiceType()) +
+				getTripsWhere(adQuery.getHeadsign(), adQuery.isIncludeTrip()) +
+				getStopsWhere(adQuery.isIncludeStop()) +
+				getStopPathsWhere(adQuery.isIncludeStopPath()) +
+				getDwellTimesWhere(adQuery.isDwellTimeOnly()) +
+				"ORDER BY ad.time, ad.stopPathIndex, ad.isArrival DESC";
+
+		try {
+			Query query = session.createQuery(hql);
+			if(adQuery.getTripIds() != null) {
+				query.setParameterList("tripIds", adQuery.getTripIds());
+			}
 
 			List<ArrivalDeparture> results = query.list();
 
@@ -1095,40 +1160,61 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	public static String getArrivalDepartureTimeWhere(LocalDate beginDate, LocalDate endDate, LocalTime beginTime, LocalTime endTime) {
 		String hql = "";
 
-		List<LocalDate> dates = new ArrayList<>();
-		while (!beginDate.isAfter(endDate)) {
-			dates.add(beginDate);
-			beginDate = beginDate.plusDays(1);
-		}
-
-		for(int i=0; i < dates.size(); i++){
-			if(i == 0){
-				hql += " (";
-
-			} else {
-				hql += " OR ";
+		if(beginTime != null && endTime != null) {
+			List<LocalDate> dates = new ArrayList<>();
+			while (!beginDate.isAfter(endDate)) {
+				dates.add(beginDate);
+				beginDate = beginDate.plusDays(1);
 			}
-			LocalDateTime startDateTime = LocalDateTime.of(dates.get(i), beginTime);
-			LocalDateTime endDateTime = LocalDateTime.of(dates.get(i), endTime);
+
+			for (int i = 0; i < dates.size(); i++) {
+				if (i == 0) {
+					hql += " (";
+
+				} else {
+					hql += " OR ";
+				}
+				LocalDateTime startDateTime = LocalDateTime.of(dates.get(i), beginTime);
+				LocalDateTime endDateTime = LocalDateTime.of(dates.get(i), endTime);
+				hql += String.format(" ad.time between '%s' AND '%s' ",
+						startDateTime.format(isoDateTimeFormat), endDateTime.format(isoDateTimeFormat));
+				if (i == dates.size() - 1) {
+					hql += ") ";
+				}
+			}
+		}
+		else if(!beginDate.isAfter(endDate)) {
+			LocalDateTime startDateTime = beginDate.atStartOfDay();
+			LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
 			hql += String.format(" ad.time between '%s' AND '%s' ",
 					startDateTime.format(isoDateTimeFormat), endDateTime.format(isoDateTimeFormat));
-			if(i == dates.size() -1){
-				hql += ") ";
-			}
+		}
+		else{
+			LocalDateTime startDateTime = beginDate.atStartOfDay();
+			LocalDateTime endDateTime = beginDate.atTime(LocalTime.MAX);
+			hql += String.format(" ad.time between '%s' AND '%s' ",
+					startDateTime.format(isoDateTimeFormat), endDateTime.format(isoDateTimeFormat));
 		}
 		return hql;
 	}
 
 	private static String getRouteWhere(String routeShortName){
-		if(routeShortName !=null) {
+		if(StringUtils.isNotBlank(routeShortName) && routeShortName !=null) {
 			return String.format("AND ad.routeShortName = '%s' ", routeShortName);
 		}
 		return "";
 	}
 
-	private static String getTripPatternWhere(String startStop, String endStop){
-		if(StringUtils.isNotBlank(startStop) && StringUtils.isNotBlank(endStop)) {
-			return String.format("AND ad.tripPatternId LIKE 'shape_%%_%s_to_%s_%%' ", startStop, endStop);
+	private static String getTripPatternWhere(String tripPatternId){
+		if(StringUtils.isNotBlank(tripPatternId)) {
+			return String.format("AND ad.tripPatternId = '%s' ", tripPatternId);
+		}
+		return "";
+	}
+
+	private static String getTripIdsWhere(Set<String> tripIds){
+		if(tripIds != null) {
+			return "AND ad.tripId IN (:tripIds)";
 		}
 		return "";
 	}

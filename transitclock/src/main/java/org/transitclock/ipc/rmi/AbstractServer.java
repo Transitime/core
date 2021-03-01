@@ -62,7 +62,7 @@ public abstract class AbstractServer {
 	// Need to store this so can rebind
 	private String bindName;
 	
-	private final String agencyId;
+	private String agencyId;
 	
 	// Need to store this so can rebind
 	private Remote stub;
@@ -118,20 +118,26 @@ public abstract class AbstractServer {
 	 *            something like ClassName.class.getSimpleName()
 	 */
 	protected AbstractServer(String agencyId, String objectName) {
+		start(agencyId, objectName);
+	}
+
+	protected AbstractServer(){}
+
+	protected void start(String agencyId, String objectName){
 		this.agencyId = agencyId;
-	
+
 		try {
 			// First make sure that this object is a subclass of Remote
 			// since this class is only intended to be a parent class
 			// of Remote.
 			if (!(this instanceof Remote)) {
 				logger.error("Class {} is not a subclass of Remote. Therefore "
-						+ "it cannot be used with {}",
+								+ "it cannot be used with {}",
 						this.getClass().getName(), getClass().getSimpleName());
 				return;
 			}
 			Remote remoteThis = (Remote) this;
-			
+
 			logger.info("Setting up AbstractServer for RMI using secondary "
 					+ "port={}", RmiParams.getSecondaryRmiPort());
 			// Export the RMI stub. Specify that should use special port for
@@ -142,27 +148,27 @@ public abstract class AbstractServer {
 			// Make sure the registry exists
 			if (registry == null) {
 				try {
-					// Start up the RMI registry. If it has already been 
-					// started manually or by another process then will 
+					// Start up the RMI registry. If it has already been
+					// started manually or by another process then will
 					// get an exception, which is fine.
 					LocateRegistry.createRegistry(RmiParams.getRmiPort());
 				} catch (Exception e) {
 					// Most likely registry was already running
 					logger.debug("Exception occurred when trying to create " +
-							"RMI registry. Most likely the registry was " +
-							"already running, which is fine. Message={}", 
+									"RMI registry. Most likely the registry was " +
+									"already running, which is fine. Message={}",
 							e.getMessage());
 				}
 				registry = LocateRegistry.getRegistry(RmiParams.getRmiPort());
 			}
-			
+
 			// Bind the stub to the RMI registry so that it can be accessed by
 			// name by the client.
 			bindName = getBindName(agencyId, objectName);
-			
-			// Bind the stub to the RMI registry in a loop so that even if 
+
+			// Bind the stub to the RMI registry in a loop so that even if
 			// rmiregistry is restarted the stub will quickly get bound to it.
-			// rebind() is called immediately and then again every 
+			// rebind() is called immediately and then again every
 			// REBIND_RATE_SEC seconds.
 			rebindTimer.scheduleAtFixedRate(
 					// Call rebind() using anonymous class
@@ -171,14 +177,14 @@ public abstract class AbstractServer {
 							rebind();
 						}
 					}, 0, REBIND_RATE_SEC, TimeUnit.SECONDS);
-			
+
 			constructed = true;
 		} catch (Exception e) {
 			// Log the error. Since RMI is critical send out e-mail as well so
 			// that the issue is taken care of.
-			logger.error(Markers.email(), 
+			logger.error(Markers.email(),
 					"For agencyId={} error occurred when constructing a RMI {}",
-					AgencyConfig.getAgencyId(), getClass().getSimpleName(), 
+					AgencyConfig.getAgencyId(), getClass().getSimpleName(),
 					e);
 		}
 	}

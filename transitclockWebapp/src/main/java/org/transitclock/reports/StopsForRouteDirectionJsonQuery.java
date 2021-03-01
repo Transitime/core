@@ -19,6 +19,7 @@ package org.transitclock.reports;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.db.GenericQuery;
 import org.transitclock.utils.Time;
 
 /**
@@ -46,12 +47,17 @@ public class StopsForRouteDirectionJsonQuery {
 	 */
 	public static String getStopsJson(String agencyId, String routeId, String headsign) {
 
+		String sql = "SELECT tp.id " +
+					 "FROM TripPatterns tp " +
+					 "WHERE tp.routeId = '" + routeId + "' AND tp.headsign = '" + headsign + "' AND tp.configRev = (select configRev from ActiveRevisions limit 1) ";
+		/*GenericQuery
+
 		String sql = "SELECT s.id, s.name, sp.tripPatternId, sp.gtfsStopSeq " +
 				"FROM Stops s " +
 				"JOIN StopPaths sp ON s.id = sp.stopId " +
 				"JOIN TripPatterns tp ON sp.tripPatternId = tp.id AND sp.routeId = tp.routeId AND sp.configRev = tp.configRev AND tp.configRev = s.configRev " +
-				"WHERE tp.routeId = '" + routeId + "' AND tp.headsign = '" + headsign + "' AND s.configRev = (select configRev from ActiveRevisions limit 1) " +
-				"ORDER BY sp.tripPatternId, sp.gtfsStopSeq;";
+				"WHERE tp.routeId = '" + routeId + "' AND tp.headsign = '" + headsign + "' AND tp.configRev = (select configRev from ActiveRevisions limit 1) " +
+				"ORDER BY sp.tripPatternId, sp.gtfsStopSeq;";*/
 
 		String json = GenericJsonQuery.getJsonString(agencyId, sql);
 

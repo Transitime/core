@@ -35,6 +35,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
 import org.transitclock.api.data.ApiActiveBlocks;
 import org.transitclock.api.data.ApiActiveBlocksRoutes;
 import org.transitclock.api.data.ApiAdherenceSummary;
@@ -823,7 +824,7 @@ public class TransitimeApi {
 	 *            the trip pattern are marked as being for the UI and can be
 	 *            highlighted. Useful for when want to emphasize in the UI only
 	 *            the stops that are of interest to the user.
-	 * @param direction
+	 * @param directionId
 	 *            optional. If set then only the shape for specified direction
 	 *            is marked as being for the UI. Needed for situations where a
 	 *            single stop is used for both directions of a route and want to
@@ -1481,7 +1482,9 @@ public class TransitimeApi {
 	description="Retrives a list of all trip patters for the specific routeId or routeShortName."
 			,tags= {"base data","trip"})
 	public Response getTripPatterns(@BeanParam StandardParameters stdParameters,
-			@Parameter(description="Specifies the routeId or routeShortName.",required=true)@QueryParam(value = "r") String routesIdOrShortNames) throws WebApplicationException {
+			@Parameter(description="Specifies the routeId or routeShortName.",required=true) @QueryParam(value = "r") String routesIdOrShortNames,
+			@Parameter(description="Specifies the headsign",required=false) @QueryParam(value = "headsign") String headsign,
+			@Parameter(description="Specifies whether to show StopPaths",required=false) @DefaultValue("true") @QueryParam(value = "includeStopPaths") boolean includeStopPaths) throws WebApplicationException {
 
 		// Make sure request is valid
 		stdParameters.validate();
@@ -1489,7 +1492,12 @@ public class TransitimeApi {
 		try {
 			// Get block data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
-			List<IpcTripPattern> ipcTripPatterns = inter.getTripPatterns(routesIdOrShortNames);
+			List<IpcTripPattern> ipcTripPatterns;
+			if(StringUtils.isBlank(headsign)){
+				ipcTripPatterns = inter.getTripPatterns(routesIdOrShortNames);
+			} else{
+				ipcTripPatterns = inter.getTripPatterns(routesIdOrShortNames, headsign);
+			}
 
 			// If the trip doesn't exist then throw exception such that
 			// Bad Request with an appropriate message is returned.
@@ -1497,7 +1505,7 @@ public class TransitimeApi {
 				throw WebUtils.badRequestException("route=" + routesIdOrShortNames + " does not exist.");
 
 			// Create and return ApiTripPatterns response
-			ApiTripPatterns apiTripPatterns = new ApiTripPatterns(ipcTripPatterns);
+			ApiTripPatterns apiTripPatterns = new ApiTripPatterns(ipcTripPatterns, includeStopPaths);
 			return stdParameters.createResponse(apiTripPatterns);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request

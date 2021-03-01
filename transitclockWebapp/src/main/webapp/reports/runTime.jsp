@@ -275,17 +275,12 @@
 
                         <div class="param">
                             <label for="direction">Direction:</label>
-                            <select id="direction" name="direction" disabled="true" "></select>
+                            <select id="direction" name="direction" disabled="true" ></select>
                         </div>
 
                         <div class="param">
-                            <label for="startStop">Start Stop:</label>
-                            <select id="startStop" name="startStop" disabled="true" ></select>
-                        </div>
-
-                        <div class="param">
-                            <label for="endStop">End Stop:</label>
-                            <select id="endStop" name></select>
+                            <label for="tripPattern">Trip Pattern:</label>
+                            <select id="tripPattern" name="tripPattern" disabled="true" ></select>
                         </div>
 
                         <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
@@ -501,28 +496,21 @@
         }
         else {
             $("#direction").empty();
-            $("#endStop").empty();
-            $("#startStop").empty();
+            $("#tripPattern").empty();
             $("#direction").attr("disabled", true);
-            $("#endStop").attr("disabled", true);
-            $("#startStop").attr("disabled", true);
+            $("#tripPattern").attr("disabled", true);
         }
     })
 
     $("#direction").change(function() {
-        populateStartStop();
-    })
-
-    $("#startStop").change(function() {
-        populateEndStop(stops);
+        populateTripPattern();
     })
 
     function populateDirection() {
 
         $("#submit").attr("disabled", true);
 
-        $("#endStop").empty();
-        $("#startStop").empty();
+        $("#tripPattern").empty();
         $("#direction").removeAttr('disabled');
         $("#direction").empty();
 
@@ -538,7 +526,7 @@
                 response.headsigns.forEach(function(headsign) {
                     $("#direction").append("<option value='" + headsign.headsign + "'>" + headsign.label + "</option>");
                 })
-                populateStartStop();
+                populateTripPattern();
             },
             error: function(response) {
                 alert("Error retrieving directions for route " + response.r);
@@ -547,20 +535,19 @@
         })
     }
 
-    function populateStartStop() {
-        $("#endStop").empty();
-        $("#startStop").empty();
+    function populateTripPattern() {
+        $("#tripPattern").empty();
 
-        stops = {};
         var request = {};
 
         request.a = 1;
         request.r = $("#route").val();
         request.headsign = $("#direction").val();
+        request.includeStopPaths = 'false';
 
         $.ajax({
             // The page being requested
-            url: "stopsJsonData.jsp",
+            url: apiUrlPrefix + "/command/tripPatterns",
             // Pass in query string parameters to page being requested
             data: request,
             // Needed so that parameters passed properly to page being requested
@@ -569,46 +556,19 @@
             async: true,
             // When successful process JSON data
             success: function (resp) {
-                if (resp.data.length == 0) {
-                    alert("No stop data for selected route and headsign.");
-                    $("#submit").attr("disabled", false);
+                if (resp.tripPatterns.length == 0) {
+                    alert("No trip pattern data for selected route and headsign.");
+                    $("#submit").attr("disabled", true);
                 }
                 else {
-                    $("#startStop").removeAttr('disabled');
+                    $("#tripPattern").removeAttr('disabled');
+                    $("#submit").removeAttr('disabled');
 
-                    var tripId;
-                    var first;
-                    var last;
-
-                    resp.data.forEach(function (stop) {
-                        if (stop.tripPatternId == tripId) {
-                            last = stop;
-                        } else {
-                            if (typeof (last) == 'undefined') {
-                                first = stop;
-                            } else {
-                                if (typeof (stops[first.id]) == 'undefined') {
-                                    stops[first.id] = {name: first.name, endStops: [{id: last.id, name: last.name}]};
-                                } else {
-                                    stops[first.id].endStops.push({id: last.id, name: last.name});
-                                }
-                                first = stop;
-                            }
-                            tripId = stop.tripPatternId;
-                        }
+                    $("#tripPattern").append("<option value=''>All</option>")
+                    resp.tripPatterns.forEach(function (tripPattern) {
+                        $("#tripPattern").append("<option value='" + tripPattern.id + "'>" + tripPattern.firstStopName + ' to ' + tripPattern.lastStopName + "</option>");
                     })
 
-                    if (typeof (stops[first.id]) == 'undefined') {
-                        stops[first.id] = {name: first.name, endStops: [{id: last.id, name: last.name}]};
-                    } else {
-                        stops[first.name].endStops.push({id: last.id, name: last.name});
-                    }
-
-                    Object.entries(stops).forEach(function (stop) {
-                        $("#startStop").append("<option value='" + stop[0] + "'>" + stop[1].name + "</option>");
-                    })
-
-                    populateEndStop(stops);
                 }
 
             },
@@ -620,15 +580,6 @@
         });
     }
 
-    function populateEndStop(stops) {
-        $("#endStop").removeAttr('disabled');
-        $("#endStop").empty();
-
-        stops[$("#startStop").val()].endStops.forEach(function(endStop) {
-            $("#endStop").append("<option value='" + endStop.id + "'>" + endStop.name + "</option>");
-        })
-        $("#submit").attr("disabled", false);
-    }
 
     function getParams(modal) {
         var datepicker, serviceTypeSelector;
@@ -659,8 +610,7 @@
 
         var routeName = $("#route").val().trim() == "" ? "" : $("#route").val();
         var directionName = $("#direction").val() == null ? "" : $("#direction").val();
-        var startStopName = $("#startStop").val() == null ? "" : $("#startStop").val();
-        var endStopName = $("#endStop").val() == null ? "" : $("#endStop").val();
+        var tripPatternName = $("#tripPattern").val() == null ? "" : $("#tripPattern").val();
 
         params = {};
 
@@ -671,8 +621,7 @@
         params.r = routeName
         params.headsign = directionName;
         params.serviceType = $("#" + serviceTypeSelector).val();
-        params.startStop = startStopName;
-        params.endStop = endStopName;
+        params.tripPattern = tripPatternName;
 
         return params;
     }
@@ -938,8 +887,8 @@
                         serviceDayString = "All days";
                     }
 
-                    $("#paramDetails").html("<p style='font-size: 0.8em;'>" + (request.r == "" ? "All routes" : "Route " + request.r)  + " to " + (request.headsign == "" ? "All directions" : request.headsign) + " | " + (request.startStop == "" && request.endStop == "" ? "All stops" : request.startStop + " to " + request.endStop) + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "<a id='compareLink' style='font-size: 0.8em; margin-bottom: 1em; margin-left: 4em; color: blue; text-decoration: underline; cursor: pointer' onclick='openModal()'>Compare</a></p>");
-                    $("#paramDetailsModal").html("<p style='font-size: 0.7em;'>" + (request.r == "" ? "All routes" : "Route " + request.r)  + " to " + (request.headsign == "" ? "All directions" : request.headsign) + " | " + (request.startStop == "" && request.endStop == "" ? "All stops" : request.startStop + " to " + request.endStop) + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "</p>");
+                    $("#paramDetails").html("<p style='font-size: 0.8em;'>" + (request.r == "" ? "All routes" : "Route " + request.r)  + " to " + (request.headsign == "" ? "All directions" : request.headsign) + " | " + (request.tripPattern == "" ? "All Trip Patterns" : request.tripPattern) + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "<a id='compareLink' style='font-size: 0.8em; margin-bottom: 1em; margin-left: 4em; color: blue; text-decoration: underline; cursor: pointer' onclick='openModal()'>Compare</a></p>");
+                    $("#paramDetailsModal").html("<p style='font-size: 0.7em;'>" + (request.r == "" ? "All routes" : "Route " + request.r)  + " to " + (request.headsign == "" ? "All directions" : request.headsign) + " | " + (request.tripPattern == "" ? "All Trip Patterns" : request.tripPattern) + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "</p>");
 
                     var avgRunTime = typeof (response.avgRunTime) == 'undefined' ? "N/A" : (response.avgRunTime / 60000).toFixed(1);
                     var avgFixed = typeof (response.fixed) == 'undefined' ? "N/A" : (response.fixed / 60000).toFixed(1);
@@ -1012,7 +961,7 @@
                         serviceDayString = "All days";
                     }
 
-                    $("#comparisonParams").html("<p style='font-size: 0.8em;'>" + (request.r == "" ? "All routes" : "Route " + request.r)  + " to " + (request.headsign == "" ? "All directions" : request.headsign) + " | " + (request.startStop == "" && request.endStop == "" ? "All stops" : request.startStop + " to " + request.endStop) + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "<a id='clearLink' style='font-size: 0.8em; margin-bottom: 1em; margin-left: 4em; color: blue; text-decoration: underline; cursor: pointer' onclick='clearComparison()'>Clear</a></p>");
+                    $("#comparisonParams").html("<p style='font-size: 0.8em;'>" + (request.r == "" ? "All routes" : "Route " + request.r)  + " to " + (request.headsign == "" ? "All directions" : request.headsign) + " | " + (request.tripPattern == "" ? "All Trip Patterns" : request.tripPattern) + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "<a id='clearLink' style='font-size: 0.8em; margin-bottom: 1em; margin-left: 4em; color: blue; text-decoration: underline; cursor: pointer' onclick='clearComparison()'>Clear</a></p>");
 
                     var avgRunTime = typeof (response.avgRunTime) == 'undefined' ? "N/A" : (response.avgRunTime / 60000).toFixed(1);
                     var avgFixed = typeof (response.fixed) == 'undefined' ? "N/A" : (response.fixed / 60000).toFixed(1);

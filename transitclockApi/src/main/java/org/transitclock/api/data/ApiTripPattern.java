@@ -58,6 +58,12 @@ public class ApiTripPattern {
 	@XmlAttribute
 	private String shapeId;
 
+	@XmlAttribute
+	private String firstStopName;
+
+	@XmlAttribute
+	private String lastStopName;
+
 	@XmlElement
 	private List<ApiStopPath> stopPaths;
 
@@ -87,6 +93,8 @@ public class ApiTripPattern {
 		routeShortName = ipcTripPattern.getRouteShortName();
 		extent = new ApiExtent(ipcTripPattern.getExtent());
 		shapeId = ipcTripPattern.getShapeId();
+		firstStopName = ipcTripPattern.getFirstStopName();
+		lastStopName = ipcTripPattern.getLastStopName();
 
 		// Only include stop paths if actually want them. This
 		// can greatly reduce volume of the output.

@@ -8,11 +8,19 @@ public class IpcRunTimeForTrip extends IpcRunTime {
     private  Double scheduledTripCompletionTime;
     private  Double nextScheduledTripStartTime;
 
-    public IpcRunTimeForTrip(String tripId, Integer tripSchStartTime, Integer tripSchEndTime, Integer nextTripSchStartTime,
-                             Double avgRunTime, Double fixed, Double variable, Double dwell){
+    public IpcRunTimeForTrip(String tripId,
+                             Integer tripSchStartTime,
+                             Integer tripSchEndTime,
+                             Integer nextTripSchStartTime,
+                             Double avgRunTime,
+                             Double fixed,
+                             Double variable,
+                             Double dwell){
+
         super(avgRunTime, fixed, variable, dwell);
+
         this.tripId = tripId;
-        this.scheduledTripStartTime = tripSchEndTime;
+        this.scheduledTripStartTime = tripSchStartTime;
 
         if(tripSchStartTime != null && tripSchEndTime != null) {
             double tripSchTimeLengthMsec = (tripSchEndTime - tripSchStartTime) * 1000;

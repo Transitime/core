@@ -47,13 +47,13 @@ public class ApiTripPatterns {
      */
     protected ApiTripPatterns() {}
 
-    public ApiTripPatterns(Collection<IpcTripPattern> ipcTripPatterns) {
+    public ApiTripPatterns(Collection<IpcTripPattern> ipcTripPatterns, Boolean includeStopPaths) {
 	tripPatterns = new ArrayList<ApiTripPattern>();
 	for (IpcTripPattern ipcTripPattern : ipcTripPatterns) {
 	    // Including stop paths in output since that is likely
 	    // what user wants since they are trying to understand
 	    // the trip patterns for a route.
-	    tripPatterns.add(new ApiTripPattern(ipcTripPattern, true));
+	    tripPatterns.add(new ApiTripPattern(ipcTripPattern, includeStopPaths));
 	}
     }
 }

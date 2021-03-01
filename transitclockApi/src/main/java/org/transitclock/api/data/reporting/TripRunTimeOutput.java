@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import static org.transitclock.api.utils.NumberFormatter.*;
 
 @XmlRootElement
 public class TripRunTimeOutput implements Serializable {
@@ -20,7 +21,7 @@ public class TripRunTimeOutput implements Serializable {
 
     public TripRunTimeOutput() {}
 
-    public static TripRunTimeMixedChart  getAvgTripRunTimes(List<IpcRunTimeForTrip> runTimeForTrips){
+    public static TripRunTimeMixedChart getRunTimes(List<IpcRunTimeForTrip> runTimeForTrips){
         TripRunTimeData data = new TripRunTimeData();
         for(IpcRunTimeForTrip runTimeForTrip : sortRunTimes(runTimeForTrips)){
             data.getTripsList().add(getFormattedTripId(runTimeForTrip));
@@ -31,19 +32,6 @@ public class TripRunTimeOutput implements Serializable {
             data.getNextTripStartList().add(getValueAsLong(runTimeForTrip.getNextScheduledTripStartTime()));
         }
         return new TripRunTimeMixedChart(data);
-    }
-
-    private static Long getValueAsLong(Double value){
-        if(value != null){
-            try{
-                return value.longValue();
-            } catch (NumberFormatException nfe){
-                logger.warn("Unable to convert {} to a Long do to a number format exception",value, nfe);
-            } catch(Exception e){
-                logger.warn("Hit unexpected issue converting value {} to Big Decimal", value, e);
-            }
-        }
-        return 0L;
     }
 
     private static String getFormattedTripId(IpcRunTimeForTrip runTimeForTrip){

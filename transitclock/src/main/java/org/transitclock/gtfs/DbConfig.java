@@ -34,6 +34,7 @@ import org.transitclock.utils.MapKey;
 import org.transitclock.utils.Time;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Reads all the configuration data from the database. The data is based on GTFS
@@ -488,6 +489,30 @@ public class DbConfig {
 
 		// Return cached trip pattern data
 		return tripPatternsByRouteMap.get(routeId);
+	}
+
+	/**
+	 * Returns the list of trip patterns associated with the specified route and headsign.
+	 * Reads the trip patterns from the database and stores them in cache so
+	 * that subsequent calls get them directly from the cache. The first time
+	 * this is called it can take a few seconds. Therefore this is not done at
+	 * startup since want startup to be quick.
+	 *
+	 * @param routeId
+	 * @return List of TripPatterns for the route, or null if no such route
+	 */
+	public List<TripPattern> getTripPatternsForRouteAndHeadSign(String routeId, String headSign) {
+		// If haven't read in the trip pattern data yet, do so now and cache it
+		if (tripPatternsByRouteMap == null) {
+			logger.error("tripPatternsByRouteMap not set when "
+					+ "getTripPatternsForRoute() called. Exiting!");
+			System.exit(-1);
+		}
+
+		// Return cached trip pattern data
+		return tripPatternsByRouteMap.get(routeId).stream()
+				.filter(tp -> tp.getHeadsign().equalsIgnoreCase(headSign))
+				.collect(Collectors.toList());
 	}
 
 	/**
