@@ -68,6 +68,21 @@ public class DbConfig {
 	// Keyed on serviceId. Submap keyed on blockId
 	private Map<String, Map<String, Block>> blocksByServiceMap = null;
 
+	/**
+	 * For unit tests populate blocksByServiceMap.
+	 * @param serviceId
+	 * @param blockId
+	 * @param block
+	 */
+	public void addBlockToServiceMap(String serviceId, String blockId, Block block) {
+		Map<String, Block> blockMap = blocksByServiceMap.get(serviceId);
+		if (blockMap == null) {
+			blockMap = new HashMap<>();
+			blocksByServiceMap.put(serviceId, blockMap);
+		}
+		blockMap.put(blockId, block);
+	}
+
 	// So can access blocks by service ID and route ID easily
 	private Map<RouteServiceMapKey, List<Block>> blocksByRouteMap = null;
 

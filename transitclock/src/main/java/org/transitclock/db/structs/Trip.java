@@ -873,7 +873,15 @@ public class Trip implements Lifecycle, Serializable {
 		}
 		return route;
 	}
-	
+
+	/**
+	 * Setter for unit tests.
+	 * @param route
+	 */
+	public void setRoute(Route route) {
+		this.route = route;
+	}
+
 	/**
 	 * Returns route name. Gets it from the Core database configuration. If Core
 	 * database configuration not available such as when processing GTFS data

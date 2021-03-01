@@ -3,6 +3,7 @@
         id integer not null auto_increment,
         configRev integer,
         travelTimesRev integer,
+        trafficRev integer,
         primary key (id)
     );
 
@@ -367,6 +368,52 @@
         timepointStop bit,
         waitStop bit,
         primary key (id, configRev)
+    );
+
+    create table TrafficPath_locations (
+        TrafficPath_trafficRev integer not null,
+        TrafficPath_trafficPathId varchar(120) not null,
+        lat double precision,
+        lon double precision,
+        locations_ORDER integer not null,
+        primary key (TrafficPath_trafficRev, TrafficPath_trafficPathId, locations_ORDER)
+    );
+
+    create table TrafficPath_to_StopPath_joinTable (
+        TrafficPaths_trafficRev integer not null,
+        TrafficPaths_trafficPathId varchar(120) not null,
+        stopPaths_tripPatternId varchar(120) not null,
+        stopPaths_stopPathId varchar(120) not null,
+        stopPaths_configRev integer not null,
+        listIndex integer not null,
+        primary key (TrafficPaths_trafficRev, TrafficPaths_trafficPathId, listIndex)
+    );
+
+    create table TrafficPaths (
+        trafficRev integer not null,
+        trafficPathId varchar(120) not null,
+        pathLength float,
+        primary key (trafficRev, trafficPathId)
+    );
+
+    create table TrafficSensor (
+        trafficRev integer not null,
+        id varchar(60) not null,
+        description varchar(255),
+        externalId varchar(60),
+        trafficPathId varchar(120),
+        primary key (trafficRev, id)
+    );
+
+    create table TrafficSensorData (
+        trafficSensorId varchar(255) not null,
+        trafficRev integer not null,
+        time datetime(3) not null,
+        confidence double precision,
+        delayMillis double precision,
+        speed double precision,
+        travelTimeMillis integer,
+        primary key (trafficSensorId, trafficRev, time)
     );
 
     create table Transfers (
