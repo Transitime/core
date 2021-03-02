@@ -44,8 +44,8 @@
 
     if (agencyId == null || beginDate == null || numDays == null ) {
 		response.getWriter().write("For predAccuracyRangeData.jsp must "
-			+ "specify parameters 'a' (agencyId), 'beginDate', "
-			+ "and 'numDays'."); 
+			+ "specify parameters 'a' (agencyId=" +  agencyId + "), 'beginDate' (" + beginDate + ") , "
+			+ "and 'numDays' (" + numDays + ") + .");
 		return;
     }
 	

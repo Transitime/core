@@ -21,7 +21,7 @@ public class TravelTimeDataFilterImpl implements TravelTimeDataFilter {
 			"transitclock.prediction.travel.maxTravelTimeAllowedInModel", (long) (20 * Time.MS_PER_MIN),
 			"Max travel time to be considered in algorithm. Milliseconds.");
 	private static LongConfigValue minTravelTimeAllowedInModel = new LongConfigValue(
-			"transitclock.prediction.travel.minTravelTimeAllowedInModel", (long) 1000,
+			"transitclock.prediction.travel.minTravelTimeAllowedInModel", (long) 100,
 			"Min travel time to be considered in algorithm. Milliseconds.");
 	private static IntegerConfigValue minSceheduleAdherence = new IntegerConfigValue(
 			"transitclock.prediction.travel.minSceheduleAdherence", (int) (10 * Time.SEC_PER_MIN),

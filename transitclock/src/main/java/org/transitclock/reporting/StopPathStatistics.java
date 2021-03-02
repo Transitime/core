@@ -1,4 +1,4 @@
-package org.transitclock.db.reporting;
+package org.transitclock.reporting;
 
 import java.util.DoubleSummaryStatistics;
 
@@ -39,6 +39,8 @@ public class StopPathStatistics {
     public Double getAverageDwellTime() {
         return dwellTimeStats.getAverage();
     }
+
+    public long getCount() { return runTimeStats.getCount(); }
 
     public boolean isLastStop() {
         return isLastStop;

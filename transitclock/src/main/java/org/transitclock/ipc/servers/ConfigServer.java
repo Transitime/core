@@ -281,6 +281,27 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 		return tripPatterns;
 	}
 
+	@Override
+	public List<IpcTripPattern> getTripPatterns(String routeIdOrShortName, String headSign)
+			throws RemoteException {
+		DbConfig dbConfig = Core.getInstance().getDbConfig();
+
+		Route dbRoute = getRoute(routeIdOrShortName);
+		if (dbRoute == null)
+			return null;
+
+		List<TripPattern> dbTripPatterns =
+				dbConfig.getTripPatternsForRouteAndHeadSign(dbRoute.getId(), headSign);
+		if (dbTripPatterns == null)
+			return null;
+
+		List<IpcTripPattern> tripPatterns = new ArrayList<IpcTripPattern>();
+		for (TripPattern dbTripPattern : dbTripPatterns) {
+			tripPatterns.add(new IpcTripPattern(dbTripPattern));
+		}
+		return tripPatterns;
+	}
+
 	/* (non-Javadoc)
 	 * @see org.transitclock.ipc.interfaces.ConfigInterface#getAgencies()
 	 */

@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import org.apache.commons.lang3.StringUtils;
 import org.transitclock.api.data.*;
 import org.transitclock.api.data.reporting.OnTimePerformanceOutput;
+import org.transitclock.api.data.reporting.StopPathRunTimeOutput;
 import org.transitclock.api.data.reporting.TripRunTimeOutput;
 import org.transitclock.api.data.reporting.chartjs.ChartType;
 import org.transitclock.api.data.ApiDispatcher;
@@ -332,6 +333,131 @@ public class ReportingApi {
         }
     }
 
+    @Path("/report/runTime/avgTripRunTimes")
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Operation(summary="Gets arrival / departures for date range and route",
+            description="Retrives a list of arrival departures for a specified date range "
+                    + "Optionally can be filered accorditn to routesIdOrShortNames params."
+                    + "Every trip is associated with a block.",tags= {"prediction","trip","block","route","vehicle"})
+    public Response getRunTimeTripAvgRunTime(
+            @BeanParam StandardParameters stdParameters,
+            @Parameter(description="Begin date to use for retrieving arrival departures",required=true)
+            @QueryParam(value = "beginDate") DateParam beginDate,
+            @Parameter(description="End date to use for retrieving arrival departures",required=true)
+            @QueryParam(value = "endDate") DateParam endDate,
+            @Parameter(description="Begin time of time-band to use for retrieving arrival departures")
+            @QueryParam(value = "beginTime") TimeParam beginTime,
+            @Parameter(description="End time of time-band to use for retrieving arrival departures")
+            @QueryParam(value = "endTime") TimeParam endTime,
+            @Parameter(description="Retrives only arrivalDepartures belonging to the route name specified.",required=true)
+            @QueryParam(value = "r") String route,
+            @Parameter(description="Retrives only arrivalDepartures belonging to the headsign specified.",required=true)
+            @QueryParam(value = "headsign") String headsign,
+            @Parameter(description="Specifies the tripPatternId to filter by.")
+            @QueryParam(value = "tripPattern") String tripPatternId,
+            @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday")
+            @QueryParam(value = "serviceType") String serviceType,
+            @Parameter(description="if set, retrives only arrivalDepartures with stops that are timePoints")
+            @QueryParam(value = "timePointsOnly") @DefaultValue("false") boolean timePointsOnly)
+            throws WebApplicationException {
+
+        // Make sure request is valid
+        stdParameters.validate();
+
+        try {
+            // Get active block data from server
+            ReportingInterface reportingInterface =
+                    stdParameters.getReportingInterface();
+
+            ServiceType serviceTypeEnum = null;
+            if(StringUtils.isNotBlank(serviceType)){
+                serviceTypeEnum = ServiceType.valueOf(serviceType.toUpperCase());
+            }
+
+            List<IpcRunTimeForTrip> ipcRunTimeTrips = reportingInterface.getRunTimeForTrips(beginDate.getDate(),
+                                                                                            endDate.getDate(),
+                                                                                            beginTime.getTime(),
+                                                                                            endTime.getTime(),
+                                                                                            route,
+                                                                                            headsign,
+                                                                                            tripPatternId,
+                                                                                            serviceTypeEnum,
+                                                                                            timePointsOnly,
+                                                                             false,
+                                                                                   true);
+
+            Object response = TripRunTimeOutput.getRunTimes(ipcRunTimeTrips);
+
+            return stdParameters.createResponse(response);
+        } catch (Exception e) {
+            // If problem getting data then return a Bad Request
+            throw WebUtils.badRequestException(e);
+        }
+
+    }
+
+    @Path("/report/runTime/avgStopPathRunTimes")
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Operation(summary="Gets arrival / departures for date range and route",
+            description="Retrives a list of arrival departures for a specified date range "
+                    + "Optionally can be filered according to routesIdOrShortNames params."
+                    + "Every trip is associated with a block.",tags= {"prediction","trip","block","route","vehicle"})
+    public Response getAvgStopPathRunTimes(
+            @BeanParam StandardParameters stdParameters,
+            @Parameter(description="Begin date to use for retrieving arrival departures",required=true)
+            @QueryParam(value = "beginDate") DateParam beginDate,
+            @Parameter(description="End date to use for retrieving arrival departures",required=true)
+            @QueryParam(value = "endDate") DateParam endDate,
+            @Parameter(description="Begin time of time-band to use for retrieving arrival departures")
+            @QueryParam(value = "beginTime") TimeParam beginTime,
+            @Parameter(description="End time of time-band to use for retrieving arrival departures")
+            @QueryParam(value = "endTime") TimeParam endTime,
+            @Parameter(description="Retrives only arrivalDepartures belonging to the route name specified.",required=true)
+            @QueryParam(value = "r") String route,
+            @Parameter(description="Specifies the tripId to filter by.",required=true)
+            @QueryParam(value = "tripId") String tripId,
+            @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday")
+            @QueryParam(value = "serviceType") String serviceType,
+            @Parameter(description="if set, retrives only arrivalDepartures with stops that are timePoints")
+            @QueryParam(value = "timePointsOnly") @DefaultValue("false") boolean timePointsOnly)
+            throws WebApplicationException {
+
+        // Make sure request is valid
+        stdParameters.validate();
+
+        try {
+            // Get active block data from server
+            ReportingInterface reportingInterface =
+                    stdParameters.getReportingInterface();
+
+            ServiceType serviceTypeEnum = null;
+            if(StringUtils.isNotBlank(serviceType)){
+                serviceTypeEnum = ServiceType.valueOf(serviceType.toUpperCase());
+            }
+
+            List<IpcRunTimeForStopPath> ipcRunTimeForStopPaths = reportingInterface.getRunTimeForStopPaths(
+                                                                                                beginDate.getDate(),
+                                                                                                endDate.getDate(),
+                                                                                                beginTime.getTime(),
+                                                                                                endTime.getTime(),
+                                                                                                route,
+                                                                                                tripId,
+                                                                                                serviceTypeEnum,
+                                                                                                timePointsOnly,
+                                                                                                true);
+
+            Object response = StopPathRunTimeOutput.getRunTimes(ipcRunTimeForStopPaths);
+
+            return stdParameters.createResponse(response);
+        } catch (Exception e) {
+            // If problem getting data then return a Bad Request
+            throw WebUtils.badRequestException(e);
+        }
+
+    }
+
     @Path("/report/live/dispatch")
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -353,65 +479,6 @@ public class ReportingApi {
             Object response = null;
             ApiDispatcher dispatcher = new ApiDispatcher(vehicles);
             response = dispatcher;
-
-            return stdParameters.createResponse(response);
-        } catch (Exception e) {
-            // If problem getting data then return a Bad Request
-            throw WebUtils.badRequestException(e);
-        }
-
-    }
-
-    @Path("/report/runTime/avgTripRunTimes")
-    @GET
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    @Operation(summary="Gets arrival / departures for date range and route",
-            description="Retrives a list of arrival departures for a specified date range "
-                    + "Optionally can be filered accorditn to routesIdOrShortNames params."
-                    + "Every trip is associated with a block.",tags= {"prediction","trip","block","route","vehicle"})
-    public Response getRunTimeTripAvgRunTime(
-            @BeanParam StandardParameters stdParameters,
-            @Parameter(description="Begin date to use for retrieving arrival departures",required=true)
-            @QueryParam(value = "beginDate") DateParam beginDate,
-            @Parameter(description="End date to use for retrieving arrival departures",required=true)
-            @QueryParam(value = "endDate") DateParam endDate,
-            @Parameter(description="Begin time of time-band to use for retrieving arrival departures",required=true)
-            @QueryParam(value = "beginTime") TimeParam beginTime,
-            @Parameter(description="End time of time-band to use for retrieving arrival departures",required=true)
-            @QueryParam(value = "endTime") TimeParam endTime,
-            @Parameter(description="Retrives only arrivalDepartures belonging to the route name specified.",required=true)
-            @QueryParam(value = "r") String route,
-            @Parameter(description="Retrives only arrivalDepartures belonging to the headsign specified.",required=true)
-            @QueryParam(value = "headsign") String headsign,
-            @Parameter(description="Specifies to the starting stop Id for the trips to filter by.",required=true)
-            @QueryParam(value = "startStop") String startStop,
-            @Parameter(description="Specifies to the ending stop Id for the trips to filter by.",required=true)
-            @QueryParam(value = "endStop") String endStop,
-            @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday",required=false)
-            @QueryParam(value = "serviceType") String serviceType,
-            @Parameter(description="if set, retrives only arrivalDepartures with stops that are timePoints",required=false)
-            @QueryParam(value = "timePointsOnly") @DefaultValue("false") boolean timePointsOnly)
-            throws WebApplicationException {
-
-        // Make sure request is valid
-        stdParameters.validate();
-
-        try {
-            // Get active block data from server
-            ReportingInterface reportingInterface =
-                    stdParameters.getReportingInterface();
-
-            ServiceType serviceTypeEnum = null;
-            if(StringUtils.isNotBlank(serviceType)){
-                serviceTypeEnum = ServiceType.valueOf(serviceType.toUpperCase());
-            }
-
-            List<IpcRunTimeForTrip> ipcRunTimeTrips = reportingInterface.getRunTimeForTrips(
-                    beginDate.getDate(), endDate.getDate(), beginTime.getTime(), endTime.getTime(),
-                    route, headsign, startStop, endStop, serviceTypeEnum, timePointsOnly,
-                    false, false);
-
-            Object response = TripRunTimeOutput.getAvgTripRunTimes(ipcRunTimeTrips);
 
             return stdParameters.createResponse(response);
         } catch (Exception e) {

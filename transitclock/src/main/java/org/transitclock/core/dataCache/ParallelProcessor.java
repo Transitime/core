@@ -100,8 +100,15 @@ public class ParallelProcessor {
         new Thread(pt).start();
     }
 
+  public String getDebugInfo() {
+      TaskWrapper taskWrapper = runQueue.peek();
+      if (taskWrapper != null)
+        return taskWrapper.task.toString();
+      return "(none)";
+  }
 
-    /**
+
+  /**
      * Remove complete jobs from the run queue.
      */
     public static class PruneThread implements Runnable {

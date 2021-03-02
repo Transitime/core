@@ -147,7 +147,7 @@ public class StopPath implements Serializable, Lifecycle {
 	 * Simple constructor
 	 * 
 	 * @param configRev
-	 * @param pathId
+	 * @param stopPathId
 	 * @param stopId
 	 * @param gtfsStopSeq
 	 * @param lastStopInTrip
@@ -158,7 +158,7 @@ public class StopPath implements Serializable, Lifecycle {
 	 * @param breakTime
 	 */
 	public StopPath(int configRev,
-			String pathId, 
+			String stopPathId,
 			String stopId,
 			int gtfsStopSeq,
 			boolean lastStopInTrip,
@@ -170,7 +170,7 @@ public class StopPath implements Serializable, Lifecycle {
 			Double maxDistance,
 			Double maxSpeed) {
 		this.configRev = configRev;
-		this.stopPathId = pathId;
+		this.stopPathId = stopPathId;
 		this.stopId = stopId;
 		this.gtfsStopSeq = gtfsStopSeq;
 		this.lastStopInTrip = lastStopInTrip;
@@ -642,6 +642,10 @@ public class StopPath implements Serializable, Lifecycle {
 		} else {
 			return 0;
 		}
+	}
+
+	public Integer getBreakTime() {
+		return breakTime;
 	}
 
 	/**

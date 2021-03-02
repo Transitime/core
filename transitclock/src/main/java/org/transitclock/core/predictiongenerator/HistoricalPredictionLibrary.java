@@ -84,6 +84,7 @@ public class HistoricalPredictionLibrary {
 						// for this departure find the next arrival
 						if ((found = findMatchInList(nextStopList, currentArrivalDeparture)) != null) {
 							getMonitoring().rateMetric("PredictionStopADTTHit", true);
+							// NOTE: this constructor is departure, arrival!!!!
 							TravelTimeDetails travelTimeDetails=new TravelTimeDetails(currentArrivalDeparture, found);
 							if(travelTimeDetails.getTravelTime()>0)
 							{
@@ -239,8 +240,14 @@ public class HistoricalPredictionLibrary {
 		return null;
 	}
 
-    public static List<TravelTimeDetails> lastDaysTimes(TripDataHistoryCacheInterface cache, String tripId,String direction, int stopPathIndex, Date startDate,
-														Integer startTime, int num_days_look_back, int num_days) {
+    public static List<TravelTimeDetails> getHistoricalTravelTimes(TripDataHistoryCacheInterface cache,
+																																	 String tripId,
+																																	 String direction,
+																																	 int stopPathIndex,
+																																	 Date startDate,
+																																	 Integer startTime,
+																																	 int num_days_look_back,
+																																	 int num_days) {
 
 		List<TravelTimeDetails> times = new ArrayList<TravelTimeDetails>();
 		List<IpcArrivalDeparture> results = null;

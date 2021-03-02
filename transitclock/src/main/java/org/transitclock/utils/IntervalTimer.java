@@ -30,6 +30,8 @@ public class IntervalTimer {
 
 	// The time the interval timer created or reset
 	private long initialNanotime;
+
+	private final String name;
 	
 	private static DecimalFormat decimalFormat = new DecimalFormat("#.###");
 	
@@ -39,6 +41,12 @@ public class IntervalTimer {
 	 * Records the current time so that elapsed time can later be determined.
 	 */
 	public IntervalTimer() {
+		this.name = "timer";
+		initialNanotime = System.nanoTime();
+	}
+
+	public IntervalTimer(String name){
+		this.name = name;
 		initialNanotime = System.nanoTime();
 	}
 	
@@ -76,6 +84,10 @@ public class IntervalTimer {
 	public String elapsedMsecStr() {
 		long microSecs = (System.nanoTime() - initialNanotime)/1000;
 		return decimalFormat.format((double) microSecs / 1000);
+	}
+
+	public void printTime(){
+		System.out.println(name + " - " + elapsedMsecStr());
 	}
 	
 	/**

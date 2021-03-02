@@ -16,6 +16,8 @@
  */
 package org.transitclock.applications;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Session;
@@ -36,11 +38,13 @@ import org.transitclock.core.dataCache.VehicleDataCache;
 import org.transitclock.core.dataCache.ehcache.CacheManagerFactory;
 import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
+import org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman.TrafficManager;
 import org.transitclock.db.hibernate.DataDbLogger;
 import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.db.structs.ActiveRevisions;
 import org.transitclock.db.structs.Agency;
 import org.transitclock.gtfs.DbConfig;
+import org.transitclock.guice.modules.ReportingModule;
 import org.transitclock.ipc.servers.*;
 import org.transitclock.modules.Module;
 import org.transitclock.monitoring.PidFile;
@@ -77,7 +81,7 @@ public class Core {
 	private final TimeoutHandlerModule timeoutHandlerModule;
 
 	private final ServiceUtils service;
-	private final Time time;
+	private Time time;
 
 	// So that can access the current time, even when in playback mode
 	private SystemTime systemTime = new SystemCurrentTime();
@@ -218,6 +222,16 @@ public class Core {
 	}
 
 	/**
+	 * For testing access.  Not to be used in production!
+	 * @param agencyId
+	 * @return
+	 */
+	synchronized public static Core createTestCore(String agencyId) {
+		Core core = new Core(agencyId);
+		Core.singleton = core;
+		return core;
+	}
+	/**
 	 * For obtaining singleton Core object.
 	 * Synchronized to prevent race conditions if starting lots of optional modules.
 	 *
@@ -266,6 +280,13 @@ public class Core {
 	 */
 	public Time getTime() {
 		return time;
+	}
+
+	/**
+	 * unit test access, otherwise this is constructed internally.
+	 */
+	public void setTime(Time time) {
+		this.time = time;
 	}
 
 	/**
@@ -405,7 +426,10 @@ public class Core {
 		CacheQueryServer.start(agencyId);
 		PredictionAnalysisServer.start(agencyId);
 		HoldingTimeServer.start(agencyId);
-		ReportingServer.start(agencyId);
+
+		Injector injector = Guice.createInjector(new ReportingModule());
+		ReportingServer reportingServer = injector.getInstance(ReportingServer.class);
+		reportingServer.start(agencyId);
 	}
 	
 	static private void populateCaches() throws Exception
@@ -432,6 +456,10 @@ public class Core {
 			{
 				logger.info("Populating StopArrivalDepartureCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
 				StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
+			}
+
+			if (TrafficManager.getInstance() != null) {
+				TrafficManager.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
 			}
 		}else
 		{
@@ -466,12 +494,17 @@ public class Core {
 					pp.enqueue(ct);
 				}
 
+				if (i < 5 && TrafficManager.getInstance() != null && TrafficManager.getInstance().isEnabled()) {
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.TrafficDataHistoryCache);
+					pp.enqueue(ct);
+				}
+
 				endDate=startDate;
 			}
 			// don't continue until caches are ready!
 			while (!pp.isDone()) {
 				try {
-					logger.info("waiting on caching to complete with {} in run queue, {} in wait queue ", pp.getRunQueueSize(), pp.getWaitQueueSize() );
+					logger.info("waiting on caching to complete with {} in run queue, {} in wait queue; {} running ", pp.getRunQueueSize(), pp.getWaitQueueSize(), pp.getDebugInfo() );
 					Thread.sleep(10 * 1000);
 				} catch (InterruptedException ie) {
 					return;

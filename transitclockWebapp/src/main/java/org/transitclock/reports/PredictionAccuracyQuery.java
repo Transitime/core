@@ -613,7 +613,6 @@ abstract public class PredictionAccuracyQuery {
 			logger.debug("beginDate {} beginDateStr {} endDateStr {} beginTime {} beginTimeStr {} endTime {} endTimeStr {}",
 					beginDate,
 					beginDateStr,
-					numDays,
 					beginTime,
 					beginTimeStr,
 					endTime,

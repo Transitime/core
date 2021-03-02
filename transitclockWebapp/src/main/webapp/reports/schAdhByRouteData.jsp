@@ -17,8 +17,20 @@
     pageEncoding="ISO-8859-1"%>
 <%@ page import="org.transitclock.reports.GenericJsonQuery" %>
 <%@ page import="org.transitclock.reports.SqlUtils" %>
+<%@ page import="org.transitclock.db.webstructs.WebAgency" %>
 <%
-try {		
+try {
+
+String agencyId = request.getParameter("a");
+WebAgency agency = WebAgency.getCachedWebAgency(agencyId);
+String dbtype = agency.getDbType();
+boolean isMysql = "mysql".equals(dbtype);
+
+String epochCommandPre = "";
+if (isMysql) {
+	epochCommandPre = "UNIX_TIMESTAMP";
+}
+
 String allowableEarlyStr = request.getParameter("allowableEarly");
 if (allowableEarlyStr == null || allowableEarlyStr.isEmpty())
 	allowableEarlyStr = "1.0";
@@ -28,13 +40,13 @@ String allowableLateStr = request.getParameter("allowableLate");
 if (allowableLateStr == null || allowableLateStr.isEmpty())
 	allowableLateStr = "4.0";
 String allowableLateMinutesStr = "'" + SqlUtils.convertMinutesToSecs(allowableLateStr) + " seconds'";
-    		   
+
 String sql =
 	"SELECT " 
-	+ "     COUNT(CASE WHEN scheduledTime-time > " + allowableEarlyMinutesStr + " THEN 1 ELSE null END) as early, \n"
-	+ "     COUNT(CASE WHEN scheduledTime-time <= " + allowableEarlyMinutesStr + " AND time-scheduledTime <= " 
+	+ "     COUNT(CASE WHEN " + epochCommandPre + "(scheduledTime-time) > " + allowableEarlyMinutesStr + " THEN 1 ELSE null END) as early, \n"
+	+ "     COUNT(CASE WHEN " + epochCommandPre + "(scheduledTime-time) <= " + allowableEarlyMinutesStr + " AND " + epochCommandPre + "(time-scheduledTime) <= "
 				+ allowableLateMinutesStr + " THEN 1 ELSE null END) AS ontime, \n" 
-    + "     COUNT(CASE WHEN time-scheduledTime > " + allowableLateMinutesStr + " THEN 1 ELSE null END) AS late, \n" 
+    + "     COUNT(CASE WHEN " + epochCommandPre + "(time-scheduledTime) > " + allowableLateMinutesStr + " THEN 1 ELSE null END) AS late, \n"
     + "     COUNT(*) AS total, \n"
     + "     r.name \n"
     + "FROM ArrivalsDepartures ad, Routes r \n"
@@ -54,7 +66,6 @@ String sql =
 System.out.println("\nFor schedule adherence by route query sql=\n" + sql);
     		
 // Do the query and return result in JSON format    
-String agencyId = request.getParameter("a");
 String jsonString  = GenericJsonQuery.getJsonString(agencyId, sql);
 response.setContentType("application/json");
 response.setHeader("Access-Control-Allow-Origin", "*");
