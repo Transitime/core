@@ -34,11 +34,7 @@ public class TripStatistics {
      * @param runTime
      */
     public void addStopPathRunTime(ArrivalDeparture ad, Double runTime){
-       /* if(ad.getTripId().equals("6190176")) {
-            System.out.println(ad.getTripId() + " -- " + ad.getStopPathIndex() + "(" + ad.getStopId() + ")" + " - " + runTime);
-        }*/
-
-        if(ad.getTripId().equals(trip.getId())
+           if(ad.getTripId().equals(trip.getId())
                 && stopPathsGroupedById.get(ad.getStopPathId()) != null){
             StopPathRunTimeKey stopPathkey = new StopPathRunTimeKey(ad.getStopId(), ad.getStopPathId(), ad.getStopPathIndex());
             addStopPathRunTime(stopPathkey, ad, runTime);
