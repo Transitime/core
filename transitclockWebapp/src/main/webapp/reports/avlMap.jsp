@@ -45,7 +45,7 @@
         <label for="early">Allowable early (mins):</label>
         <input type="number" id="early" name="early" min="0" max="1440" step="0.5" value="1.5">
     </div>
-    <jsp:include page="params/routeAllOrSingle.jsp" /> <br>
+    <jsp:include page="params/routeAllOrSingleWithShortName.jsp" /> <br>
     <input type="button" id="submit" value="Submit">
     <a href="#" id="exportData">Export</a>
   </div>
