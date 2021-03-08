@@ -411,6 +411,7 @@
         time timestamp not null,
         confidence double precision,
         delayMillis double precision,
+        length double precision,
         speed double precision,
         travelTimeMillis number(10,0),
         primary key (trafficSensorId, trafficRev, time)

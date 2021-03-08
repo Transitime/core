@@ -2,8 +2,8 @@
     create table ActiveRevisions (
         id integer not null auto_increment,
         configRev integer,
-        travelTimesRev integer,
         trafficRev integer,
+        travelTimesRev integer,
         primary key (id)
     );
 
@@ -411,6 +411,7 @@
         time datetime(3) not null,
         confidence double precision,
         delayMillis double precision,
+        length double precision,
         speed double precision,
         travelTimeMillis integer,
         primary key (trafficSensorId, trafficRev, time)
@@ -586,7 +587,7 @@
 
     create index StopPathPredictionTimeIndex on StopPathPredictions (tripId, stopPathIndex);
 
-    alter table TrafficPath_to_StopPath_joinTable
+    alter table TrafficPath_to_StopPath_joinTable 
         add constraint UK_ohqplmhw0t46tipi7i9bxuur8  unique (stopPaths_tripPatternId, stopPaths_stopPathId, stopPaths_configRev);
 
     create index TravelTimesRevIndex on TravelTimesForTrips (travelTimesRev);
@@ -623,22 +624,22 @@
         foreign key (StopPath_tripPatternId, StopPath_stopPathId, StopPath_configRev) 
         references StopPaths (tripPatternId, stopPathId, configRev);
 
-    alter table TrafficPath_locations
-        add constraint FK_j3otbyk8qsh9rg02q8kk8931q
-        foreign key (TrafficPath_trafficRev, TrafficPath_trafficPathId)
+    alter table TrafficPath_locations 
+        add constraint FK_j3otbyk8qsh9rg02q8kk8931q 
+        foreign key (TrafficPath_trafficRev, TrafficPath_trafficPathId) 
         references TrafficPaths (trafficRev, trafficPathId);
 
-    alter table TrafficPath_to_StopPath_joinTable
-        add constraint FK_ohqplmhw0t46tipi7i9bxuur8
-        foreign key (stopPaths_tripPatternId, stopPaths_stopPathId, stopPaths_configRev)
+    alter table TrafficPath_to_StopPath_joinTable 
+        add constraint FK_ohqplmhw0t46tipi7i9bxuur8 
+        foreign key (stopPaths_tripPatternId, stopPaths_stopPathId, stopPaths_configRev) 
         references StopPaths (tripPatternId, stopPathId, configRev);
 
-    alter table TrafficPath_to_StopPath_joinTable
-        add constraint FK_6aib4u1tr2wfpxoog3a5ycou9
-        foreign key (TrafficPaths_trafficRev, TrafficPaths_trafficPathId)
+    alter table TrafficPath_to_StopPath_joinTable 
+        add constraint FK_6aib4u1tr2wfpxoog3a5ycou9 
+        foreign key (TrafficPaths_trafficRev, TrafficPaths_trafficPathId) 
         references TrafficPaths (trafficRev, trafficPathId);
 
-    alter table TravelTimesForTrip_to_TravelTimesForPath_joinTable
+    alter table TravelTimesForTrip_to_TravelTimesForPath_joinTable 
         add constraint FK_hh5uepurijcqj0pyc6e3h5mqw 
         foreign key (travelTimesForStopPaths_id) 
         references TravelTimesForStopPaths (id);

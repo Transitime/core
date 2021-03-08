@@ -411,6 +411,7 @@
         time timestamp not null,
         confidence float8,
         delayMillis float8,
+        length float8,
         speed float8,
         travelTimeMillis int4,
         primary key (trafficSensorId, trafficRev, time)
