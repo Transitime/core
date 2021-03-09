@@ -32,6 +32,7 @@ import org.transitclock.configData.CoreConfig;
 import org.transitclock.configData.DbSetupConfig;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.AvlReport;
+import org.transitclock.db.structs.Headway;
 import org.transitclock.db.structs.Match;
 import org.transitclock.db.structs.MonitoringEvent;
 import org.transitclock.db.structs.Prediction;
@@ -89,9 +90,10 @@ public class DataDbLogger {
   private DbQueue<PredictionAccuracy> predictionAccuracyQueue;
   private DbQueue<MonitoringEvent> monitoringEventQueue;
   private DbQueue<VehicleEvent> vehicleEventQueue;
-	private DbQueue<PredictionEvent> predictionEventQueue;
+  private DbQueue<PredictionEvent> predictionEventQueue;
   private DbQueue<VehicleState> vehicleStateQueue;
   private DbQueue<TrafficSensorData> trafficSensorDataQueue;
+  private DbQueue<Headway> headwayQueue;
   private DbQueue<Object> genericQueue;
 	
 	private static final int QUEUE_CAPACITY = 5000000;
@@ -196,7 +198,8 @@ public class DataDbLogger {
 		predictionEventQueue = new DbQueue<PredictionEvent>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, PredictionEvent.class.getSimpleName());
 	  vehicleStateQueue = new DbQueue<VehicleState>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, VehicleState.class.getSimpleName());
 	  trafficSensorDataQueue = new DbQueue<TrafficSensorData>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, TrafficSensorData.class.getSimpleName());
-	  genericQueue = new DbQueue<Object>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, Object.class.getSimpleName());
+	  headwayQueue = new DbQueue<Headway>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, Headway.class.getSimpleName());
+		genericQueue = new DbQueue<Object>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, Object.class.getSimpleName());
 		
 	}
 	
@@ -249,19 +252,23 @@ public class DataDbLogger {
 		return false;
 		}
     public boolean add(VehicleState vs) {
-			String key = "vs_" + vs.getVehicleId();
-			String hash = vehicleToPrimayKeyMap.get(key);
-			if (hash != null && hash.equals(hashVehicleState(vs))) {
-				// we already have this value, prevent sql exception
-				return false;
-			}
-			vehicleToPrimayKeyMap.put(key, hash);
-			return vehicleStateQueue.add(vs);
+		String key = "vs_" + vs.getVehicleId();
+		String hash = vehicleToPrimayKeyMap.get(key);
+		if (hash != null && hash.equals(hashVehicleState(vs))) {
+			// we already have this value, prevent sql exception
+			return false;
 		}
+		vehicleToPrimayKeyMap.put(key, hash);
+		return vehicleStateQueue.add(vs);
+	}
 
-		public boolean add(TrafficSensorData data) {
-			return trafficSensorDataQueue.add(data);
-		}
+	public boolean add(TrafficSensorData data) {
+		return trafficSensorDataQueue.add(data);
+	}
+
+	public boolean add(Headway data) {
+		return headwayQueue.add(data);
+	}
 
 	
 	/**
@@ -316,6 +323,7 @@ public class DataDbLogger {
 						predictionEventQueue.queueLevel(),
 						vehicleStateQueue.queueLevel(),
 						trafficSensorDataQueue.queueLevel(),
+						headwayQueue.queueLevel(),
 						genericQueue.queueLevel()
 		};
 
@@ -338,6 +346,7 @@ public class DataDbLogger {
 						predictionEventQueue.queueSize(),
 						vehicleStateQueue.queueSize(),
 						trafficSensorDataQueue.queueSize(),
+						headwayQueue.queueSize(),
 						genericQueue.queueSize()
 		};
 

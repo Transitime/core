@@ -70,8 +70,16 @@ public class LastArrivalsHeadwayGenerator implements HeadwayGenerator {
 				{
 					long headwayTime=Math.abs(stopList.get(lastStopArrivalIndex).getTime().getTime()-stopList.get(previousVehicleArrivalIndex).getTime().getTime());
 
-					Headway headway=new Headway(headwayTime, new Date(date), vehicleId, stopList.get(previousVehicleArrivalIndex).getVehicleId(), stopId, vehicleState.getTrip().getId(), vehicleState.getTrip().getRouteId(), new Date(stopList.get(lastStopArrivalIndex).getTime().getTime()), new Date(stopList.get(previousVehicleArrivalIndex).getTime().getTime()));
-					// TODO Core.getInstance().getDbLogger().add(headway);
+					Headway headway=new Headway(headwayTime,
+												new Date(date),
+												vehicleId,
+												stopList.get(previousVehicleArrivalIndex).getVehicleId(),
+												stopId,
+												vehicleState.getTrip().getId(),
+												vehicleState.getTrip().getRouteId(),
+												new Date(stopList.get(lastStopArrivalIndex).getTime().getTime()),
+												new Date(stopList.get(previousVehicleArrivalIndex).getTime().getTime()));
+					Core.getInstance().getDbLogger().add(headway);
 					setSystemVariance(headway);
 					return headway;
 				}

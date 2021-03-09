@@ -68,8 +68,16 @@ public class LastDepartureHeadwayGenerator implements HeadwayGenerator {
 				{
 					long headwayTime=Math.abs(stopList.get(lastStopArrivalIndex).getTime().getTime()-stopList.get(previousVehicleArrivalIndex).getTime().getTime());
 
-					Headway headway=new Headway(headwayTime, new Date(date), vehicleId, stopList.get(previousVehicleArrivalIndex).getVehicleId(), stopId, vehicleState.getTrip().getId(), vehicleState.getTrip().getRouteId(), new Date(stopList.get(lastStopArrivalIndex).getTime().getTime()), new Date(stopList.get(previousVehicleArrivalIndex).getTime().getTime()));
-					// TODO Core.getInstance().getDbLogger().add(headway);
+					Headway headway=new Headway(headwayTime,
+												new Date(date),
+												vehicleId,
+												stopList.get(previousVehicleArrivalIndex).getVehicleId(),
+												stopId,
+												vehicleState.getTrip().getId(),
+												vehicleState.getTrip().getRouteId(),
+												new Date(stopList.get(lastStopArrivalIndex).getTime().getTime()),
+												new Date(stopList.get(previousVehicleArrivalIndex).getTime().getTime()));
+					Core.getInstance().getDbLogger().add(headway);
 
 					// remove rubish data from departure sfrom t
 					if(Math.abs(headway.getCreationTime().getTime()-headway.getFirstDeparture().getTime())>1200000||lastStopArrivalIndex>5)
