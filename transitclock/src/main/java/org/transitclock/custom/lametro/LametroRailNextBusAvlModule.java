@@ -16,8 +16,14 @@
  */
 package org.transitclock.custom.lametro;
 
+import org.jdom2.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitclock.avl.NextBusAvlModule;
 import org.transitclock.config.StringConfigValue;
+import org.transitclock.db.structs.AvlReport;
+
+import java.util.Collection;
 
 /**
  * For lametro agency using two separate AVL feeds so need a 
@@ -44,6 +50,6 @@ public class LametroRailNextBusAvlModule extends NextBusAvlModule {
 	public LametroRailNextBusAvlModule(String agencyId) {
 		super(agencyId);
 	}
-	
+
 
 }
