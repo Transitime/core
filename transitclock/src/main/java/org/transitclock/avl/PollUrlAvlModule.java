@@ -161,63 +161,64 @@ public abstract class PollUrlAvlModule extends AvlModule {
 		IntervalTimer timer = new IntervalTimer(); 
 
 		// Get from the AVL feed subclass the URL to use for this feed
-		String fullUrl = getUrl();
-		
-		// Log what is happening
-		logger.warn("Getting data from feed using url=" + fullUrl);
-	
-		// Create the connection
-		URL url = new URL(fullUrl);
-		URLConnection con = url.openConnection();
-		
-		// Set the timeout so don't wait forever
-		int timeoutMsec = AvlConfig.getAvlFeedTimeoutInMSecs();
-		con.setConnectTimeout(timeoutMsec);
-		con.setReadTimeout(timeoutMsec);
-		
-		// Request compressed data to reduce bandwidth used
-		if (useCompression)
-			con.setRequestProperty("Accept-Encoding", "gzip,deflate");
-	
-		// If authentication being used then set user and password
-		if (authenticationUser.getValue() != null
-				&& authenticationPassword.getValue() != null) {
-			String authString =
-					authenticationUser.getValue() + ":"
-							+ authenticationPassword.getValue();
-			byte[] authEncBytes =
-					Base64.encodeBase64(authString.getBytes());
-			String authStringEnc = new String(authEncBytes);
-			con.setRequestProperty("Authorization", "Basic "
-					+ authStringEnc);
-		}
-		
-		// Set any additional AVL feed specific request headers
-		setRequestHeaders(con);
-		
-		// Create appropriate input stream depending on whether content is 
-		// compressed or not
-		InputStream in = con.getInputStream();
-		if ("gzip".equals(con.getContentEncoding())) {
-		    in = new GZIPInputStream(in);
-		    logger.debug("Returned data is compressed");
-		} else {
-		    logger.debug("Returned data is NOT compressed");			
-		}
+		String[] fullUrls = getUrl().split(",");
+		for (String fullUrl : fullUrls) {
+			// Log what is happening
+			logger.warn("Getting data from feed using url=" + fullUrl);
 
-		// For debugging
-		logger.warn("Time to access inputstream {} msec",
-				timer.elapsedMsec());
-				
-		// Call the abstract method to actually process the data
-		timer.resetTimer();
-		Collection<AvlReport> avlReportsReadIn = processData(in);		
-		in.close();
-		logger.warn("Time to parse document {} msec", timer.elapsedMsec());
-		
-		// Process all the reports read in
-		if (shouldProcessAvl.getValue())
-			processAvlReports(avlReportsReadIn);
+			// Create the connection
+			URL url = new URL(fullUrl);
+			URLConnection con = url.openConnection();
+
+			// Set the timeout so don't wait forever
+			int timeoutMsec = AvlConfig.getAvlFeedTimeoutInMSecs();
+			con.setConnectTimeout(timeoutMsec);
+			con.setReadTimeout(timeoutMsec);
+
+			// Request compressed data to reduce bandwidth used
+			if (useCompression)
+				con.setRequestProperty("Accept-Encoding", "gzip,deflate");
+
+			// If authentication being used then set user and password
+			if (authenticationUser.getValue() != null
+					&& authenticationPassword.getValue() != null) {
+				String authString =
+						authenticationUser.getValue() + ":"
+								+ authenticationPassword.getValue();
+				byte[] authEncBytes =
+						Base64.encodeBase64(authString.getBytes());
+				String authStringEnc = new String(authEncBytes);
+				con.setRequestProperty("Authorization", "Basic "
+						+ authStringEnc);
+			}
+
+			// Set any additional AVL feed specific request headers
+			setRequestHeaders(con);
+
+			// Create appropriate input stream depending on whether content is
+			// compressed or not
+			InputStream in = con.getInputStream();
+			if ("gzip".equals(con.getContentEncoding())) {
+				in = new GZIPInputStream(in);
+				logger.debug("Returned data is compressed");
+			} else {
+				logger.debug("Returned data is NOT compressed");
+			}
+
+			// For debugging
+			logger.warn("Time to access inputstream {} msec",
+					timer.elapsedMsec());
+
+			// Call the abstract method to actually process the data
+			timer.resetTimer();
+			Collection<AvlReport> avlReportsReadIn = processData(in);
+			in.close();
+			logger.warn("Time to parse document {} msec", timer.elapsedMsec());
+
+			// Process all the reports read in
+			if (shouldProcessAvl.getValue())
+				processAvlReports(avlReportsReadIn);
+		}
 	}
 	
 	/** 
