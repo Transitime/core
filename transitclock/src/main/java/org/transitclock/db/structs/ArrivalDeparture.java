@@ -1449,6 +1449,10 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		return stopPathId;
 	}
 
+	public String getTripPatternId() {
+		return tripPatternId;
+	}
+
 	public Stop getStopFromDb() {
 		return stop;
 	}

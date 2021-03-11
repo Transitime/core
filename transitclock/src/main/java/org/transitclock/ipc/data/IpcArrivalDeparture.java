@@ -56,6 +56,10 @@ public class IpcArrivalDeparture implements Serializable {
 	private Date freqStartTime;
 	@XmlAttribute
 	private transient Long dwellTime;
+	@XmlAttribute
+	private String tripPatternId;
+	@XmlAttribute
+	private Date scheduledDate;
 
 	protected IpcArrivalDeparture(){}
 
@@ -76,6 +80,8 @@ public class IpcArrivalDeparture implements Serializable {
 		this.blockId=arrivalDepature.getBlockId();
 		this.serviceId=arrivalDepature.getServiceId();
 		this.dwellTime=arrivalDepature.getDwellTime();
+		this.tripPatternId=arrivalDepature.getTripPatternId();
+		this.scheduledDate=arrivalDepature.getScheduledDate();
 	}
 	
 	
@@ -207,6 +213,14 @@ public class IpcArrivalDeparture implements Serializable {
 		this.dwellTime = dwellTime;
 	}
 
+	public String getTripPatternId() {
+		return tripPatternId;
+	}
+
+	public Date getScheduledDate() {
+		return scheduledDate;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -228,6 +242,8 @@ public class IpcArrivalDeparture implements Serializable {
 		result = prime * result + tripIndex;
 		result = prime * result + ((vehicleId == null) ? 0 : vehicleId.hashCode());
 		result = prime * result + ((dwellTime == null) ? 0 : dwellTime.hashCode());
+		result = prime * result + ((scheduledDate == null) ? 0 : scheduledDate.hashCode());
+		result = prime * result + ((tripPatternId == null) ? 0 : tripPatternId.hashCode());
 		return result;
 	}
 
@@ -313,6 +329,16 @@ public class IpcArrivalDeparture implements Serializable {
 				return false;
 		} else if (!dwellTime.equals(other.dwellTime))
 			return false;
+		if (scheduledDate == null) {
+			if (other.scheduledDate != null)
+				return false;
+		} else if (!scheduledDate.equals(other.scheduledDate))
+			return false;
+		if (tripPatternId == null) {
+			if (other.tripPatternId != null)
+				return false;
+		} else if (!tripPatternId.equals(other.tripPatternId))
+			return false;
 		return true;
 	}
 
@@ -323,7 +349,8 @@ public class IpcArrivalDeparture implements Serializable {
 				+ avlTime + ", scheduledAdherence=" + scheduledAdherence + ", blockId=" + blockId + ", routeId="
 				+ routeId + ", routeShortName=" + routeShortName + ", serviceId=" + serviceId + ", directionId="
 				+ directionId + ", tripIndex=" + tripIndex + ", stopPathIndex=" + stopPathIndex + ", stopPathLength="
-				+ stopPathLength + ", freqStartTime=" + freqStartTime + (dwellTime != null ? ", dwellTime=" + dwellTime : "") + "]";
+				+ stopPathLength + ", freqStartTime=" + freqStartTime + (dwellTime != null ? ", dwellTime=" + dwellTime : "")
+				+ ", tripPatternId=" + tripPatternId + (scheduledDate != null ? ", scheduledDate=" + scheduledDate : "") + "]";
 	}
 
 
