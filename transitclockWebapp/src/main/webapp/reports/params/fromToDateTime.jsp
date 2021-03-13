@@ -3,21 +3,27 @@
 <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
 <link rel="stylesheet" type="text/css" href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
 
+<link rel="stylesheet" type="text/css" href="../jquery.datepick.package-5.1.0/css/jquery.datepick.css">
+<script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.plugin.js"></script>
+<script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.datepick.js"></script>
+
 <script>
 $(function() {
   var calendarIconTooltip = "Popup calendar to select date";
   
-  $( "#beginDate" ).datepicker({
+  $( "#beginDate" ).datepick({
 	dateFormat: "yy-mm-dd",
     showOtherMonths: true,
     selectOtherMonths: true,
     // Show button for calendar
-    buttonImage: "images/calendar.png",
+      buttonImage: "../jquery.datepick.package-5.1.0/img/calendar.gif",
     buttonImageOnly: true,
     showOn: "both",
     // Don't allow going past current date
     maxDate: 0,
-    // onClose is for restricting end date to be after start date, 
+      showTrigger: '<button type="button" class="trigger">' +
+          '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
+      // onClose is for restricting end date to be after start date,
     // though it is potentially confusing to user
     onClose: function( selectedDate ) {
       $( "#endDate" ).datepicker( "option", "minDate", selectedDate );
@@ -31,10 +37,12 @@ $(function() {
     showOtherMonths: true,
     selectOtherMonths: true,
     // Show button for calendar
-    buttonImage: "images/calendar.png",
+    buttonImage: "img/calendar.gif",
     buttonImageOnly: true,
     showOn: "both",
-    // Don't allow going past current date
+      showTrigger: '<button type="button" class="trigger">' +
+          '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
+      // Don't allow going past current date
     maxDate: 0,
     // onClose is for restricting end date to be after start date, 
     // though it is potentially confusing to user

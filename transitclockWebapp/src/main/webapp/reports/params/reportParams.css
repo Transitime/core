@@ -6,7 +6,7 @@ label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-rig
 .submitDiv{ margin-top: 40px; text-align: center; }
 #radioButtonsDiv {margin-top: 13px; text-align: center;}
 .note {font-size: small;}
-#allowableEarly, #allowableLate, #intervalPercentage1, #intervalPercentage2 { width: 3em; }
+/*#allowableEarly, #allowableLate, #intervalPercentage1, #intervalPercentage2 { width: 3em; }*/
 
 .multiAllowableSec {
     float: left;
@@ -15,10 +15,10 @@ label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-rig
 .multiAllowableSec label{
     width: 150px;
 }
-
+/*
 .multiAllowableSec input[type=number]{
     width: 60px;
-}
+}*/
 
 .bucketLabel {
     font-size: 12px;
@@ -41,3 +41,122 @@ label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-rig
     width:100px;
     font-size: 14px;
 }
+
+
+
+/* updated css */
+#title {
+    margin-top: 40px;
+    margin-bottom: 2px;
+    font-weight: normal;
+    text-align: center;
+    background: #019932;
+    color: white;
+    padding: 8px;
+    font-size: 24px;
+}
+
+#mainDiv {
+    height: 100vh;
+    max-width: 420px;
+    width: 100%;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    flex-flow: column;
+    background-color: #fff;
+    z-index: 2;
+}
+#mainDiv form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.param {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+    margin-top: 6%;
+}
+.param > * {
+    font-size: 14px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+label {
+    width: 200px;
+    float: left;
+    text-align: left;
+    margin-top: 4px;
+    margin-right: 10px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+
+.select2-container--below {
+    max-width: 220px;
+    min-width: 220px;
+    height: 30px;
+}
+
+input[type='text'],.ui-timepicker-input,input[type='number'],input[type='text']  {
+    width: 199px;
+    -webkit-appearance: none;
+    border: 1px solid #c1c1c1c1;
+    background-color: #fff;
+    line-height: 1.5;
+    box-shadow: 0px 1px 4px rgb(0 0 0 / 33%);
+    color: #444;
+    padding: 0px 6px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    height: 30px;
+}
+
+.select2-container .select2-selection--single {
+    border: 1px solid #c1c1c1c1;
+    background-color: #fff;
+    line-height: 1.5;
+    box-shadow: 0px 1px 4px rgb(0 0 0 / 33%);
+    color: #444;
+    /* padding: 0px 6px; */
+    font-family: 'Montserrat', sans-serif;
+}
+
+.ui-timepicker-input{
+    width: 230px;
+}
+
+input[type='number'] ,input[type='text'] {
+    width: 210px;
+}
+
+select {
+    border: 1px solid #c1c1c1c1;
+    background-color: #fff;
+    line-height: 1.5;
+    box-shadow: 0px 1px 4px rgb(0 0 0 / 33%);
+    color: #444;
+    padding: 0px 6px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    width: 245px;
+    height: 30px;
+}
+
+
+input#submit {
+    margin: 24px;
+    background-color: #029932;
+    cursor: pointer;
+    width: 210px;
+    padding: 5px 0px;
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    box-shadow: 0 4px rgb(127 127 127 / 80%);
+    border-color: transparent;
+    line-height: 1.5;
+
+}
+

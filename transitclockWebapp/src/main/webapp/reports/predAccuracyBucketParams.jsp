@@ -10,6 +10,7 @@
   <!-- Load in Select2 files so can create fancy route selector -->
   <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
   <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
   
   <link href="params/reportParams.css" rel="stylesheet"/>  
 </head>
@@ -59,9 +60,9 @@
             early."
               value="0.0"
               step="0.1"
+                      placeholder="minute"
               type="number"
                />
-               <span class="note">minute</span>
            </div>
            <div class="multiAllowableSec">
               <label class="bucketLabel" for="allowableLate1">Allowable Late:</label>
@@ -69,9 +70,9 @@
                   title="How late a vehicle can arrive compared to the prediction and still be acceptable. Must be a positive number to indicate late."
                   value="2.0"
                   step="0.1"
+                     placeholder="minute"
                   type="number"
               />
-               <span class="note">minute</span>
             </div>
        </fieldset>
        <fieldset>
@@ -84,9 +85,9 @@
             early."
                       value="1.0"
                       step="0.1"
+                      placeholder="minute"
                       type="number"
                />
-               <span class="note">minute</span>
            </div>
            <div class="multiAllowableSec">
                <label class="bucketLabel" for="allowableLate2">Allowable Late:</label>
@@ -95,8 +96,9 @@
                       value="2.0"
                       step="0.1"
                       type="number"
+                      placeholder="minute"
                />
-               <span class="note">minute</span>
+
            </div>
        </fieldset>
        <fieldset>
@@ -109,6 +111,7 @@
             early."
                       value="2.0"
                       step="0.1"
+                      placeholder="minute"
                       type="number"
                />
                <span class="note">minute</span>
@@ -120,8 +123,9 @@
                       value="3.0"
                       step="0.1"
                       type="number"
+                      placeholder="minute"
                />
-               <span class="note">minute</span>
+
            </div>
        </fieldset>
        <fieldset>
@@ -135,6 +139,7 @@
                       value="2.0"
                       step="0.1"
                       type="number"
+                      placeholder="minute"
                />
                <span class="note">minute</span>
            </div>
@@ -145,6 +150,7 @@
                       value="3.0"
                       step="0.1"
                       type="number"
+                      placeholder="minute"
                />
                <span class="note">minute</span>
            </div>
@@ -158,10 +164,10 @@
             and still be acceptable. Must be a positive number to indicate
             early."
                       value="2.0"
+                      placeholder="minute"
                       step="0.1"
                       type="number"
                />
-               <span class="note">minute</span>
            </div>
            <div class="multiAllowableSec">
                <label class="bucketLabel" for="allowableLate6">Allowable Late:</label>
@@ -169,9 +175,9 @@
                       title="How late a vehicle can arrive compared to the prediction and still be acceptable. Must be a positive number to indicate late."
                       value="4.0"
                       step="0.1"
+                      placeholder="minute"
                       type="number"
                />
-               <span class="note">minute</span>
            </div>
        </fieldset>
   </div>

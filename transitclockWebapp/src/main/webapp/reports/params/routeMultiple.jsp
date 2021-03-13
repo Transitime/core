@@ -62,7 +62,7 @@ $.getJSON(apiUrlPrefix + "/command/routes",
 
     <div id="routesDiv"  class="param">
       <label for="route">Routes:</label>
-      <select id="route" name="r" style="width: 450px" multiple="multiple"
+      <select id="route" name="r"  multiple="multiple"
       	title="Select which routes you want data for. You can use the Ctrl key along
       		   with the mouse to select multiple routes. Note: selecting all routes
       		   indeed reads in data for all routes which means it could be 

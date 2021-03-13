@@ -8,7 +8,7 @@
         <title>On Time Performance</title>
 
         <!-- Load in Select2 files so can create fancy route selector -->
-        <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
+        <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet"/>
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
         <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
 
@@ -482,7 +482,8 @@
                     <hr>
                 </div>
 
-                <input type="button" id="submit" value="Submit">
+                <div class="submitDiv"><input type='submit' id='submit' value="Submit"/></div>
+
 
             </div>
 

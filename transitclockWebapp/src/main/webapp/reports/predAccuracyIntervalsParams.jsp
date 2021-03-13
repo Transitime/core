@@ -10,6 +10,7 @@
   <!-- Load in Select2 files so can create fancy route selector -->
   <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
   <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
   
   <link href="params/reportParams.css" rel="stylesheet"/>  
 </head>
@@ -75,7 +76,8 @@
     	type="number"
     	value="70"
     	min="0"
-    	max="100"/> <span class="note">%</span>
+           placeholder="%"
+    	max="100"/>
   </div>
  
    <div class="param">
@@ -86,7 +88,8 @@
     		the minimum and maximum intervals." 
     	type="number"
     	min="0"
-    	max="100"/> <span class="note">%</span>
+           placeholder="%"
+    	max="100"/>
   </div>
     
     <jsp:include page="params/submitReport.jsp" />

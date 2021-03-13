@@ -8,8 +8,9 @@
 <title>Specify Parameters</title>
 
   <!-- Load in Select2 files so can create fancy route selector -->
-  <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/css/select2.min.css" rel="stylesheet" />
-  <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/js/select2.min.js"></script>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/css/select2.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/js/select2.min.js"></script>
 
   <link href="params/reportParams.css" rel="stylesheet"/>  
 </head>
@@ -35,7 +36,9 @@
     	and still be acceptable. Must be a negative number to indicate
     	early." 
     	size="1"
-    	value="1.0" /> <span class="note">minutes</span>
+            type="text"
+            placeholder="minutes"
+    	value="1.0" />
   </div>
  
    <div class="param">
@@ -44,8 +47,10 @@
     	title="How late a vehicle can arrive compared to the prediction
     	and still be acceptable. Must be a positive number to indicate
     	late." 
-    	size="1" 
-    	value="4.0"/> <span class="note">minutes</span>
+    	size="1"
+            type="text"
+            placeholder="minutes"
+    	value="4.0"/>
   </div>
     
     <jsp:include page="params/submitReport.jsp" />
