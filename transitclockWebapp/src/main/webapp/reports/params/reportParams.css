@@ -10,6 +10,7 @@ label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-rig
 
 .multiAllowableSec {
     float: left;
+    margin-bottom: 10px;
 }
 
 .multiAllowableSec label{
@@ -24,10 +25,14 @@ label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-rig
     font-size: 12px;
 }
 
-.bucketParam fieldset {
-    margin: 15px 0px;
-    padding: 20px 0px;
-}
+    .bucketParam fieldset {
+        margin: 15px 0px;
+        padding: 20px 0px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+    }
 
 .bucketParam legend {
     font-size: 14px;
@@ -95,8 +100,6 @@ label {
 
 
 .select2-container--below {
-    max-width: 220px;
-    min-width: 220px;
     height: 30px;
 }
 
@@ -160,3 +163,18 @@ input#submit {
 
 }
 
+    legend {
+        text-align: center;
+    }
+
+    .select2-container--default  {
+        background-color: white;
+        border: 1px solid #c1c1c1c1;
+        border-radius: 0px;
+        cursor: text;
+        box-shadow: 0px 1px 4px rgb(0 0 0 / 33% );
+    }
+    .select2-container {
+
+        width: 236px!important;
+    }

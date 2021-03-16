@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-         pageEncoding="ISO-8859-1"%>
+         pageEncoding="ISO-8859-1" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -8,7 +8,7 @@
     <title>Specify Parameters</title>
 
     <!-- Load in Select2 files so can create fancy route selector -->
-    <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
+    <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet"/>
     <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
 
@@ -23,14 +23,14 @@
 <div id="mainDiv">
     <form action="predAccuracyBucketChart.jsp" method="POST">
         <%-- For passing agency param to the report --%>
-        <input type="hidden" name="a" value="<%= request.getParameter("a")%>" />
-        <input type="hidden" name="numDays" value="1" />
+        <input type="hidden" name="a" value="<%= request.getParameter("a")%>"/>
+        <input type="hidden" name="numDays" value="1"/>
 
-        <jsp:include page="params/routeMultiple.jsp" />
+        <jsp:include page="params/routeMultiple.jsp"/>
 
-        <jsp:include page="params/fromDateNumDaysTime.jsp" />
+        <jsp:include page="params/fromDateNumDaysTime.jsp"/>
 
-        <jsp:include page="params/predictionSource.jsp" />
+        <jsp:include page="params/predictionSource.jsp"/>
 
         <div class="param">
             <label for="predictionType">Prediction Type:</label>
@@ -47,12 +47,12 @@
             </select>
         </div>
 
-        <jsp:include page="params/stopMultiple.jsp" />
+        <jsp:include page="params/stopMultiple.jsp"/>
 
         <div class="param, bucketParam">
             <fieldset>
-                <legend> 1 Minute Bucket </legend>
-                <div class="multiAllowableSec" >
+                <legend> 1 Minute Bucket</legend>
+                <div class="multiAllowableSec">
                     <label class="bucketLabel" for="allowableEarly1">Allowable Early:</label>
                     <input id="allowableEarly1" name="allowableEarly1"
                            title="How early a vehicle can arrive compared to the prediction
@@ -77,7 +77,7 @@
             </fieldset>
             <fieldset>
                 <legend>5 Minute Bucket</legend>
-                <div class="multiAllowableSec" >
+                <div class="multiAllowableSec">
                     <label class="bucketLabel" for="allowableEarly2">Allowable Early:</label>
                     <input id="allowableEarly2" name="allowableEarly2"
                            title="How early a vehicle can arrive compared to the prediction
@@ -103,7 +103,7 @@
             </fieldset>
             <fieldset>
                 <legend>10 Minute Bucket</legend>
-                <div class="multiAllowableSec" >
+                <div class="multiAllowableSec">
                     <label class="bucketLabel" for="allowableEarly3">Allowable Early:</label>
                     <input id="allowableEarly3" name="allowableEarly3"
                            title="How early a vehicle can arrive compared to the prediction
@@ -114,7 +114,6 @@
                            placeholder="minute"
                            type="number"
                     />
-                    <span class="note">minute</span>
                 </div>
                 <div class="multiAllowableSec">
                     <label class="bucketLabel" for="allowableLate3">Allowable Late:</label>
@@ -130,7 +129,7 @@
             </fieldset>
             <fieldset>
                 <legend>15 Minute Bucket</legend>
-                <div class="multiAllowableSec" >
+                <div class="multiAllowableSec">
                     <label class="bucketLabel" for="allowableEarly4">Allowable Early:</label>
                     <input id="allowableEarly4" name="allowableEarly4"
                            title="How early a vehicle can arrive compared to the prediction
@@ -141,7 +140,6 @@
                            type="number"
                            placeholder="minute"
                     />
-                    <span class="note">minute</span>
                 </div>
                 <div class="multiAllowableSec">
                     <label class="bucketLabel" for="allowableLate4">Allowable Late:</label>
@@ -152,12 +150,12 @@
                            type="number"
                            placeholder="minute"
                     />
-                    <span class="note">minute</span>
+
                 </div>
             </fieldset>
             <fieldset>
                 <legend>20 Minute Bucket</legend>
-                <div class="multiAllowableSec" >
+                <div class="multiAllowableSec">
                     <label class="bucketLabel" for="allowableEarly5">Allowable Early:</label>
                     <input id="allowableEarly5" name="allowableEarly5"
                            title="How early a vehicle can arrive compared to the prediction
@@ -182,7 +180,7 @@
             </fieldset>
         </div>
 
-        <jsp:include page="params/submitReport.jsp" />
+        <jsp:include page="params/submitReport.jsp"/>
     </form>
 </div>
 
