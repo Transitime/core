@@ -17,7 +17,7 @@
 
     <!-- Load in Select2 files so can create fancy selectors -->
     <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
-    <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.mn.js"></script>
 
     <link rel="stylesheet" href="<%= request.getContextPath() %>/maps/css/mapUi.css" />
 
