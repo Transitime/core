@@ -426,6 +426,8 @@
         var tripPatternStr = "<br/><b>Trip Pattern:</b> " + vehicleData.tripPattern;
         var startTimeStr = vehicleData.isScheduledService ? "" : "<br/><b>Start Time:</b> "+dateFormat(vehicleData.freqStartTime/1000);
         var schAdhStr = vehicleData.isScheduledService ? "<br/><b>SchAdh:</b> " + vehicleData.schAdhStr : ""
+        var mapsLink = 'http://google.com/maps?q=loc:' + vehicleData.loc.lat + ',' + vehicleData.loc.lon;
+
         var content = "<b>Vehicle:</b> " + vehicleData.id
             + "<br/><b>Route: </b> " + vehicleData.routeShortName
             + latLonHeadingStr
@@ -440,7 +442,8 @@
             + layoverStr
             + layoverDepartureStr
             + nextStopNameStr
-            + driver;
+            + driver
+            +"<br/><a href=" + mapsLink + " target='_blank' >View Location in Google Maps</a>";
         return content;
     }
 
