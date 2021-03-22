@@ -149,6 +149,12 @@ finding specific issues with predictions.">
             Real Time Dispatcher View</a></li>
     </ul>
 
+    <div id="subtitle">Real Time Vehicle Monitoring Reports</div>
+    <ul class="choicesList">
+        <li><a href="../maps/map.jsp?verbose=true&a=<%= agencyId %>"
+               title="Real-time map for selected route">
+            Real Time Vehicle Reports</a></li>
+    </ul>
 
 
 </div>
