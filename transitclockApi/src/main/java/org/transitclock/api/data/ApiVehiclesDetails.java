@@ -1,6 +1,6 @@
 /*
  * This file is part of Transitime.org
- * 
+ *
  * Transitime.org is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPL) as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -42,6 +43,9 @@ import org.transitclock.utils.Time;
 @XmlRootElement
 public class ApiVehiclesDetails {
 
+	@XmlElement(name = "responseTime")
+	private long responseTime;
+
 	@XmlElement(name = "vehicles")
 	private List<ApiVehicleDetails> vehiclesData;
 
@@ -57,32 +61,34 @@ public class ApiVehiclesDetails {
 	/**
 	 * For constructing a ApiVehiclesDetails object from a Collection of Vehicle
 	 * objects.
-	 * 
+	 *
 	 * @param vehicles
 	 * @param agencyId
 	 * @param uiTypesForVehicles
 	 *            Specifies how vehicles should be drawn in UI. Can be NORMAL,
 	 *            SECONDARY, or MINOR
-	 * @param assigned 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalAccessException 
+	 * @param assigned
+	 * @throws InvocationTargetException
+	 * @throws IllegalAccessException
 	 */
 	public ApiVehiclesDetails(Collection<IpcVehicle> vehicles,
-			String agencyId, Map<String, UiMode> uiTypesForVehicles, boolean assigned) throws IllegalAccessException, InvocationTargetException {
+							  String agencyId, Map<String, UiMode> uiTypesForVehicles, boolean assigned) throws IllegalAccessException, InvocationTargetException {
 		// Get Time object based on timezone for agency
 		WebAgency webAgency = WebAgency.getCachedWebAgency(agencyId);
 		Agency agency = webAgency.getAgency();
-		Time timeForAgency = agency != null ? 
-				agency.getTime() : new Time((String) null);				
-		
+		Time timeForAgency = agency != null ?
+				agency.getTime() : new Time((String) null);
+
+		responseTime = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
+
 		// Process each vehicle
 		vehiclesData = new ArrayList<ApiVehicleDetails>();
 		for (IpcVehicle vehicle : vehicles) {
 			// Determine UI type for vehicle
 			UiMode uiType = uiTypesForVehicles.get(vehicle.getId());
 			if((assigned  && vehicle.getTripId()!=null ) || !assigned)
-			vehiclesData.add(new ApiVehicleDetails(vehicle, timeForAgency,
-					uiType));
+				vehiclesData.add(new ApiVehicleDetails(vehicle, timeForAgency,
+						uiType));
 		}
 	}
 
