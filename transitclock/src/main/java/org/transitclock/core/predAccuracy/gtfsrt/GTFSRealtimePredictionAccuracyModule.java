@@ -17,6 +17,7 @@
 
 package org.transitclock.core.predAccuracy.gtfsrt;
 
+import com.google.protobuf.CodedInputStream;
 import com.google.transit.realtime.GtfsRealtime;
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
@@ -35,6 +36,8 @@ import org.transitclock.db.structs.StopPath;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
@@ -60,11 +63,21 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 			"transitclock.predAccuracy.gtfsTripUpdateUrl", "http://127.0.0.1:8091/trip-updates",
 			"URL to access gtfs-rt trip updates.");
 
+	private static StringConfigValue gtfsRealtimeHeaderKey =
+			new StringConfigValue("transitclock.predictionAccuracy.apiKeyHeader",
+					null,
+					"api key header value if necessary, null if not needed");
+
+	private static StringConfigValue gtfsRealtimeHeaderValue =
+			new StringConfigValue("transitclock.predictionAccuracy.apiKeyValue",
+					null,
+					"api key value if necessary, null if not needed");
+
 	
-  private static ClassConfigValue translatorConfig =
-      new ClassConfigValue("transitclock.predAccuracy.RtTranslator", null, 
-          "Implementation of GTFSRealtimeTranslator to perform " + 
-      "the translation of stopIds and other rt quirks");
+	  private static ClassConfigValue translatorConfig =
+		  new ClassConfigValue("transitclock.predAccuracy.RtTranslator", null,
+			  "Implementation of GTFSRealtimeTranslator to perform " +
+		  "the translation of stopIds and other rt quirks");
 	
   // if stopIds needs optional parsing/translation
   private GTFSRealtimeTranslator translator = null;
@@ -99,10 +112,31 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 		logger.info("Getting predictions from API using URL={}", getGtfstripupdateurl().getValue());
 
 		try {
+
 			// Create the connection
 			url = new URL(getGtfstripupdateurl().getValue());
 
-			FeedMessage feed = FeedMessage.parseFrom(url.openStream());
+			HttpURLConnection
+					connection = (HttpURLConnection) url.openConnection();
+
+			if (gtfsRealtimeHeaderKey.getValue() != null &&
+					gtfsRealtimeHeaderValue.getValue() != null) {
+				connection.addRequestProperty(gtfsRealtimeHeaderKey.getValue(), gtfsRealtimeHeaderValue.getValue());
+				connection.addRequestProperty("Cache-Control", "no-cache");
+			}
+
+
+			// Create a CodedInputStream instead of just a regular InputStream
+			// so that can change the size limit. Otherwise if file is greater
+			// than 64MB get an exception.
+			InputStream inputStream = connection.getInputStream();
+			CodedInputStream codedStream =
+					CodedInputStream.newInstance(inputStream);
+			// What to use instead of default 64MB limit
+			final int GTFS_SIZE_LIMIT = 200000000;
+			codedStream.setSizeLimit(GTFS_SIZE_LIMIT);
+
+			FeedMessage feed = FeedMessage.parseFrom(codedStream);
 			logger.info("Prediction read successfully from URL={}", getGtfstripupdateurl().getValue());
 
 			return feed;
