@@ -1070,22 +1070,23 @@ public class TravelTimesProcessor {
 	
 	 public Long updateMetrics(Session session, int travelTimesRev) {
 	   Long count = Trip.countTravelTimesForTrips(session, travelTimesRev);
-	   monitoringService.saveMetric("PredictionLatestTravelTimeRev", travelTimesRev*1.0, 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+	   monitoringService.averageMetric("PredictionLatestTravelTimeRev", travelTimesRev*1.0);
 	   if (count != null) {
-	     monitoringService.saveMetric("PredictionTravelTimesForTripsCount", count*1.0, 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+	     monitoringService.averageMetric("PredictionTravelTimesForTripsCount", count*1.0);
 	   } else {
-	     monitoringService.saveMetric("PredictionTravelTimesForTripsCount", -1.0, 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+	     monitoringService.averageMetric("PredictionTravelTimesForTripsCount", -1.0);
 	   }
+	   monitoringService.flush();
 	   return count;
 	  }
 
 
 	// cloudwatch reporting/monitoring
   private void reportStatus(int setSize, int matched, int unmatched, int invalid) {
-    monitoringService.saveMetric("TravelTimeTotal", setSize * 1.0 , 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-    monitoringService.saveMetric("TravelTimeMatched", matched * 1.0 , 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-    monitoringService.saveMetric("TravelTimeUnmatched", unmatched * 1.0 , 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-    monitoringService.saveMetric("TravelTimeInvalid", invalid * 1.0 , 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    monitoringService.averageMetric("TravelTimeTotal", setSize * 1.0);
+    monitoringService.averageMetric("TravelTimeMatched", matched * 1.0);
+    monitoringService.averageMetric("TravelTimeUnmatched", unmatched * 1.0);
+    monitoringService.averageMetric("TravelTimeInvalid", invalid * 1.0);
 
   }
 

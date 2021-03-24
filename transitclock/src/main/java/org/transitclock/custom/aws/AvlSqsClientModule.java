@@ -330,19 +330,19 @@ public class AvlSqsClientModule extends Module {
                 recordCount++;
                 if (avlReport != null) {
                   if (avlReport.getTotalLatency() != null) {
-                    monitoring.saveMetric("PredictionTotalQueueLatencyInMillis", new Double(avlReport.getTotalLatency()), 1, MonitoringService.MetricType.AVERAGE, MonitoringService.ReportingIntervalTimeUnit.MINUTE, false);
+                    monitoring.averageMetric("PredictionTotalQueueLatencyInMillis", new Double(avlReport.getTotalLatency()));
                   }
                   if (avlReport.getSqsLatency() != null) {
-                    monitoring.saveMetric("PredictionSQSQueueLatencyInMillis", new Double(avlReport.getSqsLatency()), 1, MonitoringService.MetricType.AVERAGE, MonitoringService.ReportingIntervalTimeUnit.MINUTE, false);
+                    monitoring.averageMetric("PredictionSQSQueueLatencyInMillis", new Double(avlReport.getSqsLatency()));
                   }
                   if (avlReport.getAvlLatency() != null) {
-                    monitoring.saveMetric("PredictionAvlQueueLatencyInMillis", new Double(avlReport.getAvlLatency()), 1, MonitoringService.MetricType.AVERAGE, MonitoringService.ReportingIntervalTimeUnit.MINUTE, false);
+                    monitoring.averageMetric("PredictionAvlQueueLatencyInMillis", new Double(avlReport.getAvlLatency()));
                   }
                   if (avlReport.getForwarderProcessingLatency() != null) {
-                    monitoring.saveMetric("PredictionForwarderProcessingLatencyInMillis", new Double(avlReport.getForwarderProcessingLatency()), 1, MonitoringService.MetricType.AVERAGE, MonitoringService.ReportingIntervalTimeUnit.MINUTE, false);
+                    monitoring.averageMetric("PredictionForwarderProcessingLatencyInMillis", new Double(avlReport.getForwarderProcessingLatency()));
                   }
                   if (avlReport.getForwarderSendLatency() != null) {
-                    monitoring.saveMetric("PredictionForwarderSendLatencyInMillis", new Double(avlReport.getForwarderSendLatency()), 1, MonitoringService.MetricType.AVERAGE, MonitoringService.ReportingIntervalTimeUnit.MINUTE, false);
+                    monitoring.averageMetric("PredictionForwarderSendLatencyInMillis", new Double(avlReport.getForwarderSendLatency()));
                   }
                 }
                   
@@ -444,10 +444,10 @@ public class AvlSqsClientModule extends Module {
                 _acknowledgeQueue.size(),
                 _archiveQueue.size());
             // lastAvlReportTime is already reported as LatestAvlReportAgeInSeconds
-            monitoring.saveMetric("PredictionReceiveQueueSize", new Double(_receiveQueue.size()), 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-            monitoring.saveMetric("PredictionDeserializeQueueSize", new Double(_deserializeQueue.size()), 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-            monitoring.saveMetric("PredictionAckQueueSize", new Double(_acknowledgeQueue.size()), 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-            monitoring.saveMetric("PredictionArchiveQueueSize", new Double(_archiveQueue.size()), 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+            monitoring.averageMetric("PredictionReceiveQueueSize", new Double(_receiveQueue.size()));
+            monitoring.averageMetric("PredictionDeserializeQueueSize", new Double(_deserializeQueue.size()));
+            monitoring.averageMetric("PredictionAckQueueSize", new Double(_acknowledgeQueue.size()));
+            monitoring.averageMetric("PredictionArchiveQueueSize", new Double(_archiveQueue.size()));
             Thread.sleep(STATUS_FREQUENCY_SECONDS * 1000);
           } catch (Exception any) {
             logger.error("exception with status: ", any);
