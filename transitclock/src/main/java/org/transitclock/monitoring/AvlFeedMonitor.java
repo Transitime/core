@@ -87,7 +87,7 @@ public class AvlFeedMonitor extends MonitorBase {
 		long lastAvlReportTime = AvlProcessor.getInstance().lastAvlReportTime();
 		long ageOfAvlReport = System.currentTimeMillis() - lastAvlReportTime;
 		Double ageOfAvlReportInSecs = new Double(ageOfAvlReport / Time.MS_PER_SEC );
-        monitoringService.saveMetric("PredictionLatestAvlReportAgeInSeconds", ageOfAvlReportInSecs, 1, MonitoringService.MetricType.AVERAGE, MonitoringService.ReportingIntervalTimeUnit.MINUTE, false);
+        monitoringService.averageMetric("PredictionLatestAvlReportAgeInSeconds", ageOfAvlReportInSecs);
 
 		logger.debug("When monitoring AVL feed last AVL report={}",
 				AvlProcessor.getInstance().getLastAvlReport());

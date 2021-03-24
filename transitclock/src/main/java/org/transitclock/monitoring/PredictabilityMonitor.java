@@ -97,7 +97,7 @@ public class PredictabilityMonitor extends MonitorBase {
 		if (activeBlocks.size() == 0) {
 			setMessage("No currently active blocks so predictability "
 					+ "considered to be OK.");
-            monitoringService.saveMetric("PredictionPredictablePercentageOfBlocks", 1d, 1, MonitoringService.MetricType.AVERAGE, MonitoringService.ReportingIntervalTimeUnit.MINUTE, false);
+            monitoringService.averageMetric("PredictionPredictablePercentageOfBlocks", 1d);
 			return 1.0;
 		}
 
@@ -117,10 +117,10 @@ public class PredictabilityMonitor extends MonitorBase {
 		// Determine fraction of active blocks that have a predictable vehicle 
 		double fraction = ((double) Math.max(predictableVehicleCount,
 		minimumPredictableVehicles.getValue())) / activeBlocks.size();
-		monitoringService.saveMetric("PredictionActiveBlockCount", (double)Math.max(predictableVehicleCount,
-		    minimumPredictableVehicles.getValue()), 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-		monitoringService.saveMetric("PredictionTotalBlockCount", (double)activeBlocks.size() , 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-    monitoringService.saveMetric("PredictablePercentageOfBlocks", fraction, 1, MonitoringService.MetricType.AVERAGE, MonitoringService.ReportingIntervalTimeUnit.MINUTE, false);
+		monitoringService.averageMetric("PredictionActiveBlockCount", (double)Math.max(predictableVehicleCount,
+		    minimumPredictableVehicles.getValue()));
+		monitoringService.averageMetric("PredictionTotalBlockCount", (double)activeBlocks.size());
+    monitoringService.averageMetric("PredictablePercentageOfBlocks", fraction);
 
 		// Provide simple message explaining the situation
 		String message = "Predictable blocks fraction=" 
