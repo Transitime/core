@@ -16,6 +16,10 @@
  */
 package org.transitclock.core;
 
+import java.time.DayOfWeek;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -25,14 +29,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.IntegerConfigValue;
-import org.transitclock.db.structs.Agency;
-import org.transitclock.db.structs.Calendar;
-import org.transitclock.db.structs.CalendarDate;
+import org.transitclock.db.structs.*;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.utils.Time;
 
@@ -357,10 +360,71 @@ public class ServiceUtils {
 		return currentCalendars;
 	}
 
-	public static boolean isServiceTypeActiveForServiceCal(ServiceType serviceType, Calendar calendar){
+	public ServiceType getServiceTypeForTrip(Date avlTime, Integer tripStartTime, String serviceId){
+		if(avlTime != null){
+			long updatedTime = avlTime.getTime();
+			if(tripStartTime != null){
+				if(tripStartTime < (TimeUnit.HOURS.toSeconds(6))){
+					updatedTime += TimeUnit.HOURS.toMillis(6);
+				} else if(tripStartTime > (TimeUnit.HOURS.toSeconds(18))){
+					updatedTime -= TimeUnit.HOURS.toMillis(6);
+				}
+			}
+			DayOfWeek dayOfWeek = Instant.ofEpochMilli(updatedTime)
+					.atZone(ZoneId.systemDefault())
+					.toLocalDate().getDayOfWeek();
+
+			ServiceType serviceType = getServiceType(dayOfWeek);
+
+			if(isServiceIdValidForDate(serviceType, serviceId, new Date(updatedTime))){
+				return serviceType;
+			}
+		}
+
+		return null;
+
+	}
+
+	private boolean isServiceIdValidForDate(ServiceType serviceType, String serviceId, Date date){
+		Calendar calendar = dbConfig.getCalendarByServiceId(serviceId);
+		if(isServiceTypeActiveForServiceCal(serviceType, calendar)){
+			return true;
+		} else{
+			List<CalendarDate> calendarDatesForNow = dbConfig.getCalendarDates(date);
+			if (calendarDatesForNow != null) {
+				for (CalendarDate calendarDate : calendarDatesForNow) {
+					// Handle special service for this date
+					if (calendarDate.addService() && calendarDate.getServiceId().equals(serviceId)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+
+	private ServiceType getServiceType(DayOfWeek dayOfWeek){
+		switch (dayOfWeek) {
+			case MONDAY:
+			case TUESDAY:
+			case WEDNESDAY:
+			case THURSDAY:
+			case FRIDAY:
+				return ServiceType.WEEKDAY;
+			case SATURDAY:
+				return ServiceType.SATURDAY;
+			case SUNDAY:
+				return ServiceType.SUNDAY;
+			default:
+				return null;
+		}
+	}
+
+	private boolean isServiceTypeActiveForServiceCal(ServiceType serviceType, Calendar calendar){
 		if(serviceType.equals(ServiceType.SUNDAY) && calendar.getSunday()){
 			return Boolean.TRUE;
-		} else if(serviceType.equals(ServiceType.SUNDAY) && calendar.getSunday()) {
+		} else if(serviceType.equals(ServiceType.SATURDAY) && calendar.getSaturday()) {
 			return Boolean.TRUE;
 		} else if(serviceType.equals(ServiceType.WEEKDAY) && (
 				calendar.getMonday() ||

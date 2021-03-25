@@ -63,6 +63,7 @@ public class AnnotatedClassesList {
 		MonitoringEvent.class,
 		PredictionAccuracy.class,
 		Route.class,
+		RunTimesForRoutes.class,
 		Stop.class,
 		StopPath.class,
 		Transfer.class,

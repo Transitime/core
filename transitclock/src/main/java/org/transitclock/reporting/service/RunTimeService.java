@@ -6,9 +6,12 @@ import org.transitclock.core.ServiceType;
 import org.transitclock.core.TemporalDifference;
 import org.transitclock.core.travelTimes.TravelTimesProcessor;
 import org.transitclock.db.query.ArrivalDepartureQuery;
+import org.transitclock.db.query.RunTimeForRouteQuery;
 import org.transitclock.db.query.TripQuery;
 import org.transitclock.db.structs.*;
-import org.transitclock.ipc.data.IpcRunTimeForStopPath;
+import org.transitclock.ipc.data.*;
+import org.transitclock.reporting.RouteStatistics;
+import org.transitclock.reporting.dao.RunTimeRoutesDao;
 import org.transitclock.reporting.keys.StopPathRunTimeKey;
 import org.transitclock.reporting.StopPathStatistics;
 import org.transitclock.reporting.TripStatistics;
@@ -17,9 +20,12 @@ import org.transitclock.ipc.data.IpcRunTime;
 import org.transitclock.ipc.data.IpcRunTimeForTrip;
 import org.transitclock.reporting.keys.ArrivalDepartureTripKey;
 import org.transitclock.reporting.keys.TripDateKey;
+import org.transitclock.utils.IntervalTimer;
 
+import javax.inject.Inject;
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,6 +37,9 @@ public class RunTimeService {
 
     private static final Logger logger =
             LoggerFactory.getLogger(RunTimeService.class);
+
+    @Inject
+    private RunTimeRoutesDao dao;
 
     /**
      * Get avg run time for all trips in a route for a specified period of time
@@ -722,5 +731,91 @@ public class RunTimeService {
         }
 
         return ipcRunTimeForStopPaths;
+    }
+
+    /**
+     * Get RunTime Information for Trip Stop Paths
+     * @param beginDate
+     * @param endDate
+     * @param beginTime
+     * @param endTime
+     * @param serviceType
+     * @param readOnly
+     * @return
+     */
+    public List<IpcRunTimeForRoute> getRunTimeForRoutes(LocalDate beginDate,
+                                                           LocalDate endDate,
+                                                           LocalTime beginTime,
+                                                           LocalTime endTime,
+                                                           ServiceType serviceType,
+                                                           Integer earlyThreshold,
+                                                           Integer lateThreshold,
+                                                           boolean readOnly) throws Exception {
+
+
+        Integer beginTimeSeconds = beginTime != null ? beginTime.toSecondOfDay() : null;
+        Integer endTimeSeconds = endTime != null ? endTime.toSecondOfDay(): null;
+
+        RunTimeForRouteQuery.Builder rtBuilder = new RunTimeForRouteQuery.Builder();
+        RunTimeForRouteQuery rtQuery = rtBuilder
+                .beginDate(beginDate)
+                .endDate(endDate)
+                .beginTime(beginTimeSeconds)
+                .endTime(endTimeSeconds)
+                .serviceType(serviceType)
+                .readOnly(readOnly)
+                .build();
+
+        List<RunTimesForRoutes> runTimesForRoutes = dao.getRunTimesForRoutes(rtQuery);
+
+        Map<String, RouteStatistics> routeStatisticsByRouteName = getRouteRunTimeStatistics(runTimesForRoutes, earlyThreshold, lateThreshold);
+
+        List<IpcRunTimeForRoute> ipcRunTimeForRoutes = getRunTimeStatsForRoutes(routeStatisticsByRouteName);
+
+        return ipcRunTimeForRoutes;
+    }
+
+    private Map<String, RouteStatistics> getRouteRunTimeStatistics(List<RunTimesForRoutes> runTimesForRoutes,
+                                                                   Integer earlyThresholdSec,
+                                                                   Integer lateThresholdSec) {
+        Map<String, RouteStatistics> routeStatisticsByRouteName = new HashMap<>();
+        for(RunTimesForRoutes rt : runTimesForRoutes){
+            if(rt.getRouteShortName() == null || rt.getEndTime() == null || rt.getStartTime() == null ||
+                    rt.getScheduledStartTime() == null || rt.getScheduledEndTime() == null){
+                continue;
+            }
+            RouteStatistics routeStatistics  = routeStatisticsByRouteName.get(rt.getRouteShortName());
+            if(routeStatistics == null){
+                routeStatistics = new RouteStatistics();
+                routeStatisticsByRouteName.put(rt.getRouteShortName(), routeStatistics);
+            }
+            long runTimeSec = TimeUnit.MILLISECONDS.toSeconds(rt.getEndTime().getTime() - rt.getStartTime().getTime());
+            int scheduledRunTimeSec = rt.getScheduledEndTime() - rt.getScheduledStartTime();
+            long runTimeDiff = runTimeSec - scheduledRunTimeSec;
+            if(runTimeDiff < 0 && Math.abs(runTimeDiff) > earlyThresholdSec){
+                routeStatistics.addEarly();
+            }
+            else if(runTimeDiff > 0 && runTimeDiff > lateThresholdSec){
+                routeStatistics.addLate();
+            }
+            else {
+                routeStatistics.addOnTime();
+            }
+        }
+
+        return routeStatisticsByRouteName;
+    }
+
+
+    private List<IpcRunTimeForRoute> getRunTimeStatsForRoutes(Map<String, RouteStatistics> routeRunTimeStatistics) {
+        List<IpcRunTimeForRoute> ipcRunTimeForRoutes = new ArrayList<>();
+        for(Map.Entry<String, RouteStatistics> rtStats : routeRunTimeStatistics.entrySet()){
+            String routeName = rtStats.getKey();
+            RouteStatistics stats = rtStats.getValue();
+            ipcRunTimeForRoutes.add(new IpcRunTimeForRoute(routeName, stats.getEarlyCount(), stats.getOnTimeCount(),
+                    stats.getLateCount()));
+
+        }
+        return ipcRunTimeForRoutes;
     }
 }

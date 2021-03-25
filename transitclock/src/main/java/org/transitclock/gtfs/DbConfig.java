@@ -118,6 +118,7 @@ public class DbConfig {
 	private List<CalendarDate> calendarDates;
 	// So can efficiently look up calendar dates
 	private Map<Long, List<CalendarDate>> calendarDatesMap;
+	private Map<String, Calendar> calendarByServiceIdMap;
 	private List<FareAttribute> fareAttributes;
 	private List<FareRule> fareRules;
 	private List<Frequency> frequencies;
@@ -825,8 +826,17 @@ public class DbConfig {
 		agencies = Agency.getAgencies(globalSession, configRev);
 		calendars = Calendar.getCalendars(globalSession, configRev);
 		calendarDates = CalendarDate.getCalendarDates(globalSession, configRev);
+
+		calendarByServiceIdMap = new HashMap<>();
+		for (Calendar calendar : calendars) {
+			if(calendarByServiceIdMap.get(calendar.getServiceId()) == null){
+				calendarByServiceIdMap.put(calendar.getServiceId(), calendar);
+			} else{
+				logger.warn("Duplicate Service Id {} in Calendar", calendar.getServiceId());
+			}
+		}
 		
-		calendarDatesMap = new HashMap<Long, List<CalendarDate>>();
+		calendarDatesMap = new HashMap<>();
 		for (CalendarDate calendarDate : calendarDates) {
 			Long time = calendarDate.getTime();
 			List<CalendarDate> calendarDatesForDate = calendarDatesMap.get(time);
@@ -1108,7 +1118,11 @@ public class DbConfig {
 		}
 		return serviceIds;
 	}
-	
+
+	public Calendar getCalendarByServiceId(String serviceId) {
+		return calendarByServiceIdMap.get(serviceId);
+	}
+
 	/**
 	 * There can be multiple agencies but usually there will be just one. For
 	 * getting timezone and such want to be able to easily access the main

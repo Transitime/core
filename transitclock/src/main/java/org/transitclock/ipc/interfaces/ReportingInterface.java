@@ -58,4 +58,8 @@ public interface ReportingInterface extends Remote {
                                                    LocalTime beginTime, LocalTime endTime,
                                                    String routeIdOrShortName, String tripId, ServiceType serviceType,
                                                    boolean timePointsOnly, boolean readOnly) throws Exception;
+
+    List<IpcRunTimeForRoute> getRunTimeForRoutes(LocalDate beginDate, LocalDate endDate,
+                                                        LocalTime beginTime, LocalTime endTime, ServiceType serviceType,
+                                                        Integer earlyThreshold, Integer lateThreshold, boolean readOnly) throws Exception;
 }

@@ -55,7 +55,7 @@ public class IpcArrivalDeparture implements Serializable {
 	@XmlAttribute
 	private Date freqStartTime;
 	@XmlAttribute
-	private transient Long dwellTime;
+	private Long dwellTime;
 	@XmlAttribute
 	private String tripPatternId;
 	@XmlAttribute
