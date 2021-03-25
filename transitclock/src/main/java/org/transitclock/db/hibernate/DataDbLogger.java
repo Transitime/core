@@ -30,18 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.configData.CoreConfig;
 import org.transitclock.configData.DbSetupConfig;
-import org.transitclock.db.structs.ArrivalDeparture;
-import org.transitclock.db.structs.AvlReport;
-import org.transitclock.db.structs.Headway;
-import org.transitclock.db.structs.Match;
-import org.transitclock.db.structs.MonitoringEvent;
-import org.transitclock.db.structs.Prediction;
-import org.transitclock.db.structs.PredictionAccuracy;
-import org.transitclock.db.structs.PredictionEvent;
-import org.transitclock.db.structs.TrafficSensorData;
-import org.transitclock.db.structs.VehicleConfig;
-import org.transitclock.db.structs.VehicleEvent;
-import org.transitclock.db.structs.VehicleState;
+import org.transitclock.db.structs.*;
 
 /**
  * DataDbLogger is for storing to the db a stream of data objects. It is intended
@@ -94,6 +83,7 @@ public class DataDbLogger {
   private DbQueue<VehicleState> vehicleStateQueue;
   private DbQueue<TrafficSensorData> trafficSensorDataQueue;
   private DbQueue<Headway> headwayQueue;
+  private DbQueue<RunTimesForRoutes> runTimesForRoutesQueue;
   private DbQueue<Object> genericQueue;
 	
 	private static final int QUEUE_CAPACITY = 5000000;
@@ -199,7 +189,8 @@ public class DataDbLogger {
 	  vehicleStateQueue = new DbQueue<VehicleState>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, VehicleState.class.getSimpleName());
 	  trafficSensorDataQueue = new DbQueue<TrafficSensorData>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, TrafficSensorData.class.getSimpleName());
 	  headwayQueue = new DbQueue<Headway>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, Headway.class.getSimpleName());
-		genericQueue = new DbQueue<Object>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, Object.class.getSimpleName());
+	  runTimesForRoutesQueue = new DbQueue<RunTimesForRoutes>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, RunTimesForRoutes.class.getSimpleName());
+	  genericQueue = new DbQueue<Object>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, Object.class.getSimpleName());
 		
 	}
 	
@@ -270,7 +261,11 @@ public class DataDbLogger {
 		return headwayQueue.add(data);
 	}
 
-	
+	public boolean add(RunTimesForRoutes data) {
+		return runTimesForRoutesQueue.add(data);
+	}
+
+
 	/**
 	 * Determines set of class names in the queue. Useful for logging
 	 * error message when queue getting filled up so know what kind of
@@ -324,6 +319,7 @@ public class DataDbLogger {
 						vehicleStateQueue.queueLevel(),
 						trafficSensorDataQueue.queueLevel(),
 						headwayQueue.queueLevel(),
+						runTimesForRoutesQueue.queueLevel(),
 						genericQueue.queueLevel()
 		};
 
@@ -347,6 +343,7 @@ public class DataDbLogger {
 						vehicleStateQueue.queueSize(),
 						trafficSensorDataQueue.queueSize(),
 						headwayQueue.queueSize(),
+						runTimesForRoutesQueue.queueSize(),
 						genericQueue.queueSize()
 		};
 
