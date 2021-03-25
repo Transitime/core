@@ -1,7 +1,7 @@
-<%@page import="org.transitclock.db.webstructs.WebAgency"%>
+<%@page import="org.transitclock.db.webstructs.WebAgency" %>
 
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-         pageEncoding="ISO-8859-1"%>
+         pageEncoding="ISO-8859-1" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <%
     String agencyId = request.getParameter("a");
@@ -20,9 +20,11 @@
 <body>
 <%@include file="/template/header.jsp" %>
 <div id="mainDiv">
-    <div id="title">Historical Reports for <%= WebAgency.getCachedWebAgency(agencyId).getAgencyName() %></div>
+    <div id="title">Historical Reports for <%= WebAgency.getCachedWebAgency(agencyId).getAgencyName() %>
+    </div>
 
-    <div id="subtitle">Prediction Accuracy<br/><span style="font-size: small">(only for agencies where prediction accuracy stored to database)</span></div>
+    <div id="subtitle">Prediction Accuracy<br/><span style="font-size: small">(only for agencies where prediction accuracy stored to database)</span>
+    </div>
     <ul class="choicesList">
         <li><a href="predAccuracyBucketParams.jsp?a=<%= agencyId %>"
                title="Shows percentage of predictions that were accurate
@@ -88,9 +90,9 @@ finding specific issues with predictions.">
     how early/late. The resulting bell curve shows the distribution of 
     early/late times. ">
             Schedule Adherence by how Early/Late</a></li>
-  <li><a href="onTimePerformanceReport.jsp?a=<%=agencyId%>"
-     title="Displays historic on time performance data in a chart for a given route.">
-      On Time Performance</a></li>
+        <li><a href="onTimePerformanceReport.jsp?a=<%=agencyId%>"
+               title="Displays historic on time performance data in a chart for a given route.">
+            On Time Performance</a></li>
     </ul>
 
 
@@ -120,30 +122,40 @@ finding specific issues with predictions.">
             Server Status</a></li>
     </ul>
 
-<div id="subtitle">Speed Reports</div>
-<ul class="choicesList">
-    <li><a href="speedMap.jsp?a=<%=agencyId%>" title="Displays historic average speed data on a map for a given route and headsign.">
-        Speed Map</a></li>
-</ul>
+    <div id="subtitle">Speed Reports</div>
+    <ul class="choicesList">
+        <li><a href="speedMap.jsp?a=<%=agencyId%>"
+               title="Displays historic average speed data on a map for a given route and headsign.">
+            Speed Map</a></li>
+    </ul>
 
-<div id="subtitle">Run Time Reports</div>
-<ul class="choicesList">
-    <li><a href="runTime.jsp?a=<%=agencyId%>" title="Displays historic run time data for a given route and headsign.">
-        Run Times</a></li>
-</ul>
+    <div id="subtitle">Run Time Reports</div>
+    <ul class="choicesList">
+        <li><a href="runTime.jsp?a=<%=agencyId%>"
+               title="Displays historic run time data for a given route and headsign.">
+            Run Times</a></li>
+    </ul>
 
-<div id="subtitle">Real Time Reports</div>
-<ul class="choicesList">
-    <li><a href="realTimeLiveMap.jsp?a=<%= agencyId %>"
-           title="Displays real time vehicle and stop information on a map.">
-        Real Time Live Map</a></li>
-    <li><a href="realTimeScheduleAdherence.jsp?a=<%= agencyId %>"
-           title="Displays real time schedule adherence information on a map.">
-        Real Time Schedule Adherence</a></li>
-    <li><a href="realTimeDispatcher.jsp?a=<%= agencyId %>"
-           title="Displays real time vehicle information in a table.">
-        Real Time Dispatcher View</a></li>
-</ul>
+    <div id="subtitle">Real Time Reports</div>
+    <ul class="choicesList">
+        <li><a href="realTimeLiveMap.jsp?a=<%= agencyId %>"
+               title="Displays real time vehicle and stop information on a map.">
+            Real Time Live Map</a></li>
+        <li><a href="realTimeScheduleAdherence.jsp?a=<%= agencyId %>"
+               title="Displays real time schedule adherence information on a map.">
+            Real Time Schedule Adherence</a></li>
+        <li><a href="realTimeDispatcher.jsp?a=<%= agencyId %>"
+               title="Displays real time vehicle information in a table.">
+            Real Time Dispatcher View</a></li>
+    </ul>
+
+    <div id="subtitle">Real Time Vehicle Monitoring Reports</div>
+    <ul class="choicesList">
+        <li><a href="../maps/map.jsp?verbose=true&a=<%= agencyId %>"
+               title="Real-time map for selected route">
+            Real Time Vehicle Reports</a></li>
+    </ul>
+
 
 </div>
 </body>
