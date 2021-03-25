@@ -4,26 +4,18 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
-import org.transitclock.configData.HeadwayConfig;
 import org.transitclock.core.ServiceType;
 import org.transitclock.core.ServiceUtils;
 import org.transitclock.core.SpatialMatch;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.*;
-import org.transitclock.core.headwaygenerator.AbstractHeadwayGenerator;
-import org.transitclock.core.predictiongenerator.kalman.Vehicle;
 import org.transitclock.db.structs.*;
-import org.transitclock.gtfs.DbConfig;
-import org.transitclock.gtfs.writers.GtfsRoutesWriter;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
-import org.transitclock.reporting.writers.RunTimeForRoutesWriter;
 import org.transitclock.utils.IntervalTimer;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
-import static org.transitclock.configData.HeadwayConfig.calculateSystemVariance;
 
 public class RunTimeGenerator {
 
