@@ -61,7 +61,7 @@ public class ReportingApi {
             @QueryParam(value = "minEarlyMSec") @DefaultValue("90000") int minEarlyMSec,
             @Parameter(description="Begin date to use for retrieving arrival departures",required=false)
             @QueryParam(value = "minLateMSec") @DefaultValue("150000") int minLateMSec,
-            @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday",required=false)
+            @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday)",required=false)
             @QueryParam(value = "serviceType") String serviceType,
             @Parameter(description="if set, retrives only arrivalDepartures with stops that are timePoints",required=false)
             @QueryParam(value = "timePointsOnly") @DefaultValue("false") boolean timePointsOnly,
@@ -124,7 +124,7 @@ public class ReportingApi {
             @QueryParam(value = "r") String route,
             @Parameter(description="Retrives only arrivalDepartures belonging to the headsign specified.",required=true)
             @QueryParam(value = "headsign") String headsign,
-            @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday",required=false)
+            @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday)",required=false)
             @QueryParam(value = "serviceType") String serviceType,
             @Parameter(description="if set, retrives only arrivalDepartures with stops that are timePoints",required=false)
             @QueryParam(value = "timePointsOnly") @DefaultValue("false") boolean timePointsOnly)
@@ -183,7 +183,7 @@ public class ReportingApi {
             @QueryParam(value = "r") String route,
             @Parameter(description="Retrives only arrivalDepartures belonging to the headsign specified.",required=true)
             @QueryParam(value = "headsign") String headsign,
-            @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday",required=false)
+            @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday)",required=false)
             @QueryParam(value = "serviceType") String serviceType)
             throws WebApplicationException {
 
@@ -238,7 +238,7 @@ public class ReportingApi {
             @QueryParam(value = "r") String route,
             @Parameter(description="Retrives only arrivalDepartures belonging to the headsign specified.",required=true)
             @QueryParam(value = "headsign") String headsign,
-            @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday",required=false)
+            @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday)",required=false)
             @QueryParam(value = "serviceType") String serviceType)
             throws WebApplicationException {
 
@@ -298,7 +298,7 @@ public class ReportingApi {
             @QueryParam(value = "startStop") String startStop,
             @Parameter(description="Specifies to the ending stop Id for the trips to filter by.",required=true)
             @QueryParam(value = "endStop") String endStop,
-            @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday",required=false)
+            @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday)",required=false)
             @QueryParam(value = "serviceType") String serviceType,
             @Parameter(description="if set, retrives only arrivalDepartures with stops that are timePoints",required=false)
             @QueryParam(value = "timePointsOnly") @DefaultValue("false") boolean timePointsOnly)
@@ -357,7 +357,7 @@ public class ReportingApi {
             @QueryParam(value = "headsign") String headsign,
             @Parameter(description="Specifies the tripPatternId to filter by.")
             @QueryParam(value = "tripPattern") String tripPatternId,
-            @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday")
+            @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday)")
             @QueryParam(value = "serviceType") String serviceType,
             @Parameter(description="if set, retrives only arrivalDepartures with stops that are timePoints")
             @QueryParam(value = "timePointsOnly") @DefaultValue("false") boolean timePointsOnly)
@@ -419,7 +419,7 @@ public class ReportingApi {
             @QueryParam(value = "r") String route,
             @Parameter(description="Specifies the tripId to filter by.",required=true)
             @QueryParam(value = "tripId") String tripId,
-            @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday")
+            @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday)")
             @QueryParam(value = "serviceType") String serviceType,
             @Parameter(description="if set, retrives only arrivalDepartures with stops that are timePoints")
             @QueryParam(value = "timePointsOnly") @DefaultValue("false") boolean timePointsOnly)
@@ -476,7 +476,7 @@ public class ReportingApi {
             @QueryParam(value = "beginTime") TimeParam beginTime,
             @Parameter(description="End time of time-band to use for retrieving run-times")
             @QueryParam(value = "endTime") TimeParam endTime,
-            @Parameter(description="if set, retrives only run-times belonging to the serviceType (Weekday, Saturday,Sunday")
+            @Parameter(description="if set, retrives only run-times belonging to the serviceType (Weekday, Saturday,Sunday)")
             @QueryParam(value = "serviceType") String serviceType,
             @Parameter(description="if set, minimum number of seconds that a route has to complete a run ahead of schedule to be considered early")
             @QueryParam(value = "minEarlySec") @DefaultValue("120") int minEarlySec,
@@ -524,19 +524,25 @@ public class ReportingApi {
             description="Retrives a list of arrival departures for a specified date range "
                     + "Optionally can be filered accorditn to routesIdOrShortNames params."
                     + "Every trip is associated with a block.",tags= {"prediction","trip","block","route","vehicle"})
-    public Response getLiveDispatchView(@BeanParam StandardParameters stdParameters)
+    public Response getLiveDispatchView(
+            @BeanParam StandardParameters stdParameters, 
+            @Parameter(description="if set, formats speed to the specified format (MS,KM,MPH)")
+            @QueryParam(value = "speedFormat") @DefaultValue("MS") String speedFormat)
             throws WebApplicationException {
 
         // Make sure request is valid
         stdParameters.validate();
 
         try {
+            // Convert speedFormat param to Enum
+            SpeedFormat speedFormatEnum = SpeedFormat.valueOf(speedFormat.toUpperCase());
+            
             // Get vehicles interface
             VehiclesInterface vehiclesInterface = stdParameters.getVehiclesInterface();
             Collection<IpcVehicle> vehicles = vehiclesInterface.get();
 
             Object response = null;
-            ApiDispatcher dispatcher = new ApiDispatcher(vehicles);
+            ApiDispatcher dispatcher = new ApiDispatcher(vehicles, speedFormatEnum);
             response = dispatcher;
 
             return stdParameters.createResponse(response);
