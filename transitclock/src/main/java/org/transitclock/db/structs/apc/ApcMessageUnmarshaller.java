@@ -11,10 +11,15 @@ import java.util.List;
  * Unmarshal messages into ApcRecord format.
  */
 public class ApcMessageUnmarshaller {
+
   public List<ApcRecord> toApcRecord(Message message) {
     List<ApcRecord> records = new ArrayList<>();
     String body = message.getBody();
-    JSONObject wrapper = new JSONObject(message.getBody());
+    return toApcRecord(body);
+  }
+
+  public List<ApcRecord> toApcRecord(String body) {
+    JSONObject wrapper = new JSONObject(body);
     return null;
   }
 }
