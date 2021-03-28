@@ -39,7 +39,9 @@ public class Headway implements Serializable {
 	
 	@Column		
 	private  double headway;
-	
+
+	@Column
+	private  Double scheduledHeadway;
 
 	@Column		
 	private double average;
@@ -72,8 +74,7 @@ public class Headway implements Serializable {
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private  String routeId;
-	
-	
+
 	@Column	
 	@Temporal(TemporalType.TIMESTAMP)
 	private  Date firstDeparture;
@@ -81,13 +82,16 @@ public class Headway implements Serializable {
 	@Column	
 	@Temporal(TemporalType.TIMESTAMP)
 	private  Date secondDeparture;
+
+
 	
 	
-	public Headway(long headway, Date creationTime, String vehicleId, String otherVehicleId, String stopId, String tripId,
-			String routeId, Date firstDeparture, Date secondDeparture) {
+	public Headway(long headway, Long scheduledHeadway, Date creationTime, String vehicleId, String otherVehicleId, String stopId, String tripId,
+			String routeId, Date firstDeparture, Date secondDeparture, Date avlTime) {
 		
 		this.configRev = Core.getInstance().getDbConfig().getConfigRev();
 		this.headway = headway;
+		this.scheduledHeadway = scheduledHeadway !=null ? scheduledHeadway.doubleValue() : null;
 		this.creationTime = creationTime;
 		this.vehicleId = vehicleId;
 		this.stopId = stopId;
@@ -125,8 +129,6 @@ public class Headway implements Serializable {
 	public int getConfigRev() {
 		return configRev;
 	}
-
-
 
 	public Date getCreationTime() {
 		return creationTime;
@@ -228,9 +230,10 @@ public class Headway implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		long temp;
-		temp = Double.doubleToLongBits(headway);
-		result = prime * result + (int) (temp ^ (temp >>> 32));		
+		long headwayTemp = Double.doubleToLongBits(headway);
+		long scheduledHeadwayTemp = Double.doubleToLongBits(scheduledHeadway);
+		result = prime * result + (int) (headwayTemp ^ (headwayTemp >>> 32));
+		result = prime * result + (int) (scheduledHeadwayTemp ^ (scheduledHeadwayTemp >>> 32));
 		result = prime * result + ((otherVehicleId == null) ? 0 : otherVehicleId.hashCode());
 		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
 		result = prime * result + ((stopId == null) ? 0 : stopId.hashCode());
@@ -249,7 +252,9 @@ public class Headway implements Serializable {
 			return false;
 		Headway other = (Headway) obj;
 		if (Double.doubleToLongBits(headway) != Double.doubleToLongBits(other.headway))
-			return false;	
+			return false;
+		if (Double.doubleToLongBits(scheduledHeadway) != Double.doubleToLongBits(other.scheduledHeadway))
+			return false;
 		if (otherVehicleId == null) {
 			if (other.otherVehicleId != null)
 				return false;
@@ -280,11 +285,12 @@ public class Headway implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Headway [id=" + id + ", configRev=" + configRev + ", headway=" + headway + ", average=" + average
-				+ ", variance=" + variance + ", coefficientOfVariation=" + coefficientOfVariation + ", numVehicles="
-				+ numVehicles + ", creationTime=" + creationTime + ", vehicleId=" + vehicleId + ", otherVehicleId="
-				+ otherVehicleId + ", stopId=" + stopId + ", tripId=" + tripId + ", routeId=" + routeId
-				+ ", firstDeparture=" + firstDeparture + ", secondDeparture=" + secondDeparture + "]";
+		return "Headway [id=" + id + ", configRev=" + configRev + ", headway=" + headway + ", scheduledHeadway=" + scheduledHeadway
+				+ ", average=" + average + ", variance=" + variance + ", coefficientOfVariation="
+				+ coefficientOfVariation + ", numVehicles=" + numVehicles + ", creationTime=" + creationTime
+				+ ", vehicleId=" + vehicleId + ", otherVehicleId=" + otherVehicleId + ", stopId=" + stopId
+				+ ", tripId=" + tripId + ", routeId=" + routeId + ", firstDeparture=" + firstDeparture
+				+ ", secondDeparture=" + secondDeparture + "]";
 	}
 
 	

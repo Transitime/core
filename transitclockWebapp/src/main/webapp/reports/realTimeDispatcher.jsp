@@ -131,6 +131,9 @@
             ],
             ajax: {
                 url: apiUrlPrefix + "/report/live/dispatch",
+                data: {
+                    speedFormat: 'km'
+                },
                 type: "get"
             },
             dom: 'lrtip'

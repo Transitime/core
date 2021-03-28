@@ -68,27 +68,28 @@ public class AvlJsonQuery {
 		String timeSql = getTimeSql(beginTime, endTime);
 		String headwayColSql = getHeadwayColSql(includeHeadway);
 		String headwayJoinSql = getHeadwayJoinSql(includeHeadway, beginDate);
+		String headwayWhereSql = getHeadwayWhereSql(includeHeadway);
 		String onTimePerformanceSql = getOnTimePerformanceSql(earlyMsec, lateMsec);
 
 		//need to limit the vehicle state table by time as well to utilize index on avlTime column
 		String sql = "SELECT a.vehicleId, a.time, a.assignmentId, a.lat, a.lon, a.speed, "
-				+ "a.heading, a.timeProcessed, a.source, v.routeShortName, t.headsign, t.tripId "
+				+ "a.heading, a.timeProcessed, a.source, v.routeShortName, t.blockId, t.headsign, t.tripId "
 				+ ",round(v.schedAdhMsec / (1000 * 60), 1) mod 60 as schedAdh "
 				+ headwayColSql
 				+ onTimePerformanceSql
 				+ "FROM AvlReports a "
-				+ "JOIN "
+				+ "LEFT JOIN "
 				+ "(SELECT vehicleId, tripId, routeShortName, avlTime, schedAdh, CAST(schedAdhMsec AS CHAR) + 0.0 as schedAdhMsec FROM VehicleStates "
 				+ "WHERE avlTime BETWEEN '" + beginDate + "' "
 				+ "AND TIMESTAMPADD(DAY,1,'" + beginDate + "') "
 				+ ") v "
 				+ "ON v.vehicleId=a.vehicleId and v.avlTime=a.time "
+				+ "LEFT JOIN Trips t ON t.tripId=v.tripId "
+				+ "LEFT JOIN Matches m ON a.timeProcessed = m.avlTime AND a.vehicleId = m.vehicleId AND t.configRev = m.configRev "
 				+ headwayJoinSql
-				+ "JOIN "
-				+ "(SELECT tripId, headsign FROM Trips) t "
-				+ "ON t.tripId=v.tripId "
 				+ "WHERE a.time BETWEEN '" + beginDate + "' "
 				+ "AND TIMESTAMPADD(DAY,1,'" + beginDate + "') "
+				+ headwayWhereSql
 				+ timeSql;
 
 		// If only want data for single vehicle then specify so in SQL
@@ -135,24 +136,42 @@ public class AvlJsonQuery {
 	private static String getHeadwayColSql(String includeHeadway){
 		String headwayColSql = "";
 		if	(includeHeadway != null && includeHeadway.equalsIgnoreCase("true")) {
-			headwayColSql = ", h.headway ";
+			headwayColSql += ", ROUND((h.headway - h.scheduledHeadway) / 60000, 1) AS headway ";
 		}
 		return headwayColSql;
 	}
 
-	private static String getHeadwayJoinSql(String includeHeadway, String beginDate){
+	/*private static String getHeadwayJoinSql(String includeHeadway, String beginDate){
 		String headwayJoinSql = "";
 		if	(includeHeadway != null && includeHeadway.equalsIgnoreCase("true")){
 			headwayJoinSql = "LEFT JOIN "
-					+ "(SELECT vehicleId, creationTime, FLOOR(headway / 60000) as headway FROM Headway "
-					+ "WHERE creationTime BETWEEN '" + beginDate + "' "
+					+ "(SELECT vehicleId, avlTime, FLOOR(headway / 60000) as headway FROM Headway "
+					+ "WHERE avlTime BETWEEN '" + beginDate + "' "
 					+ "AND TIMESTAMPADD(DAY,1,'" + beginDate + "') "
 					+ "AND headway < " + MAX_HEADWAY
 					+ ") h "
-					+ "ON h.vehicleId=a.vehicleId and h.creationTime=a.time ";
+					+ "ON h.avlTime=a.time "
+			        + "WHERE h.vehicleId=a.vehicleId ";
 
 		}
 		return headwayJoinSql;
+	}*/
+
+	private static String getHeadwayJoinSql(String includeHeadway, String beginDate){
+		String headwayJoinSql = "";
+		if	(includeHeadway != null && includeHeadway.equalsIgnoreCase("true")){
+			headwayJoinSql = "LEFT JOIN Headway h ON a.time= h.creationTime AND a.vehicleId = h.vehicleId ";
+		}
+		return headwayJoinSql;
+	}
+
+	private static String getHeadwayWhereSql(String includeHeadway){
+		String sql = "";
+		if(includeHeadway != null && includeHeadway.equalsIgnoreCase("true")){
+			sql +=  "AND h.headway < " + MAX_HEADWAY;
+		}
+		return sql;
+
 	}
 
 	private static String getOnTimePerformanceSql(String early, String late){

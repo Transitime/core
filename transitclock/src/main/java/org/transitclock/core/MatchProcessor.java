@@ -25,6 +25,7 @@ import org.transitclock.configData.CoreConfig;
 import org.transitclock.core.dataCache.HoldingTimeCache;
 import org.transitclock.core.dataCache.PredictionDataCache;
 import org.transitclock.core.holdingmethod.HoldingTimeGeneratorFactory;
+import org.transitclock.core.reporting.RunTimeGenerator;
 import org.transitclock.db.structs.Headway;
 import org.transitclock.db.structs.HoldingTime;
 import org.transitclock.db.structs.Match;
@@ -166,6 +167,13 @@ public class MatchProcessor {
 		if (!match.isAtStop())
 			Core.getInstance().getDbLogger().add(match);
 	}
+
+	private void processRunTimes(VehicleState vehicleState) {
+		logger.debug("Processing runTimes for vehicleId={}",
+				vehicleState.getVehicleId());
+
+		boolean processedRunTime = RunTimesGeneratorFactory.getInstance().generate(vehicleState);
+	}
 	
 	/**
 	 * Called when vehicle is matched successfully. Generates predictions
@@ -202,5 +210,6 @@ public class MatchProcessor {
 			processSpatialMatch(vehicleState);
 		}
 		processArrivalDepartures(vehicleState);
+		processRunTimes(vehicleState);
 	}
 }

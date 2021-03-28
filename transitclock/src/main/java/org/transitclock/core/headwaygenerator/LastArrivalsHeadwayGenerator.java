@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
+import org.transitclock.configData.HeadwayConfig;
 import org.transitclock.core.HeadwayGenerator;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
@@ -17,6 +20,8 @@ import org.transitclock.db.structs.Headway;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.ipc.data.IpcVehicleComplete;
 
+import static org.transitclock.configData.HeadwayConfig.calculateSystemVariance;
+
 /**
  *
  * @author Sean Óg Crudden
@@ -27,7 +32,10 @@ import org.transitclock.ipc.data.IpcVehicleComplete;
  *
  * Maybe should be a list and have a predicted headway at each stop along the route. So key for headway could be (stop, vehicle, trip, start_time).
  */
-public class LastArrivalsHeadwayGenerator implements HeadwayGenerator {
+public class LastArrivalsHeadwayGenerator extends AbstractHeadwayGenerator {
+
+	private static final Logger logger =
+			LoggerFactory.getLogger(LastArrivalsHeadwayGenerator.class);
 
 	@Override
 	public  Headway generate(VehicleState vehicleState) {
@@ -38,102 +46,52 @@ public class LastArrivalsHeadwayGenerator implements HeadwayGenerator {
 				return null;
 
 			String stopId = vehicleState.getMatch().getMatchAtPreviousStop().getAtStop().getStopId();
-
-			long date = vehicleState.getMatch().getAvlTime();
-
+			long vehicleMatchAvlTime = vehicleState.getMatch().getAvlTime();
 			String vehicleId=vehicleState.getVehicleId();
 
-			StopArrivalDepartureCacheKey key=new StopArrivalDepartureCacheKey(stopId, new Date(date));
+			List<IpcArrivalDeparture> arrivalDeparturesForStop = getRecentArrivalDeparturesForStop(stopId, vehicleMatchAvlTime);
 
-			List<IpcArrivalDeparture> stopList=StopArrivalDepartureCacheFactory.getInstance().getStopHistory(key);
-			int lastStopArrivalIndex =-1;
-			int previousVehicleArrivalIndex = -1;
+			int lastStopArrivalIndex;
+			int previousVehicleArrivalIndex;
 
-			if(stopList!=null)
+			if(arrivalDeparturesForStop!=null)
 			{
-				for(int i=0;i<stopList.size() && previousVehicleArrivalIndex==-1 ;i++)
-				{
-					IpcArrivalDeparture arrivalDepature = stopList.get(i);
-					if(arrivalDepature.isArrival() && arrivalDepature.getStopId().equals(stopId) && arrivalDepature.getVehicleId().equals(vehicleId)
-							&& (vehicleState.getTrip().getDirectionId()==null || vehicleState.getTrip().getDirectionId().equals(arrivalDepature.getDirectionId())))
-					{
-						// This the arrival of this vehicle now the next arrival in the list will be the previous vehicle (The arrival of the vehicle ahead).
-						lastStopArrivalIndex=i;
-					}
-					if(lastStopArrivalIndex>-1 && arrivalDepature.isArrival() && arrivalDepature.getStopId().equals(stopId) && !arrivalDepature.getVehicleId().equals(vehicleId)
-							&& (vehicleState.getTrip().getDirectionId()==null || vehicleState.getTrip().getDirectionId().equals(arrivalDepature.getDirectionId())))
-					{
-						previousVehicleArrivalIndex = i;
-					}
-				}
+				boolean useArrivals = true;
+				int[] arrivalIndexes = getLastStopAndPrevVehicleArrivalDepartureIndex(vehicleState, vehicleId, stopId,
+																				arrivalDeparturesForStop, useArrivals);
+				lastStopArrivalIndex = arrivalIndexes[0];
+				previousVehicleArrivalIndex = arrivalIndexes [1];
+
 				if(previousVehicleArrivalIndex!=-1 && lastStopArrivalIndex!=-1)
 				{
-					long headwayTime=Math.abs(stopList.get(lastStopArrivalIndex).getTime().getTime()-stopList.get(previousVehicleArrivalIndex).getTime().getTime());
+					IpcArrivalDeparture lastStopDeparture = arrivalDeparturesForStop.get(lastStopArrivalIndex);
+					IpcArrivalDeparture lastStopPreviousVehicleDeparture = arrivalDeparturesForStop.get(previousVehicleArrivalIndex);
+
+					long headwayTime= calculateHeadway(lastStopDeparture, lastStopPreviousVehicleDeparture);
+					Long scheduledHeadwayTime = calculateScheduledHeadway(lastStopDeparture, lastStopPreviousVehicleDeparture);
 
 					Headway headway=new Headway(headwayTime,
-												new Date(date),
+												scheduledHeadwayTime,
+												new Date(vehicleMatchAvlTime),
 												vehicleId,
-												stopList.get(previousVehicleArrivalIndex).getVehicleId(),
+												arrivalDeparturesForStop.get(previousVehicleArrivalIndex).getVehicleId(),
 												stopId,
 												vehicleState.getTrip().getId(),
 												vehicleState.getTrip().getRouteId(),
-												new Date(stopList.get(lastStopArrivalIndex).getTime().getTime()),
-												new Date(stopList.get(previousVehicleArrivalIndex).getTime().getTime()));
-					Core.getInstance().getDbLogger().add(headway);
-					setSystemVariance(headway);
+												new Date(arrivalDeparturesForStop.get(lastStopArrivalIndex).getTime().getTime()),
+												new Date(arrivalDeparturesForStop.get(previousVehicleArrivalIndex).getTime().getTime()),
+												new Date(vehicleState.getAvlReport().getTime()));
+
+					if(calculateSystemVariance()){
+						setSystemVariance(headway);
+					}
+
 					return headway;
 				}
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Exception when processing headway", e);
 		}
 		return null;
-	}
-	private void setSystemVariance(Headway headway)
-	{
-		ArrayList<Headway> headways=new ArrayList<Headway>();
-		for(IpcVehicleComplete currentVehicle:VehicleDataCache.getInstance().getVehicles())
-		{
-			VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(currentVehicle.getId());
-			if(vehicleState.getHeadway()!=null)
-			{
-				headways.add(vehicleState.getHeadway());
-			}
-		}
-		// ONLY SET IF HAVE VALES FOR ALL VEHICLES ON ROUTE.
-		if(VehicleDataCache.getInstance().getVehicles().size()==headways.size())
-		{
-			headway.setAverage(average(headways));
-			headway.setVariance(variance(headways));
-			headway.setCoefficientOfVariation(coefficientOfVariance(headways));
-			headway.setNumVehicles(headways.size());
-		}
-	}
-	private double average(List<Headway> headways)
-	{
-		double total=0;
-		for(Headway headway:headways)
-		{
-			total=total+headway.getHeadway();
-		}
-		return total/headways.size();
-	}
-	private double variance(List<Headway> headways)
-	{
-		double topline=0;
-		double average = average(headways);
-		for(Headway headway:headways)
-		{
-			topline=topline+((headway.getHeadway()-average)*(headway.getHeadway()-average));
-		}
-		return topline/headways.size();
-	}
-	private double coefficientOfVariance(List<Headway> headways)
-	{
-		double variance = variance(headways);;
-		double average = average(headways);
-
-		return variance/(average*average);
 	}
 }

@@ -167,4 +167,13 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                 routeIdOrShortName, serviceType, timePointsOnly, headsign, readOnly);
     }
 
+    @Override
+    public List<IpcRunTimeForRoute> getRunTimeForRoutes(LocalDate beginDate, LocalDate endDate,
+                                                        LocalTime beginTime, LocalTime endTime, ServiceType serviceType,
+                                                        Integer earlyThreshold, Integer lateThreshold,
+                                                        boolean readOnly) throws Exception{
+        return runTimeService.getRunTimeForRoutes(beginDate, endDate, beginTime, endTime, serviceType,
+                earlyThreshold, lateThreshold, readOnly);
+    }
+
 }

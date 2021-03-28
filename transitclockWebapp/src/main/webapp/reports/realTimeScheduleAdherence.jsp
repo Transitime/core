@@ -1,20 +1,22 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-         pageEncoding="ISO-8859-1"%>
+         pageEncoding="ISO-8859-1" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<%@page import="org.transitclock.web.WebConfigParams"%>
+<%@page import="org.transitclock.web.WebConfigParams" %>
 <html>
 <head>
     <%@include file="/template/includes.jsp" %>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
     <title>Real-time Operations</title>
 
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+
     <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
 
     <script src="<%= request.getContextPath() %>/maps/javascript/leafletRotatedMarker.js"></script>
     <script src="<%= request.getContextPath() %>/maps/javascript/mapUiOptions.js"></script>
 
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/maps/css/mapUi.css" />
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/maps/css/mapUi.css"/>
 
     <link href="params/reportParams.css" rel="stylesheet"/>
     <style>
@@ -42,7 +44,7 @@
             width: 20%;
             height: 100%;
             margin-left: 10px;
-            float:left;
+            float: left;
             border-right: 1px solid black;
         }
 
@@ -61,51 +63,56 @@
         }
 
         html, body, #map {
-            height: 100%; width: 100%; padding: 0px; margin: 0px;
+            height: 100%;
+            width: 100%;
+            padding: 0px;
+            margin: 0px;
         }
 
     </style>
     <%--        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>--%>
 
     <!-- Load in Select2 files so can create fancy route selector -->
-    <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
+    <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet"/>
     <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
 </head>
 <body>
-    <%@include file="/template/header.jsp" %>
-    <div id="paramsSidebar">
-        <div id="title" style="text-align: left; font-size:x-large">
-            Schedule Adherence
-        </div>
+<%@include file="/template/header.jsp" %>
+<div id="paramsSidebar">
+    <div id="title" style="text-align: left; font-size:x-large">
+        Schedule Adherence
+    </div>
 
-        <div id="paramsFields">
-            <%-- For passing agency param to the report --%>
-            <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
+    <div id="paramsFields">
+        <%-- For passing agency param to the report --%>
+        <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
 
-            <jsp:include page="params/routeAllOrSingle.jsp" />
+        <jsp:include page="params/routeAllOrSingle.jsp"/>
 
-            <div id="search" style="margin-top: 20px;">
-                Search
-                <br>
-                <div class="param">
-                    <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
-                    <button type="submit" id="vehiclesSubmit" onclick="getAndProcessSchAdhData($('#route').val(), $('#vehiclesSearch').val())">Show vehicle</button>
-                </div>
-            </div>
-        </div>
-        <div id="links">
-            <div id="liveMapLink">
-                <a href="realTimeLiveMap.jsp?a=1">Live Map View >></a>
-            </div>
-            <div id="dispatcherLink">
-                <a href="realTimeDispatcher.jsp?a=1">Dispatcher View >></a>
+        <div id="search" style="margin-top: 20px;">
+            Search
+            <br>
+            <div class="param">
+                <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
+                <button type="submit" id="vehiclesSubmit"
+                        onclick="getAndProcessSchAdhData($('#route').val(), $('#vehiclesSearch').val())">Show vehicle
+                </button>
             </div>
         </div>
     </div>
-
-    <div id="mainPage" style="width: 79%; height: 100%; display: inline-block;">
-        <div id="map"></div>
+    <div id="links">
+        <div id="liveMapLink">
+            <a href="realTimeLiveMap.jsp?a=1">Live Map View >></a>
+        </div>
+        <div id="dispatcherLink">
+            <a href="realTimeDispatcher.jsp?a=1">Dispatcher View >></a>
+        </div>
     </div>
+</div>
+
+<div id="mainPage" style="width: 79%; height: 100%; display: inline-block;">
+    <div id="map"></div>
+</div>
 
 <script>
 
@@ -119,7 +126,7 @@
     };
 
     var vehiclePopupOptions = {
-        offset: L.point(0,-2),
+        offset: L.point(0, -2),
         closeButton: false
     };
 
@@ -129,7 +136,7 @@
     var vehicleLayer;
 
     $.getJSON(apiUrlPrefix + "/command/routes?keepDuplicates=true",
-        function(routes) {
+        function (routes) {
             // Generate list of routes for the selector
             var selectorData = [{id: '', text: 'Select Route'}];
             for (var i in routes.routes) {
@@ -140,7 +147,8 @@
             $("#route").select2({
                 data: selectorData
             }).on("select2:select", function (e) {
-                getAndProcessSchAdhData($("#route").val(), $("#vehiclesSearch").val())});
+                getAndProcessSchAdhData($("#route").val(), $("#vehiclesSearch").val())
+            });
         }
     );
 
@@ -171,7 +179,7 @@
         // Do API call to get schedule adherence data
         $.getJSON(apiUrlPrefix + "/command/vehiclesDetails?onlyAssigned=true", {r: routeId},
             // Process data
-            function(jsonData) {
+            function (jsonData) {
                 var newVehicleLayer = L.featureGroup();
 
                 // Add new vehicles
@@ -204,13 +212,13 @@
                     var fillOpacity;
                     if (vehicle.schAdh < lateTime) {
                         // Vehicle is late
-                        radius = 5 - (Math.max(maxLate, vehicle.schAdh) - lateTime)/msecPerRadiusPixels;
+                        radius = 5 - (Math.max(maxLate, vehicle.schAdh) - lateTime) / msecPerRadiusPixels;
                         fillColor = '#E6D83E';
                         fillOpacity = 0.5;
                     } else if (vehicle.schAdh > earlyTime) {
                         // Vehicle is early. Since early is worse make radius
                         // of larger by using msecPerRadiusPixels/2
-                        radius = 5 + (Math.min(maxEarly, vehicle.schAdh) - earlyTime)/(msecPerRadiusPixels/2);
+                        radius = 5 + (Math.min(maxEarly, vehicle.schAdh) - earlyTime) / (msecPerRadiusPixels / 2);
                         fillColor = '#E34B71';
                         fillOpacity = 0.5;
                     } else {
@@ -245,7 +253,7 @@
                     vehicleMarker.vehicle = vehicle;
 
                     // Create popup window for vehicle when clicked on
-                    vehicleMarker.on('click', function(e) {
+                    vehicleMarker.on('click', function (e) {
                         openVehiclePopup(this);
                     });
 
@@ -276,13 +284,13 @@
         var routeFeatureGroup = L.featureGroup();
 
         // For each route
-        for (var r=0; r<routeData.routes.length; ++r) {
+        for (var r = 0; r < routeData.routes.length; ++r) {
             // Draw the paths for the route
             var route = routeData.routes[r];
-            for (var i=0; i<route.shape.length; ++i) {
+            for (var i = 0; i < route.shape.length; ++i) {
                 var shape = route.shape[i];
                 var latLngs = [];
-                for (var j=0; j<shape.loc.length; ++j) {
+                for (var j = 0; j < shape.loc.length; ++j) {
                     var loc = shape.loc[j];
                     latLngs.push(L.latLng(loc.lat, loc.lon));
                 }
@@ -325,7 +333,7 @@
 
         // Set map bounds to the agency extent
         $.getJSON(apiUrlPrefix + "/command/agencyGroup",
-            function(agencies) {
+            function (agencies) {
                 // Fit the map initially to the agency
                 var e = agencies.agency[0].extent;
                 map.fitBounds([[e.minLat, e.minLon], [e.maxLat, e.maxLon]]);
@@ -339,7 +347,9 @@
         // change every 10 seconds, but it shows that the map is live and is
         // really cool.
         getAndProcessSchAdhData($("#route").val(), $("#vehiclesSearch").val());
-        setInterval(function() {getAndProcessSchAdhData($("#route").val(), $("#vehiclesSearch").val())}, 10000);
+        setInterval(function () {
+            getAndProcessSchAdhData($("#route").val(), $("#vehiclesSearch").val())
+        }, 10000);
     }
 
     function openVehiclePopup(vehicleMarker) {
@@ -352,10 +362,11 @@
             .setLatLng(latlng)
             .setContent(content).openOn(map);
     }
+
     /**
      * When page finishes loading then create map
      */
-    $( document ).ready(function() {
+    $(document).ready(function () {
         createMap('<%= WebConfigParams.getMapTileUrl() %>',
             '<%= WebConfigParams.getMapTileCopyright() %>');
     });
