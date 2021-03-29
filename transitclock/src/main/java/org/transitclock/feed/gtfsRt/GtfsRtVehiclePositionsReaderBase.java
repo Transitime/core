@@ -21,6 +21,8 @@ import com.google.protobuf.CodedInputStream;
 import com.google.transit.realtime.GtfsRealtime.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.avl.AvlExecutor;
+import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.AvlReport.AssignmentType;
@@ -53,12 +55,17 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 					null,
 					"api key value if necessary, null if not needed");
 
+	private static IntegerConfigValue minQueueSizeForRefresh =
+					new IntegerConfigValue("transitclock.avl.minQueueSizeForRefresh",
+									0,
+									"beyond this queue size refreshes will block waiting for queue to empty");
 
 	private final String urlString;
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(GtfsRtVehiclePositionsReaderBase.class);
 
+	private long lastRunMillis = System.currentTimeMillis();
 	/********************** Member Functions **************************/
 
 	public GtfsRtVehiclePositionsReaderBase(String urlString) {
@@ -240,8 +247,19 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 	 */
 	public void process() {
 		try {
-			logger.info("Getting GTFS-realtime AVL data from URL={} ...", 
-					urlString);
+			int size = AvlExecutor.getInstance().getQueueSize();
+			// avoid possible queue starvation -- allow queue to empty before refilling
+			while (size > getRefreshQueueSize()) {
+				logger.info("waiting on queue to empty of size {}", size);
+				Thread.sleep(1000);
+				size = AvlExecutor.getInstance().getQueueSize();
+			}
+			long now = System.currentTimeMillis();
+			logger.info("Getting GTFS-realtime AVL after {}s, q size={} data from URL={} ...",
+							(now - lastRunMillis)/1000,
+							size,
+							urlString);
+			lastRunMillis = now;
 			IntervalTimer timer = new IntervalTimer();
 			
 			URI uri = new URI(urlString);
@@ -287,7 +305,11 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 					urlString, e);
 		}				
 	}
-	
+
+	private int getRefreshQueueSize() {
+		return minQueueSizeForRefresh.getValue();
+	}
+
 	/**
 	 * Returns the URL that this class is reading the GTFS-realtime data from.
 	 * 
