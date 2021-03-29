@@ -96,7 +96,7 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
 <script>
 
 
-    var agencyTimezoneOffset;
+    var agencyTimezoneOffset , timerGroup;
 
     /**
      * For formating epoch times to human readable times, possibly including
@@ -418,8 +418,10 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
         var tripPatternStr = verbose ? "<br/><b>Trip Pattern:</b> " + vehicleData.tripPattern : "";
         var startTimeStr = vehicleData.isScheduledService ? "" : "<br/><b>Start Time:</b> " + dateFormat(vehicleData.freqStartTime / 1000);
         var schAdhStr = vehicleData.isScheduledService ? "<br/><b>SchAdh:</b> " + vehicleData.schAdhStr : ""
-        var content = "<b>Vehicle:</b> " + vehicleData.id
-            + "<br/><b>Route: </b> " + vehicleData.routeShortName
+        var content = "<b>Vehicle:</b> " + vehicleData.id +"<span id='updated-time-holder' age='"+vehicleData.updatedTime+"'  time-initial='"+new Date().getTime()+"'> | Data updated "+vehicleData.updatedTime+" seconds ago"
+
+
+            + "</span><br/><b>Route: </b> " + vehicleData.routeShortName
             + latLonHeadingStr
             + "<br/><b>GPS Time:</b> " + gpsTimeStr
             + "<br/><b>Headsign:</b> " + vehicleData.headsign
@@ -433,8 +435,48 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
             + layoverDepartureStr
             + nextStopNameStr
             + driver;
+
+        clearInterval(timerGroup);
+        setUpdatedTime()
+
+
         return content;
     }
+
+
+    function setUpdatedTime() {
+        timerGroup = setInterval(function() {
+
+            var selector = document.querySelector("#updated-time-holder");
+
+            if (!selector) {return false;}
+
+            var timeInitial = parseInt(selector.getAttribute("time-initial"),10);
+            var age = parseInt(selector.getAttribute("age"),10);
+            var differencefUpdate = age + (new Date().getTime() - timeInitial) / 1000;
+
+            selector.innerHTML = "| Data updated " + getUpdatedTimeText(differencefUpdate) ;
+
+        }, 1000);}
+
+
+    function getUpdatedTimeText(secondsAgo) {
+        secondsAgo = Math.floor(secondsAgo);
+        if(secondsAgo < 60) {
+            return secondsAgo + " second" + ((secondsAgo === 1) ? "" : "s") + " ago";
+        } else {
+            var minutesAgo = Math.floor(secondsAgo / 60);
+            secondsAgo = secondsAgo - (minutesAgo * 60);
+
+            var s = minutesAgo + " minute" + ((minutesAgo === 1) ? "" : "s");
+            if(secondsAgo > 0) {
+                s += ", " + secondsAgo + " second" + ((secondsAgo === 1) ? "" : "s");
+            }
+            s += " ago";
+            return s;
+        }
+    }
+
 
     /**
      * Determines options for drawing the vehicle marker icon based on uiType
@@ -644,6 +686,27 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
     }
 
     /**
+     * Returns the difference of two timestamps
+     */
+    function timeDifference(date1,date2) {
+
+        var difference = date1 - date2;
+
+        var daysDifference = Math.floor(difference/60/60/24);
+        difference -= daysDifference*60*60*24
+
+        var hoursDifference = Math.floor(difference/60/60);
+        difference -= hoursDifference*60*60
+
+        var minutesDifference = Math.floor(difference/60);
+        difference -= minutesDifference*60
+
+        var secondsDifference = Math.floor(difference);
+
+        return secondsDifference;
+    }
+
+    /**
      * Reads in vehicle data obtained via AJAX. Called for each vehicle in API
      * whether vehicle changed or not.
      */
@@ -688,6 +751,10 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
 
             var vehicleLoc = L.latLng(vehicleData.loc.lat, vehicleData.loc.lon);
 
+            // Gets Vehicle Updated Time
+            var updatedTime = vehicles.responseTime && vehicleData.loc.time ?
+                timeDifference(vehicles.responseTime, vehicleData.loc.time) : 0;
+            vehicleData.updatedTime = updatedTime;
             // If vehicle icon wasn't already created then create it now
             var vehicleMarker = getVehicleMarker(vehicleData.id);
             if (vehicleMarker == null) {

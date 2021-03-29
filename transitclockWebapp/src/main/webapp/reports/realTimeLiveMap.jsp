@@ -1102,10 +1102,12 @@
 
         var routeParam = "";
         var stopParam = "";
-
-        if (routeShortName.trim() != "") {
-            routeParam = "r=" + routeShortName;
+        if(routeShortName && routeShortName.length > 0) {
+            $(routeShortName).each(function (index, eachList) {
+                routeParam += "r=" + eachList + ($(routeShortName).length - 1 === index ? "" : "&");
+            });
         }
+
         if (stopId.trim() != "") {
             stopParam = "s=" + stopId;
         }
