@@ -48,7 +48,10 @@ public class AvlExecutor {
 	
 	// The actual executor
 	ThreadPoolExecutor avlClientExecutor = null;
-	
+	public int getQueueSize() {
+		return avlClientExecutor.getQueue().size();
+	}
+
 	// Singleton class
 	private static AvlExecutor singleton;
 	
