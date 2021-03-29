@@ -82,7 +82,7 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
             </div>
             <div id="routesDiv" class="param">
                 <label for="routes">Route:</label>
-                <select id="routes"></select>
+                <select id="routes"  multiple="multiple"></select>
             </div>
         </div>
     </div>
@@ -271,92 +271,90 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
         routeFeatureGroup = L.featureGroup();
 
         // Only working with single route at a time for now
-        var route = routesData.routes[0];
+        // var route = routesData.routes[0];
 
-        // Draw stops for the route. Do stops before paths so that when call
-        // bringToBack() the stops will end up being on top.
-        var locsToFit = [];
-        var firstNonMinorStop = true;
-        for (var i = 0; i < route.direction.length; ++i) {
-            var direction = route.direction[i];
-            for (var j = 0; j < direction.stop.length; ++j) {
-                var stop = direction.stop[j];
-                var options = stop.minor ? minorStopOptions : stopOptions;
-                // Draw first non-minor stop differently to highlight it
-                /*
-                if (!stop.minor && firstNonMinorStop) {
-                    options = firstStopOptions;
-                    firstNonMinorStop = false;
-                }
-                */
-                // Keep track of non-minor stop locations so can fit map to show them all
-                if (!stop.minor)
-                    locsToFit.push(L.latLng(stop.lat, stop.lon));
+        $(routesData.routes).each(function(index,route){
 
-                // Create the stop Marker
-                var stopMarker = L.circleMarker([stop.lat, stop.lon], options).addTo(map);
-
-                routeFeatureGroup.addLayer(stopMarker);
-
-                // Store stop data obtained via AJAX with stopMarker so it can be used in popup
-                stopMarker.stop = stop;
-
-                // Store routeShortName obtained via AJAX with stopMarker so can be
-                // used to get predictions for stop/route
-                stopMarker.routeShortName = route.shortName;
-
-                // When user clicks on stop popup information box
-                stopMarker.on('click', function (e) {
-                    showStopPopup(this);
-                }).addTo(map);
-            }
-        }
-
-        // Draw the paths for the route
-        for (var i = 0; i < route.shape.length; ++i) {
-            var shape = route.shape[i];
-            var options = shape.minor ? minorShapeOptions : shapeOptions;
-
-            var latLngs = [];
-            for (var j = 0; j < shape.loc.length; ++j) {
-                var loc = shape.loc[j];
-                latLngs.push(L.latLng(loc.lat, loc.lon));
-            }
-            var polyline = L.polyline(latLngs, options).addTo(map);
-
-            routeFeatureGroup.addLayer(polyline);
-
-            // Store shape data obtained via AJAX with polyline so it can be used in popup
-            polyline.shape = shape;
-
-            // Popup trip pattern info when user clicks on path
-            if (verbose) {
-                polyline.on('click', function (e) {
-                        var content = "<b>TripPattern:</b> " + this.shape.tripPattern
-                            + "<br/><b>Headsign:</b> " + this.shape.headsign;
-                        L.popup(tripPatternPopupOptions)
-                            .setLatLng(e.latlng)
-                            .setContent(content)
-                            .openOn(map);
+            // Draw stops for the route. Do stops before paths so that when call
+            // bringToBack() the stops will end up being on top.
+            var locsToFit = [];
+            var firstNonMinorStop = true;
+            for (var i=0; i<route.direction.length; ++i) {
+                var direction = route.direction[i];
+                for (var j=0; j<direction.stop.length; ++j) {
+                    var stop = direction.stop[j];
+                    var options = stop.minor ? minorStopOptions : stopOptions;
+                    // Draw first non-minor stop differently to highlight it
+                    /*
+                    if (!stop.minor && firstNonMinorStop) {
+                        options = firstStopOptions;
+                        firstNonMinorStop = false;
                     }
-                );
+                    */
+                    // Keep track of non-minor stop locations so can fit map to show them all
+                    if (!stop.minor)
+                        locsToFit.push(L.latLng(stop.lat, stop.lon));
+
+                    // Create the stop Marker
+                    var stopMarker = L.circleMarker([stop.lat,stop.lon], options).addTo(map);
+
+                    routeFeatureGroup.addLayer(stopMarker);
+
+                    // Store stop data obtained via AJAX with stopMarker so it can be used in popup
+                    stopMarker.stop = stop;
+
+                    // Store routeShortName obtained via AJAX with stopMarker so can be
+                    // used to get predictions for stop/route
+                    stopMarker.routeShortName = route.shortName;
+
+                    // When user clicks on stop popup information box
+                    stopMarker.on('click', function(e) {
+                        showStopPopup(this);
+                    }).addTo(map);
+
+                    if (stopMarker.stop.id == $("#stopsSearch").val()) {
+                        showStopPopup(stopMarker);
+                    }
+                }
             }
 
-        }
+            // Draw the paths for the route
+            for (var i=0; i<route.shape.length; ++i) {
+                var shape = route.shape[i];
+                var options = shape.minor ? minorShapeOptions : shapeOptions;
 
-        // Add all of the paths and stops to the map at once via the FeatureGroup
-        routeFeatureGroup.addTo(map);
+                var latLngs = [];
+                for (var j=0; j<shape.loc.length; ++j) {
+                    var loc = shape.loc[j];
+                    latLngs.push(L.latLng(loc.lat, loc.lon));
+                }
+                var polyline = L.polyline(latLngs, options).addTo(map);
 
-        // If stop was specified for getting route then locationOfNextPredictedVehicle
-        // is also returned. Use this vehicle location when fitting bounds of map
-        // so that user will always see the next vehicle coming.
-        if (route.locationOfNextPredictedVehicle) {
-            locsToFit.push(L.latLng(route.locationOfNextPredictedVehicle.lat,
-                route.locationOfNextPredictedVehicle.lon));
-        }
+                routeFeatureGroup.addLayer(polyline);
 
-        // Get map to fit route
-        map.fitBounds(locsToFit);
+                // Store shape data obtained via AJAX with polyline so it can be used in popup
+                polyline.shape = shape;
+
+            }
+
+            // Add all of the paths and stops to the map at once via the FeatureGroup
+            routeFeatureGroup.addTo(map);
+
+            // If stop was specified for getting route then locationOfNextPredictedVehicle
+            // is also returned. Use this vehicle location when fitting bounds of map
+            // so that user will always see the next vehicle coming.
+            if (route.locationOfNextPredictedVehicle) {
+                locsToFit.push(L.latLng(route.locationOfNextPredictedVehicle.lat,
+                    route.locationOfNextPredictedVehicle.lon));
+            }
+            // Get map to fit route
+            if (locsToFit.length > 0) {
+                map.fitBounds(locsToFit);
+            }
+
+        });
+
+
 
         // It can happen that vehicles get drawn before the route paths & stops.
         // In this case need call bringToBack() on the paths and stops so that
@@ -930,44 +928,53 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
                     selectorData.push({id: route.id, text: route.name})
                 }
 
+                function selectUnselect(e) {
+                    // First remove all old vehicles so that they don't
+                    // get moved around when zooming to new route
+                    removeAllVehicles();
+
+                    // Remove old predictions popup if there is one
+                    if (predictionsPopup)
+                        map.closePopup(predictionsPopup);
+
+                    // Configure map for new route
+                    // var selectedRouteId = e.params.data.id;
+                    var selectedDataList = $("#routes").select2("data");
+                    var selectedRouteId = "";
+                    $(selectedDataList).each(function(index, eachList){
+                        selectedRouteId += "r=" + eachList.id + ($(selectedDataList).length-1 === index ? "": "&");
+                    });
+
+                    var url = apiUrlPrefix + "/command/routesDetails?" + selectedRouteId;
+                    $.getJSON(url, routeConfigCallback);
+
+                    // Reset the polling rate back down to minimum value since selecting new route
+                    avlPollingRate = MIN_AVL_POLLING_RATE;
+                    if (avlTimer)
+                        clearTimeout(avlTimer);
+
+                    // Read in vehicle locations now
+                    setRouteQueryStrParam(selectedRouteId);
+                    updateVehiclesUsingApiData();
+
+                    // Disable tooltips. For some reason get an unwanted
+                    // tooltip consisting of the current select once a selection
+                    // has been made. It is really distracting. So have to do
+                    // this convoluted thing after every selection in order to
+                    // make sure this annoying tooltip doesn't popup.
+                    $("#select2-routes-container").tooltip({content: 'foo'});
+                    $("#select2-routes-container").tooltip("option", "disabled", true);
+                }
+
                 // Configure the selector to be a select2 one that has
                 // search capability
                 $("#routes").select2({
                     placeholder: "Select Route",
                     data: selectorData
-                })
+                }).on("select2:select", selectUnselect)
+                  .on("select2:unselect", selectUnselect);
                     // Called when user selects route. Draws route and associated vehicles on map.
-                    .on("select2:select", function (e) {
-                        // First remove all old vehicles so that they don't
-                        // get moved around when zooming to new route
-                        removeAllVehicles();
 
-                        // Remove old predictions popup if there is one
-                        if (predictionsPopup)
-                            map.closePopup(predictionsPopup);
-
-                        // Configure map for new route
-                        var selectedRouteId = e.params.data.id;
-                        var url = apiUrlPrefix + "/command/routesDetails?r=" + selectedRouteId;
-                        $.getJSON(url, routeConfigCallback);
-
-                        // Reset the polling rate back down to minimum value since selecting new route
-                        avlPollingRate = MIN_AVL_POLLING_RATE;
-                        if (avlTimer)
-                            clearTimeout(avlTimer);
-
-                        // Read in vehicle locations now
-                        setRouteQueryStrParam("r=" + selectedRouteId);
-                        updateVehiclesUsingApiData();
-
-                        // Disable tooltips. For some reason get an unwanted
-                        // tooltip consisting of the current select once a selection
-                        // has been made. It is really distracting. So have to do
-                        // this convoluted thing after every selection in order to
-                        // make sure this annoying tooltip doesn't popup.
-                        $("#select2-routes-container").tooltip({content: 'foo'});
-                        $("#select2-routes-container").tooltip("option", "disabled", true);
-                    });
 
                 // If showing unassigned vehicles then start getting vehicle
                 // location data now instead instead of waiting till route selected.
