@@ -101,15 +101,19 @@ sup {
 }
 .param-container{
 	flex-flow: column;
-	width: 90%;
+	width: 94%;
 	max-width: 30vw;
 	justify-content: space-between;
-	padding: 0 5%;
+	padding: 0 3%;
 	display: flex;
 }
 
 .param-container label{
 	margin-right: 2px;
+	width: auto;
+}
+.margintop{
+	margin-top: 20px;
 }
 
 .title {

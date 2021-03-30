@@ -17,6 +17,7 @@
 
     <!-- Load in Select2 files so can create fancy selectors -->
     <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
 
     <link rel="stylesheet" href="<%= request.getContextPath() %>/maps/css/mapUi.css" />
@@ -74,7 +75,7 @@
 <body>
     <%@include file="/template/header.jsp" %>
     <div id="paramsSidebar">
-        <div id="title" style="text-align: left; font-size:x-large">
+        <div id="title" style="font-size:x-large">
             Live Map
         </div>
 
