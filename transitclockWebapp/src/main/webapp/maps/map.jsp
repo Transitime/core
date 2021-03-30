@@ -28,7 +28,9 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
     <script src="javascript/mapUiOptions.js"></script>
     <script src="<%= request.getContextPath() %>/javascript/jquery-dateFormat.min.js"></script>
 
-    <%-- MBTA wants some color customization. Load in options file if mbta --%>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/reports/params/reportParams.css" />
+
+<%-- MBTA wants some color customization. Load in options file if mbta --%>
     <% if (request.getParameter("a").startsWith("mbta")) { %>
     <link rel="stylesheet" href="css/mbtaMapUi.css"/>
     <script src="javascript/mbtaMapUiOptions.js"></script>
@@ -81,8 +83,21 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
                 Real Time Vehicle Monitoring
             </div>
             <div id="routesDiv" class="param">
-                <label for="routes">Route:</label>
+                <label for="routes">Routes:</label>
                 <select id="routes"  multiple="multiple"></select>
+            </div>
+            <div id="search" class="margintop">
+                Search
+                <br>
+                <div class="param">
+                    <input type="text" id="stopsSearch" placeholder="Stops" name="stopsSearch">
+                    <button type="submit" id="stopsSubmit" onclick="showStopDetails($('#routes').val(), $('#stopsSearch').val())">Show stop</button>
+                </div>
+
+                <div class="param">
+                    <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
+                    <button type="submit" id="vehiclesSubmit" onclick="openVehiclePopup(getVehicleMarker($('#vehiclesSearch').val()))">Show vehicle</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1099,5 +1114,44 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
     setTimeout(function () {
         $('#mapTitle').hide('fade', 1000);
     }, 1000);
+
+
+    function showStopDetails(routeShortName, stopId) {
+        var url;
+
+        var routeParam = "";
+        var stopParam = "";
+        if(routeShortName && routeShortName.length > 0) {
+            $(routeShortName).each(function (index, eachList) {
+                routeParam += "r=" + eachList + ($(routeShortName).length - 1 === index ? "" : "&");
+            });
+        }
+
+        if (stopId.trim() != "") {
+            stopParam = "s=" + stopId;
+        }
+
+        url = apiUrlPrefix + "/command/routesDetails";
+        if (routeParam != "" || stopParam != "") {
+            url += "?" + routeParam;
+            if (routeParam != "") {
+                url += "&"
+            }
+            url += stopParam;
+        }
+
+        $.getJSON(url, routeConfigCallback).error(function() {alert("Specified stop not found.");});
+    }
+
+    function openVehiclePopup(vehicleMarker) {
+        var content = getVehiclePopupContent(vehicleMarker.vehicleData);
+        var latlng = L.latLng(vehicleMarker.vehicleData.loc.lat,
+            vehicleMarker.vehicleData.loc.lon);
+        // Create popup and associate it with the vehicleMarker
+        // so can later update the content.
+        vehicleMarker.popup = L.popup(vehiclePopupOptions, vehicleMarker)
+            .setLatLng(latlng)
+            .setContent(content).openOn(map);
+    }
 
 </script>
