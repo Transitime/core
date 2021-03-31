@@ -54,3 +54,75 @@ sup {
 	vertical-align: super;
 	font-size: xx-small;
 }
+
+
+
+/*Update styles*/
+.page-container {
+	display: flex;
+	width: 100%;
+	height: 100%;
+	flex-direction: row;
+}
+
+.side-container-view {
+	width: 20%;
+	height: 100%;
+	border-right: 1px solid black;
+}
+
+.map-container-view {
+	width: 80%;
+	position: relative;
+	height: 100%;
+}
+.param {
+	display: flex;
+	flex-flow: row;
+	justify-content: space-between;
+	margin-top: 6%;
+	align-items: center;
+}
+
+.param > * {
+	font-size: 14px;
+	font-family: 'Montserrat', sans-serif;
+}
+
+.select2-container--default  {
+	background-color: white;
+	border: 1px solid #c1c1c1c1;
+	border-radius: 0px;
+	cursor: text;
+	box-shadow: 0px 1px 4px rgb(0 0 0 / 33% );
+}
+.select2-container {
+	width: 236px!important;
+}
+.param-container{
+	flex-flow: column;
+	width: 94%;
+	max-width: 30vw;
+	justify-content: space-between;
+	padding: 0 3%;
+	display: flex;
+}
+
+.param-container label{
+	margin-right: 2px;
+	width: auto;
+}
+.margintop{
+	margin-top: 20px;
+}
+
+.title {
+	margin-top: 40px;
+	margin-bottom: 10px;
+	font-weight: normal;
+	text-align: center;
+	background: #019932;
+	color: white;
+	padding: 8px;
+	font-size: 24px;
+}

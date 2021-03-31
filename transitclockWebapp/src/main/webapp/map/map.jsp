@@ -49,20 +49,24 @@
 </head>
 
 <body>
-  <div id="map"></div>
+
   <!-- To center successfully in all situations need to use a div within a div.
        The title text is set in css so that it is easily configurable -->
   <div id="titleContainer">
     <div id="mapTitle"></div>
   </div>
-  
+  <div class="page-container">
+    <div class="side-container-view">
   <!--  To center successfully in all situations use div within a div trick -->  
   <div id="routesContainer">
     <div id="routesDiv">
       <input type="hidden" id="routes" style="width:380px" />
     </div>
   </div>
-  
+    </div>
+    <div class="map-container-view">
+  <div id="map"></div>
+  </div>
 </body>
 
 <script>

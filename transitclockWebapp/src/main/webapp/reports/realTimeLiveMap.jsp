@@ -17,6 +17,7 @@
 
     <!-- Load in Select2 files so can create fancy selectors -->
     <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
 
     <link rel="stylesheet" href="<%= request.getContextPath() %>/maps/css/mapUi.css" />
@@ -74,7 +75,7 @@
 <body>
     <%@include file="/template/header.jsp" %>
     <div id="paramsSidebar">
-        <div id="title" style="text-align: left; font-size:x-large">
+        <div id="title" style="font-size:x-large">
             Live Map
         </div>
 
@@ -82,8 +83,7 @@
             <%-- For passing agency param to the report --%>
             <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
 
-            <jsp:include page="params/routeAllOrSingle.jsp" />
-
+                <jsp:include page="params/routeMultiple.jsp" />
             <div id="search" style="margin-top: 20px;">
                 Search
                 <br>
@@ -114,6 +114,7 @@
 
 
 <script>
+    var timerGroup;
     var agencyTimezoneOffset;
     /**
      * For formating epoch times to human readable times, possibly including
@@ -152,6 +153,7 @@
             routeQueryStrParam =  null;
             return;
         }
+        console.log(getQueryVariable("r"))
 
         if (getQueryVariable("r"))
             routeQueryStrParam = "r=" + getQueryVariable("r");
@@ -285,85 +287,90 @@
         routeFeatureGroup = L.featureGroup();
 
         // Only working with single route at a time for now
-        var route = routesData.routes[0];
+        // var route = routesData.routes[0];
 
-        // Draw stops for the route. Do stops before paths so that when call
-        // bringToBack() the stops will end up being on top.
-        var locsToFit = [];
-        var firstNonMinorStop = true;
-        for (var i=0; i<route.direction.length; ++i) {
-            var direction = route.direction[i];
-            for (var j=0; j<direction.stop.length; ++j) {
-                var stop = direction.stop[j];
-                var options = stop.minor ? minorStopOptions : stopOptions;
-                // Draw first non-minor stop differently to highlight it
-                /*
-                if (!stop.minor && firstNonMinorStop) {
-                    options = firstStopOptions;
-                    firstNonMinorStop = false;
-                }
-                */
-                // Keep track of non-minor stop locations so can fit map to show them all
-                if (!stop.minor)
-                    locsToFit.push(L.latLng(stop.lat, stop.lon));
+        $(routesData.routes).each(function(index,route){
 
-                // Create the stop Marker
-                var stopMarker = L.circleMarker([stop.lat,stop.lon], options).addTo(map);
+            // Draw stops for the route. Do stops before paths so that when call
+            // bringToBack() the stops will end up being on top.
+            var locsToFit = [];
+            var firstNonMinorStop = true;
+            for (var i=0; i<route.direction.length; ++i) {
+                var direction = route.direction[i];
+                for (var j=0; j<direction.stop.length; ++j) {
+                    var stop = direction.stop[j];
+                    var options = stop.minor ? minorStopOptions : stopOptions;
+                    // Draw first non-minor stop differently to highlight it
+                    /*
+                    if (!stop.minor && firstNonMinorStop) {
+                        options = firstStopOptions;
+                        firstNonMinorStop = false;
+                    }
+                    */
+                    // Keep track of non-minor stop locations so can fit map to show them all
+                    if (!stop.minor)
+                        locsToFit.push(L.latLng(stop.lat, stop.lon));
 
-                routeFeatureGroup.addLayer(stopMarker);
+                    // Create the stop Marker
+                    var stopMarker = L.circleMarker([stop.lat,stop.lon], options).addTo(map);
 
-                // Store stop data obtained via AJAX with stopMarker so it can be used in popup
-                stopMarker.stop = stop;
+                    routeFeatureGroup.addLayer(stopMarker);
 
-                // Store routeShortName obtained via AJAX with stopMarker so can be
-                // used to get predictions for stop/route
-                stopMarker.routeShortName = route.shortName;
+                    // Store stop data obtained via AJAX with stopMarker so it can be used in popup
+                    stopMarker.stop = stop;
 
-                // When user clicks on stop popup information box
-                stopMarker.on('click', function(e) {
-                    showStopPopup(this);
-                }).addTo(map);
+                    // Store routeShortName obtained via AJAX with stopMarker so can be
+                    // used to get predictions for stop/route
+                    stopMarker.routeShortName = route.shortName;
 
-                if (stopMarker.stop.id == $("#stopsSearch").val()) {
-                    showStopPopup(stopMarker);
+                    // When user clicks on stop popup information box
+                    stopMarker.on('click', function(e) {
+                        showStopPopup(this);
+                    }).addTo(map);
+
+                    if (stopMarker.stop.id == $("#stopsSearch").val()) {
+                        showStopPopup(stopMarker);
+                    }
                 }
             }
-        }
 
-        // Draw the paths for the route
-        for (var i=0; i<route.shape.length; ++i) {
-            var shape = route.shape[i];
-            var options = shape.minor ? minorShapeOptions : shapeOptions;
+            // Draw the paths for the route
+            for (var i=0; i<route.shape.length; ++i) {
+                var shape = route.shape[i];
+                var options = shape.minor ? minorShapeOptions : shapeOptions;
 
-            var latLngs = [];
-            for (var j=0; j<shape.loc.length; ++j) {
-                var loc = shape.loc[j];
-                latLngs.push(L.latLng(loc.lat, loc.lon));
+                var latLngs = [];
+                for (var j=0; j<shape.loc.length; ++j) {
+                    var loc = shape.loc[j];
+                    latLngs.push(L.latLng(loc.lat, loc.lon));
+                }
+                var polyline = L.polyline(latLngs, options).addTo(map);
+
+                routeFeatureGroup.addLayer(polyline);
+
+                // Store shape data obtained via AJAX with polyline so it can be used in popup
+                polyline.shape = shape;
+
             }
-            var polyline = L.polyline(latLngs, options).addTo(map);
 
-            routeFeatureGroup.addLayer(polyline);
+            // Add all of the paths and stops to the map at once via the FeatureGroup
+            routeFeatureGroup.addTo(map);
 
-            // Store shape data obtained via AJAX with polyline so it can be used in popup
-            polyline.shape = shape;
+            // If stop was specified for getting route then locationOfNextPredictedVehicle
+            // is also returned. Use this vehicle location when fitting bounds of map
+            // so that user will always see the next vehicle coming.
+            if (route.locationOfNextPredictedVehicle) {
+                locsToFit.push(L.latLng(route.locationOfNextPredictedVehicle.lat,
+                    route.locationOfNextPredictedVehicle.lon));
+            }
+            // Get map to fit route
+            if (locsToFit.length > 0) {
+                map.fitBounds(locsToFit);
+            }
 
-        }
+        });
 
-        // Add all of the paths and stops to the map at once via the FeatureGroup
-        routeFeatureGroup.addTo(map);
 
-        // If stop was specified for getting route then locationOfNextPredictedVehicle
-        // is also returned. Use this vehicle location when fitting bounds of map
-        // so that user will always see the next vehicle coming.
-        if (route.locationOfNextPredictedVehicle) {
-            locsToFit.push(L.latLng(route.locationOfNextPredictedVehicle.lat,
-                route.locationOfNextPredictedVehicle.lon));
-        }
-
-        // Get map to fit route
-        if (locsToFit.length > 0) {
-            map.fitBounds(locsToFit);
-        }
 
         // It can happen that vehicles get drawn before the route paths & stops.
         // In this case need call bringToBack() on the paths and stops so that
@@ -426,10 +433,9 @@
         var tripPatternStr = "<br/><b>Trip Pattern:</b> " + vehicleData.tripPattern;
         var startTimeStr = vehicleData.isScheduledService ? "" : "<br/><b>Start Time:</b> "+dateFormat(vehicleData.freqStartTime/1000);
         var schAdhStr = vehicleData.isScheduledService ? "<br/><b>SchAdh:</b> " + vehicleData.schAdhStr : ""
-        var mapsLink = 'http://google.com/maps?q=loc:' + vehicleData.loc.lat + ',' + vehicleData.loc.lon;
-
-        var content = "<b>Vehicle:</b> " + vehicleData.id
-            + "<br/><b>Route: </b> " + vehicleData.routeShortName
+        var content = "<b>Vehicle:</b> " +
+            vehicleData.id +"<span id='updated-time-holder' age='"+vehicleData.updatedTime+"'  time-initial='"+new Date().getTime()+"'> | Data updated "+vehicleData.updatedTime+" seconds ago"
+            + "</span><br/><b>Route: </b> " + vehicleData.routeShortName
             + latLonHeadingStr
             + "<br/><b>GPS Time:</b> " + gpsTimeStr
             + "<br/><b>Headsign:</b> " + vehicleData.headsign
@@ -442,9 +448,43 @@
             + layoverStr
             + layoverDepartureStr
             + nextStopNameStr
-            + driver
-            +"<br/><a href=" + mapsLink + " target='_blank' >View Location in Google Maps</a>";
+            + driver;
+        clearInterval(timerGroup);
+        setUpdatedTime()
         return content;
+    }
+
+    function setUpdatedTime() {
+        timerGroup = setInterval(function() {
+
+            var selector = document.querySelector("#updated-time-holder");
+
+            if (!selector) {return false;}
+
+            var timeInitial = parseInt(selector.getAttribute("time-initial"),10);
+            var age = parseInt(selector.getAttribute("age"),10);
+            var differencefUpdate = age + (new Date().getTime() - timeInitial) / 1000;
+
+            selector.innerHTML = "| Data updated " + getUpdatedTimeText(differencefUpdate) ;
+
+        }, 1000);}
+
+
+    function getUpdatedTimeText(secondsAgo) {
+        secondsAgo = Math.floor(secondsAgo);
+        if(secondsAgo < 60) {
+            return secondsAgo + " second" + ((secondsAgo === 1) ? "" : "s") + " ago";
+        } else {
+            var minutesAgo = Math.floor(secondsAgo / 60);
+            secondsAgo = secondsAgo - (minutesAgo * 60);
+
+            var s = minutesAgo + " minute" + ((minutesAgo === 1) ? "" : "s");
+            if(secondsAgo > 0) {
+                s += ", " + secondsAgo + " second" + ((secondsAgo === 1) ? "" : "s");
+            }
+            s += " ago";
+            return s;
+        }
     }
 
     /**
@@ -648,6 +688,27 @@
     }
 
     /**
+     * Returns the difference of two timestamps
+     */
+    function timeDifference(date1,date2) {
+
+        var difference = date1 - date2;
+
+        var daysDifference = Math.floor(difference/60/60/24);
+        difference -= daysDifference*60*60*24
+
+        var hoursDifference = Math.floor(difference/60/60);
+        difference -= hoursDifference*60*60
+
+        var minutesDifference = Math.floor(difference/60);
+        difference -= minutesDifference*60
+
+        var secondsDifference = Math.floor(difference);
+
+        return secondsDifference;
+    }
+
+    /**
      * Reads in vehicle data obtained via AJAX. Called for each vehicle in API
      * whether vehicle changed or not.
      */
@@ -694,6 +755,12 @@
 
             // If vehicle icon wasn't already created then create it now
             var vehicleMarker = getVehicleMarker(vehicleData.id);
+
+            // Gets Vehicle Updated Time
+            var updatedTime = vehicles.responseTime && vehicleData.loc.time ?
+                timeDifference(vehicles.responseTime, vehicleData.loc.time) : 0;
+            vehicleData.updatedTime = updatedTime;
+
             if (vehicleMarker == null) {
                 // Create the new marker
                 vehicleMarker = createVehicleMarker(vehicleData);
@@ -879,8 +946,8 @@
     var mapTileUrl = '<%= WebConfigParams.getMapTileUrl() %>';
     L.tileLayer(mapTileUrl, {
         // Specifying a shorter version of attribution. Original really too long.
-        //attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-        attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery ©<%= WebConfigParams.getMapTileCopyright() %>',
+        //attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery ï¿½ <a href="http://mapbox.com">Mapbox</a>',
+        attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery ï¿½<%= WebConfigParams.getMapTileCopyright() %>',
         maxZoom: 19
     }).addTo(map);
 
@@ -942,53 +1009,61 @@
 
             // Configure the selector to be a select2 one that has
             // search capability
+            function selectUnSelectCallBack(e){
+
+                var configuredTitle = $( "#route" ).attr("title");
+                $( "#select2-route-container" ).tooltip({ content: configuredTitle,
+                    position: { my: "left+10 center", at: "right center" } });
+
+                // First remove all old vehicles so that they don't
+                // get moved around when zooming to new route
+                removeAllVehicles();
+
+                // Remove old predictions popup if there is one
+                if (predictionsPopup)
+                    map.closePopup(predictionsPopup);
+
+                // Configure map for new route
+                var selectedDataList = $("#route").select2("data");
+                var selectedRouteId = "";
+                $(selectedDataList).each(function(index, eachList){
+                    selectedRouteId += "r=" + eachList.id + ($(selectedDataList).length-1 === index ? "": "&");
+                });
+
+                if (selectedRouteId.trim() != "") {
+                    var url = apiUrlPrefix + "/command/routesDetails?" + selectedRouteId;
+                    $.getJSON(url, routeConfigCallback);
+                }
+                else {
+                    // If there is an old route then remove it
+                    if (routeFeatureGroup) {
+                        map.removeLayer(routeFeatureGroup);
+                    }
+                }
+
+                // Reset the polling rate back down to minimum value since selecting new route
+                avlPollingRate = MIN_AVL_POLLING_RATE;
+                if (avlTimer)
+                    clearTimeout(avlTimer);
+
+                // Read in vehicle locations now
+                setRouteQueryStrParam(selectedRouteId);
+                updateVehiclesUsingApiData();
+
+                // Disable tooltips. For some reason get an unwanted
+                // tooltip consisting of the current select once a selection
+                // has been made. It is really distracting. So have to do
+                // this convoluted thing after every selection in order to
+                // make sure this annoying tooltip doesn't popup.
+                $( "#select2-routes-container" ).tooltip({ content: 'foo' });
+                $( "#select2-routes-container" ).tooltip("option", "disabled", true);
+            }
+
             $("#route").select2({
                 data : selectorData})
-            // Need to reset tooltip after selector is used. Sheesh!
-                .on("select2:select", function(e) {
-                    var configuredTitle = $( "#route" ).attr("title");
-                    $( "#select2-route-container" ).tooltip({ content: configuredTitle,
-                        position: { my: "left+10 center", at: "right center" } });
-
-                    // First remove all old vehicles so that they don't
-                    // get moved around when zooming to new route
-                    removeAllVehicles();
-
-                    // Remove old predictions popup if there is one
-                    if (predictionsPopup)
-                        map.closePopup(predictionsPopup);
-
-                    // Configure map for new route
-                    var selectedRouteId = e.params.data.id;
-
-                    if (selectedRouteId.trim() != "") {
-                        var url = apiUrlPrefix + "/command/routesDetails?r=" + selectedRouteId;
-                        $.getJSON(url, routeConfigCallback);
-                    }
-                    else {
-                        // If there is an old route then remove it
-                        if (routeFeatureGroup) {
-                            map.removeLayer(routeFeatureGroup);
-                        }
-                    }
-
-                    // Reset the polling rate back down to minimum value since selecting new route
-                    avlPollingRate = MIN_AVL_POLLING_RATE;
-                    if (avlTimer)
-                        clearTimeout(avlTimer);
-
-                    // Read in vehicle locations now
-                    setRouteQueryStrParam("r=" + selectedRouteId);
-                    updateVehiclesUsingApiData();
-
-                    // Disable tooltips. For some reason get an unwanted
-                    // tooltip consisting of the current select once a selection
-                    // has been made. It is really distracting. So have to do
-                    // this convoluted thing after every selection in order to
-                    // make sure this annoying tooltip doesn't popup.
-                    $( "#select2-routes-container" ).tooltip({ content: 'foo' });
-                    $( "#select2-routes-container" ).tooltip("option", "disabled", true);
-                });
+                // Need to reset tooltip after selector is used. Sheesh!
+                .on("select2:select", selectUnSelectCallBack)
+        .on("select2:unselect", selectUnSelectCallBack);
 
             // start getting vehicle location data now instead instead of waiting till route selected.
             updateVehiclesUsingApiData();
@@ -1028,10 +1103,12 @@
 
         var routeParam = "";
         var stopParam = "";
-
-        if (routeShortName.trim() != "") {
-            routeParam = "r=" + routeShortName;
+        if(routeShortName && routeShortName.length > 0) {
+            $(routeShortName).each(function (index, eachList) {
+                routeParam += "r=" + eachList + ($(routeShortName).length - 1 === index ? "" : "&");
+            });
         }
+
         if (stopId.trim() != "") {
             stopParam = "s=" + stopId;
         }
