@@ -135,7 +135,7 @@ input[type='number'] ,input[type='text'] {
     width: 210px;
 }
 
-select {
+select:not(.datepick-month-year):not(.datepick-month-year) {
     border: 1px solid #c1c1c1c1;
     background-color: #fff;
     line-height: 1.5;
@@ -177,4 +177,101 @@ input#submit {
     .select2-container {
 
         width: 236px!important;
+    }
+
+    div#ui-datepicker-div {
+        background: white;
+    }
+
+    .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+        border: 1px solid #cbc7bd;
+        background: white;
+        font-weight: bold;
+        color: black;
+    }
+
+    .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
+        border: 1px solid #d9d6c4;
+        background: #4ddb4c9c;
+        font-weight: bold;
+        color: black;
+    }
+
+    .trigger.datepick-trigger {
+        height: 32px;
+    }
+
+    .datepick-nav,.datepick-ctrl {
+        background-color: white;
+        color: #000;
+        padding: 5px 0;
+        border: 1px solid #d9d6c4;
+        border-radius: 4px;
+        margin: 2px 0;
+    }
+
+    .datepick a{
+        color:#444;
+    }
+
+    .datepick-month-header select{
+        background-color: #fff;
+        color: #000;
+
+    }
+
+    .datepick-month td .datepick-selected,
+    .datepick-month td .datepick-highlight,
+    .datepick-ctrl .datepick-cmd:hover,.datepick-cmd:hover, .datepick-month td .datepick-today{
+        background-color: #4ddb4c9c;
+        color: #000;
+    }
+    .datepick-month th, .datepick-month th a {
+        background-color: #019932;
+        color: #fff;
+    }
+
+    .datepick-month-header {
+        height: 1.5em;
+        background-color: #019932;
+        margin-bottom: 2px;
+        padding: 4px 0;
+        border: 1px solid transparent;
+    }
+
+    .ui-datepicker-week-end .ui-state-default {
+        background-color: #ddd;
+    }
+
+    .datepick-month a {
+        background-color: white;
+    }
+
+    .datepick-month a {
+        background-color: white;
+        border: 1px solid #cbc7bd;
+        /* padding: .2em; */
+        /* text-align: right; */
+    }
+
+    .datepick-month td {
+        padding: 2px;
+        border: 0;
+        background-color: transparent;
+    }
+
+    .datepick-month td span {
+        border: 1px solid #cbc7bd;
+        background-color: #fff;
+    }
+
+    .datepick {
+        border: 1px solid #d9d6c4;
+        padding: 3px;
+    }
+
+    .datepick-month {
+        /* border: 0; */
+        width: 15em;
+        border: 1px solid transparent;
     }

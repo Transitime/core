@@ -1,8 +1,9 @@
 <%-- For specifying a begin date, number of days, begin time, and end time --%>
 
-<link rel="stylesheet" type="text/css" href="../jquery.datepick.package-5.1.0/css/jquery.datepick.css">
-<script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.plugin.js"></script>
-<script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.datepick.js"></script>
+
+<script src="<%= request.getContextPath() %>//jquery-ui.js"></script>
+
+
 
 <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
 <link rel="stylesheet" type="text/css" href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
@@ -11,18 +12,18 @@
     $(function() {
         var calendarIconTooltip = "Popup calendar to select date";
 
-        $( "#beginDate" ).datepick({
-            dateFormat: "yyyy-mm-dd",
+        $( "#beginDate" ).datepicker({
+            dateFormat: "yy-mm-dd",
             showOtherMonths: true,
             selectOtherMonths: true,
             // Show button for calendar
-            buttonImage: "../jquery.datepick.package-5.1.0/img/calendar.gif",
-            buttonImageOnly: true,
-            showOn: "both",
+            buttonImage: "images/calendar.gif",
+            buttonImageOnly: false,
+            showOn: "button",
             // Don't allow going past current date
             maxDate: 0,
-            showTrigger: '<button type="button" class="trigger">' +
-                '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
+            // showTrigger: '<button type="button" class="trigger">' +
+            //     '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
             // onClose is for restricting end date to be after start date,
             // though it is potentially confusing to user
             onClose: function( selectedDate ) {

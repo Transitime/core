@@ -12,6 +12,12 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
 
+    <link rel="stylesheet" type="text/css" href="../jquery.datepick.package-5.1.0/css/jquery.datepick.css">
+
+    <script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.plugin.js"></script>
+    <script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.datepick.js"></script>
+
+
     <link href="params/reportParams.css" rel="stylesheet"/>
     <style>
 
@@ -63,7 +69,7 @@
             color: #44444469;
         }
 
-        select {
+        select:not(.datepick-month-year):not(.datepick-month-year) lect {
             width: -webkit-fill-available;
             border: 1px solid #c1c1c1c1;
             background-color: #fff;
@@ -259,10 +265,7 @@
         }
 
     </style>
-    <%--        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>--%>
-    <link rel="stylesheet" type="text/css" href="../jquery.datepick.package-5.1.0/css/jquery.datepick.css">
-    <script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.plugin.js"></script>
-    <script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.datepick.js"></script>
+
 </head>
 <body>
 <%@include file="/template/header.jsp" %>
