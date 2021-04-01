@@ -62,9 +62,9 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 	/* (non-Javadoc)
 	 * @see org.transitclock.core.dataCache.ehcache.StopArrivalDepartureCacheInterface#getStopHistory(org.transitclock.core.dataCache.StopArrivalDepartureCacheKey)
 	 */
-	
+
 	@SuppressWarnings("unchecked")
-	synchronized public List<IpcArrivalDeparture> getStopHistory(StopArrivalDepartureCacheKey key) {
+	public List<IpcArrivalDeparture> getStopHistory(StopArrivalDepartureCacheKey key) {
 
 		//logger.debug(cache.toString());
 		Calendar date = Calendar.getInstance();
@@ -75,21 +75,22 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 		date.set(Calendar.SECOND, 0);
 		date.set(Calendar.MILLISECOND, 0);
 		key.setDate(date.getTime());
-		StopEvents result = cache.get(key);
-		
-		if (result != null) {
-			return (List<IpcArrivalDeparture>) result.getEvents();
-		} else {
-			return null;
+		synchronized (cache) {
+			StopEvents result = cache.get(key);
+
+			if (result != null) {
+				return (List<IpcArrivalDeparture>) result.getEvents();
+			} else {
+				return null;
+			}
 		}
 	}
 
 	/* (non-Javadoc)
 	 * @see org.transitclock.core.dataCache.ehcache.StopArrivalDepartureCacheInterface#putArrivalDeparture(org.transitclock.db.structs.ArrivalDeparture)
 	 */
-	
 	@SuppressWarnings("unchecked")
-	synchronized public StopArrivalDepartureCacheKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
+	public StopArrivalDepartureCacheKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
 
 		logger.trace("Putting :" + arrivalDeparture.toString() + " in StopArrivalDepartureCache cache.");
 	
@@ -100,29 +101,26 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);
 		date.set(Calendar.MILLISECOND, 0);
-		if(arrivalDeparture.getStop()!=null)
-		{
-			StopArrivalDepartureCacheKey key = new StopArrivalDepartureCacheKey(arrivalDeparture.getStop().getId(),
-					date.getTime());
-					
+		if(arrivalDeparture.getStop() == null) return null;
+		StopArrivalDepartureCacheKey key = new StopArrivalDepartureCacheKey(arrivalDeparture.getStop().getId(),
+				date.getTime());
+
+		synchronized (cache) {
 			StopEvents element = cache.get(key);
-	
-			if (element == null) {														
-				element=new StopEvents();	
+
+			if (element == null) {
+				element = new StopEvents();
 			}
-			
+
 			try {
 				element.addEvent(new IpcArrivalDeparture(arrivalDeparture));
-			} catch (Exception e) {				
-				logger.error("Error adding "+arrivalDeparture.toString()+" event to StopArrivalDepartureCache.", e);				
-			}			
-									
-			cache.put(key,element);
-	
+			} catch (Exception e) {
+				logger.error("Error adding " + arrivalDeparture.toString() + " event to StopArrivalDepartureCache.", e);
+			}
+
+			cache.put(key, element);
+
 			return key;
-		}else
-		{
-			return null;
 		}
 	}
 

@@ -50,23 +50,20 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 		cache = cm.getCache(cacheName, StopPathCacheKey.class, DwellModel.class);
 	}
 	@Override
-	synchronized public void addSample(ArrivalDeparture event, Headway headway, long dwellTime) {
+	public void addSample(ArrivalDeparture event, Headway headway, long dwellTime) {
 
 		StopPathCacheKey key=new StopPathCacheKey(headway.getTripId(), event.getStopPathIndex(), false);
 
-		DwellModel model = null;
+		synchronized (cache) {
+			DwellModel model = cache.get(key);
 
-		if(cache.get(key)!=null)
-		{
-			model=(DwellModel) cache.get(key);
+			if (model == null) {
+				model = DwellTimeModelFactory.getInstance();
+			}
+			model.putSample((int) dwellTime, (int) headway.getHeadway(), null);
 
-			model.putSample((int)dwellTime, (int)headway.getHeadway(),null);
-		}else
-		{
-			model=DwellTimeModelFactory.getInstance();
+			cache.put(key, model);
 		}
-		model.putSample((int)dwellTime, (int)headway.getHeadway(),null);
-		cache.put(key, model);
 	}
 
 	@Override
