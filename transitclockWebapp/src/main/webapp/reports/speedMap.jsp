@@ -18,6 +18,11 @@
 
     <script src="<%= request.getContextPath() %>/maps/javascript/leafletRotatedMarker.js"></script>
     <script src="<%= request.getContextPath() %>/maps/javascript/mapUiOptions.js"></script>
+    <%--        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>--%>
+    <link rel="stylesheet" type="text/css" href="../jquery.datepick.package-5.1.0/css/jquery.datepick.css">
+
+    <script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.plugin.js"></script>
+    <script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.datepick.js"></script>
 
     <link rel="stylesheet" href="<%= request.getContextPath() %>/maps/css/mapUi.css" />
 
@@ -74,7 +79,7 @@
             font-size: 16px;
         }
 
-        select {
+        select:not(.datepick-month-year):not(.datepick-month-year) {
             width: -webkit-fill-available;
             border: 1px solid #c1c1c1c1;
             background-color: #fff;
@@ -319,10 +324,7 @@
         }
 
     </style>
-    <%--        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>--%>
-    <link rel="stylesheet" type="text/css" href="../jquery.datepick.package-5.1.0/css/jquery.datepick.css">
-    <script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.plugin.js"></script>
-    <script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.datepick.js"></script>
+
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
     <script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script>
