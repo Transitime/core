@@ -157,8 +157,6 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 
 						KalmanError last_prediction_error = lastVehiclePredictionError(kalmanErrorCache, previousVehicleIndices);
 
-						logger.debug("Using error value: " + last_prediction_error +" found with vehicle id "+travelTimeDetails.getArrival().getVehicleId()+ " from: "+new KalmanErrorCacheKey(previousVehicleIndices).toString());
-
 						//TODO this should also display the detail of which vehicle it choose as the last one.
 						logger.debug("Using last vehicle value: " + travelTimeDetails + " for : "+ indices.toString());
 

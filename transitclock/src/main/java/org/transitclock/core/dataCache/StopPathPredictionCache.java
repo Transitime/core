@@ -67,22 +67,19 @@ public class StopPathPredictionCache implements StopPathPredictionCacheInterface
 	@SuppressWarnings("unchecked")
     @Override
 	 public void putPrediction(StopPathCacheKey key,  PredictionForStopPath prediction) {
-		
-		List<PredictionForStopPath> list = null;
+
+		StopPredictions emptySp = new StopPredictions();
+		emptySp.addPrediction(prediction);
 
 		synchronized (cache) {
 			StopPredictions element = cache.get(key);
-
-			if (element != null && element.getPredictions() != null) {
-				list = (List<PredictionForStopPath>) element.getPredictions();
+			if (element == null) {
+				cache.put(key, emptySp);
 			} else {
-				list = new ArrayList<PredictionForStopPath>();
+				element.addPrediction(prediction);
+				cache.put(key, element);
 			}
-			list.add(prediction);
 
-			element.setPredictions(list);
-
-			cache.put(key, element);
 		}
 	}		
 

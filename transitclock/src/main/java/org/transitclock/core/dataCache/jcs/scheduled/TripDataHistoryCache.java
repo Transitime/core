@@ -117,13 +117,8 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 	 */
 	
 	@Override
-	public void populateCacheFromDb(Session session, Date startDate, Date endDate)
+	public void populateCacheFromDb(List<ArrivalDeparture> results)
 	{
- 		Criteria criteria =session.createCriteria(ArrivalDeparture.class);				
-		
-		@SuppressWarnings("unchecked")
-		List<ArrivalDeparture> results=criteria.add(Restrictions.between("time", startDate, endDate)).list();
-						
 		for(ArrivalDeparture result : results)		
 		{						
 			// TODO this might be better done in the database.						
