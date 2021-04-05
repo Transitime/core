@@ -166,7 +166,7 @@ public class FrequencyBasedHistoricalAverageCache {
 
 						logger.debug("Putting : {} in FrequencyBasedHistoricalAverageCache cache for key : {} which results in : {}.", pathDuration, historicalAverageCacheKey, average);
 
-						FrequencyBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+						putAverage(historicalAverageCacheKey, average);
 					}
 				}
 			}				
@@ -176,7 +176,7 @@ public class FrequencyBasedHistoricalAverageCache {
 				StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), stopDuration.getDeparture().getStopPathIndex(), false, new Long(time));
 
 				synchronized (m) {
-					HistoricalAverage average = FrequencyBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+					HistoricalAverage average = getAverage(historicalAverageCacheKey);
 
 					if (average == null)
 						average = new HistoricalAverage();
@@ -185,7 +185,7 @@ public class FrequencyBasedHistoricalAverageCache {
 
 					logger.debug("Putting : {} in FrequencyBasedHistoricalAverageCache cache for key : {} which results in : {}.", stopDuration, historicalAverageCacheKey, average);
 
-					FrequencyBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+					putAverage(historicalAverageCacheKey, average);
 				}
 			}	
 			if(stopDuration==null && pathDuration==null)
@@ -294,7 +294,7 @@ public class FrequencyBasedHistoricalAverageCache {
 				}
 				// TODO this might be better done in the database.
 				if (GtfsData.routeNotFiltered(result.getRouteId())) {
-					FrequencyBasedHistoricalAverageCache.getInstance().putArrivalDeparture(result);
+					putArrivalDeparture(result);
 				}
 				counter++;
 			}

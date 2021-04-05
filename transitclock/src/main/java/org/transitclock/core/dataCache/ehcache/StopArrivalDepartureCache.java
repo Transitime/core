@@ -139,13 +139,7 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 				if (counter % 1000 == 0) {
 					logger.info("{} out of {} Stop Arrival Departure Records ({}%)", counter, results.size(), (int) ((counter * 100.0f) / results.size()));
 				}
-				StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(result);
-				//TODO might be better with its own populateCacheFromdb
-				try {
-					DwellTimeModelCacheFactory.getInstance().addSample(result);
-				} catch (Exception Ex) {
-					Ex.printStackTrace();
-				}
+				putArrivalDeparture(result);
 				counter++;
 			}
 		} catch (Throwable t) {

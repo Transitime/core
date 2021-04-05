@@ -160,7 +160,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 				// TODO this might be better done in the database.
 				if (GtfsData.routeNotFiltered(result.getRouteId())) {
 					try {
-						TripDataHistoryCacheFactory.getInstance().putArrivalDeparture(result);
+						putArrivalDeparture(result);
 					} catch (Throwable tt) {
 						logger.error("TripDataHistoryCache Excepiton buried");
 					}

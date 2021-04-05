@@ -183,7 +183,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 			for (ArrivalDeparture result : results) {
 				// TODO this might be better done in the database.
 				if (GtfsData.routeNotFiltered(result.getRouteId())) {
-					TripDataHistoryCacheFactory.getInstance().putArrivalDeparture(result);
+					putArrivalDeparture(result);
 				}
 			}
 		} catch (Throwable t) {

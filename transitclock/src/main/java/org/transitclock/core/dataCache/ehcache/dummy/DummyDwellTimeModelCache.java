@@ -8,6 +8,8 @@ import org.transitclock.core.dataCache.StopPathCacheKey;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Headway;
 
+import java.util.List;
+
 public class DummyDwellTimeModelCache implements DwellTimeModelCacheInterface {
 
     private static final Logger logger = LoggerFactory.getLogger(DummyDwellTimeModelCache.class);
@@ -26,5 +28,10 @@ public class DummyDwellTimeModelCache implements DwellTimeModelCacheInterface {
     @Override
     public Long predictDwellTime(StopPathCacheKey cacheKey, Headway headway) {
         return null;
+    }
+
+    @Override
+    public void populateCacheFromDb(List<ArrivalDeparture> results) {
+
     }
 }

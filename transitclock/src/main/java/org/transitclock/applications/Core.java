@@ -31,6 +31,7 @@ import org.transitclock.configData.CoreConfig;
 import org.transitclock.core.ServiceUtils;
 import org.transitclock.core.TimeoutHandlerModule;
 import org.transitclock.core.dataCache.CacheTask;
+import org.transitclock.core.dataCache.DwellTimeModelCacheFactory;
 import org.transitclock.core.dataCache.ParallelProcessor;
 import org.transitclock.core.dataCache.PredictionDataCache;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
@@ -487,6 +488,11 @@ public class Core {
 				if(ScheduleBasedHistoricalAverageCache.getInstance()!=null)
 				{
 					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.ScheduleBasedHistoricalAverageCache, defaultInput);
+					pp.enqueue(ct);
+				}
+
+				if(DwellTimeModelCacheFactory.getInstance() != null) {
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.DwellTimeModelCacheFactory, defaultInput);
 					pp.enqueue(ct);
 				}
 

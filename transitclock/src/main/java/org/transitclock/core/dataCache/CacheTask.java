@@ -29,7 +29,8 @@ public class CacheTask implements ParallelTask {
         TripDataHistoryCacheFactory,
         StopArrivalDepartureCacheFactory,
         FrequencyBasedHistoricalAverageCache,
-        ScheduleBasedHistoricalAverageCache
+        ScheduleBasedHistoricalAverageCache,
+        DwellTimeModelCacheFactory
     }
 
     private Date startDate;
@@ -72,6 +73,9 @@ public class CacheTask implements ParallelTask {
                     break;
                 case ScheduleBasedHistoricalAverageCache:
                     ScheduleBasedHistoricalAverageCache.getInstance().populateCacheFromDb(results);
+                    break;
+                case DwellTimeModelCacheFactory:
+                    DwellTimeModelCacheFactory.getInstance().populateCacheFromDb(results);
                     break;
                 default:
                     throw new IllegalArgumentException("unknown type=" + type);

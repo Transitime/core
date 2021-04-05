@@ -90,13 +90,13 @@ public class ScheduleBasedHistoricalAverageCache {
 					HistoricalAverage empty = new HistoricalAverage();
 					empty.update(travelTimeDetails.getTravelTime());
 					synchronized (cache) {
-						HistoricalAverage average = ScheduleBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+						HistoricalAverage average = getAverage(historicalAverageCacheKey);
 
 						if (average == null) {
-							ScheduleBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, empty);
+							putAverage(historicalAverageCacheKey, empty);
 						} else{
 							average.update(travelTimeDetails.getTravelTime());
-							ScheduleBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+							putAverage(historicalAverageCacheKey, average);
 						}
 					}
 				}
@@ -110,14 +110,14 @@ public class ScheduleBasedHistoricalAverageCache {
 				HistoricalAverage empty = new HistoricalAverage();
 				empty.update(dwellTimeDetails.getDwellTime());
 				synchronized (cache) {
-					HistoricalAverage average = ScheduleBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+					HistoricalAverage average = getAverage(historicalAverageCacheKey);
 
 					if (average == null) {
-						ScheduleBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, empty);
+						putAverage(historicalAverageCacheKey, empty);
 					} else {
 						logger.trace("Updating historical averege for : {} with {}", historicalAverageCacheKey, dwellTimeDetails);
 						average.update(dwellTimeDetails.getDwellTime());
-						ScheduleBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+						putAverage(historicalAverageCacheKey, average);
 					}
 				}
 			}
@@ -186,7 +186,7 @@ public class ScheduleBasedHistoricalAverageCache {
 				if (counter % 1000 == 0) {
 					logger.info("{} out of {} ScheduleBased Historical Records ({}%)", counter, results.size(), (int) ((counter * 100.0f) / results.size()));
 				}
-				ScheduleBasedHistoricalAverageCache.getInstance().putArrivalDeparture(result);
+				putArrivalDeparture(result);
 				counter++;
 			}
 		} catch (Throwable t) {
