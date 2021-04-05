@@ -295,7 +295,8 @@
             var direction = route.direction[i];
             for (var j=0; j<direction.stop.length; ++j) {
                 var stop = direction.stop[j];
-                var options = stop.minor ? minorStopOptions : stopOptions;
+                // var options = stop.minor ? minorStopOptions : stopOptions;
+                var options =  (stop.id == $("#stopsSearch").val())  ?  {"color":"#FF0000","opacity":1,"radius":3,"weight":2,"fillColor":"#FF0000","fillOpacity":0.6,"clickable":false} : stopOptions;
                 // Draw first non-minor stop differently to highlight it
                 /*
                 if (!stop.minor && firstNonMinorStop) {
@@ -333,7 +334,8 @@
         // Draw the paths for the route
         for (var i=0; i<route.shape.length; ++i) {
             var shape = route.shape[i];
-            var options = shape.minor ? minorShapeOptions : shapeOptions;
+            var options = shapeOptions;
+                // shape.minor ? minorShapeOptions : shapeOptions;
 
             var latLngs = [];
             for (var j=0; j<shape.loc.length; ++j) {
