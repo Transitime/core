@@ -58,10 +58,10 @@ finding specific issues with predictions.">
     <ul class="choicesList">
         <li><a href="avlMap.jsp?a=<%= agencyId %>"
                title="Displays historic AVL data for a vehicle in a map.">
-            AVL Data in Map</a></li>
-        <li><a href="avlMapParams.jsp?a=<%= agencyId %>"
+            Vehicle Location Playback </a></li>
+        <%--<li><a href="avlMapParams.jsp?a=<%= agencyId %>"
                title="Displays historic AVL data for a vehicle in a map.">
-            AVL Data in Map (parameters page)</a></li>
+            AVL Data in Map (parameters page)</a></li>--%>
         <li><a href="lastAvlReport.jsp?a=<%= agencyId %>"
                title="Displays the last time each vehicle reported its GPS position over the last 24 hours.">
             Last GPS Report by Vehicle</a></li>
@@ -140,20 +140,20 @@ finding specific issues with predictions.">
     <ul class="choicesList">
         <li><a href="realTimeLiveMap.jsp?a=<%= agencyId %>"
                title="Displays real time vehicle and stop information on a map.">
-            Real Time Live Map</a></li>
+            Live Map View</a></li>
         <li><a href="realTimeScheduleAdherence.jsp?a=<%= agencyId %>"
                title="Displays real time schedule adherence information on a map.">
-            Real Time Schedule Adherence</a></li>
+            Schedule Adherence</a></li>
         <li><a href="realTimeDispatcher.jsp?a=<%= agencyId %>"
                title="Displays real time vehicle information in a table.">
-            Real Time Dispatcher View</a></li>
+            Dispatcher View</a></li>
     </ul>
 
-    <div id="subtitle">Real Time Vehicle Monitoring Reports</div>
+    <div id="subtitle">Real Time Vehicle Monitoring</div>
     <ul class="choicesList">
         <li><a href="../maps/map.jsp?verbose=true&a=<%= agencyId %>"
                title="Real-time map for selected route">
-            Real Time Vehicle Reports</a></li>
+            Real Time Vehicle View</a></li>
     </ul>
 
 
