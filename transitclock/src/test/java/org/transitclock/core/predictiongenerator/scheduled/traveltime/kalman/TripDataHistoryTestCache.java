@@ -40,7 +40,7 @@ public class TripDataHistoryTestCache implements TripDataHistoryCacheInterface {
   }
 
   @Override
-  public void populateCacheFromDb(Session session, Date startDate, Date endDate) {
+  public void populateCacheFromDb(List<ArrivalDeparture> results) {
 
   }
 

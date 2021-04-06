@@ -21,6 +21,7 @@ import org.transitclock.gtfs.GtfsData;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -74,16 +75,17 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	 */
 	@Override
 	public List<IpcArrivalDeparture> getTripHistory(TripKey tripKey) {
-		// we need to protected the deserializer from modifications
+		TripEvents result = null;
 		synchronized (cache) {
-			TripEvents result = (TripEvents) cache.get(tripKey);
+			// we need to protected the deserializer from modifications
+			result = cache.get(tripKey);
+		}
 
-			if (result != null) {
-				// this call needs outer synchronization
-				return result.getEvents();
-			} else {
-				return null;
-			}
+		if (result != null) {
+			// TripEvent is immutable so this call is now threadsafe
+			return result.getEvents();
+		} else {
+			return null;
 		}
 	}
 
@@ -92,7 +94,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	 */
 	@Override	
 	public TripKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
-
+		
 		logger.trace("Putting :"+arrivalDeparture.toString() + " in TripDataHistoryCache cache.");
 		/* just put todays time in for last three days to aid development. This means it will kick in in 1 days rather than 3. Perhaps be a good way to start rather than using default transiTime method but I doubt it. */
 		int days_back=1;
@@ -125,14 +127,18 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 			} catch (Exception e) {
 				logger.error("Error adding "+arrivalDeparture.toString()+" event to TripDataHistoryCache.", e);
 			}
+			TripEvents empty = new TripEvents(ipcad);
 
 			synchronized (cache) {
-				TripEvents result = (TripEvents) cache.get(tripKey);
+				TripEvents result = cache.get(tripKey);
 				if (result == null) {
-					result = new TripEvents();
+					cache.put(tripKey, empty);
+				} else {
+					// update TripEvents in a threadsafe way
+					// object needs to be immutable for ehcache to store
+					result = result.copyAdd(ipcad);
+					cache.put(tripKey, result);
 				}
-				result.addEvent(ipcad);
-				cache.put(tripKey, result);
 			}
 		}
 		return tripKey;
@@ -143,23 +149,27 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	 */
 	
 	@Override
-	public void populateCacheFromDb(Session session, Date startDate, Date endDate)
+	public void populateCacheFromDb(List<ArrivalDeparture> results)
 	{
-		Criteria criteria =session.createCriteria(ArrivalDeparture.class);
-		List<ArrivalDeparture> results = StopArrivalDepartureCacheInterface.createArrivalDeparturesCriteria(criteria, startDate, endDate);
-		int counter = 0;
-		for(ArrivalDeparture result : results)		
-		{
-			if(counter % 1000 == 0){
-				logger.info("{} out of {} Trip Data History Records for period {} to {} ({}%)", counter, results.size(), startDate, endDate, (int)((counter * 100.0f) / results.size()));
+		try {
+			int counter = 0;
+			for (ArrivalDeparture result : results) {
+				if (counter % 1000 == 0) {
+					logger.info("{} out of {} Trip Data History Records ({}%)", counter, results.size(), (int) ((counter * 100.0f) / results.size()));
+				}
+				// TODO this might be better done in the database.
+				if (GtfsData.routeNotFiltered(result.getRouteId())) {
+					try {
+						putArrivalDeparture(result);
+					} catch (Throwable tt) {
+						logger.error("TripDataHistoryCache Excepiton buried");
+					}
+				}
+				counter++;
 			}
-			// TODO this might be better done in the database.						
-			if(GtfsData.routeNotFiltered(result.getRouteId()))
-			{
-				TripDataHistoryCacheFactory.getInstance().putArrivalDeparture(result);
-			}
-			counter++;
-		}		
+		} catch (Throwable t) {
+			logger.error("Exception in populateCacheFromDb {}", t, t);
+		}
 	}
 		
 	/* (non-Javadoc)
@@ -169,12 +179,10 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	public IpcArrivalDeparture findPreviousArrivalEvent(List<IpcArrivalDeparture> arrivalDepartures,IpcArrivalDeparture current)
 	{
 		if (arrivalDepartures == null) return null;
-		synchronized (cache) {
-			Collections.sort(arrivalDepartures, new IpcArrivalDepartureComparator());
-			for (IpcArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) {
-				if (tocheck.getStopId().equals(current.getStopId()) && (current.isDeparture() && tocheck.isArrival())) {
-					return tocheck;
-				}
+		Collections.sort(arrivalDepartures, new IpcArrivalDepartureComparator());
+		for (IpcArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) {
+			if (tocheck.getStopId().equals(current.getStopId()) && (current.isDeparture() && tocheck.isArrival())) {
+				return tocheck;
 			}
 		}
 		return null;
@@ -183,20 +191,18 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	 * @see org.transitclock.core.dataCache.ehcache.test#findPreviousDepartureEvent(java.util.List, org.transitclock.db.structs.ArrivalDeparture)
 	 */
 	@Override
-	public IpcArrivalDeparture findPreviousDepartureEvent(List<IpcArrivalDeparture> arrivalDepartures,IpcArrivalDeparture current)
+	public IpcArrivalDeparture findPreviousDepartureEvent(List<IpcArrivalDeparture> arrivalDeparturesUnsafe,IpcArrivalDeparture current)
 	{
-		if (arrivalDepartures == null) return null;
-		synchronized (cache) {
-			Collections.sort(arrivalDepartures, new IpcArrivalDepartureComparator());
-			for (IpcArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) {
-				try {
-					if (tocheck.getStopPathIndex() == (current.getStopPathIndex() - 1) && (current.isArrival() && tocheck.isDeparture())) {
-						return tocheck;
-					}
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+		if (arrivalDeparturesUnsafe == null) return null;
+		List<IpcArrivalDeparture> arrivalDepartures = new ArrayList<>(arrivalDeparturesUnsafe);
+		Collections.sort(arrivalDepartures, new IpcArrivalDepartureComparator());
+		for (IpcArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) {
+			try {
+				if (tocheck.getStopPathIndex() == (current.getStopPathIndex() - 1) && (current.isArrival() && tocheck.isDeparture())) {
+					return tocheck;
 				}
+			} catch (Exception e) {
+				logger.error("Exception searching {}", e, e);
 			}
 		}
 		return null;		

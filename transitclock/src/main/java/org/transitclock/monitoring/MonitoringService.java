@@ -159,10 +159,13 @@ public class MonitoringService {
             while (iterator.hasNext() && i < 20) {
                 i++;
                 MetricDatum datum = (MetricDatum) iterator.next();
-                only20.add(datum);
+                if (datum != null && datum.getValue() != null) {
+                    only20.add(datum);
+                    logger.info("{},{},{}", datum.getUnit(), datum.getMetricName(), datum.getValue());
+                } else {
+                    logger.info("discarding empty metric {}", datum.getMetricName());
+                }
                 iterator.remove();
-                logger.info("{},{},{}", datum.getUnit(), datum.getMetricName(), datum.getValue());
-
             }
             if (isCloudWatchInitialized) {
                 PutMetricDataRequest putMetricDataRequest = new PutMetricDataRequest()

@@ -67,7 +67,6 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
           "transitclock.prediction.data.kalman.tresholdForDifferenceEventLog", new Integer(60000),
           "This is the threshold in milliseconds that the difference has to be over before it will consider the percentage difference.");
 
-
   private static final Logger logger = LoggerFactory.getLogger(KalmanPredictionGeneratorImpl.class);
 
   /*
@@ -114,10 +113,6 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
             LinkTravelTimes linkTravelTimes = generateLinkTravelTimes(avlReport, historicalTravelTimes, headwayTravelTimes, indices);
             Indices headwayVehicleIndices = new Indices(headwayTravelTimes.getArrival());
             KalmanError headwayError = getKalmanErrorForIndices(getKalmanErrorCache(), headwayVehicleIndices);
-            logger.debug("Using error value: " + headwayError +" found with vehicle id "+headwayTravelTimes.getArrival().getVehicleId()+ " from: "+new KalmanErrorCacheKey(headwayVehicleIndices).toString());
-
-            //TODO this should also display the detail of which vehicle it chose as the last one.
-            logger.debug("Using last vehicle value: " + headwayTravelTimes + " for : "+ indices.toString());
 
             // perform the adjustment based on the history retrieved and the headway as the realtime input
             KalmanPredictionResult kalmanPredictionResult = kalmanPrediction.predict(linkTravelTimes.getLastVehicleSegment(),
@@ -125,7 +120,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
                     headwayError.getError());
 
             long predictionTime = (long) kalmanPredictionResult.getResult();
-            logger.debug("Setting Kalman error value: " + kalmanPredictionResult.getFilterError() + " for : "+ new KalmanErrorCacheKey(indices).toString());
+
             getKalmanErrorCache().putErrorValue(indices, kalmanPredictionResult.getFilterError());
             logPredictionEvent(avlReport, headwayTravelTimes, currentVehicleState, predictionTime, alternatePrediction);
 

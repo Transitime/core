@@ -4,12 +4,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.transitclock.applications.Core;
 import org.transitclock.db.structs.Arrival;
 import org.transitclock.db.structs.ArrivalDeparture;
@@ -22,20 +21,22 @@ import org.transitclock.utils.Time;
 
 public abstract class StopArrivalDepartureCacheInterface {
 
+	private static final Logger logger = LoggerFactory.getLogger(StopArrivalDepartureCacheInterface.class);
+
 	abstract  public  List<IpcArrivalDeparture> getStopHistory(StopArrivalDepartureCacheKey key);
 
 	abstract  public StopArrivalDepartureCacheKey putArrivalDeparture(ArrivalDeparture arrivalDeparture);
 
-	private static final Logger logger = LoggerFactory.getLogger(StopArrivalDepartureCacheInterface.class);
-
-	public void populateCacheFromDb(Session session, Date startDate, Date endDate) {
-		Criteria criteria = session.createCriteria(ArrivalDeparture.class);
-
-		List<ArrivalDeparture> results = createArrivalDeparturesCriteria(criteria, startDate, endDate);
-		for (ArrivalDeparture result : results) {
-			this.putArrivalDeparture(result);
-			//TODO might be better with its own populateCacheFromdb
-			DwellTimeModelCacheFactory.getInstance().addSample(result);
+	abstract public void populateCacheFromDb(List<ArrivalDeparture> results);
+	public void defaultPopulateCacheFromDb(List<ArrivalDeparture> results) {
+		try {
+			for (ArrivalDeparture result : results) {
+				this.putArrivalDeparture(result);
+				//TODO might be better with its own populateCacheFromdb
+				DwellTimeModelCacheFactory.getInstance().addSample(result);
+			}
+		} catch (Throwable t) {
+			logger.error("StopArrivalDepartureCacheInterface failed with {}", t, t);
 		}
 	}
 

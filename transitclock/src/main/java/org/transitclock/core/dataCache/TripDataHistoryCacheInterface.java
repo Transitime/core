@@ -15,7 +15,7 @@ public interface TripDataHistoryCacheInterface {
 
 	TripKey putArrivalDeparture(ArrivalDeparture arrivalDeparture);
 		
-	void populateCacheFromDb(Session session, Date startDate, Date endDate);
+	void populateCacheFromDb(List<ArrivalDeparture> results);
 
 	IpcArrivalDeparture findPreviousArrivalEvent(List<IpcArrivalDeparture> arrivalDepartures, IpcArrivalDeparture current);
 
