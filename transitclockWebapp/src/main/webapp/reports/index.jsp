@@ -112,16 +112,6 @@ finding specific issues with predictions.">
              title="Real time schedule adherence by vehicle">Real Time Schedule Adherence By Vehicle</a></li>--%>
     </ul>
 
-    <div id="subtitle">Status Reports</div>
-    <ul class="choicesList">
-        <li><a href="../status/activeBlocks.jsp?a=<%= agencyId %>"
-               title="Shows how many block assignments are currently active and if they have assigned vehicles">
-            Active Blocks</a></li>
-        <li><a href="../status/serverStatus.jsp?a=<%= agencyId %>"
-               title="Shows how well system is running, including the AVL feed">
-            Server Status</a></li>
-    </ul>
-
     <div id="subtitle">Speed Reports</div>
     <ul class="choicesList">
         <li><a href="speedMap.jsp?a=<%=agencyId%>"
@@ -154,6 +144,16 @@ finding specific issues with predictions.">
         <li><a href="../maps/map.jsp?verbose=true&a=<%= agencyId %>"
                title="Real-time map for selected route">
             Real Time Vehicle View</a></li>
+    </ul>
+
+    <div id="subtitle">Status Reports</div>
+    <ul class="choicesList">
+        <li><a href="../status/activeBlocks.jsp?a=<%= agencyId %>"
+               title="Shows how many block assignments are currently active and if they have assigned vehicles">
+            Active Blocks</a></li>
+        <li><a href="../status/serverStatus.jsp?a=<%= agencyId %>"
+               title="Shows how well system is running, including the AVL feed">
+            Server Status</a></li>
     </ul>
 
 
