@@ -16,7 +16,6 @@ import org.transitclock.ipc.data.IpcArrivalDeparture;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * @author Sean Óg Crudden
  * This class is to hold the historical average for frequency based services. It puts them in buckets that represent increments of time. The start time of the trip is used to decide which 
@@ -136,7 +135,7 @@ public class FrequencyBasedHistoricalAverageCache {
 		}
 	}
 	public void putArrivalDeparture(ArrivalDeparture arrivalDeparture) throws Exception
-	{
+	{		
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
 				
 		Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
@@ -166,7 +165,7 @@ public class FrequencyBasedHistoricalAverageCache {
 
 						logger.debug("Putting : {} in FrequencyBasedHistoricalAverageCache cache for key : {} which results in : {}.", pathDuration, historicalAverageCacheKey, average);
 
-						FrequencyBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+						putAverage(historicalAverageCacheKey, average);
 					}
 				}
 			}				
@@ -176,7 +175,7 @@ public class FrequencyBasedHistoricalAverageCache {
 				StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), stopDuration.getDeparture().getStopPathIndex(), false, new Long(time));
 
 				synchronized (m) {
-					HistoricalAverage average = FrequencyBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+					HistoricalAverage average = getAverage(historicalAverageCacheKey);
 
 					if (average == null)
 						average = new HistoricalAverage();
@@ -185,7 +184,7 @@ public class FrequencyBasedHistoricalAverageCache {
 
 					logger.debug("Putting : {} in FrequencyBasedHistoricalAverageCache cache for key : {} which results in : {}.", stopDuration, historicalAverageCacheKey, average);
 
-					FrequencyBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+					putAverage(historicalAverageCacheKey, average);
 				}
 			}	
 			if(stopDuration==null && pathDuration==null)
@@ -280,25 +279,27 @@ public class FrequencyBasedHistoricalAverageCache {
 		}
 		return null;
 	}
-	public void populateCacheFromDb(Session session, Date startDate, Date endDate) throws Exception 
+	public void populateCacheFromDb(List<ArrivalDeparture> resultsUnsafe) throws Exception
 	{
-		Criteria criteria =session.createCriteria(ArrivalDeparture.class);
-		List<ArrivalDeparture> results = StopArrivalDepartureCacheInterface.createArrivalDeparturesCriteria(criteria, startDate, endDate);
-		Collections.sort(results, new ArrivalDepartureComparator());
+		try {
+			if (resultsUnsafe == null) return;
+			List<ArrivalDeparture> results = new ArrayList<>(resultsUnsafe);
+			Collections.sort(results, new ArrivalDepartureComparator());
 
-		int counter = 0;
-		for(ArrivalDeparture result : results)
-		{
-			if(counter % 1000 == 0){
-				logger.info("{} out of {} Frequency Based Historical Records for period {} to {} ({}%)", counter, results.size(), startDate, endDate, (int)((counter * 100.0f) / results.size()));
+			int counter = 0;
+			for (ArrivalDeparture result : results) {
+				if (counter % 1000 == 0) {
+					logger.info("{} out of {} Frequency Based Historical Records for period ({}%)", counter, results.size(), (int) ((counter * 100.0f) / results.size()));
+				}
+				// TODO this might be better done in the database.
+				if (GtfsData.routeNotFiltered(result.getRouteId())) {
+					putArrivalDeparture(result);
+				}
+				counter++;
 			}
-			// TODO this might be better done in the database.
-			if(GtfsData.routeNotFiltered(result.getRouteId()))
-			{
-				FrequencyBasedHistoricalAverageCache.getInstance().putArrivalDeparture(result);
-			}
-			counter++;
-		}		
+		} catch (Throwable t) {
+			logger.error("Exception in populateCacheFromDb {}", t, t);
+		}
 	}
 	public static int round(double i, int v){
 	    return (int) (Math.floor(i/v) * v);

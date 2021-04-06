@@ -116,11 +116,9 @@ public final class Block implements Serializable {
 	// Use CascadeType.SAVE_UPDATE so that when the TripPattern is stored   
 	// the Paths are automatically stored.
 	//
-	// Use FetchType.LAZY so that don't read in all trip data at once since
-	// that in turn reads in trip pattern and travel time info, which can
-	// be voluminous and therefore slow. The trips will be read in when
-	// getTrips() is called.
-	@ManyToMany(fetch=FetchType.LAZY)
+	// Fetch EAGERly to avoid AVLExecutor threading issues
+	// take the hit to load blocks on startup for later concurrency/throughput
+	@ManyToMany(fetch=FetchType.EAGER)
 	@JoinTable(name="Block_to_Trip_joinTable")
 	@OrderColumn(name="listIndex")
 	@Cascade({CascadeType.SAVE_UPDATE})

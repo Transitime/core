@@ -87,7 +87,6 @@ public class ParallelProcessor {
     public void startup() {
         startTime = System.currentTimeMillis();
         startRunThread();
-        startPruneThread();
     }
 
     private void startRunThread() {
@@ -95,55 +94,18 @@ public class ParallelProcessor {
         new Thread(rt).start();
     }
 
-    private void startPruneThread() {
-        PruneThread pt = new PruneThread(this);
-        new Thread(pt).start();
+
+    private void remove(TaskWrapper tw) {
+        runQueue.remove(tw);
     }
 
-  public String getDebugInfo() {
-      TaskWrapper taskWrapper = runQueue.peek();
-      if (taskWrapper != null)
-        return taskWrapper.task.toString();
-      return "(none)";
-  }
-
-
-  /**
-     * Remove complete jobs from the run queue.
-     */
-    public static class PruneThread implements Runnable {
-        private ParallelProcessor pp;
-        public PruneThread(ParallelProcessor pp) {
-            this.pp = pp;
-        }
-
-        public void run() {
-            while (!pp.shutDown) {
-                TaskWrapper taskWrapper = pp.runQueue.peek();
-                if (taskWrapper != null) {
-                    while (!taskWrapper.started || !taskWrapper.done) {
-                        try {
-                            logger.debug("waiting on task {} to complete", taskWrapper.taskNumber);
-                            Thread.sleep(1000);
-                        } catch (InterruptedException ie) {
-                            pp.shutDown = true;
-                            return;
-                        }
-                    }
-                    pp.runQueue.poll();
-                    logger.debug("task complete with {} more in queue", pp.runQueue.size());
-
-                }
-                try {
-                    logger.debug("no task to prune");
-                    Thread.sleep(1000);
-                } catch (InterruptedException ie) {
-                    pp.shutDown = true;
-                    return;
-                }
-            }
-        }
+    public String getDebugInfo() {
+        TaskWrapper taskWrapper = runQueue.peek();
+        if (taskWrapper != null)
+            return taskWrapper.task.toString();
+        return "(none)";
     }
+
 
     /**
      * add waiting jobs to the run queue, launching them in a new thread
@@ -156,12 +118,13 @@ public class ParallelProcessor {
         }
 
         public void run() {
+            Thread.currentThread().setName("Parallel Processor Run Thread");
             int taskCount = 0;
             while (!pp.shutDown) {
 
                 if (!pp.list.isEmpty()) {
                     ParallelTask toRun = pp.list.remove(0);
-                    TaskWrapper tw = new TaskWrapper(toRun, taskCount);
+                    TaskWrapper tw = new TaskWrapper(pp, toRun, taskCount);
                     boolean success = false;
                     while (!success) {
                         success = pp.runQueue.offer(tw);
@@ -194,17 +157,20 @@ public class ParallelProcessor {
      * Wrapper around the task that can be safely run as a thread.
      */
     public static class TaskWrapper implements Runnable {
+        private ParallelProcessor pp;
         private ParallelTask task;
         private int taskNumber;
         private boolean started = false;
         private boolean done = false;
 
-        public TaskWrapper(ParallelTask task, int taskNumber) {
+        public TaskWrapper(ParallelProcessor pp, ParallelTask task, int taskNumber) {
+            this.pp = pp;
             this.task = task;
             this.taskNumber = taskNumber;
         }
 
         public void run() {
+            Thread.currentThread().setName(task.toString() + "-" + taskNumber);
             logger.debug("starting task {}", taskNumber);
             started = true;
             try {
@@ -214,6 +180,7 @@ public class ParallelProcessor {
             } finally {
                 logger.debug("completing task {}", taskNumber);
                 done = true;
+                pp.remove(this);
             }
         }
     }

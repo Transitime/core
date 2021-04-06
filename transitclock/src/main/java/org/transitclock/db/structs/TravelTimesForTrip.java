@@ -100,8 +100,9 @@ public class TravelTimesForTrip implements Serializable {
 	// on schedule.
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String tripCreatedForId;
-	
-	@ManyToMany(fetch=FetchType.LAZY)
+
+	// Load EAGERly for AVLExecutor thread safety/concurrency performance
+	@ManyToMany(fetch=FetchType.EAGER)
 	@JoinTable(name="TravelTimesForTrip_to_TravelTimesForPath_joinTable")
 	@Cascade({CascadeType.SAVE_UPDATE})
 	@OrderColumn(name="listIndex")

@@ -36,6 +36,12 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 
 	private static final Logger logger = LoggerFactory.getLogger(StopArrivalDepartureCache.class);
 
+	@Override
+	public void populateCacheFromDb(List<ArrivalDeparture> results) {
+		// make it obvious we are using the base implementation
+		defaultPopulateCacheFromDb(results);
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<IpcArrivalDeparture> getStopHistory(StopArrivalDepartureCacheKey key) {

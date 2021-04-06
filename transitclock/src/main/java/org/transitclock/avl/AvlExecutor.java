@@ -48,7 +48,10 @@ public class AvlExecutor {
 	
 	// The actual executor
 	ThreadPoolExecutor avlClientExecutor = null;
-	
+	public int getQueueSize() {
+		return avlClientExecutor.getQueue().size();
+	}
+
 	// Singleton class
 	private static AvlExecutor singleton;
 	
@@ -110,7 +113,6 @@ public class AvlExecutor {
 				maxAVLQueueSize, numberThreads);
 
 		// Start up the ThreadPoolExecutor
-		int corePoolSize = 1;
 		int maximumPoolSize = numberThreads;
 		long keepAliveTime = 1; /* 1 hour */
 		BlockingQueue<Runnable> workQueue = new AvlQueue(maxAVLQueueSize);
@@ -135,9 +137,10 @@ public class AvlExecutor {
 					logger.error(message);
 				}
 			}};
-		
+
+		// pool size does not expand as expected -- configure to have max threads available on creation
 		avlClientExecutor =
-				new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
+				new ThreadPoolExecutor(maximumPoolSize, maximumPoolSize,
 						keepAliveTime, TimeUnit.HOURS, workQueue,
 						avlClientThreadFactory,
 						rejectedHandler);

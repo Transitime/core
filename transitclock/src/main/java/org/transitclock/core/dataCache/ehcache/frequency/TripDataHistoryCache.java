@@ -6,8 +6,6 @@ package org.transitclock.core.dataCache.ehcache.frequency;
 import org.apache.commons.lang3.time.DateUtils;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
@@ -108,7 +106,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	synchronized public TripKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
+	public TripKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
 		
 		Block block=null;
 		if(arrivalDeparture.getBlock()==null)
@@ -126,8 +124,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 			days_back=3;		
 		TripKey tripKey=null;
 		
-		for(int i=0;i < days_back;i++)
-		{
+		for(int i=0;i < days_back;i++) {
 			Date nearestDay = DateUtils.truncate(new Date(arrivalDeparture.getTime()), Calendar.DAY_OF_MONTH);
 									
 			nearestDay=DateUtils.addDays(nearestDay, i*-1);
@@ -137,44 +134,38 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 			Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
 			
 			// TODO need to set start time based on start of bucket
-			if(arrivalDeparture.getFreqStartTime()!=null)
-			{
-				Integer time=FrequencyBasedHistoricalAverageCache.secondsFromMidnight(arrivalDeparture.getFreqStartTime(),2);
-				
-				time=FrequencyBasedHistoricalAverageCache.round(time, FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
-				
-				if(trip!=null)							
-				{												
+			if(arrivalDeparture.getFreqStartTime()!=null) {
+				Integer time = FrequencyBasedHistoricalAverageCache.secondsFromMidnight(arrivalDeparture.getFreqStartTime(), 2);
+
+				time = FrequencyBasedHistoricalAverageCache.round(time, FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
+
+				if (trip != null) {
 					tripKey = new TripKey(arrivalDeparture.getTripId(),
-							nearestDay,
-							time);
-					
+									nearestDay,
+									time);
+
 					logger.debug("Putting :{} in TripDataHistoryCache cache using key {}.", arrivalDeparture, tripKey);
-					
-					List<IpcArrivalDeparture> list = null;						
-					
-					 TripEvents element = cache.get(tripKey);
-			
-					if (element != null && element.getEvents() != null) {
-						list = (List<IpcArrivalDeparture>) element.getEvents();
-						cache.remove(tripKey);
-					} else {
-						list = new ArrayList<IpcArrivalDeparture>();
-					}
-					
+					IpcArrivalDeparture ipcad = null;
 					try {
-						list.add(new IpcArrivalDeparture(arrivalDeparture));
+						ipcad = new IpcArrivalDeparture(arrivalDeparture);
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}									
-					element.setEvents(list);					
-					
-					cache.put(tripKey, element);
+						logger.error("Exception creating IpcArrivalDeparture {}", e, e);
+						return tripKey;
+					}
+					TripEvents empty = new TripEvents(ipcad);
+
+					synchronized (cache) {
+						TripEvents element = cache.get(tripKey);
+						if (element == null) {
+							cache.put(tripKey, empty);
+						} else {
+							// immutable object for thread safety
+							element = element.copyAdd(ipcad);
+							cache.put(tripKey, element);
+						}
+					}
 				}
-			}								
-			else
-			{
+			} else {
 				logger.error("Cannot add event to TripDataHistoryCache as it has no freqStartTime set. {}", arrivalDeparture);
 			}
 		}				
@@ -186,19 +177,18 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	 */
 	
 	@Override
-	public void populateCacheFromDb(Session session, Date startDate, Date endDate)
+	public void populateCacheFromDb(List<ArrivalDeparture> results)
 	{
- 		Criteria criteria =session.createCriteria(ArrivalDeparture.class);				
-		
-		List<ArrivalDeparture> results = StopArrivalDepartureCacheInterface.createArrivalDeparturesCriteria(criteria, startDate, endDate);
-		for(ArrivalDeparture result : results)		
-		{						
-			// TODO this might be better done in the database.						
-			if(GtfsData.routeNotFiltered(result.getRouteId()))
-			{
-				TripDataHistoryCacheFactory.getInstance().putArrivalDeparture(result);
+		try {
+			for (ArrivalDeparture result : results) {
+				// TODO this might be better done in the database.
+				if (GtfsData.routeNotFiltered(result.getRouteId())) {
+					putArrivalDeparture(result);
+				}
 			}
-		}		
+		} catch (Throwable t) {
+			logger.error("Exception in populateCacheFromDb {}", t, t);
+		}
 	}
 		
 	/* (non-Javadoc)

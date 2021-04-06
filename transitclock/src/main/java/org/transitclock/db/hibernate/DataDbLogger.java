@@ -30,7 +30,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.configData.CoreConfig;
 import org.transitclock.configData.DbSetupConfig;
-import org.transitclock.db.structs.*;
+import org.transitclock.db.structs.ArrivalDeparture;
+import org.transitclock.db.structs.AvlReport;
+import org.transitclock.db.structs.Headway;
+import org.transitclock.db.structs.Match;
+import org.transitclock.db.structs.MonitoringEvent;
+import org.transitclock.db.structs.Prediction;
+import org.transitclock.db.structs.PredictionAccuracy;
+import org.transitclock.db.structs.PredictionEvent;
+import org.transitclock.db.structs.RunTimesForRoutes;
+import org.transitclock.db.structs.TrafficSensorData;
+import org.transitclock.db.structs.VehicleConfig;
+import org.transitclock.db.structs.VehicleEvent;
+import org.transitclock.db.structs.VehicleState;
 
 /**
  * DataDbLogger is for storing to the db a stream of data objects. It is intended
@@ -122,7 +134,7 @@ public class DataDbLogger {
 	// keep track of primary key values to reduce database duplicate exceptions
 	private Map<String, String> vehicleToPrimayKeyMap = new HashMap<>();
 
-	private static final Logger logger = 
+	private static final Logger logger =
 			LoggerFactory.getLogger(DataDbLogger.class);
 
 	/********************** Member Functions **************************/
@@ -327,7 +339,7 @@ public class DataDbLogger {
 		Collections.sort(levels);
 		return levels.get(levels.size()-1);
 	}
-
+	
 	// as a summary of queue sizes, return the largest queue size
 	public int queueSize() {
 		Integer[] sizesArray = {
@@ -376,7 +388,7 @@ public class DataDbLogger {
 		return simple.format(vs.getAvlTime());
 
 	}
-
+	
 	/**
 	 * Just for doing some testing
 	 * 
