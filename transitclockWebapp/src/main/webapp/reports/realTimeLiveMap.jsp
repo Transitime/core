@@ -289,37 +289,21 @@
         // Only working with single route at a time for now
         // var route = routesData.routes[0];
 
-        $(routesData.routes).each(function(index,route){
-        // Draw stops for the route. Do stops before paths so that when call
-        // bringToBack() the stops will end up being on top.
-        var locsToFit = [];
-        var firstNonMinorStop = true;
-        for (var i=0; i<route.direction.length; ++i) {
-            var direction = route.direction[i];
-            for (var j=0; j<direction.stop.length; ++j) {
-                var stop = direction.stop[j];
-                // var options = stop.minor ? minorStopOptions : stopOptions;
-                var options =  (stop.id == $("#stopsSearch").val())  ?  {"color":"#FF0000","opacity":1,"radius":3,"weight":2,"fillColor":"#FF0000","fillOpacity":0.6,"clickable":false} : stopOptions;
-                // Draw first non-minor stop differently to highlight it
-                /*
-                if (!stop.minor && firstNonMinorStop) {
-                    options = firstStopOptions;
-                    firstNonMinorStop = false;
-                }
-                */
-                // Keep track of non-minor stop locations so can fit map to show them all
-                if (!stop.minor)
-                    locsToFit.push(L.latLng(stop.lat, stop.lon));
 
+
+
+        $(routesData.routes).each(function(index,route){
             // Draw stops for the route. Do stops before paths so that when call
             // bringToBack() the stops will end up being on top.
             var locsToFit = [];
             var firstNonMinorStop = true;
+
             for (var i=0; i<route.direction.length; ++i) {
                 var direction = route.direction[i];
                 for (var j=0; j<direction.stop.length; ++j) {
                     var stop = direction.stop[j];
-                    var options = stop.minor ? minorStopOptions : stopOptions;
+                    // var options = stop.minor ? minorStopOptions : stopOptions;
+                    var options =  (stop.id == $("#stopsSearch").val())  ?  {"color":"#FF0000","opacity":1,"radius":3,"weight":2,"fillColor":"#FF0000","fillOpacity":0.6,"clickable":false} : stopOptions;
                     // Draw first non-minor stop differently to highlight it
                     /*
                     if (!stop.minor && firstNonMinorStop) {
@@ -350,46 +334,46 @@
 
                     if (stopMarker.stop.id == $("#stopsSearch").val()) {
                         showStopPopup(stopMarker);
-                    }
                 }
             }
+        }
 
         // Draw the paths for the route
         for (var i=0; i<route.shape.length; ++i) {
             var shape = route.shape[i];
             var options = shapeOptions;
-                // shape.minor ? minorShapeOptions : shapeOptions;
+            // shape.minor ? minorShapeOptions : shapeOptions;
 
-                var latLngs = [];
-                for (var j=0; j<shape.loc.length; ++j) {
-                    var loc = shape.loc[j];
-                    latLngs.push(L.latLng(loc.lat, loc.lon));
-                }
-                var polyline = L.polyline(latLngs, options).addTo(map);
-
-                routeFeatureGroup.addLayer(polyline);
-
-                // Store shape data obtained via AJAX with polyline so it can be used in popup
-                polyline.shape = shape;
-
+            var latLngs = [];
+            for (var j=0; j<shape.loc.length; ++j) {
+                var loc = shape.loc[j];
+                latLngs.push(L.latLng(loc.lat, loc.lon));
             }
+            var polyline = L.polyline(latLngs, options).addTo(map);
 
-            // Add all of the paths and stops to the map at once via the FeatureGroup
-            routeFeatureGroup.addTo(map);
+            routeFeatureGroup.addLayer(polyline);
 
-            // If stop was specified for getting route then locationOfNextPredictedVehicle
-            // is also returned. Use this vehicle location when fitting bounds of map
-            // so that user will always see the next vehicle coming.
-            if (route.locationOfNextPredictedVehicle) {
-                locsToFit.push(L.latLng(route.locationOfNextPredictedVehicle.lat,
-                    route.locationOfNextPredictedVehicle.lon));
-            }
-            // Get map to fit route
-            if (locsToFit.length > 0) {
-                map.fitBounds(locsToFit);
-            }
+            // Store shape data obtained via AJAX with polyline so it can be used in popup
+            polyline.shape = shape;
 
-        });
+        }
+
+        // Add all of the paths and stops to the map at once via the FeatureGroup
+        routeFeatureGroup.addTo(map);
+
+        // If stop was specified for getting route then locationOfNextPredictedVehicle
+        // is also returned. Use this vehicle location when fitting bounds of map
+        // so that user will always see the next vehicle coming.
+        if (route.locationOfNextPredictedVehicle) {
+            locsToFit.push(L.latLng(route.locationOfNextPredictedVehicle.lat,
+                route.locationOfNextPredictedVehicle.lon));
+        }
+        // Get map to fit route
+        if (locsToFit.length > 0) {
+            map.fitBounds(locsToFit);
+        }
+
+    });
 
 
 
