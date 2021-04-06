@@ -290,6 +290,26 @@
         // var route = routesData.routes[0];
 
         $(routesData.routes).each(function(index,route){
+        // Draw stops for the route. Do stops before paths so that when call
+        // bringToBack() the stops will end up being on top.
+        var locsToFit = [];
+        var firstNonMinorStop = true;
+        for (var i=0; i<route.direction.length; ++i) {
+            var direction = route.direction[i];
+            for (var j=0; j<direction.stop.length; ++j) {
+                var stop = direction.stop[j];
+                // var options = stop.minor ? minorStopOptions : stopOptions;
+                var options =  (stop.id == $("#stopsSearch").val())  ?  {"color":"#FF0000","opacity":1,"radius":3,"weight":2,"fillColor":"#FF0000","fillOpacity":0.6,"clickable":false} : stopOptions;
+                // Draw first non-minor stop differently to highlight it
+                /*
+                if (!stop.minor && firstNonMinorStop) {
+                    options = firstStopOptions;
+                    firstNonMinorStop = false;
+                }
+                */
+                // Keep track of non-minor stop locations so can fit map to show them all
+                if (!stop.minor)
+                    locsToFit.push(L.latLng(stop.lat, stop.lon));
 
             // Draw stops for the route. Do stops before paths so that when call
             // bringToBack() the stops will end up being on top.
@@ -334,10 +354,11 @@
                 }
             }
 
-            // Draw the paths for the route
-            for (var i=0; i<route.shape.length; ++i) {
-                var shape = route.shape[i];
-                var options = shape.minor ? minorShapeOptions : shapeOptions;
+        // Draw the paths for the route
+        for (var i=0; i<route.shape.length; ++i) {
+            var shape = route.shape[i];
+            var options = shapeOptions;
+                // shape.minor ? minorShapeOptions : shapeOptions;
 
                 var latLngs = [];
                 for (var j=0; j<shape.loc.length; ++j) {

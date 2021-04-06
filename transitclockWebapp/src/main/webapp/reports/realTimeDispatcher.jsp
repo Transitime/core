@@ -85,6 +85,9 @@
                 <div id="liveMapLink">
                     <a href="realTimeLiveMap.jsp?a=1">Live Map View >></a>
                 </div>
+                <div id="schAdhLink">
+                    <a href="realTimeScheduleAdherence.jsp?a=1">Schedule Adherence View >></a>
+                </div>
             </div>
         </div>
 
