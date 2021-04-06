@@ -373,6 +373,8 @@ button.ui-button::-moz-focus-inner {
 	padding: .7em .3em;
 	text-align: center;
 	font-weight: bold;
+	color: white;
+	background-color: #019932;
 	border: 0;
 }
 .ui-datepicker td {
@@ -854,7 +856,7 @@ body .ui-tooltip {
 .ui-widget-header {
 	border: 1px solid #d4d1bf;
 	background: #ffffff url("images/ui-bg_fine-grain_15_ffffff_60x60.png") 50% 50% repeat;
-	color: #453821;
+	color: black;
 	font-weight: bold;
 }
 .ui-widget-header a {
