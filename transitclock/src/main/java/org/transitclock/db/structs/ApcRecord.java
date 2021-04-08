@@ -58,6 +58,11 @@ public class ApcRecord implements Serializable {
   private final int departure;
   @Column
   private final int arrival;
+  @Column
+  private final double lat;
+  @Column
+  private final double lon;
+
 
   private ApcRecord() {
     messageId = null;
@@ -72,6 +77,8 @@ public class ApcRecord implements Serializable {
     doorClose = -1;
     arrival = -1;
     departure = -1;
+    lat = -1.0;
+    lon = -1.0;
   }
 
   public ApcRecord(String messageId,
@@ -85,7 +92,9 @@ public class ApcRecord implements Serializable {
                    int doorOpen,
                    int doorClose,
                    int arrival,
-                   int departure) {
+                   int departure,
+                   double lat,
+                   double lon) {
     this.messageId = messageId;
     this.time = time;
     this.serviceDate = serviceDate;
@@ -98,6 +107,8 @@ public class ApcRecord implements Serializable {
     this.doorClose = doorClose;
     this.arrival = arrival;
     this.departure = departure;
+    this.lat = lat;
+    this.lon = lon;
   }
 
   public String getMessageId() {
@@ -148,5 +159,8 @@ public class ApcRecord implements Serializable {
     return arrival;
   }
 
+  public double getLat() { return lat; }
+
+  public double getLon() { return lon; }
 
 }
