@@ -282,12 +282,12 @@
 
                 <jsp:include page="params/routeAllOrSingle.jsp"/>
 
-                <div class="param">
+                <div class="param individual-route-only">
                     <label for="direction">Direction:</label>
                     <select id="direction" name="direction" disabled="true"></select>
                 </div>
 
-                <div class="param">
+                <div class="param individual-route-only">
                     <label for="tripPattern">Trip Pattern:</label>
                     <select id="tripPattern" name="tripPattern" disabled="true"></select>
                 </div>
@@ -392,7 +392,7 @@
     </div>
 
 
-    <div id="mainPage">
+    <div id="mainPage" class="scrollable-element">
         <div id="mainResults">
             <div id="paramDetails" class="paramDetails" style="float: left;">
                 <p style='font-size: 0.8em;'></p>
@@ -400,7 +400,7 @@
 
             <br>
 
-            <div id="avgRunTime"
+            <div id="avgRunTime" class="individual-route"
                  style="display: inline-block; width: 90%; vertical-align: middle; margin-left:auto; margin-right:auto;">
                 <p style="font-size: 0.8em;display: inline-block;"></p>
                 <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
@@ -411,14 +411,14 @@
                 <p style="font-size: 0.8em;display: inline-block;"></p>
                 <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
             </div>
-            <div style="width:100%; display: flex; justify-content: center;">
+            <div  style="width:100%; display: flex; justify-content: center;" class="individual-route">
                 <input type="button" id="visualizeButton" class="visualizeButton" value="Visualize Trips"
                        style="margin-top: 10px; margin-bottom: 10px; margin-left:auto; margin-right:auto; width:70%"
                        hidden="true">
             </div>
         </div>
 
-        <div id="comparisonModal" hidden="true">
+        <div id="comparisonModal"  class="individual-route" hidden="true">
             <div id="modalContents" style="margin-right: 30px; margin-left: 30px; margin-top: 10px;">
                 <div id="modalHeader" style="text-align: left; vertical-align: middle; font-size: medium">
                     Trip Run Time Comparison
@@ -487,12 +487,12 @@
             </div>
         </div>
 
-        <div id="comparisonResults" hidden="true"></div>
+        <div id="comparisonResults" class="individual-route" hidden="true"></div>
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 
         <div id="runTimeVisualization" hidden="true">
-            <canvas id="visualizationCanvas" maintainAspectRatio="false" responsive="true"></canvas>
+
         </div>
     </div>
 </div>
@@ -504,11 +504,15 @@
     var stops = {};
 
     $("#route").attr("style", "width: 200px");
+    $(".individual-route-only").hide();
 
     $("#route").change(function () {
         if ($("#route").val().trim() != "") {
+            $(".individual-route-only").show();
+
             populateDirection();
         } else {
+            $(".individual-route-only").hide();
             $("#direction").empty();
             $("#tripPattern").empty();
             $("#direction").attr("disabled", true);
@@ -673,156 +677,92 @@
         return Math.ceil(maxMins / 5) * 5;
     }
 
-    var canvas = $("#visualizationCanvas");
-    var barGraph = new Chart(canvas, {
-        type: 'horizontalBar',
-        data: {},
-        options: {
-            scales: {
-                xAxes: [
-                    {
-                        stacked: true,
-                        scaleLabel: {
-                            display: true,
-                            labelString: "Min"
-                        },
-                        ticks: {
-                            max: 50
-                        }
-                    }],
-                yAxes: [
-                    {
-                        id: "bars",
-                        stacked: false
-                    },
-                    // {
-                    //     id: "icons",
-                    //     stacked: false,
-                    //     display: true,
-                    //     ticks: {
-                    //         beginAtZero: true,
-                    //         min: 0,
-                    //         max: 8,
-                    //         stepSize: 1
-                    //     }
-                    // }
-                ]
-            },
-            legend: {
-                position: 'top',
-                onClick: function (l) {
-                    l.stopPropagation();
-                }
 
-            },
-            tooltips: {
-                callbacks: {
-                    label: function (tooltipItem) {
-                        var data = this._data.datasets[tooltipItem.datasetIndex];
-                        var value = function () {
-                            if (data.label == "Scheduled" || data.label == "Next trip start") {
-                                return data.data[tooltipItem.index].x;
-                            } else {
-                                return data.data[tooltipItem.index];
-                            }
-                        }
-                        return data.label + ": " + value();
-                    }
-                }
-            },
-            animation: {
-                duration: 1,
-                onComplete: function () {
-                    var chartInstance = this.chart,
-                        ctx = chartInstance.ctx;
-                    ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
-                    ctx.fillStyle = '#000000';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'bottom';
-
-                    this.data.datasets.forEach(function (dataset, i) {
-                        var meta = chartInstance.controller.getDatasetMeta(i);
-                        meta.data.forEach(function (bar, index) {
-                            var data = dataset.data[index];
-                            ctx.fillText(data, bar._model.x - ((bar._model.x - bar._model.base) / 2), bar._model.y + 5);
-                        });
-                    });
-                }
-            }
-        },
-    });
 
     var highestPoints = [];
-
+    var visualarGraphChart;
     function visualizeData() {
         $("#submit").attr("disabled", true);
         $("#visualizeButton").attr("disabled", true);
 
         highestPoints = [];
         request = getParams(false)
+        var visualDataURL = apiUrlPrefix +  "/report/runTime/avgTripRunTimes";
+        var isAllRoutes = false;
+        if(visualarGraphChart && visualarGraphChart.destroy){
+            visualarGraphChart.destroy();
+        }
+        if(!request.r){
+            delete request.r;
+            delete  request.tripPattern;
+            delete request.serviceType
+            delete  request.headsign;
+            isAllRoutes = true;
+            // visualDataURL =  apiUrlPrefix + "/report/runTime/routeRunTimes";
+            visualDataURL = "http://gtfsrt.dev.dart.obaweb.org/api/v1/key/5c348c1d/agency/1" + "/report/runTime/routeRunTimes";
+        }
+
+
 
         $.ajax({
-            url: apiUrlPrefix + "/report/runTime/avgTripRunTimes",
+            url: visualDataURL,
             // Pass in query string parameters to page being requested
             data: request,
             // Needed so that parameters passed properly to page being requested
             traditional: true,
             dataType: "json",
             success: function (response) {
-                if (response.data.trips.length == 0) {
-                    alert("No trip breakdown available for selected run time data.");
-                    $("#visualizeButton").attr("disabled", false);
-                    $("#submit").attr("disabled", false);
-                } else {
-                    barGraph.data = {
-                        datasets: [
-                            {
-                                data: msToMin(response.data.fixed),
-                                backgroundColor: '#36509b',
-                                label: "Fixed",
-                                yAxisId: "bars"
-                            },
-                            {
-                                data: msToMin(response.data.variable),
-                                backgroundColor: '#df7f17',
-                                label: "Variable",
-                                yAxisId: "bars"
-                            },
-                            {
-                                data: msToMin(response.data.dwell),
-                                backgroundColor: '#8c8c8c',
-                                label: "Dwell",
-                                yAxisId: "bars"
-                            },
-                            {
-                                type: "scatter",
-                                data: arraysToXAndY([msToMin(response.data.scheduled), response.data.trips]),
-                                backgroundColor: '#70a260',
-                                label: "Scheduled",
-                                showLine: false,
-                                fill: false,
-                                // yAxisId: "icons"
-                            },
-                            {
-                                type: "scatter",
-                                data: arraysToXAndY([msToMin(response.data.nextTripStart), response.data.trips]),
-                                backgroundColor: '#dfbf2c',
-                                label: "Next trip start",
-                                showLine: false,
-                                fill: false,
-                                // yAxisId: "icons"
-                            }],
-                        labels: response.data.trips
+                $("#visualizeButton").attr("disabled", false);
+                $("#submit").attr("disabled", false);
+                if(response.data && ((response.data.trips && response.data.trips.length > 0) ||
+                    (response.data.routes && response.data.routes.length > 0))){
+
+
+                    if(response.data.trips && response.data.trips.length ){
+                        $("#runTimeVisualization").html(' <canvas id="visualizationCanvas" maintainAspectRatio="false" responsive="true"></canvas>');
+                    } else{
+                        var defaultHeight = (response.data.routes.length ) *38;
+                        var defaultWidth = window.innerWidth;
+
+                        if(defaultHeight < (window.innerHeight/2 - 100)) {
+                            defaultHeight =  window.innerHeight;
+                        }
+                        $("#runTimeVisualization").html(' <canvas id="visualizationCanvas" class="custom-canvas"  height="'+defaultHeight+'" width="'+defaultWidth+'"></canvas>');
+
                     }
 
-                    barGraph.options.scales.xAxes[0].ticks.max = calculateMaxMins(highestPoints);
 
-                    barGraph.update();
+                    if(isAllRoutes){
+                        generateAllRouteChart(response);
+                        /*generateAllRouteChart({
+                            "data": {
+                                "routes": [
+                                    "011",
+                                    "012",
+                                    "013",
+                                    "014",
+                                    "015",
+                                    "016",
+                                    "017",
+                                    "018",
+                                    "019",
+                                    "020"
+                                ],
+                                "early": [10, 5, 3, 30, 120, 0, 0, 15, 0, 10, 30],
+                                "onTime": [0, 0, 0, 1, 1, 10, 1, 10, 0, 0, 0],
+                                "late": [30, 0, 15, 20, 30, 45, 3, 1, 10, 0, 50],
+                            }
+                        }) ; */
+                    } else{
+                        generateIndividualRouteChart(response);
+                    }
 
                     $("#comparisonResults").hide();
                     $("#runTimeVisualization").show();
-                    $("#visualizeButton").attr("disabled", false);
-                    $("#submit").attr("disabled", false);
+
+                } else{
+                    alert("No trip breakdown available for selected run time data.");
+
                 }
 
             },
@@ -833,7 +773,238 @@
             }
         })
     }
+    function getDefaultChartOptions(options){
 
+        var canvas = $("#visualizationCanvas");
+        var barGraph = new Chart(canvas, {
+            type: 'horizontalBar',
+            data: {},
+            options: {
+                scales: {
+                    xAxes: [
+                        {
+                            stacked: true,
+                            scaleLabel: {
+                                display: true,
+                                labelString: "Min"
+                            },
+                            ticks: options && options.xAxis && options.xAxis.ticks ||{}
+                        }],
+                    yAxes: [
+                        {
+                            id: "bars",
+                            stacked: options && options.yAxis && options.yAxis.isStacked || false,
+                            ticks: options && options.yAxis && options.yAxis.ticks || {
+                                stepSize: 1
+                            }
+                        },
+                        // {
+                        //     id: "icons",
+                        //     stacked: false,
+                        //     display: true,
+                        //     ticks: {
+                        //         beginAtZero: true,
+                        //         min: 0,
+                        //         max: 8,
+                        //         stepSize: 1
+                        //     }
+                        // }
+                    ]
+                },
+                legend: {
+                    position: 'top',
+                    onClick: function (l) {
+                        l.stopPropagation();
+                    }
+
+                },
+                tooltips: {
+                    callbacks: {
+                        label: function (tooltipItem) {
+                            var data = this._data.datasets[tooltipItem.datasetIndex];
+                            var value = function () {
+                                if(options && options.showPercentage) {
+                                    return  Math.floor(data.data[tooltipItem.index]) +"%";
+                                } else  if (data.label == "Scheduled" || data.label == "Next trip start") {
+                                    return data.data[tooltipItem.index].x;
+                                } else {
+                                    return data.data[tooltipItem.index];
+                                }
+                            }
+                            return data.label + ": " + value();
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1,
+                    onComplete: function () {
+                        var chartInstance = this.chart,
+                            ctx = chartInstance.ctx;
+                        ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+                        ctx.fillStyle = '#000000';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+
+                        this.data.datasets.forEach(function (dataset, i) {
+                            var meta = chartInstance.controller.getDatasetMeta(i);
+                            meta.data.forEach(function (bar, index){
+                                var data = dataset.data[index];
+                                if(options && options.showPercentage) {
+                                    data = Math.floor(data);
+                                    if(data !== 0) {
+                                        ctx.fillText(data + "%", bar._model.x - ((bar._model.x - bar._model.base) / 2), bar._model.y + 5);
+                                    }
+                                } else {
+
+                                    ctx.fillText(data, bar._model.x - ((bar._model.x - bar._model.base) / 2), bar._model.y + 5);
+                                }
+                            });
+                        });
+                    }
+                }
+            },
+        });
+        visualarGraphChart = barGraph;
+        return barGraph;
+    }
+    function generateIndividualRouteChart(response){
+        var barGraph = getDefaultChartOptions();
+        barGraph.data = {
+            datasets: [
+                {
+                    data: msToMin(response.data.fixed),
+                    backgroundColor: '#36509b',
+                    label: "Fixed",
+                    yAxisId: "bars"
+                },
+                {
+                    data: msToMin(response.data.variable),
+                    backgroundColor: '#df7f17',
+                    label: "Variable",
+                    yAxisId: "bars"
+                },
+                {
+                    data: msToMin(response.data.dwell),
+                    backgroundColor: '#8c8c8c',
+                    label: "Dwell",
+                    yAxisId: "bars"
+                },
+                {
+                    type: "scatter",
+                    data: arraysToXAndY([msToMin(response.data.scheduled), response.data.trips]),
+                    backgroundColor: '#70a260',
+                    label: "Scheduled",
+                    showLine: false,
+                    fill: false,
+                    // yAxisId: "icons"
+                },
+                {
+                    type: "scatter",
+                    data: arraysToXAndY([msToMin(response.data.nextTripStart), response.data.trips]),
+                    backgroundColor: '#dfbf2c',
+                    label: "Next trip start",
+                    showLine: false,
+                    fill: false,
+                    // yAxisId: "icons"
+                }],
+            labels: response.data.trips
+        }
+
+        barGraph.options.scales.xAxes[0].ticks.max = calculateMaxMins(highestPoints);
+
+        barGraph.update();
+
+
+    }
+    function getHighestData(data){
+        var highest = 0;
+
+        for (var i = 0 in data) {
+            data[i] = data[i];
+            if (data[i] > highest) {
+                highest = data[i];
+            }
+        }
+
+        highestPoints.push(highest);
+        return data;
+    }
+
+
+    function percentageFormatter(data){
+
+        var convertedPercentile = {
+            early:[],
+            onTime:[],
+            late:[]
+        };
+
+        for(var i=0; i < data.early.length; i++){
+
+            var totalSum  = data.early[i]+data.onTime[i]+data.late[i];
+
+            var individualShare = ((100)/totalSum);
+            if(!isFinite(individualShare)){
+                individualShare = 0
+            }
+            convertedPercentile.early.push(individualShare*data.early[i]);
+            convertedPercentile.onTime.push(individualShare*data.onTime[i]);
+            convertedPercentile.late.push(individualShare*data.late[i]);
+
+        }
+
+        return convertedPercentile;
+    }
+
+
+    function generateAllRouteChart(nonPercentileResponse){
+
+        var barGraph = getDefaultChartOptions({
+            xAxis:{
+                ticks: {
+                    max: 100,
+                }
+            },
+            yAxis:{
+                isStacked: true
+            },
+            showPercentage : true
+
+        });
+        var response = percentageFormatter(nonPercentileResponse.data);
+
+
+        barGraph.data = {
+            datasets: [
+                {
+                    data: getHighestData(response.early),
+                    backgroundColor: '#4778de',
+                    label: "Ahead Of Schedule",
+                    yAxisId: "bars"
+                },
+                {
+                    data: getHighestData(response.onTime),
+                    backgroundColor: '#4bd56b',
+                    label: "On Schedule",
+                    yAxisId: "bars"
+                },
+                {
+                    data: getHighestData(response.late),
+                    backgroundColor: '#e33b3b',
+                    label: "Behind Schedule",
+                    yAxisId: "bars"
+                },
+
+            ],
+            labels: nonPercentileResponse.data.routes
+        }
+
+        // barGraph.options.scales.xAxes[0].ticks.max = calculateMaxMins(highestPoints);
+
+        barGraph.update();
+
+
+    }
 
     $("#submit").click(function () {
         $("#submit").attr("disabled", "disabled");
@@ -864,6 +1035,40 @@
 
         request = getParams(false);
 
+        var beginDateArray = request.beginDate.split("-");
+        var endDateArray = request.endDate.split("-");
+        [beginDateArray[0], beginDateArray[1], beginDateArray[2]] = [beginDateArray[1], beginDateArray[2], beginDateArray[0]];
+        [endDateArray[0], endDateArray[1], endDateArray[2]] = [endDateArray[1], endDateArray[2], endDateArray[0]];
+        var beginDateString = beginDateArray.join("/");
+        var endDateString = endDateArray.join("/");
+
+        var timeRange = request.beginTime + " to " + request.endTime;
+
+        if (beginTime == "00:00:00" && endTime == "23:59:59") {
+            timeRange = "All times";
+        }
+
+        var serviceDayString = request.serviceType;
+
+        if (serviceDayString == "") {
+            serviceDayString = "All days";
+        }
+
+        if(!request.r){
+            $("#paramDetails").html("<p style='font-size: 0.8em;'>" +
+                (request.r == "" ? "All routes" : "Route " + request.r) + " to " +
+                (request.headsign == "" ? "All directions" : request.headsign) + " | " +
+                (request.tripPattern == "" ? "All Trip Patterns" : request.tripPattern) + " | " +
+                beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString
+                + "</p>");
+            $("#mainResults").show();
+            visualizeData();
+            $(".individual-route").hide();
+            return true;
+        } else{
+            $(".individual-route").hide();
+        }
+
         $.ajax({
             url: apiUrlPrefix + "/report/runTime/avgRunTime",
             // Pass in query string parameters to page being requested
@@ -877,24 +1082,6 @@
                     alert("No run time information available for selected parameters.");
                 } else {
                     $("#submit").removeAttr("disabled");
-                    var beginDateArray = request.beginDate.split("-");
-                    var endDateArray = request.endDate.split("-");
-                    [beginDateArray[0], beginDateArray[1], beginDateArray[2]] = [beginDateArray[1], beginDateArray[2], beginDateArray[0]];
-                    [endDateArray[0], endDateArray[1], endDateArray[2]] = [endDateArray[1], endDateArray[2], endDateArray[0]];
-                    var beginDateString = beginDateArray.join("/");
-                    var endDateString = endDateArray.join("/");
-
-                    var timeRange = request.beginTime + " to " + request.endTime;
-
-                    if (beginTime == "00:00:00" && endTime == "23:59:59") {
-                        timeRange = "All times";
-                    }
-
-                    var serviceDayString = request.serviceType;
-
-                    if (serviceDayString == "") {
-                        serviceDayString = "All days";
-                    }
 
                     $("#paramDetails").html("<p style='font-size: 0.8em;'>" + (request.r == "" ? "All routes" : "Route " + request.r) + " to " + (request.headsign == "" ? "All directions" : request.headsign) + " | " + (request.tripPattern == "" ? "All Trip Patterns" : request.tripPattern) + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "<a id='compareLink' style='font-size: 0.8em; margin-bottom: 1em; margin-left: 4em; color: blue; text-decoration: underline; cursor: pointer' onclick='openModal()'>Compare</a></p>");
                     $("#paramDetailsModal").html("<p style='font-size: 0.7em;'>" + (request.r == "" ? "All routes" : "Route " + request.r) + " to " + (request.headsign == "" ? "All directions" : request.headsign) + " | " + (request.tripPattern == "" ? "All Trip Patterns" : request.tripPattern) + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "</p>");

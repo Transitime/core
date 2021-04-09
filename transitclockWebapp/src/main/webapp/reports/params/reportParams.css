@@ -186,14 +186,14 @@ input#submit {
     .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
         border: 1px solid #cbc7bd;
         background: white;
-        font-weight: bold;
-        color: black;
+        font-weight: normal;
+        color: #444;
     }
 
     .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
         border: 1px solid #d9d6c4;
         background: #4ddb4c9c;
-        font-weight: bold;
+        font-weight: normal;
         color: black;
     }
 
@@ -274,4 +274,12 @@ input#submit {
         /* border: 0; */
         width: 15em;
         border: 1px solid transparent;
+    }
+
+    .scrollable-element{
+        overflow: auto;
+    }
+
+    .custom-canvas {
+    margin-bottom: 100px;
     }
