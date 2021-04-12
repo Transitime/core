@@ -79,20 +79,9 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 		  new ClassConfigValue("transitclock.predAccuracy.RtTranslator", null,
 			  "Implementation of GTFSRealtimeTranslator to perform " +
 		  "the translation of stopIds and other rt quirks");
-
-	private static BooleanConfigValue useTripUpdateDelay =
-			new BooleanConfigValue("transitclock.predAccuracy.useTripDelay", false,
-					"Configuration to use trip delay instead of stopTimeUpdates when generating prediction" +
-							"accuracy records");
-
-	private static BooleanConfigValue useStopTimeDelayAsFallback =
-			new BooleanConfigValue("transitclock.predAccuracy.useStopTimeDelayAsFallback", false,
-					"Configuration to use stop time update delay if the trip update delay is missing. Assumes" +
-							"that atleast one stop time update is available.");
 	
   // if stopIds needs optional parsing/translation
   private GTFSRealtimeTranslator translator = null;
-  
 
 	/**
 	 * @return the gtfstripupdateurl
@@ -158,20 +147,20 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 	}
 
 	/**
-	 * Takes data from XML Document object and processes it and calls
+	 * Takes data from Protocol Buffer object and processes it and calls
 	 * storePrediction() on the predictions.
 	 * 
 	 * @param feed
-	 * @param predictionsReadTime
+	 * @param dbConfig
 	 */
-	private void processExternalPredictions(FeedMessage feed, Date predictionsReadTime) {
+	public void processExternalPredictions(FeedMessage feed, DbConfig dbConfig) {
 
 		// If couldn't read data from feed then can't process it
 		if (feed == null)
 			return;
 
 		// So can look up direction in database
-		DbConfig dbConfig = Core.getInstance().getDbConfig();
+
 		TimeZone timeZone = dbConfig.getFirstAgency().getTimeZone();
 
 		logger.info("Processing GTFS-rt feed.....");
@@ -229,7 +218,8 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 								if(stopPathIndex >= 0){
 									logger.debug("StopPathIndex : " + stopPathIndex);
 									int stopPathIndexIncrement = 0;
-									boolean isLastStopTimeUpdate = !hasNextStopTime(i, tripUpdateStopTimes);
+									StopTimeUpdate nextStopTime = getNextStopTime(i, tripUpdateStopTimes);
+									boolean isLastStopTimeUpdate = nextStopTime == null;
 									int totalStopPaths = gtfsTrip.getStopPaths().size();
 
 									// Check if it is last stopTime for trip
@@ -256,23 +246,20 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 									else{
 										// Look for stopPaths that not be included in the feed and process them
 										while(stopPathIndex + stopPathIndexIncrement < totalStopPaths &&
-												!stopTimeMatchesStopPath(stopTimeUpdate, gtfsTrip.getStopPath(stopPathIndex + stopPathIndexIncrement))){
+												!stopTimeMatchesStopPath(nextStopTime, gtfsTrip.getStopPath(stopPathIndex + stopPathIndexIncrement))){
+
 											String stopId = gtfsTrip.getStopPath(stopPathIndex + stopPathIndexIncrement).getStopId();
 											ScheduleTime scheduledTime = gtfsTrip.getScheduleTime(stopPathIndex + stopPathIndexIncrement);
+											boolean stopTimeMatchesSchedule = stopTimeMatchesStopPath(stopTimeUpdate, gtfsTrip.getStopPath(stopPathIndex + stopPathIndexIncrement));
+
+											if(stopTimeMatchesSchedule){
+												lastStopTimeDelay = getStopTimeDelay(stopTimeUpdate, scheduledTime, timeZone.toZoneId());
+											}
 
 											processPrediction(scheduledTime, stopTimeUpdate, update, gtfsTrip, direction,
-													stopId, eventReadTime, lastStopTimeDelay, false);
+													stopId, eventReadTime, lastStopTimeDelay, stopTimeMatchesSchedule);
 
 											stopPathIndexIncrement++;
-										}
-										// If stopTimeUpdate matches stopPath add it
-										if(stopPathIndex + stopPathIndexIncrement < totalStopPaths &&
-												stopTimeMatchesStopPath(stopTimeUpdate, gtfsTrip.getStopPath(stopPathIndex + stopPathIndexIncrement))){
-											String stopId = gtfsTrip.getStopPath(stopPathIndex + stopPathIndexIncrement).getStopId();
-											ScheduleTime scheduledTime = gtfsTrip.getScheduleTime(stopPathIndex + stopPathIndexIncrement);
-
-											processPrediction(scheduledTime, stopTimeUpdate, update, gtfsTrip, direction,
-													stopId, eventReadTime, lastStopTimeDelay, true);
 										}
 									}
 								}
@@ -299,7 +286,8 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 		if (scheduledTime != null) {
 			Date eventTime;
 			if (stopTimeUpdate.hasArrival()) {
-				eventTime = getEventTime(update, stopTimeUpdate, scheduledTime, true, stopTimeDelay, stopTimeMatchesSchedule);
+				eventTime = getEventTime(update, stopTimeUpdate, scheduledTime, true, stopTimeDelay,
+						stopTimeMatchesSchedule, eventReadTime);
 				if (eventTime != null) {
 					processRecord(gtfsTrip.getRouteId(), direction, stopId, gtfsTrip.getId(),
 							update.getVehicle().getId(), eventTime, eventReadTime,
@@ -307,7 +295,8 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 				}
 			}
 			if (stopTimeUpdate.hasDeparture()) {
-				eventTime = getEventTime(update, stopTimeUpdate, scheduledTime, false, stopTimeDelay, stopTimeMatchesSchedule);
+				eventTime = getEventTime(update, stopTimeUpdate, scheduledTime, false, stopTimeDelay,
+						stopTimeMatchesSchedule, eventReadTime);
 				if (eventTime != null) {
 					processRecord(gtfsTrip.getRouteId(), direction, stopId, gtfsTrip.getId(),
 							update.getVehicle().getId(), eventTime, eventReadTime,
@@ -337,8 +326,16 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 		return null;
 	}
 
-	private void processRecord(String routeId, String direction, String stopId, String tripId, String vehicleId,
-							   Date eventTime, Date eventReadTime, boolean isArrival, String source, String scheduledTime){
+	private void processRecord( String routeId,
+							   String direction,
+							   String stopId,
+							   String tripId,
+							   String vehicleId,
+							   Date eventTime,
+							   Date eventReadTime,
+							   boolean isArrival,
+							   String source,
+							   String scheduledTime){
 		if (eventTime.after(eventReadTime)) {
 
 			logger.info(
@@ -365,8 +362,11 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 				null,
 				scheduledTime
 			);
-
-			storePrediction(pred);
+			if(isArrival){
+				storeArrivalPrediction(pred);
+			} else{
+				storeDeparturePrediction(pred);
+			}
 		} else {
 			logger.info(
 					"Discarding as prediction after event. routeId={}, "
@@ -378,12 +378,19 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 		}
 	}
 
+	public void storeArrivalPrediction(PredAccuracyPrediction pred){
+		storePrediction(pred);
+	}
 
-	private boolean hasNextStopTime(int i, List<StopTimeUpdate> stopTimes) {
+	public void storeDeparturePrediction(PredAccuracyPrediction pred){
+		storePrediction(pred);
+	}
+
+	private StopTimeUpdate getNextStopTime(int i, List<StopTimeUpdate> stopTimes) {
 		if (i + 1 < stopTimes.size()) {
-			return stopTimes.get(i + 1) != null;
+			return stopTimes.get(i + 1);
 		}
-		return false;
+		return null;
 	}
 
 	private Date getEventTime(TripUpdate tripUpdate,
@@ -391,7 +398,8 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 							  ScheduleTime scheduledTime,
 							  boolean isArrival,
 							  Integer stopTimeDelay,
-							  boolean stopTimeMatchesSchedule){
+							  boolean stopTimeMatchesSchedule,
+							  Date eventReadTime){
 		Date eventTime = null;
 
 		if (isArrival && stopTime.getArrival().hasTime() && stopTimeMatchesSchedule) {
@@ -403,40 +411,26 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 		else if ((isArrival && stopTime.getArrival().hasDelay()) || (!isArrival && stopTime.getDeparture().hasDelay())) {
 
 			int timeInSeconds = isArrival ? stopTime.getArrival().getDelay() : stopTime.getDeparture().getDelay();
+			timeInSeconds = getArrivalDepartureTimeInSeconds(timeInSeconds, scheduledTime, isArrival);
 
-			if (scheduledTime.getDepartureTime() != null) {
-				timeInSeconds = timeInSeconds + scheduledTime.getDepartureTime();
-			}
-			else if (scheduledTime.getArrivalTime() != null) {
-				timeInSeconds = timeInSeconds + scheduledTime.getArrivalTime();
-			}
-
-			eventTime = getDateForSecondsFromMidnight(timeInSeconds);
+			eventTime = getDateForSecondsFromMidnight(eventReadTime, timeInSeconds);
 			logger.debug("Event Time : " + eventTime);
 			logger.debug("Time in seconds :" + timeInSeconds);
 
 		} else if (tripUpdate.hasDelay()) {
 
 			int timeInSeconds = tripUpdate.getDelay();
+			timeInSeconds = getArrivalDepartureTimeInSeconds(timeInSeconds, scheduledTime, isArrival);
 
-			if (scheduledTime.getDepartureTime() != null)
-				timeInSeconds = timeInSeconds + scheduledTime.getDepartureTime();
-			else if (scheduledTime.getArrivalTime() != null)
-				timeInSeconds = timeInSeconds + scheduledTime.getArrivalTime();
-
-			eventTime = getDateForSecondsFromMidnight(timeInSeconds);
+			eventTime = getDateForSecondsFromMidnight(eventReadTime, timeInSeconds);
 			logger.debug("Event Time : " + eventTime);
 			logger.debug("Time in seconds :" + timeInSeconds);
 		}
 		else if(stopTimeDelay != null){
 			int timeInSeconds = stopTimeDelay;
+			timeInSeconds = getArrivalDepartureTimeInSeconds(timeInSeconds, scheduledTime, isArrival);
 
-			if (scheduledTime.getDepartureTime() != null)
-				timeInSeconds = timeInSeconds + scheduledTime.getDepartureTime();
-			else if (scheduledTime.getArrivalTime() != null)
-				timeInSeconds = timeInSeconds + scheduledTime.getArrivalTime();
-
-			eventTime = getDateForSecondsFromMidnight(timeInSeconds);
+			eventTime = getDateForSecondsFromMidnight(eventReadTime, timeInSeconds);
 			logger.debug("Event Time : " + eventTime);
 			logger.debug("Time in seconds :" + timeInSeconds);
 		}
@@ -444,9 +438,29 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 		return eventTime;
 	}
 
-	Date getDateForSecondsFromMidnight(int secondsFromMidnight) {
+	private Integer getArrivalDepartureTimeInSeconds(int timeInSeconds, ScheduleTime scheduledTime, boolean isArrival){
+		if(isArrival){
+			if (scheduledTime.getArrivalTime() != null) {
+				timeInSeconds = timeInSeconds + scheduledTime.getArrivalTime();
+			}
+			else if (scheduledTime.getDepartureTime() != null) {
+				timeInSeconds = timeInSeconds + scheduledTime.getDepartureTime();
+			}
+		} else {
+			if (scheduledTime.getDepartureTime() != null) {
+				timeInSeconds = timeInSeconds + scheduledTime.getDepartureTime();
+			}
+			else if (scheduledTime.getArrivalTime() != null) {
+				timeInSeconds = timeInSeconds + scheduledTime.getArrivalTime();
+			}
+		}
+		return timeInSeconds;
+	}
+
+	Date getDateForSecondsFromMidnight(Date epochTime, int secondsFromMidnight) {
 
 		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(epochTime);
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
@@ -563,8 +577,9 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 
 		// Get data for all items in the GTFS-RT trip updates feed
 		FeedMessage feed = getExternalPredictions();
+		DbConfig dbConfig = Core.getInstance().getDbConfig();
 
-		processExternalPredictions(feed, predictionsReadTime);
+		processExternalPredictions(feed, dbConfig);
 
 	}
 
