@@ -763,6 +763,7 @@ public class RunTimeService {
                 .beginTime(beginTimeSeconds)
                 .endTime(endTimeSeconds)
                 .serviceType(serviceType)
+                .includeRunTimesForStops(false)
                 .readOnly(readOnly)
                 .build();
 

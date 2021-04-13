@@ -31,6 +31,7 @@ import org.transitclock.core.ServiceType;
 import org.transitclock.core.TemporalDifference;
 import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.db.query.ArrivalDepartureQuery;
+import org.transitclock.ipc.interfaces.ArrivalDepartureSpeed;
 import org.transitclock.logging.Markers;
 import org.transitclock.utils.Geo;
 import org.transitclock.utils.IntervalTimer;
@@ -70,7 +71,7 @@ import java.util.*;
                       columnList="routeShortName, time" ),
 			       @Index(name="ArrivalsDeparturesTripPatternIdIndex",
 					   columnList="tripPatternId" )} )
-public class ArrivalDeparture implements Lifecycle, Serializable  {
+public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartureSpeed {
 	
 	@Id 
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
@@ -276,7 +277,14 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		if(block!=null)
 		{
 			Trip trip = block.getTrip(tripIndex);
+			if(trip == null){
+				System.out.println("Empty Trip");
+				System.out.println(tripIndex);
+			}
 			StopPath stopPath = trip.getStopPath(stopPathIndex);
+			if(stopPath == null){
+				System.out.println("Stop Path Empty");
+			}
 			this.tripPatternId = stopPath.getTripPatternId();
 			String stopId = stopPath.getStopId();
 			// Determine and store stop order
@@ -599,30 +607,31 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 
 	@Override
 	public String toString() {
-		return (isArrival ? "Arrival  " : "Departure") + " [" 
-				+ "vehicleId=" + vehicleId 
-				// + ", isArrival=" + isArrival
+		return (isArrival ? "Arrival  " : "Departure") + " ["
+				+ "vehicleId=" + vehicleId
 				+ ", time=" + Time.dateTimeStrMsec(time)
-				+ ", route="	+ routeId 
+				+ ", route="	+ routeId
 				+ ", rteName=" + routeShortName
 				+ ", directionId=" + directionId
-				+ ", stop=" + stopId 
+				+ ", stop=" + stopId
 				+ ", gtfsStopSeq=" + gtfsStopSeq
 				+ ", stopIdx=" + stopPathIndex
 				+ ", stopPathId=" + stopPathId
 				+ ", freqStartTime=" + freqStartTime
 				+ ", stopOrder=" + stopOrder
-				+ ", avlTime=" + Time.timeStrMsec(avlTime)
+				+  (avlTime != null ?
+				 		", avlTime=" + Time.timeStrMsec(avlTime) : "")
 				+ ", trip=" + tripId
 				+ ", tripIdx=" + tripIndex
 				+ ", tripPatternId=" + tripPatternId
-				+ ", block=" + blockId 
+				+ ", block=" + blockId
 				+ ", srv=" + serviceId
 				+ ", cfg=" + configRev
-				+ ", pathLnth=" + Geo.distanceFormat(stopPathLength)
-				+ (scheduledTime != null ? 
+				+ (stopPathLength != Float.NaN ?
+				 		", pathLnth=" + Geo.distanceFormat(stopPathLength) : "")
+				+ (scheduledTime != null ?
 						", schedTime=" + Time.timeStr(scheduledTime) : "")
-				+ (scheduledTime != null ? 
+				+ (scheduledTime != null ?
 						", schedAdh=" + new TemporalDifference(
 								scheduledTime.getTime() - time.getTime()) : "")
 				+ (dwellTime != null ? ", dwellTime=" + dwellTime : "")

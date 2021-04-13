@@ -64,6 +64,7 @@ public class AnnotatedClassesList {
 		PredictionAccuracy.class,
 		Route.class,
 		RunTimesForRoutes.class,
+		RunTimesForStops.class,
 		Stop.class,
 		StopPath.class,
 		Transfer.class,

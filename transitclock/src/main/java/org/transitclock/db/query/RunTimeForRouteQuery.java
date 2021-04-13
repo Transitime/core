@@ -16,6 +16,7 @@ public class RunTimeForRouteQuery {
     private boolean timePointsOnly;
     private boolean scheduledTimesOnly;
     private boolean readOnly;
+    private boolean includeRunTimesForStops;
 
     private RunTimeForRouteQuery(Builder builder){
         this.beginDate = builder.beginDate;
@@ -27,6 +28,7 @@ public class RunTimeForRouteQuery {
         this.timePointsOnly = builder.timePointsOnly;
         this.scheduledTimesOnly = builder.scheduledTimesOnly;
         this.readOnly = builder.readOnly;
+        this.includeRunTimesForStops = builder.includeRunTimesForStops;
     }
 
     public LocalDate getBeginDate() {
@@ -65,6 +67,10 @@ public class RunTimeForRouteQuery {
         return readOnly;
     }
 
+    public boolean includeRunTimesForStops() {
+        return includeRunTimesForStops;
+    }
+
     public static class Builder{
 
         private LocalDate beginDate;
@@ -76,6 +82,7 @@ public class RunTimeForRouteQuery {
         private boolean timePointsOnly = false;
         private boolean scheduledTimesOnly = false;
         private boolean readOnly = false;
+        private boolean includeRunTimesForStops = false;
 
         public Builder(){}
 
@@ -121,6 +128,11 @@ public class RunTimeForRouteQuery {
 
         public Builder readOnly(boolean readOnly) {
             this.readOnly = readOnly;
+            return this;
+        }
+
+        public Builder includeRunTimesForStops(boolean includeRunTimesForStops){
+            this.includeRunTimesForStops = includeRunTimesForStops;
             return this;
         }
 

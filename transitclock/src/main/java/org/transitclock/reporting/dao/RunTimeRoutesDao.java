@@ -44,6 +44,7 @@ public class RunTimeRoutesDao {
                 "rt " +
                 "FROM " +
                 "RunTimesForRoutes rt " +
+                getRunTimesForStopsJoin(rtQuery) +
                 "WHERE " +
                 getTimeRange(rtQuery, parameterNameAndValues) +
                 getServiceTypeWhere(rtQuery, parameterNameAndValues) +
@@ -69,6 +70,13 @@ public class RunTimeRoutesDao {
             // it might actually be detrimental and slow things down.
             session.close();
         }
+    }
+
+    private String getRunTimesForStopsJoin(RunTimeForRouteQuery rtQuery) {
+        if(rtQuery.includeRunTimesForStops()){
+            return "JOIN FETCH rt.runTimesForStops rts ";
+        }
+        return "";
     }
 
     public static String getTimeRange(RunTimeForRouteQuery rtQuery, Map<String, Object> parameterNameAndValues) {
