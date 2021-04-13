@@ -337,3 +337,7 @@ span.ui-datepicker-month {
     height: 1.7em;
 }
 
+.trip-block .maxWidth{
+    max-width: 350px;
+    margin: 10px;
+}
