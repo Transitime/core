@@ -1,6 +1,6 @@
-    /*
-     * CSS styles for report parameter pages
-     */
+/*
+ * CSS styles for report parameter pages
+ */
 label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-right: 10px;}
 .param {margin-top: 12px;}
 .submitDiv{ margin-top: 40px; text-align: center; }
@@ -25,14 +25,14 @@ label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-rig
     font-size: 12px;
 }
 
-    .bucketParam fieldset {
-        margin: 15px 0px;
-        padding: 20px 0px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        align-items: center;
-    }
+.bucketParam fieldset {
+    margin: 15px 0px;
+    padding: 20px 0px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
 
 .bucketParam legend {
     font-size: 14px;
@@ -163,115 +163,177 @@ input#submit {
 
 }
 
-    legend {
-        text-align: center;
-    }
+legend {
+    text-align: center;
+}
 
-    .select2-container--default  {
-        background-color: white;
-        border: 1px solid #c1c1c1c1;
-        border-radius: 0px;
-        cursor: text;
-        box-shadow: 0px 1px 4px rgb(0 0 0 / 33% );
-    }
-    .select2-container {
+.select2-container--default  {
+    background-color: white;
+    border: 1px solid #c1c1c1c1;
+    border-radius: 0px;
+    cursor: text;
+    box-shadow: 0px 1px 4px rgb(0 0 0 / 33% );
+}
+.select2-container {
 
-        width: 236px!important;
-    }
+    width: 236px!important;
+}
 
-    div#ui-datepicker-div {
-        background: white;
-    }
+div#ui-datepicker-div {
+    background: white;
+    width: 225px;
+}
 
-    .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
-        border: 1px solid #cbc7bd;
-        background: white;
-        font-weight: bold;
-        color: black;
-    }
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+    border: 1px solid #cbc7bd;
+    background: white;
+    font-weight: normal;
+    color: #444;
+}
 
-    .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
-        border: 1px solid #d9d6c4;
-        background: #4ddb4c9c;
-        font-weight: bold;
-        color: black;
-    }
+.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
+    border: 1px solid #d9d6c4;
+    background: #4ddb4c9c;
+    font-weight: normal;
+    color: black;
+}
 
-    .trigger.datepick-trigger {
-        height: 32px;
-    }
+.trigger.datepick-trigger {
+    height: 32px;
+}
 
-    .datepick-nav,.datepick-ctrl {
-        background-color: white;
-        color: #000;
-        padding: 5px 0;
-        border: 1px solid #d9d6c4;
-        border-radius: 4px;
-        margin: 2px 0;
-    }
+.datepick-nav,.datepick-ctrl {
+    background-color: white;
+    color: #000;
+    padding: 5px 0;
+    border: 1px solid #d9d6c4;
+    border-radius: 4px;
+    margin: 2px 0;
+    width: 99%;
+}
 
-    .datepick a{
-        color:#444;
-    }
+.datepick a{
+    color:#444;
+}
 
-    .datepick-month-header select{
-        background-color: #fff;
-        color: #000;
+.datepick-month-header select{
+    background-color: #fff;
+    color: #000;
 
-    }
+}
 
-    .datepick-month td .datepick-selected,
-    .datepick-month td .datepick-highlight,
-    .datepick-ctrl .datepick-cmd:hover,.datepick-cmd:hover, .datepick-month td .datepick-today{
-        background-color: #4ddb4c9c;
-        color: #000;
-    }
-    .datepick-month th, .datepick-month th a {
-        background-color: #019932;
-        color: #fff;
-    }
+.datepick-month td .datepick-selected,
+.datepick-month td .datepick-highlight,
+.datepick-ctrl .datepick-cmd:hover,.datepick-cmd:hover, .datepick-month td .datepick-today{
+    background-color: #4ddb4c9c;
+    color: #000;
+}
+.datepick-month th, .datepick-month th a {
+    background-color: #019932;
+    color: #fff;
+}
 
-    .datepick-month-header {
-        height: 1.5em;
-        background-color: #019932;
-        margin-bottom: 2px;
-        padding: 4px 0;
-        border: 1px solid transparent;
-    }
+.datepick-month-header {
+    height: 1.5em;
+    background-color: #019932;
+    margin-bottom: 2px;
+    padding: 4px 0;
+    border: 1px solid transparent;
+}
 
-    .ui-datepicker-week-end .ui-state-default {
-        background-color: #ddd;
-    }
+.ui-datepicker-week-end .ui-state-default {
+    background-color: #ddd;
+}
 
-    .datepick-month a {
-        background-color: white;
-    }
+.ui-datepicker td span, .ui-datepicker td a, .ui-datepicker th span {
+    text-align: center;
+    font-weight: normal;
+    font-size:16px
+}
 
-    .datepick-month a {
-        background-color: white;
-        border: 1px solid #cbc7bd;
-        /* padding: .2em; */
-        /* text-align: right; */
-    }
+.ui-datepicker th {
+    padding: 0.125em 0em;
+    text-align: center;
+    font-weight: bold;
+    color: white;
+    background-color: #019932;
+    /* border: 0; */
+    border: 1px solid #777;
+}
 
-    .datepick-month td {
-        padding: 2px;
-        border: 0;
-        background-color: transparent;
-    }
+.datepick-month a {
+    background-color: white;
+}
 
-    .datepick-month td span {
-        border: 1px solid #cbc7bd;
-        background-color: #fff;
-    }
+.datepick-month a {
+    background-color: white;
+    border: 1px solid #cbc7bd;
+    /* padding: .2em; */
+    /* text-align: right; */
+}
 
-    .datepick {
-        border: 1px solid #d9d6c4;
-        padding: 3px;
-    }
+.datepick-month td {
+    padding: 2px;
+    border: 0;
+    background-color: transparent;
+}
 
-    .datepick-month {
-        /* border: 0; */
-        width: 15em;
-        border: 1px solid transparent;
-    }
+.datepick-month td span {
+    border: 1px solid #cbc7bd;
+    background-color: #fff;
+}
+
+.datepick {
+    border: 1px solid #d9d6c4;
+    padding: 3px;
+}
+
+.datepick-month {
+    /* border: 0; */
+    width: 15em;
+    border: 1px solid transparent;
+}
+
+.scrollable-element{
+    overflow: auto;
+}
+
+.custom-canvas {
+    margin-bottom: 100px;
+}
+
+.ui-datepicker-header.ui-widget-header.ui-helper-clearfix.ui-corner-all {
+    border-radius: 0;
+    margin-bottom: 2px;
+    padding: 0;
+    background: #ffffff;
+}
+
+span.ui-datepicker-year {
+    font-size: 16px;
+}
+
+span.ui-datepicker-month {
+    font-size: 16px;
+}
+
+.ui-widget-header .ui-icon, .ui-state-hover .ui-icon,
+.ui-state-focus .ui-icon {
+    background-image: url('../../../web/jquery-ui/images/ui-icons_222222_256x240.png');
+}
+
+.ui-state-hover,
+.ui-widget-content .ui-state-hover,
+.ui-widget-header .ui-state-hover,
+.ui-state-focus,
+.ui-widget-content .ui-state-focus,
+.ui-widget-header .ui-state-focus {
+    border: 1px solid #4CAF50;
+    background: #4CAF50;
+    color: #ffffff;
+}
+
+.ui-datepicker .ui-datepicker-prev, .ui-datepicker .ui-datepicker-next {
+    height: 1.7em;
+}
+
