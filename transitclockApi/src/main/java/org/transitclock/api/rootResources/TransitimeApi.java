@@ -915,6 +915,76 @@ public class TransitimeApi {
 	}
 
 	/**
+	 * Handles the "stops" command. Returns all stops associated with a route,
+	 * grouped by direction. Useful for creating a UI where user needs to select
+	 * a stop from a list.
+	 *
+	 * @param stdParameters
+	 * @param routeIdsOrShortNames
+	 * @return
+	 * @throws WebApplicationException
+	 */
+	@Path("/command/stopsForRoutes")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Retrives bus stops from the server.",
+			description="Returns all stops associated with a route,"+
+					" grouped by direction. Useful for creating a UI where user needs to select" +
+					" a stop from a list.",tags= {"base data","stop"})
+	public Response getStops(@BeanParam StandardParameters stdParameters,
+							 @Parameter(description="if set, retrives only busstops belongind to the route. "
+									 + "It might be routeId or route shrot name.",required=false)
+							 @QueryParam(value = "r")  List<String> routeIdsOrShortNames,
+							 @Parameter(description="if set, includes route and direction information for retrieved stops",required=false)
+								 @QueryParam(value = "directions") @DefaultValue("false")  boolean includeDirections ) throws WebApplicationException {
+
+		// Make sure request is valid
+		stdParameters.validate();
+
+		try {
+
+			List<IpcDirectionsForRoute> stopsForRoutes;
+
+			// Get Vehicle data from server
+			ConfigInterface inter = stdParameters.getConfigInterface();
+
+			if (routeIdsOrShortNames != null && routeIdsOrShortNames.size() == 1) {
+				String routeIdOrShortName = routeIdsOrShortNames.get(0);
+				IpcDirectionsForRoute stops = inter.getStops(routeIdOrShortName);
+
+				// If the stops doesn't exist then throw exception such that
+				// Bad Request with an appropriate message is returned.
+				if (stops == null)
+					throw WebUtils.badRequestException("Route for route=" + routeIdOrShortName + " does not exist.");
+
+				stopsForRoutes = new ArrayList<>();
+				stopsForRoutes.add(stops);
+			} else {
+				// Multiple routes specified
+				stopsForRoutes = inter.getStops(routeIdsOrShortNames);
+			}
+
+			// If the route doesn't exist then throw exception such that
+			// Bad Request with an appropriate message is returned.
+			if (stopsForRoutes == null)
+				throw WebUtils.badRequestException("Stops for Routes do not exist.");
+
+			// Create and return stops response
+			if(includeDirections){
+				ApiRoutesDirections stops = new ApiRoutesDirections(stopsForRoutes);
+				return stdParameters.createResponse(stops);
+			} else {
+				ApiStopsForRoute stops = new ApiStopsForRoute(stopsForRoutes);
+				return stdParameters.createResponse(stops);
+			}
+
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e);
+		}
+	}
+
+	/**
 	 * Handles the "block" command which outputs configuration data for the
 	 * specified block ID and service ID. Includes all sub-data such as trips
 	 * and trip patterns.

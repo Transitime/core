@@ -94,7 +94,13 @@ public interface ConfigInterface extends Remote {
 	 */
 	public IpcDirectionsForRoute getStops(String routeIdOrShortName)  
 			throws RemoteException;
-	
+
+	/* (non-Javadoc)
+	 * @see org.transitclock.ipc.interfaces.ConfigInterface#getStops(java.util.List)
+	 */
+	List<IpcDirectionsForRoute> getStops(List<String> routeIdOrShortNames)
+			throws RemoteException;
+
 	/**
 	 * Returns block info for specified blockId and serviceId. Includes all trip
 	 * and trip pattern info associated with the block.

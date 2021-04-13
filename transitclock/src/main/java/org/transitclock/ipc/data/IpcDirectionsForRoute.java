@@ -31,6 +31,10 @@ import org.transitclock.db.structs.Route;
  */
 public class IpcDirectionsForRoute implements Serializable {
 
+	private String routeId;
+
+	private String routeShortName;
+
 	private List<IpcDirection> directions;
 	
 	private static final long serialVersionUID = -3112277760645758349L;
@@ -38,6 +42,9 @@ public class IpcDirectionsForRoute implements Serializable {
 	/********************** Member Functions **************************/
 
 	public IpcDirectionsForRoute(Route dbRoute) {
+		this.routeId = dbRoute.getId();
+		this.routeShortName = dbRoute.getShortName();
+
 		directions = new ArrayList<IpcDirection>();
 		
 		// Determine the directions
@@ -65,4 +72,11 @@ public class IpcDirectionsForRoute implements Serializable {
 		return directions;
 	}
 
+	public String getRouteId() {
+		return routeId;
+	}
+
+	public String getRouteShortName() {
+		return routeShortName;
+	}
 }

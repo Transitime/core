@@ -17,15 +17,12 @@
 
 package org.transitclock.api.data;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import org.transitclock.ipc.data.IpcDirectionsForRoute;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.transitclock.ipc.data.IpcDirection;
-import org.transitclock.ipc.data.IpcDirectionsForRoute;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A list of directions.
@@ -33,11 +30,11 @@ import org.transitclock.ipc.data.IpcDirectionsForRoute;
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name = "directions")
-public class ApiDirections {
+@XmlRootElement(name = "routesAndDirections")
+public class ApiRoutesDirections {
 
-	@XmlElement(name = "direction")
-	private List<ApiDirection> directionsData;
+	@XmlElement
+	private List<ApiRouteDirections> routeDirections;
 
 	/********************** Member Functions **************************/
 
@@ -45,14 +42,12 @@ public class ApiDirections {
 	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
 	 * "MessageBodyWriter not found for media type=application/json" exception.
 	 */
-	protected ApiDirections() {
-	}
+	protected ApiRoutesDirections() { }
 
-	public ApiDirections(IpcDirectionsForRoute stopsForRoute) {
-		Collection<IpcDirection> directions = stopsForRoute.getDirections();
-		directionsData = new ArrayList<>(directions.size());
-		for (IpcDirection direction : directions) {
-			directionsData.add(new ApiDirection(direction));
+	public ApiRoutesDirections(List<IpcDirectionsForRoute> stopsForRoutes) {
+		routeDirections = new ArrayList<>(stopsForRoutes.size());
+		for(IpcDirectionsForRoute directionsForRoute : stopsForRoutes){
+			routeDirections.add(new ApiRouteDirections(directionsForRoute));
 		}
 	}
 }

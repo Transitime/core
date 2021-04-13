@@ -128,6 +128,7 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 		return ipcRoutes;
 	}
 
+
 	/* (non-Javadoc)
 	 * @see org.transitclock.ipc.interfaces.ConfigInterface#getRoute(java.lang.String)
 	 */
@@ -211,6 +212,44 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 		
 		// Return the ipc route
 		return ipcStopsForRoute;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.transitclock.ipc.interfaces.ConfigInterface#getStops(java.util.List)
+	 */
+	@Override
+	public List<IpcDirectionsForRoute> getStops(List<String> routeIdsOrShortNames)
+			throws RemoteException{
+		List<Route> routes = new ArrayList<>();
+
+		// If no route specified then return data for all routes
+		if (routeIdsOrShortNames == null || routeIdsOrShortNames.isEmpty()) {
+			DbConfig dbConfig = Core.getInstance().getDbConfig();
+			List<org.transitclock.db.structs.Route> dbRoutes =
+				dbConfig.getRoutes();
+			for (Route dbRoute : dbRoutes) {
+				routes.add(dbRoute);
+			}
+		} else {
+			// Routes specified so return data for those routes
+			for (String routeIdOrShortName : routeIdsOrShortNames) {
+				// Determine the route
+				Route dbRoute = getRoute(routeIdOrShortName);
+				if (dbRoute == null)
+					continue;
+				routes.add(dbRoute);
+			}
+		}
+
+		List<IpcDirectionsForRoute> ipcStopsForRoutes = new ArrayList<>();
+
+		// Convert db route into an ipc route
+		for(Route dbRoute : routes){
+			ipcStopsForRoutes.add(new IpcDirectionsForRoute(dbRoute));
+		}
+
+		// Return the ipc routes list
+		return ipcStopsForRoutes;
 	}
 
 	/* (non-Javadoc)
