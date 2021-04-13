@@ -400,6 +400,7 @@
 
             <br>
 
+
             <div id="avgRunTime" class="individual-route"
                  style="display: inline-block; width: 90%; vertical-align: middle; margin-left:auto; margin-right:auto;">
                 <p style="font-size: 0.8em;display: inline-block;"></p>
@@ -411,6 +412,7 @@
                 <p style="font-size: 0.8em;display: inline-block;"></p>
                 <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
             </div>
+
             <div  style="width:100%; display: flex; justify-content: center;" class="individual-route">
                 <input type="button" id="visualizeButton" class="visualizeButton" value="Visualize Trips"
                        style="margin-top: 10px; margin-bottom: 10px; margin-left:auto; margin-right:auto; width:70%"
@@ -491,6 +493,10 @@
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 
+        <div class="individual-route trip-block " >
+            <div class="param maxWidth" id="trips-container"></div>
+
+        </div>
         <div id="runTimeVisualization" hidden="true">
 
         </div>
@@ -681,6 +687,50 @@
 
     var highestPoints = [];
     var visualarGraphChart;
+
+
+    function showStopView(){
+
+        highestPoints = [];
+        request = getParams(false)
+        request.tripId = $("#trips-select-box").val();
+    /*Orginal URL*/
+       var stopDataURL = apiUrlPrefix +  "/report/runTime/avgStopPathRunTimes";
+
+        /*DONT COMMIT URL*/
+        // var stopDataURL = "http://gtfsrt.dev.dart.obaweb.org/api/v1/key/5c348c1d/agency/1/"+"report/runTime/avgStopPathRunTimes";
+
+        $.ajax({
+            url: stopDataURL,
+            // Pass in query string parameters to page being requested
+            data: request,
+            // Needed so that parameters passed properly to page being requested
+            traditional: true,
+            dataType: "json",
+            success: function (response) {
+                if(response.data.stopPaths && response.data.stopPaths.length ){
+
+                    var defaultHeight = (response.data.stopPaths.length ) *80;
+                    var defaultWidth = window.innerWidth;
+
+                    if(defaultHeight < (window.innerHeight/2 - 100)) {
+                        defaultHeight =  window.innerHeight;
+                    }
+                    $("#runTimeVisualization").html(' <canvas id="visualizationCanvas" class="custom-canvas"  height="'+defaultHeight+'" width="'+defaultWidth+'"></canvas>');
+
+                    generateIndividualStopChart(response);
+                } else {
+                    alert("Error retrieving stop-by-stop summary.");
+                }
+            },
+            error: function (e) {
+                alert("Error retrieving stop-by-stop summary.");
+
+            }
+        });
+
+    }
+
     function visualizeData() {
         $("#submit").attr("disabled", true);
         $("#visualizeButton").attr("disabled", true);
@@ -698,8 +748,10 @@
             delete request.serviceType
             delete  request.headsign;
             isAllRoutes = true;
-            // visualDataURL =  apiUrlPrefix + "/report/runTime/routeRunTimes";
-            visualDataURL = "http://gtfsrt.dev.dart.obaweb.org/api/v1/key/5c348c1d/agency/1" + "/report/runTime/routeRunTimes";
+            visualDataURL =  apiUrlPrefix + "/report/runTime/routeRunTimes";
+
+            /*DONT COMMIT URL*/
+            // visualDataURL = "http://gtfsrt.dev.dart.obaweb.org/api/v1/key/5c348c1d/agency/1" + "/report/runTime/routeRunTimes";
         }
 
 
@@ -719,6 +771,41 @@
 
 
                     if(response.data.trips && response.data.trips.length ){
+
+                        var tripSelectBox = $('<select id="trips-select-box" name="tripBoxType"><option value="">All</option></select>');
+                        var stopsData = [];
+                        response.data.trips.forEach(function (eachTrip, i) {
+                            var values = eachTrip.split("-");
+                            var optionValue = values[1].trim();
+                            if(stopsData.indexOf(optionValue) < 0){
+                                stopsData.push(optionValue);
+                            }
+
+                        });
+                        stopsData.forEach(function (eachTrip, i) {
+
+                            var option = $('<option></option>');
+                            option.attr('value', eachTrip);
+                            option.text(eachTrip);
+                            tripSelectBox.append(option);
+
+                        });
+
+                        tripSelectBox.append( '<span class="select2-selection__arrow"><b role="presentation"></b></span>');
+
+                        $("#trips-container").html("");
+                        $("#trips-container").append('<label for="tripBoxType">Trip Selection:</label>');
+                        $("#trips-container").append(tripSelectBox);
+
+                        $("#trips-select-box").change(function () {
+
+                            if ($("#trips-select-box").val().trim() != "") {
+                                showStopView();
+                            } else {
+                                visualizeData();
+                            }
+
+                        });
                         $("#runTimeVisualization").html(' <canvas id="visualizationCanvas" maintainAspectRatio="false" responsive="true"></canvas>');
                     } else{
                         var defaultHeight = (response.data.routes.length ) *38;
@@ -755,6 +842,9 @@
                         }) ; */
                     } else{
                         generateIndividualRouteChart(response);
+
+
+
                     }
 
                     $("#comparisonResults").hide();
@@ -786,7 +876,7 @@
                             stacked: true,
                             scaleLabel: {
                                 display: true,
-                                labelString: "Min"
+                                labelString: "Minutes"
                             },
                             ticks: options && options.xAxis && options.xAxis.ticks ||{}
                         }],
@@ -867,6 +957,48 @@
         visualarGraphChart = barGraph;
         return barGraph;
     }
+
+    function generateIndividualStopChart(response){
+        var barGraph = getDefaultChartOptions();
+        barGraph.data = {
+            datasets: [
+                {
+                    data: msToMin(response.data.fixed),
+                    backgroundColor: '#36509b',
+                    label: "Fixed",
+                    yAxisId: "bars"
+                },
+                {
+                    data: msToMin(response.data.variable),
+                    backgroundColor: '#df7f17',
+                    label: "Variable",
+                    yAxisId: "bars"
+                },
+                {
+                    data: msToMin(response.data.dwell),
+                    backgroundColor: '#8c8c8c',
+                    label: "Dwell",
+                    yAxisId: "bars"
+                },
+                {
+                    type: "scatter",
+                    data: arraysToXAndY([msToMin(response.data.scheduled), response.data.stopPaths]),
+                    backgroundColor: '#70a260',
+                    label: "Scheduled",
+                    showLine: false,
+                    fill: false,
+                    // yAxisId: "icons"
+                }],
+            labels: response.data.stopPaths
+        }
+
+        barGraph.options.scales.xAxes[0].ticks.max = calculateMaxMins(highestPoints);
+
+        barGraph.update();
+
+
+    }
+
     function generateIndividualRouteChart(response){
         var barGraph = getDefaultChartOptions();
         barGraph.data = {
@@ -916,6 +1048,7 @@
 
 
     }
+
     function getHighestData(data){
         var highest = 0;
 
