@@ -36,34 +36,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
-import org.transitclock.api.data.ApiActiveBlocks;
-import org.transitclock.api.data.ApiActiveBlocksRoutes;
-import org.transitclock.api.data.ApiAdherenceSummary;
-import org.transitclock.api.data.ApiAgencies;
-import org.transitclock.api.data.ApiAgency;
-import org.transitclock.api.data.ApiBlock;
-import org.transitclock.api.data.ApiBlocks;
-import org.transitclock.api.data.ApiBlocksTerse;
-import org.transitclock.api.data.ApiCalendars;
-import org.transitclock.api.data.ApiCurrentServerDate;
-import org.transitclock.api.data.ApiDirections;
-import org.transitclock.api.data.ApiHeadsigns;
-import org.transitclock.api.data.ApiIds;
-import org.transitclock.api.data.ApiPredictions;
-import org.transitclock.api.data.ApiRevisionInformation;
-import org.transitclock.api.data.ApiRmiServerStatus;
-import org.transitclock.api.data.ApiRoutes;
-import org.transitclock.api.data.ApiRoutesDetails;
-import org.transitclock.api.data.ApiSchedulesHorizStops;
-import org.transitclock.api.data.ApiSchedulesVertStops;
-import org.transitclock.api.data.ApiServerStatus;
-import org.transitclock.api.data.ApiStopLevels;
-import org.transitclock.api.data.ApiTrip;
-import org.transitclock.api.data.ApiTripPatterns;
-import org.transitclock.api.data.ApiTripWithTravelTimes;
-import org.transitclock.api.data.ApiVehicleConfigs;
-import org.transitclock.api.data.ApiVehicles;
-import org.transitclock.api.data.ApiVehiclesDetails;
+import org.transitclock.api.data.*;
 import org.transitclock.api.predsByLoc.PredsByLoc;
 import org.transitclock.api.utils.StandardParameters;
 import org.transitclock.api.utils.WebUtils;
@@ -844,7 +817,7 @@ public class TransitimeApi {
 			+ "and paths such that it can be drawn in a map.",tags= {"base data","route"})
 	public Response getRouteDetails(@BeanParam StandardParameters stdParameters,
 			@Parameter(description="List of routeId or routeShortName. Example: r=1&r=2" ,required=false) 
-  	  @QueryParam(value = "r")  List<String> routeIdsOrShortNames, 
+  	  			@QueryParam(value = "r")  List<String> routeIdsOrShortNames,
 			 @Parameter(description="If set then only the shape for specified direction is marked as being for the UI." ,required=false) 
 			 @QueryParam(value = "d") String directionId,
 			 @Parameter(description="If set then only this stop and the remaining ones on "
@@ -877,8 +850,10 @@ public class TransitimeApi {
 				if (route == null)
 					throw WebUtils.badRequestException("Route for route=" + routeIdOrShortName + " does not exist.");
 
-				ipcRoutes = new ArrayList<IpcRoute>();
+				ipcRoutes = new ArrayList<>();
 				ipcRoutes.add(route);
+			} else if(routeIdsOrShortNames == null || routeIdsOrShortNames.isEmpty() && StringUtils.isNotBlank(stopId)){
+				ipcRoutes = inter.getRoutesForStop(stopId);
 			} else {
 				// Multiple routes specified
 				ipcRoutes = inter.getRoutes(routeIdsOrShortNames);

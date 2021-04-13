@@ -180,6 +180,22 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	}
 
 	/* (non-Javadoc)
+	 * @see org.transitclock.ipc.interfaces.ConfigInterface#getRoutesForStop(java.lang.String)
+	 */
+	@Override
+	public List<IpcRoute> getRoutesForStop(String stopId) throws RemoteException{
+		List<IpcRoute> routes = new ArrayList<>();
+		DbConfig dbConfig = Core.getInstance().getDbConfig();
+		Collection<Route> routesForStop = dbConfig.getRoutesForStop(stopId);
+		if(routesForStop != null){
+			for(Route route : routesForStop){
+				routes.add(new IpcRoute(route, null, null, null));
+			}
+		}
+		return routes;
+	}
+
+	/* (non-Javadoc)
 	 * @see org.transitclock.ipc.interfaces.ConfigInterface#getStops(java.lang.String)
 	 */
 	@Override

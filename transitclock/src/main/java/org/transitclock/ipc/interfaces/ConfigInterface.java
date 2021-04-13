@@ -76,7 +76,12 @@ public interface ConfigInterface extends Remote {
 	 * @throws RemoteException
 	 */
 	public List<IpcRoute> getRoutes(List<String> routeIdsOrShortNames) throws RemoteException;
-	
+
+	/* (non-Javadoc)
+	 * @see org.transitclock.ipc.interfaces.ConfigInterface#getRoutesForStop(java.lang.String)
+	 */
+	public List<IpcRoute> getRoutesForStop(String stopId) throws RemoteException;
+
 	/**
 	 * Returns stops for each direction for a route.
 	 * 
