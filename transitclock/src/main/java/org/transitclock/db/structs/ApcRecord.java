@@ -17,13 +17,16 @@
 package org.transitclock.db.structs;
 
 import org.hibernate.annotations.DynamicUpdate;
+
 import org.transitclock.db.hibernate.HibernateUtils;
+import org.transitclock.utils.Time;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * represents an automated passenger count update.
@@ -62,7 +65,6 @@ public class ApcRecord implements Serializable {
   private final double lat;
   @Column
   private final double lon;
-
 
   private ApcRecord() {
     messageId = null;
@@ -146,21 +148,47 @@ public class ApcRecord implements Serializable {
   public int getDoorOpen() {
     return doorOpen;
   }
+  public long getDoorOpenEpoch() {
+    return getEpochTime(doorOpen);
+  }
 
   public int getDoorClose() {
     return doorClose;
+  }
+  public long getDoorCloseEpoch() {
+    return getEpochTime(doorClose);
   }
 
   public int getDeparture() {
     return departure;
   }
+  public long getDepartureEpoch() {
+    return getEpochTime(departure);
+  }
 
   public int getArrival() {
     return arrival;
+  }
+  public long getArrivalEpoch() {
+    return getEpochTime(arrival);
   }
 
   public double getLat() { return lat; }
 
   public double getLon() { return lon; }
+
+  private long getEpochTime(int secondsIntoDay) {
+    return serviceDate + secondsIntoDay * Time.SEC_IN_MSECS;
+  }
+
+  @Override
+  public String toString() {
+  return "apc["
+          + "vehicleId=" + vehicleId
+          + ",time=" + new Date(time)
+          + ",ons=" + getBoardings()
+          + ",offs=" + getAlightings()
+  + "]";
+  }
 
 }

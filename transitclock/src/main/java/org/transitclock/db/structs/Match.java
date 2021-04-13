@@ -188,6 +188,30 @@ public class Match implements Lifecycle, Serializable {
 		this.atStop = false;
 	}
 
+	private Match(String vehicleId,
+					long avlTime,
+					int configRev,
+					String serviceId,
+					String blockId,
+					String tripId,
+					int stopPathIndex,
+					int segmentIndex,
+					float distanceAlongSegment,
+					float distanceAlongStopPath,
+					boolean atStop) {
+		this.vehicleId = vehicleId;
+		this.avlTime = new Date(avlTime);
+		this.configRev = configRev;
+		this.serviceId = serviceId;
+		this.blockId = blockId;
+		this.tripId = tripId;
+		this.stopPathIndex = stopPathIndex;
+		this.segmentIndex = segmentIndex;
+		this.distanceAlongSegment = distanceAlongSegment;
+		this.distanceAlongStopPath = distanceAlongStopPath;
+		this.atStop = atStop;
+	}
+
 	/**
 	 * Because using a composite Id Hibernate wants this member.
 	 */	
@@ -479,5 +503,56 @@ public class Match implements Lifecycle, Serializable {
 	public boolean onDelete(Session s) throws CallbackException {
 		return Lifecycle.NO_VETO;
 	}
-	
+
+	public static class Builder {
+		String vehicleId;
+		long avlTime;
+		int configRev;
+		String serviceId;
+		String blockId;
+		String tripId;
+		int stopPathIndex;
+		int segmentIndex;
+		float distanceAlongSegment;
+		float distanceAlongStopPath;
+		boolean atStop;
+
+		public Builder(String vehicleId,
+									 long avlTime,
+									 int configRev,
+									 String serviceId,
+									 String blockId,
+									 String tripId,
+									 int stopPathIndex,
+									 int segmentIndex,
+									 float distanceAlongSegment,
+									 float distanceAlongStopPath,
+									 boolean atStop) {
+			this.vehicleId = vehicleId;
+			this.avlTime = avlTime;
+			this.configRev = configRev;
+			this.serviceId = serviceId;
+			this.blockId = blockId;
+			this.tripId = tripId;
+			this.stopPathIndex = stopPathIndex;
+			this.segmentIndex = segmentIndex;
+			this.distanceAlongSegment = distanceAlongSegment;
+			this.distanceAlongStopPath = distanceAlongStopPath;
+			this.atStop = atStop;
+		}
+
+		public Match create() {
+			return new Match(vehicleId,
+							avlTime,
+							configRev,
+							serviceId,
+							blockId,
+							tripId,
+							stopPathIndex,
+							segmentIndex,
+							distanceAlongSegment,
+							distanceAlongStopPath,
+							atStop);
+		}
+	}
 }

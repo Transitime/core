@@ -373,6 +373,84 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	}
 
 	/**
+	 * for builder/unit test integration
+	 * @param vehicleId
+	 * @param time
+	 * @param avlTime
+	 * @param block which can be null
+	 * @param directionId
+	 * @param tripIndex
+	 * @param stopPathIndex
+	 * @param stopOrder
+	 * @param isArrival
+	 * @param configRev
+	 * @param scheduledTime
+	 * @param blockId
+	 * @param tripId
+	 * @param stopId
+	 * @param gtfsStopSeq
+	 * @param stopPathLength
+	 * @param routeId
+	 * @param routeShortName
+	 * @param serviceId
+	 * @param freqStartTime
+	 * @param dwellTime
+	 * @param tripPatternId
+	 * @param stopPathId
+	 */
+	private ArrivalDeparture(String vehicleId,
+													 long time,
+													 long avlTime,
+													 Block block,
+													 String directionId,
+													 int tripIndex,
+													 int stopPathIndex,
+													 Integer stopOrder,
+													 boolean isArrival,
+													 int configRev,
+													 long scheduledTime,
+													 String blockId,
+													 String tripId,
+													 String stopId,
+													 int gtfsStopSeq,
+													 float stopPathLength,
+													 String routeId,
+													 String routeShortName,
+													 String serviceId,
+													 Long freqStartTime,
+													 Long dwellTime,
+													 String tripPatternId,
+													 String stopPathId) {
+		this.vehicleId = vehicleId;
+		this.time = new Date(time);
+		this.avlTime = new Date(time);
+		this.block = block;
+		this.directionId = directionId;
+		this.tripIndex = tripIndex;
+		this.stopPathIndex = stopPathIndex;
+		this.stopOrder = stopOrder;
+		this.isArrival = isArrival;
+		this.configRev = configRev;
+		this.scheduledTime = new Date(scheduledTime);
+		this.blockId = blockId;
+		this.tripId = tripId;
+		this.stopId = stopId;
+		this.gtfsStopSeq = gtfsStopSeq;
+		this.stopPathLength = stopPathLength;
+		this.routeId = routeId;
+		this.routeShortName = routeShortName;
+		this.serviceId = serviceId;
+		if (freqStartTime != null) {
+			this.freqStartTime = new Date(freqStartTime);
+		} else {
+			this.freqStartTime = null;
+		}
+		this.dwellTime = dwellTime;
+		this.tripPatternId = tripPatternId;
+		this.stopPathId = stopPathId;
+	}
+
+	/**
 	 * Callback due to implementing Lifecycle interface. Used to compact
 	 * string members by interning them.
 	 */
@@ -1385,7 +1463,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	public Block getBlock() {
 		return block;
 	}
-	
+
 	/**
 	 * The schedule time will only be set if the schedule info was available
 	 * from the GTFS data and it is the proper type of arrival or departure
@@ -1460,4 +1538,118 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	public Trip getTripFromDb() { return trip; }
 
 	public StopPath getStopPathFromDb() { return stopPath; }
+
+	/**
+	 * Builder pattern allows for non-hibernate creation of this instance
+	 * while still guaranteeing internal consistency.  Intended for unit tests only.
+	 */
+	public static class Builder {
+		String vehicleId;
+		long time;
+		long avlTime;
+		Block block;
+		String directionId;
+		int tripIndex;
+		int stopPathIndex;
+		Integer stopOrder;
+		boolean isArrival;
+		int configRev;
+		long scheduledTime;
+		String blockId;
+		String tripId;
+		String stopId;
+		int gtfsStopSeq;
+		float stopPathLength;
+		String routeId;
+		String routeShortName;
+		String serviceId;
+		Long freqStartTime;
+		Long dwellTime;
+		String tripPatternId;
+		String stopPathId;
+		public Builder(String vehicleId,
+						long time,
+						long avlTime,
+						Block block,
+						String directionId,
+						int tripIndex,
+						int stopPathIndex,
+						Integer stopOrder,
+					  boolean isArrival,
+						int configRev,
+						long scheduledTime,
+						String blockId,
+						String tripId,
+						String stopId,
+						int gtfsStopSeq,
+						float stopPathLength,
+						String routeId,
+						String routeShortName,
+						String serviceId,
+						Long freqStartTime,
+						Long dwellTime,
+						String tripPatternId,
+						String stopPathId
+		) {
+			this.vehicleId = vehicleId;
+			this.time = time;
+			this.avlTime = avlTime;
+			this.block = block;
+			this.directionId = directionId;
+			this.tripIndex = tripIndex;
+			this.stopPathIndex = stopPathIndex;
+			this.stopOrder = stopOrder;
+			this.isArrival = isArrival;
+			this.configRev = configRev;
+			this.scheduledTime = scheduledTime;
+			this.blockId = blockId;
+			this.tripId = tripId;
+			this.stopId = stopId;
+			this.gtfsStopSeq = gtfsStopSeq;
+			this.stopPathLength = stopPathLength;
+			this.routeId = routeId;
+			this.routeShortName = routeShortName;
+			this.serviceId = serviceId;
+			this.freqStartTime = freqStartTime;
+			this.dwellTime = dwellTime;
+			this.tripPatternId = tripPatternId;
+			this.stopPathId = stopPathId;
+
+		}
+
+		/**
+		 * create an instance of ArrivalDeparture outside of Hibernate.  Intended
+		 * for unit tests only!
+		 * @return
+		 */
+		public ArrivalDeparture create() {
+			ArrivalDeparture ad
+							= new ArrivalDeparture(
+			vehicleId,
+			time,
+			avlTime,
+			block,
+			directionId,
+			tripIndex,
+			stopPathIndex,
+			stopOrder,
+			isArrival,
+			configRev,
+			scheduledTime,
+			blockId,
+			tripId,
+			stopId,
+			gtfsStopSeq,
+			stopPathLength,
+			routeId,
+			routeShortName,
+			serviceId,
+			freqStartTime,
+			dwellTime,
+			tripPatternId,
+			stopPathId
+			);
+			return ad;
+		}
+	}
 }

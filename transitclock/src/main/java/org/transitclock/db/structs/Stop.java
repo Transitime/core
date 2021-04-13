@@ -134,6 +134,26 @@ public class Stop implements Serializable {
 		this.hidden = (gtfsStop.getHidden() != null ?  gtfsStop.getHidden() : false); 
 	}
 
+	private Stop(int configRev,
+							 String id,
+							 Integer code,
+							 String name,
+							 double lat,
+							 double lon,
+							 boolean timepointStop,
+							 Boolean layoverStop,
+							 Boolean waitStop) {
+		this.configRev = configRev;
+		this.id = id;
+		this.code = code;
+		this.name = name;
+		this.loc = new Location(lat, lon);
+		this.timepointStop = timepointStop;
+		this.layoverStop = layoverStop;
+		this.waitStop = waitStop;
+		this.hidden = false;
+	}
+
 	/**
 	 * Needed because Hibernate requires no-arg constructor
 	 */
@@ -144,10 +164,10 @@ public class Stop implements Serializable {
 		code = null;
 		name = null;
 		loc = null;
-		timepointStop = false; 
-		layoverStop = null; 
-		waitStop = null; 
-		hidden = false; 
+		timepointStop = false;
+		layoverStop = null;
+		waitStop = null;
+		hidden = false;
 	}
 
 	/* (non-Javadoc)
@@ -350,6 +370,46 @@ public class Stop implements Serializable {
 	public boolean isHidden() {
 		return hidden;
 	}
-	
+
+	public static class Builder {
+		int configRev;
+		String id;
+		Integer code;
+		String name;
+		double lat;
+		double lon;
+		boolean timepointStop;
+		Boolean layoverStop;
+		Boolean waitStop;
+		public Builder(int configRev,
+									 String id,
+									 Integer code,
+									 String name,
+									 double lat,
+									 double lon,
+									 boolean timepointStop,
+									 Boolean layoverStop,
+									 Boolean waitStop) {
+			this.configRev = configRev;
+			this.id = id;
+			this.code = code;
+			this.name = name;
+			this.lat = lat;
+			this.lon = lon;
+			this.timepointStop = timepointStop;
+			this.layoverStop = layoverStop;
+			this.waitStop = waitStop;
+		}
+		public Stop create() {
+			return new Stop(configRev,
+							id,
+							code,
+							name,
+							lat, lon,
+							timepointStop,
+							layoverStop,
+							waitStop);
+		}
+	}
 	
 }

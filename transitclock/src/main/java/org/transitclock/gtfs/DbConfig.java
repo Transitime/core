@@ -127,6 +127,14 @@ public class DbConfig {
 
 	// Keyed by stop_id.
 	private Map<String, Stop> stopsMap;
+
+	/**
+	 * for unit tests, set the underlying list of stops
+	 * @param stops
+	 */
+	public void setStopsMap(Map<String, Stop> stops) {
+		this.stopsMap = stops;
+	}
 	// Keyed by stop_code
 	private Map<Integer, Stop> stopsByStopCode;
 	
