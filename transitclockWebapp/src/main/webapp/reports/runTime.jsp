@@ -1066,7 +1066,8 @@
             $(".individual-route").hide();
             return true;
         } else{
-            $(".individual-route").hide();
+            $(".individual-route").show();
+            $("#comparisonModal").hide();
         }
 
         $.ajax({
