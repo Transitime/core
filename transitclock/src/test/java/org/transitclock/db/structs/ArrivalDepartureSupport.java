@@ -1,6 +1,19 @@
-package org.transitclock;
+package org.transitclock.db.structs;
 
+import org.transitclock.StopSupport;
+import org.transitclock.StructSupport;
+import org.transitclock.TestSupport;
+import org.transitclock.applications.Core;
 import org.transitclock.db.structs.ArrivalDeparture;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertNotNull;
+import static org.transitclock.TestSupport.getStreamAsString;
 
 /**
  * Helper methods for ArrivalDepartures within Unit Tests.
@@ -29,6 +42,41 @@ public class ArrivalDepartureSupport extends StructSupport {
   private static final int dwellTime = 20;
   private static final int tripPatternId = 21;
   private static final int stopPathId = 22;
+
+  private StopSupport stopSupport = new StopSupport();
+
+  public List<ArrivalDeparture> loadArrivalDepartureList(String s) throws Exception {
+    loadStopsMap();
+
+    InputStream is1 = this.getClass().getResourceAsStream(s);
+    // ArrivalDeparture data in CST TZ
+    return toArrivalDepartures(getStreamAsString(is1), "CST");
+  }
+
+  private void loadStopsMap() throws Exception {
+    TestSupport.createTestCore();
+    if (Core.getInstance().getDbConfig().isEmptyStopsMap()) {
+      InputStream stopsStream = this.getClass().getResourceAsStream("stops1.txt");
+      assertNotNull(stopsStream);
+
+      // ArrivalDeparture.getStop() requires this map be populated!!!
+      Map<String, Stop> stopsMap = toStopsMap(getStreamAsString(stopsStream));
+      Core.getInstance().getDbConfig().setStopsMap(stopsMap);
+    }
+  }
+
+  public List<ArrivalDeparture> toArrivalDepartures(String csv, String tz) {
+    List<ArrivalDeparture> list = new ArrayList<>();
+    String[] lines = csv.split("\n");
+    for (String line : lines) {
+      // ignore comments
+      if (!line.startsWith("//")) {
+        list.add(toArrivalDeparture(line, tz));
+      }
+    }
+    return list;
+  }
+
 
   public ArrivalDeparture toArrivalDeparture(String csv, String tz) {
     String[] split = csv.split(",");
@@ -62,5 +110,17 @@ public class ArrivalDepartureSupport extends StructSupport {
 
   }
 
+  private Map<String, Stop> toStopsMap(String csv) {
+    Map<String, Stop> map = new HashMap<>();
+    String[] lines = csv.split("\n");
+    for (String line: lines) {
+      // if not header line
+      if (line.indexOf("stop_code") == -1) {
+        Stop stop = stopSupport.toStop(line);
+        map.put(stop.getId(), stop);
+      }
+    }
+    return map;
+  }
 
 }

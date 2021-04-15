@@ -1,10 +1,13 @@
 package org.transitclock.avl;
 
 import org.transitclock.applications.Core;
+import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.configData.AgencyConfig;
+import org.transitclock.db.structs.ApcArrivalRate;
 import org.transitclock.db.structs.ApcRecord;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.monitoring.MonitoringService;
+import org.transitclock.utils.Time;
 
 import java.util.Date;
 import java.util.List;
@@ -14,6 +17,13 @@ import java.util.List;
  * feed into dwell time calculations.
  */
 public class ApcModule {
+
+  public static final IntegerConfigValue arrivalDepartureWindowMinutes
+          = new IntegerConfigValue("transitclock.apc.arrivalDepartureLoadingWindowInMinutes",
+          5,
+          "Value in minutes to bookend apc timestamps when searching for appropriate" +
+                  " ArrivalDeparture mathces");
+
   private MonitoringService monitoring;
   private static ApcModule singleton;
   private static Object lockObject = new Object();
@@ -46,11 +56,33 @@ public class ApcModule {
     archive(matches);
   }
 
-  private void archive(List<ApcMatch> matches) {
-    // TODO
-    // validate/clean
+  private long getWindowMillis() {
+    return arrivalDepartureWindowMinutes.getValue() * Time.MS_PER_MIN;
+  }
+
+
+  private synchronized void archive(List<ApcMatch> matches) {
     // write to database
-    // store in cache
+    for (ApcMatch match : matches) {
+      Core.getInstance().getDbLogger().add(match.getApc());
+    }
+
+    // validate/clean
+    List<ApcArrivalRate> rates = analyze(matches);
+
+    for (ApcArrivalRate rate : rates) {
+      Core.getInstance().getDbLogger().add(rate);
+    }
+
+  }
+
+  /**
+   * create rates from the matches.
+   * @param matches
+   * @return
+   */
+  List<ApcArrivalRate> analyze(List<ApcMatch> matches) {
+    return ApcAggregator.getInstance().analyze(matches);
   }
 
   // unit tests will need to override this!
@@ -63,9 +95,10 @@ public class ApcModule {
 
   private TimeRange findRangeForRecords(List<ApcRecord> apcRecords) {
     if (apcRecords == null || apcRecords.isEmpty()) return null;
-    long referenceTime = apcRecords.get(0).getTime();
-    long window = 5000;
-    return new TimeRange(referenceTime-window, referenceTime+window);
+    ApcRecord firstRecord = apcRecords.get(0);
+    ApcRecord lastRecord = apcRecords.get(apcRecords.size());
+    long window = getWindowMillis();
+    return new TimeRange(firstRecord.getTime()-window, lastRecord.getTime()+window);
   }
 
   public static class TimeRange {

@@ -16,6 +16,7 @@
  */
 package org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman;
 
+import org.transitclock.TestSupport;
 import org.transitclock.core.Indices;
 import org.transitclock.core.SpatialMatch;
 import org.transitclock.core.TemporalDifference;
@@ -56,7 +57,7 @@ public class KalmanDataGenerator {
   public static final String VEHICLE = "1234";
   public static final int CONFIG_REV = -1;
   public static final int TRAVEL_TIMES_REV = -2;
-  public static final String AGENCY_ID = "a1";
+  public static final String AGENCY_ID = TestSupport.AGENCY_ID;
   public static final String BLOCK_ID = "block1";
   public static final String ROUTE_ID = "route1";
   public static final String SERVICE_ID = "winter";
@@ -157,7 +158,7 @@ public class KalmanDataGenerator {
   }
 
   public String getTimeZone() {
-    return "America/New_York";
+    return TestSupport.getTimeZone();
   }
 
   public GtfsRoute getGtfsRoute() {

@@ -135,6 +135,16 @@ public class DbConfig {
 	public void setStopsMap(Map<String, Stop> stops) {
 		this.stopsMap = stops;
 	}
+
+	/**
+	 * for unit tests, to test if setup is necessar;
+	 * @return
+	 */
+	public boolean isEmptyStopsMap() {
+		return stopsMap == null || stopsMap.isEmpty();
+	}
+
+
 	// Keyed by stop_code
 	private Map<Integer, Stop> stopsByStopCode;
 	

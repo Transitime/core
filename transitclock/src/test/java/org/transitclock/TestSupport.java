@@ -1,6 +1,8 @@
 package org.transitclock;
 
 import org.junit.Ignore;
+import org.transitclock.applications.Core;
+import org.transitclock.utils.Time;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -13,6 +15,8 @@ import java.util.TimeZone;
  * Helper methods for Unit Tests.
  */
 public class TestSupport {
+
+  public static final String AGENCY_ID = "a1";
 
   public static String getStreamAsString(InputStream inputStream) throws Exception {
     ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -47,4 +51,17 @@ public class TestSupport {
   }
 
 
+  public static void createTestCore() {
+    // some structs require Core / DbConfig
+    if (!Core.isCoreApplication()) {
+      Core.createTestCore(AGENCY_ID);
+      if (Core.getInstance().getTime() == null) {
+        Core.getInstance().setTime(new Time(getTimeZone()));
+      }
+    }
+  }
+
+  public static String getTimeZone() {
+    return "America/New_York";
+  }
 }

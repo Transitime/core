@@ -18,8 +18,7 @@ package org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.transitclock.applications.Core;
-import org.transitclock.utils.Time;
+import org.transitclock.TestSupport;
 
 import java.util.Date;
 
@@ -40,15 +39,8 @@ public class KalmanPredictionGeneratorImplTest {
     dataGenerator = new KalmanDataGenerator(referenceTime);
     generator = new KalmanPredictionGeneratorTestImpl();
 
-    /**
-     * time needs to be populated for ArrivalDeparture creation
-     */
-    if (!Core.isCoreApplication()) {
-      Core.createTestCore(dataGenerator.AGENCY_ID);
-      if (Core.getInstance().getTime() == null) {
-        Core.getInstance().setTime(new Time(dataGenerator.getTimeZone()));
-      }
-    }
+    // setup core instance to prevent exceptions
+    TestSupport.createTestCore();
   }
 
   @Test
