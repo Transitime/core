@@ -1065,7 +1065,9 @@
             }
 
             $("#route").select2({
-                data : selectorData})
+                data : selectorData,
+                templateSelection: formatRoute
+            })
                 // Need to reset tooltip after selector is used. Sheesh!
                 .on("select2:select", selectUnSelectCallBack)
         .on("select2:unselect", selectUnSelectCallBack);
@@ -1141,6 +1143,12 @@
             .setContent(content).openOn(map);
     }
 
+    function formatRoute (route) {
+        if (!route.id || route.id == " ") {
+            return route.text;
+        }
+        return route.id;
+    };
     $("#route").attr("style", "width: 200px");
 
 </script>
