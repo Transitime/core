@@ -530,6 +530,35 @@
         populateTripPattern();
     })
 
+    Chart.plugins.register({
+        afterDatasetsDraw: function(chart) {
+            var ctx = chart.ctx;
+
+            ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+            ctx.fillStyle = '#000000';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+
+            Chart.helpers.each(chart.data.datasets.forEach(function(dataset, i) {
+                var meta = chart.controller.getDatasetMeta(i);
+                Chart.helpers.each(meta.data.forEach(function(bar, index) {
+                    ctx.save();
+                    var data = dataset.data[index];
+                    if(chart.options && chart.options.showPercentage) {
+                        data = Math.floor(data);
+                        if(data !== 0) {
+                            ctx.fillText(data + "%", bar._model.x - ((bar._model.x - bar._model.base) / 2), bar._model.y + 5);
+                        }
+                    } else {
+                        ctx.fillText(data, bar._model.x - ((bar._model.x - bar._model.base) / 2), bar._model.y + 5);
+                    }
+                    ctx.restore(); //<- restore canvas state
+                }))
+            }));
+        }
+    });
+
+
     function populateDirection() {
 
         $("#submit").attr("disabled", true);
@@ -694,8 +723,8 @@
         highestPoints = [];
         request = getParams(false)
         request.tripId = $("#trips-select-box").val();
-    /*Orginal URL*/
-       var stopDataURL = apiUrlPrefix +  "/report/runTime/avgStopPathRunTimes";
+        /*Orginal URL*/
+        var stopDataURL = apiUrlPrefix +  "/report/runTime/avgStopPathRunTimes";
 
         /*DONT COMMIT URL*/
         // var stopDataURL = "http://gtfsrt.dev.dart.obaweb.org/api/v1/key/5c348c1d/agency/1/"+"report/runTime/avgStopPathRunTimes";
@@ -870,6 +899,7 @@
             type: 'horizontalBar',
             data: {},
             options: {
+                showPercentage: options && options.showPercentage,
                 scales: {
                     xAxes: [
                         {
@@ -925,33 +955,7 @@
                         }
                     }
                 },
-                animation: {
-                    duration: 1,
-                    onComplete: function () {
-                        var chartInstance = this.chart,
-                            ctx = chartInstance.ctx;
-                        ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
-                        ctx.fillStyle = '#000000';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'bottom';
-
-                        this.data.datasets.forEach(function (dataset, i) {
-                            var meta = chartInstance.controller.getDatasetMeta(i);
-                            meta.data.forEach(function (bar, index){
-                                var data = dataset.data[index];
-                                if(options && options.showPercentage) {
-                                    data = Math.floor(data);
-                                    if(data !== 0) {
-                                        ctx.fillText(data + "%", bar._model.x - ((bar._model.x - bar._model.base) / 2), bar._model.y + 5);
-                                    }
-                                } else {
-
-                                    ctx.fillText(data, bar._model.x - ((bar._model.x - bar._model.base) / 2), bar._model.y + 5);
-                                }
-                            });
-                        });
-                    }
-                }
+                animation: false
             },
         });
         visualarGraphChart = barGraph;
@@ -1133,7 +1137,6 @@
         }
 
         // barGraph.options.scales.xAxes[0].ticks.max = calculateMaxMins(highestPoints);
-
         barGraph.update();
 
 
