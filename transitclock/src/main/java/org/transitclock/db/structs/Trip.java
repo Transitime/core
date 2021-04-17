@@ -128,7 +128,7 @@ public class Trip implements Lifecycle, Serializable {
 	
 	// Contains schedule time for each stop as obtained from GTFS 
 	// stop_times.txt file. Useful for determining schedule adherence.
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
   @OrderColumn
 	private final List<ScheduleTime> scheduledTimesList =
 			new ArrayList<ScheduleTime>();
@@ -1019,18 +1019,14 @@ public class Trip implements Lifecycle, Serializable {
 	 * @return
 	 */
 	public ScheduleTime getScheduleTime(int stopPathIndex) {
-	  if (scheduledTimesList instanceof PersistentList) {
-	    // TODO this is an anti-pattern
-	    // instead find a way to manage sessions more consistently 
-	    PersistentList persistentListTimes = (PersistentList)scheduledTimesList;
-	    SessionImplementor session = 
-          persistentListTimes.getSession();
-	    if (session == null) {
-	      Session globalLazyLoadSession = Core.getInstance().getDbConfig().getGlobalSession();
-	      globalLazyLoadSession.update(this);
-	    }
-	  }
-		return scheduledTimesList.get(stopPathIndex);
+		try {
+			return scheduledTimesList.get(stopPathIndex);
+		} catch (ArrayIndexOutOfBoundsException ae) {
+			logger.error("illegal stopPathIndex {} for scheduleTimesList on trip {}", stopPathIndex, tripId);
+		} catch (NullPointerException npe) {
+			logger.error("empty schedule for trip {}", tripId);
+		}
+		return null;
 	}
 	
 	/**
