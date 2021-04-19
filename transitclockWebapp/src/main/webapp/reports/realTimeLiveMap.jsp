@@ -425,6 +425,7 @@
         var tripPatternStr = "<br/><b>Trip Pattern:</b> " + vehicleData.tripPattern;
         var startTimeStr = vehicleData.isScheduledService ? "" : "<br/><b>Start Time:</b> "+dateFormat(vehicleData.freqStartTime/1000);
         var schAdhStr = vehicleData.isScheduledService ? "<br/><b>SchAdh:</b> " + vehicleData.schAdhStr : ""
+        var mapsLink = 'http://google.com/maps?q=loc:' + vehicleData.loc.lat + ',' + vehicleData.loc.lon;
         var content = "<b>Vehicle:</b> " +
             vehicleData.id +"<span id='updated-time-holder' age='"+vehicleData.updatedTime+"'  time-initial='"+new Date().getTime()+"'> | Data updated "+vehicleData.updatedTime+" seconds ago"
             + "</span><br/><b>Route: </b> " + vehicleData.routeShortName
@@ -440,7 +441,8 @@
             + layoverStr
             + layoverDepartureStr
             + nextStopNameStr
-            + driver;
+            + driver
+            +"<br/><a href=" + mapsLink + " target='_blank' >View Location in Google Maps</a>";
         clearInterval(timerGroup);
         setUpdatedTime()
         return content;
