@@ -419,7 +419,7 @@
         var latLonHeadingStr = "<br/><b>Lat:</b> " + vehicleData.loc.lat
             + "<br/><b>Lon:</b> " + vehicleData.loc.lon
             + "<br/><b>Heading:</b> " + vehicleData.loc.heading
-            + "<br/><b>Speed:</b> " + vehicleData.loc.speed + " mph";
+            + "<br/><b>Speed:</b> " + formatSpeed(vehicleData.loc.speed);
         var gpsTimeStr = dateFormat(vehicleData.loc.time);
         var directionStr = "<br/><b>Direction:</b> " + vehicleData.direction;
         var tripPatternStr = "<br/><b>Trip Pattern:</b> " + vehicleData.tripPattern;
@@ -457,7 +457,7 @@
             var age = parseInt(selector.getAttribute("age"),10);
             var differencefUpdate = age + (new Date().getTime() - timeInitial) / 1000;
 
-            selector.innerHTML = "| Data updated " + getUpdatedTimeText(differencefUpdate) ;
+            selector.innerHTML = " | Data updated " + getUpdatedTimeText(differencefUpdate) ;
 
         }, 1000);}
 
@@ -1131,6 +1131,13 @@
         vehicleMarker.popup = L.popup(vehiclePopupOptions, vehicleMarker)
             .setLatLng(latlng)
             .setContent(content).openOn(map);
+    }
+
+    /**
+     * Add speed units to speed
+     */
+    function formatSpeed(speed) {
+        return speed + " mph";
     }
 
     function formatRoute (route) {
