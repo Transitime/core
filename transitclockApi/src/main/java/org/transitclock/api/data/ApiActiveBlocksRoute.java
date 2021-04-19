@@ -67,8 +67,8 @@ public class ApiActiveBlocksRoute {
 		activeBlocks = new ArrayList<ApiActiveBlock>();
 	}
 
-	public void add(IpcActiveBlock ipcActiveBlock, String agencyId) throws IllegalAccessException, InvocationTargetException {
-		activeBlocks.add(new ApiActiveBlock(ipcActiveBlock, agencyId));
+	public void add(IpcActiveBlock ipcActiveBlock, String agencyId, SpeedFormat speedFormat) throws IllegalAccessException, InvocationTargetException {
+		activeBlocks.add(new ApiActiveBlock(ipcActiveBlock, agencyId, speedFormat));
 	}
 	
 	public String getName() {

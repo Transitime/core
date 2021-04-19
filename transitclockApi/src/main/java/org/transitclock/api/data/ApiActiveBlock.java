@@ -66,7 +66,7 @@ public class ApiActiveBlock {
      */
 	protected ApiActiveBlock() {}
 	
-	public ApiActiveBlock(IpcActiveBlock ipcActiveBlock, String agencyId) throws IllegalAccessException, InvocationTargetException {
+	public ApiActiveBlock(IpcActiveBlock ipcActiveBlock, String agencyId, SpeedFormat speedFormat) throws IllegalAccessException, InvocationTargetException {
 		id = ipcActiveBlock.getBlock().getId();
 		serviceId = ipcActiveBlock.getBlock().getServiceId();
 		startTime = Time.timeOfDayStr(ipcActiveBlock.getBlock().getStartTime());
@@ -82,7 +82,7 @@ public class ApiActiveBlock {
 
 		vehicles = new ArrayList<ApiVehicleDetails>();
 		for (IpcVehicle ipcVehicles : ipcActiveBlock.getVehicles()) {
-			vehicles.add(new ApiVehicleDetails(ipcVehicles, timeForAgency));
+			vehicles.add(new ApiVehicleDetails(ipcVehicles, timeForAgency, speedFormat));
 		}
 	}
 	

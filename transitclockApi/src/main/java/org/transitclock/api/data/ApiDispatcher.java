@@ -36,7 +36,7 @@ public class ApiDispatcher {
         if(Float.isNaN(value)){
             return null;
         }
-        return NumberFormatter.getRoundedValueAsString(MathUtils.convertSpeed(value, speedFormat), 2);
+        return NumberFormatter.getRoundedValueAsString(MathUtils.convertSpeed(value, speedFormat), 1);
     }
 
     private String getFormattedScheduleAdherence(IpcVehicle vehicle){

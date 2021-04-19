@@ -135,7 +135,7 @@
             ajax: {
                 url: apiUrlPrefix + "/report/live/dispatch",
                 data: {
-                    speedFormat: 'km'
+                    speedFormat: 'mph'
                 },
                 type: "get"
             },

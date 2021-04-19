@@ -143,7 +143,10 @@ public class TransitimeApi {
 					+ " routes and determine which vehicles are the ones generating the predictions. "
 					+ "The other vehicles are labeled as minor so they can be drawn specially in the UI.",required=false) 
 			@QueryParam(value = "s") String stopId,
-			@Parameter(description="Number of predictions to show.", required=false) @QueryParam(value = "numPreds") @DefaultValue("2") int numberPredictions) throws WebApplicationException {
+			@Parameter(description="Number of predictions to show.", required=false)
+			@QueryParam(value = "numPreds") @DefaultValue("2") int numberPredictions,
+			@Parameter(description="if set, formats speed to the specified format (MS,KM,MPH)")
+			@QueryParam(value = "speedFormat") @DefaultValue("MS") String speedFormat) throws WebApplicationException {
 		// Make sure request is valid
 		stdParameters.validate();
 
@@ -172,7 +175,9 @@ public class TransitimeApi {
 			Map<String, UiMode> uiTypesForVehicles = determineUiModesForVehicles(vehicles, stdParameters,
 					routesIdOrShortNames, stopId, numberPredictions);
 
-			ApiVehicles apiVehicles = new ApiVehicles(vehicles, uiTypesForVehicles);
+			SpeedFormat speedFormatEnum = SpeedFormat.valueOf(speedFormat.toUpperCase());
+
+			ApiVehicles apiVehicles = new ApiVehicles(vehicles, uiTypesForVehicles, speedFormatEnum);
 
 			// return ApiVehicles response
 			return stdParameters.createResponse(apiVehicles);
@@ -285,11 +290,11 @@ public class TransitimeApi {
 			@QueryParam(value = "s") String stopId,
 			@Parameter(description=" For when determining which vehicles are generating the"
 					+ "predictions so can label minor vehicles",required=false)@QueryParam(value = "numPreds") 
-			@DefaultValue("3") int numberPredictions
-			,
+			@DefaultValue("3") int numberPredictions,
 			@Parameter(description=" Return only assigned vehicles",required=false)@QueryParam(value = "onlyAssigned") 
-			@DefaultValue("false") boolean onlyAssigned
-			
+			@DefaultValue("false") boolean onlyAssigned,
+		    @Parameter(description="if set, formats speed to the specified format (MS,KM,MPH)")
+		    @QueryParam(value = "speedFormat") @DefaultValue("MS") String speedFormat
 			) throws WebApplicationException {
 		// Make sure request is valid
 		stdParameters.validate();
@@ -319,9 +324,11 @@ public class TransitimeApi {
 			Map<String, UiMode> uiTypesForVehicles = determineUiModesForVehicles(vehicles, stdParameters,
 					routesIdOrShortNames, stopId, numberPredictions);
 
+			SpeedFormat speedFormatEnum = SpeedFormat.valueOf(speedFormat.toUpperCase());
+
 			// Convert IpcVehiclesDetails to ApiVehiclesDetails
 			ApiVehiclesDetails apiVehiclesDetails = new ApiVehiclesDetails(vehicles, stdParameters.getAgencyId(),
-					uiTypesForVehicles,onlyAssigned);
+					uiTypesForVehicles,onlyAssigned, speedFormatEnum);
 
 			// return ApiVehiclesDetails response
 			Response result = null;
@@ -1180,7 +1187,9 @@ public class TransitimeApi {
 			@QueryParam(value = "r") List<String> routesIdOrShortNames,
 			@Parameter(description="A block will be active if the time is between the"
 					+ " block start time minus allowableBeforeTimeSecs and the block end time")
-			@QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs) throws WebApplicationException {
+			@QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs,
+			@Parameter(description="if set, formats speed to the specified format (MS,KM,MPH)")
+			@QueryParam(value = "speedFormat") @DefaultValue("MS") String speedFormat) throws WebApplicationException {
 
 		// Make sure request is valid
 		stdParameters.validate();
@@ -1194,9 +1203,10 @@ public class TransitimeApi {
 					.getActiveBlocks(routesIdOrShortNames,
                             allowableBeforeTimeSecs);
 
+			SpeedFormat speedFormatEnum = SpeedFormat.valueOf(speedFormat.toUpperCase());
 
 			// Create and return ApiBlock response
-			ApiActiveBlocks apiActiveBlocks = new ApiActiveBlocks(activeBlocks, stdParameters.getAgencyId());
+			ApiActiveBlocks apiActiveBlocks = new ApiActiveBlocks(activeBlocks, stdParameters.getAgencyId(), speedFormatEnum);
 			return stdParameters.createResponse(apiActiveBlocks);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
@@ -1217,7 +1227,9 @@ public class TransitimeApi {
 			@QueryParam(value = "r") List<String> routesIdOrShortNames,
 			@Parameter(description="A block will be active if the time is between the block start time minus"
 					+ " allowableBeforeTimeSecs and the block end time")
-			@QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs) throws WebApplicationException {
+			@QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs,
+		    @Parameter(description="if set, formats speed to the specified format (MS,KM,MPH)")
+		    @QueryParam(value = "speedFormat") @DefaultValue("MS") String speedFormat) throws WebApplicationException {
 
 		// Make sure request is valid
 		stdParameters.validate();
@@ -1229,10 +1241,11 @@ public class TransitimeApi {
 			Collection<IpcActiveBlock> activeBlocks = vehiclesInterface.getActiveBlocks(routesIdOrShortNames,
 					allowableBeforeTimeSecs);
 
+			SpeedFormat speedFormatEnum = SpeedFormat.valueOf(speedFormat.toUpperCase());
 
 			// Create and return ApiBlock response
 			ApiActiveBlocksRoutes apiActiveBlocksRoutes = new ApiActiveBlocksRoutes(activeBlocks,
-					stdParameters.getAgencyId());
+					stdParameters.getAgencyId(), speedFormatEnum);
 			return stdParameters.createResponse(apiActiveBlocksRoutes);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
@@ -1255,7 +1268,9 @@ public class TransitimeApi {
             @QueryParam(value = "r") List<String> routesIdOrShortNames,
             @Parameter(description="A block will be active if the time is between the block start "
             		+ "time minus allowableBeforeTimeSecs and the block end time")
-            @QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs)
+            @QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs,
+			@Parameter(description="if set, formats speed to the specified format (MS,KM,MPH)")
+			@QueryParam(value = "speedFormat") @DefaultValue("MS") String speedFormat)
             throws WebApplicationException {
 
         // Make sure request is valid
@@ -1269,9 +1284,11 @@ public class TransitimeApi {
                     .getActiveBlocksWithoutVehicles(routesIdOrShortNames,
                             allowableBeforeTimeSecs);
 
-            // Create and return ApiBlock response
+			SpeedFormat speedFormatEnum = SpeedFormat.valueOf(speedFormat.toUpperCase());
+
+			// Create and return ApiBlock response
             ApiActiveBlocksRoutes apiActiveBlocksRoutes = new ApiActiveBlocksRoutes(
-                    activeBlocks, stdParameters.getAgencyId());
+                    activeBlocks, stdParameters.getAgencyId(), speedFormatEnum);
             return stdParameters.createResponse(apiActiveBlocksRoutes);
         } catch (Exception e) {
             // If problem getting data then return a Bad Request
@@ -1293,7 +1310,9 @@ public class TransitimeApi {
             @Parameter(description="if set, retrives only active blocks belongind to the route. It might be routeId or route shrot name.",required=false)
             @QueryParam(value = "r") String routesIdOrShortName,
             @Parameter(description="A block will be active if the time is between the block start time minus allowableBeforeTimeSecs and the block end time")
-            @QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs)
+            @QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs,
+			@Parameter(description="if set, formats speed to the specified format (MS,KM,MPH)")
+			@QueryParam(value = "speedFormat") @DefaultValue("MS") String speedFormat)
             throws WebApplicationException {
 
         // Make sure request is valid
@@ -1307,9 +1326,11 @@ public class TransitimeApi {
                     .getActiveBlocksAndVehiclesByRouteId(routesIdOrShortName,
                             allowableBeforeTimeSecs);
 
-            // Create and return ApiBlock response
+			SpeedFormat speedFormatEnum = SpeedFormat.valueOf(speedFormat.toUpperCase());
+
+			// Create and return ApiBlock response
             ApiActiveBlocksRoutes apiActiveBlocksRoutes = new ApiActiveBlocksRoutes(
-                    activeBlocks, stdParameters.getAgencyId());
+                    activeBlocks, stdParameters.getAgencyId(), speedFormatEnum);
             return stdParameters.createResponse(apiActiveBlocksRoutes);
         } catch (Exception e) {
             // If problem getting data then return a Bad Request
@@ -1329,7 +1350,9 @@ public class TransitimeApi {
             @Parameter(description="if set, retrives only active blocks belongind to the route name specified.",required=false)
             @QueryParam(value = "r") String routeName,
             @Parameter(description="A block will be active if the time is between the block start time minus allowableBeforeTimeSecs and the block end time")
-            @QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs)
+            @QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs,
+			@Parameter(description="if set, formats speed to the specified format (MS,KM,MPH)")
+			@QueryParam(value = "speedFormat") @DefaultValue("MS") String speedFormat)
             throws WebApplicationException {
    // Make sure request is valid
       stdParameters.validate();
@@ -1342,9 +1365,11 @@ public class TransitimeApi {
                   .getActiveBlocksAndVehiclesByRouteName(routeName,
                           allowableBeforeTimeSecs);
 
+		  SpeedFormat speedFormatEnum = SpeedFormat.valueOf(speedFormat.toUpperCase());
+
           // Create and return ApiBlock response
           ApiActiveBlocksRoutes apiActiveBlocksRoutes = new ApiActiveBlocksRoutes(
-                  activeBlocks, stdParameters.getAgencyId());
+                  activeBlocks, stdParameters.getAgencyId(), speedFormatEnum);
           return stdParameters.createResponse(apiActiveBlocksRoutes);
       } catch (Exception e) {
           // If problem getting data then return a Bad Request
@@ -1360,8 +1385,8 @@ public class TransitimeApi {
   		+ "Besides specify the amount of vehicles no predictables and the amount of active blocks.", 
   		tags= {"prediction"})
   public Response getVehicleAdherenceSummary(@BeanParam StandardParameters stdParameters,
-      @Parameter(description="The number of seconds early a vehicle has to be before it is considered in the early counter.", required=false) @QueryParam(value = "allowableEarlySec") @DefaultValue("0") int allowableEarlySec,
-      @Parameter(description="The number of seconds early a vehicle has to be before it is considered in the late counter.", required=false) @QueryParam(value = "allowableLateSec") @DefaultValue("0") int allowableLateSec,
+      @Parameter(description="The number of seconds early a vehicle has to be before it is considered in the early counter.") @QueryParam(value = "allowableEarlySec") @DefaultValue("0") int allowableEarlySec,
+      @Parameter(description="The number of seconds early a vehicle has to be before it is considered in the late counter.") @QueryParam(value = "allowableLateSec") @DefaultValue("0") int allowableLateSec,
       @Parameter(description="A block will be active if the time is between the block start time minus allowableBeforeTimeSecs (t) and the block end time")
       @QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs) throws WebApplicationException {
 

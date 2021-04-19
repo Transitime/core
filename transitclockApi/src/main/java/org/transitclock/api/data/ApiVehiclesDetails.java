@@ -72,7 +72,10 @@ public class ApiVehiclesDetails {
 	 * @throws IllegalAccessException
 	 */
 	public ApiVehiclesDetails(Collection<IpcVehicle> vehicles,
-							  String agencyId, Map<String, UiMode> uiTypesForVehicles, boolean assigned) throws IllegalAccessException, InvocationTargetException {
+							  String agencyId,
+							  Map<String, UiMode> uiTypesForVehicles,
+							  boolean assigned,
+							  SpeedFormat speedFormat) throws IllegalAccessException, InvocationTargetException {
 		// Get Time object based on timezone for agency
 		WebAgency webAgency = WebAgency.getCachedWebAgency(agencyId);
 		Agency agency = webAgency.getAgency();
@@ -88,7 +91,7 @@ public class ApiVehiclesDetails {
 			UiMode uiType = uiTypesForVehicles.get(vehicle.getId());
 			if((assigned  && vehicle.getTripId()!=null ) || !assigned)
 				vehiclesData.add(new ApiVehicleDetails(vehicle, timeForAgency,
-						uiType));
+						speedFormat, uiType));
 		}
 	}
 

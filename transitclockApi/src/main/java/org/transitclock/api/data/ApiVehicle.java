@@ -53,8 +53,8 @@ public class ApiVehicle extends ApiVehicleAbstract {
 	 * @param uiType
 	 *            If should be labeled as "minor" in output for UI.
 	 */
-	public ApiVehicle(IpcVehicle vehicle, UiMode uiType) {
-		super(vehicle, uiType);
+	public ApiVehicle(IpcVehicle vehicle, UiMode uiType, SpeedFormat speedFormat) {
+		super(vehicle, uiType, speedFormat);
 	}
 
 	/**
@@ -64,6 +64,6 @@ public class ApiVehicle extends ApiVehicleAbstract {
 	 * @param vehicle
 	 */
 	public ApiVehicle(IpcVehicle vehicle) {
-		super(vehicle, UiMode.NORMAL);
+		super(vehicle, UiMode.NORMAL, SpeedFormat.MS);
 	}
 }

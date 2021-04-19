@@ -60,14 +60,14 @@ public class ApiVehicles {
 	 *            SECONDARY, or MINOR
 	 */
 	public ApiVehicles(Collection<IpcVehicle> vehicles,
-			Map<String, UiMode> uiTypesForVehicles) {
+			Map<String, UiMode> uiTypesForVehicles, SpeedFormat speedFormat) {
 		vehiclesData = new ArrayList<ApiVehicle>();
 		for (IpcVehicle vehicle : vehicles) {
 			// Determine UI type for vehicle
 			UiMode uiType = uiTypesForVehicles.get(vehicle.getId());
 
 			// Add this vehicle to the ApiVehicle list
-			vehiclesData.add(new ApiVehicle(vehicle, uiType));
+			vehiclesData.add(new ApiVehicle(vehicle, uiType, speedFormat));
 		}
 	}
 	
@@ -81,7 +81,7 @@ public class ApiVehicles {
 		vehiclesData = new ArrayList<ApiVehicle>();
 		for (IpcVehicle vehicle : vehicles) {
 			// Add this vehicle to the ApiVehicle list
-			vehiclesData.add(new ApiVehicle(vehicle, UiMode.NORMAL));
+			vehiclesData.add(new ApiVehicle(vehicle, UiMode.NORMAL, SpeedFormat.MS));
 		}
 	}
 

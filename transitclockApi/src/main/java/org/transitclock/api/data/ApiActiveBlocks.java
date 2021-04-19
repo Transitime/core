@@ -50,10 +50,10 @@ public class ApiActiveBlocks {
     protected ApiActiveBlocks() {}
 
 	public ApiActiveBlocks(Collection<IpcActiveBlock> ipcActiveBlocks,
-			String agencyId) throws IllegalAccessException, InvocationTargetException {
+			String agencyId, SpeedFormat speedFormat) throws IllegalAccessException, InvocationTargetException {
     	activeBlocks = new ArrayList<ApiActiveBlock>();
     	for (IpcActiveBlock ipcActiveBlock : ipcActiveBlocks) {
-    		activeBlocks.add(new ApiActiveBlock(ipcActiveBlock, agencyId));
+    		activeBlocks.add(new ApiActiveBlock(ipcActiveBlock, agencyId, speedFormat));
     	}
     	
     	// Sort the active blocks by routeId so that can more easily display

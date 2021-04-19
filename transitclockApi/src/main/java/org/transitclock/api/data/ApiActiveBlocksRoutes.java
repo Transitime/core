@@ -59,7 +59,7 @@ public class ApiActiveBlocksRoutes {
 	 * @throws IllegalAccessException 
 	 */
 	public ApiActiveBlocksRoutes(Collection<IpcActiveBlock> activeBlocks,
-			String agencyId) throws IllegalAccessException, InvocationTargetException {		
+			String agencyId, SpeedFormat speedFormat) throws IllegalAccessException, InvocationTargetException {
 		routeData = new ArrayList<ApiActiveBlocksRoute>();
 		
 		ApiActiveBlocksRoute apiRoute = null;
@@ -78,7 +78,7 @@ public class ApiActiveBlocksRoutes {
 			}
 			
 			// Add the block info to the ApiActiveBlocksRoute object
-			apiRoute.add(activeBlock, agencyId);
+			apiRoute.add(activeBlock, agencyId, speedFormat);
 		}		
 	}
 

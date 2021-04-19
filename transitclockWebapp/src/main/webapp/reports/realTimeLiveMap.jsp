@@ -401,19 +401,6 @@
     }
 
     /**
-     * So that can easily output speed in km/hr instead of m/s
-     */
-    function formatSpeed(speedInMetersPerSec) {
-        // If not a number then just return blank string
-        if (speedInMetersPerSec == "NaN")
-            return "";
-
-        // Convert m/s to km/hr and truncate to 1 decimal place to make
-        // output pretty
-        return (parseFloat(speedInMetersPerSec) * 3.6).toFixed(1) + " km/hr";
-    }
-
-    /**
      * Takes in vehicleData info from API and determines the content
      * to be displayed for the vehicles popup.
      */
@@ -432,7 +419,7 @@
         var latLonHeadingStr = "<br/><b>Lat:</b> " + vehicleData.loc.lat
             + "<br/><b>Lon:</b> " + vehicleData.loc.lon
             + "<br/><b>Heading:</b> " + vehicleData.loc.heading
-            + "<br/><b>Speed:</b> " + formatSpeed(vehicleData.loc.speed);
+            + "<br/><b>Speed:</b> " + vehicleData.loc.speed + " mph";
         var gpsTimeStr = dateFormat(vehicleData.loc.time);
         var directionStr = "<br/><b>Direction:</b> " + vehicleData.direction;
         var tripPatternStr = "<br/><b>Trip Pattern:</b> " + vehicleData.tripPattern;
@@ -925,6 +912,9 @@
         // to be many simultaneous requests.
         $.ajax(url, {
             dataType: 'json',
+            data: {
+                speedFormat: 'mph'
+            },
             success: vehicleLocationsCallback,
             timeout: 6000 // 6 second timeout
         });

@@ -20,9 +20,9 @@ package org.transitclock.api.data;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
+import org.transitclock.api.utils.MathUtils;
 import org.transitclock.api.utils.NumberFormatter;
 import org.transitclock.ipc.data.IpcVehicle;
-import org.transitclock.utils.MathUtils;
 import org.transitclock.utils.Time;
 
 /**
@@ -61,12 +61,13 @@ public class ApiGpsLocation extends ApiTransientLocation {
 	 *
 	 * @param vehicle
 	 */
-	public ApiGpsLocation(IpcVehicle vehicle) {
+	public ApiGpsLocation(IpcVehicle vehicle, SpeedFormat speedFormat) {
 		super(vehicle.getLatitude(), vehicle.getLongitude());
 
 		this.time = vehicle.getGpsTime() / Time.MS_PER_SEC;
 		// Output only 1 digit past decimal point
-		this.speed = NumberFormatter.getRoundedValueAsDouble(vehicle.getSpeed(), 1);
+		this.speed = NumberFormatter.getRoundedValueAsDouble(MathUtils.convertSpeed(vehicle.getSpeed(), speedFormat), 1);
+
 		// Output only 1 digit past decimal point
 		this.heading = NumberFormatter.getRoundedValueAsDouble(vehicle.getHeading(), 1);
 

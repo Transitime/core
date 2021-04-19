@@ -134,8 +134,8 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 	 * @throws InvocationTargetException 
 	 * @throws IllegalAccessException 
 	 */
-	public ApiVehicleDetails(IpcVehicle vehicle, Time timeForAgency, UiMode... uiType) throws IllegalAccessException, InvocationTargetException {
-		super(vehicle, uiType.length > 0 ? uiType[0] : UiMode.NORMAL);
+	public ApiVehicleDetails(IpcVehicle vehicle, Time timeForAgency,SpeedFormat speedFormat, UiMode... uiType) throws IllegalAccessException, InvocationTargetException {
+		super(vehicle, uiType.length > 0 ? uiType[0] : UiMode.NORMAL, speedFormat);
 		
 		routeName = vehicle.getRouteName();
 		scheduleAdherence = vehicle.getRealTimeSchedAdh() != null ? vehicle

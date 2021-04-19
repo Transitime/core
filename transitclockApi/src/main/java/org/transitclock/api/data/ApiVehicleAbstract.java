@@ -90,9 +90,9 @@ public abstract class ApiVehicleAbstract {
 	 * @param uiType
 	 *            If should be labeled as "minor" in output for UI.
 	 */
-	public ApiVehicleAbstract(IpcVehicle vehicle, UiMode uiType) {
+	public ApiVehicleAbstract(IpcVehicle vehicle, UiMode uiType, SpeedFormat speedFormat) {
 		id = vehicle.getId();
-		loc = new ApiGpsLocation(vehicle);
+		loc = new ApiGpsLocation(vehicle, speedFormat);
 		routeId = vehicle.getRouteId();
 		routeShortName = vehicle.getRouteShortName();
 		headsign = vehicle.getHeadsign();
