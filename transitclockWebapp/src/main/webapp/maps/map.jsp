@@ -395,16 +395,10 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
     }
 
     /**
-     * So that can easily output speed in km/hr instead of m/s
+     * Add speed units to speed
      */
-    function formatSpeed(speedInMetersPerSec) {
-        // If not a number then just return blank string
-        if (speedInMetersPerSec == "NaN")
-            return "";
-
-        // Convert m/s to km/hr and truncate to 1 decimal place to make
-        // output pretty
-        return (parseFloat(speedInMetersPerSec) * 3.6).toFixed(1) + " km/hr";
+    function formatSpeed(speed) {
+        return speed + " mph";
     }
 
     /**
@@ -922,6 +916,9 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
         // to be many simultaneous requests.
         $.ajax(url, {
             dataType: 'json',
+            data: {
+                speedFormat: 'mph'
+            },
             success: vehicleLocationsCallback,
             timeout: 6000 // 6 second timeout
         });
