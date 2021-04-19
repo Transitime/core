@@ -100,7 +100,7 @@ label {
 
 
 .select2-container--below {
-    height: 30px;
+    min-height: 30px;
 }
 
 input[type='text'],.ui-timepicker-input,input[type='number'],input[type='text']  {
@@ -340,4 +340,9 @@ span.ui-datepicker-month {
 .trip-block .maxWidth{
     max-width: 350px;
     margin: 10px;
+}
+
+.select2-container .select2-selection--multiple .select2-selection__rendered {
+    overflow: auto;
+    max-height: 100px;
 }
