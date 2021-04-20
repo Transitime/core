@@ -666,6 +666,10 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 								* Time.MS_PER_SEC;
 				return epochInMillis;
 			} catch (ArrayIndexOutOfBoundsException bound) {
+				logger.error("error retrieving schedule times {} for trip {}", index, prediction.getTrip().getId());
+				return null;
+			} catch (NullPointerException npe) {
+				logger.error("error retrieving schedule times {} for trip {}", index, prediction.getTrip().getId());
 				return null;
 			}
 		}
