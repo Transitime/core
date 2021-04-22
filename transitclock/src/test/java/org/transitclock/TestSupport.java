@@ -4,7 +4,9 @@ import org.junit.Ignore;
 import org.transitclock.applications.Core;
 import org.transitclock.utils.Time;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -63,5 +65,12 @@ public class TestSupport {
 
   public static String getTimeZone() {
     return "America/New_York";
+  }
+
+  public static void writeToFile(String filename, String toString) throws Exception {
+    BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
+    writer.write(toString);
+    writer.close();
+    System.out.println("wrote results to file " + filename);
   }
 }

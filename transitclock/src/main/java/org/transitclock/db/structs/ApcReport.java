@@ -16,6 +16,8 @@
  */
 package org.transitclock.db.structs;
 
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
 
 import org.transitclock.db.hibernate.HibernateUtils;
@@ -23,18 +25,21 @@ import org.transitclock.utils.Time;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * represents an automated passenger count update.
  */
-@Entity(name="ApcRecord")
+@Entity(name="ApcReport")
 @DynamicUpdate
-@Table(name="ApcRecord")
-public class ApcRecord implements Serializable {
+@Table(name="ApcReport")
+public class ApcReport implements Serializable {
 
   @Column(length=HibernateUtils.DEFAULT_ID_SIZE)
   @Id
@@ -66,7 +71,13 @@ public class ApcRecord implements Serializable {
   @Column
   private final double lon;
 
-  private ApcRecord() {
+  // historically hibernate 1-1 mappings are not trusted to update
+  // as this object is immutable we use it here safely
+  @OneToOne(fetch = FetchType.EAGER)
+  // hibernate link to the arrival departure the apc record corresponds to
+  private final ArrivalDeparture arrivalDeparture;
+
+  private ApcReport() {
     messageId = null;
     time = -1;
     serviceDate = 1;
@@ -81,9 +92,10 @@ public class ApcRecord implements Serializable {
     departure = -1;
     lat = -1.0;
     lon = -1.0;
+    arrivalDeparture = null;
   }
 
-  public ApcRecord(String messageId,
+  public ApcReport(String messageId,
                    long time,
                    long serviceDate,
                    String driverId,
@@ -96,7 +108,8 @@ public class ApcRecord implements Serializable {
                    int arrival,
                    int departure,
                    double lat,
-                   double lon) {
+                   double lon,
+                   ArrivalDeparture ad) {
     this.messageId = messageId;
     this.time = time;
     this.serviceDate = serviceDate;
@@ -111,6 +124,7 @@ public class ApcRecord implements Serializable {
     this.departure = departure;
     this.lat = lat;
     this.lon = lon;
+    this.arrivalDeparture = ad;
   }
 
   public String getMessageId() {
@@ -179,6 +193,26 @@ public class ApcRecord implements Serializable {
 
   private long getEpochTime(int secondsIntoDay) {
     return serviceDate + secondsIntoDay * Time.SEC_IN_MSECS;
+  }
+
+  public ArrivalDeparture getArrivalDeparture() {
+    return arrivalDeparture;
+  }
+
+  public static List<ApcReport> getApcReportsFromDb(String projectId, Date beginTime, Date endTime) {
+    Session session = HibernateUtils.getSession(projectId);
+    String hql = "FROM ApcReport " +
+            " WHERE time >= :beginDate " +
+            " AND time < :endDate";
+    Query query = session.createQuery(hql);
+    query.setTimestamp("beginDate", beginTime);
+    query.setTimestamp("endDate", endTime);
+
+    try {
+      return query.list();
+    } finally {
+      session.close();
+    }
   }
 
   @Override

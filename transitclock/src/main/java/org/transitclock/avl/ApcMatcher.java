@@ -2,7 +2,6 @@ package org.transitclock.avl;
 
 import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
-import org.transitclock.db.structs.ApcRecord;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.utils.Time;
 
@@ -29,7 +28,7 @@ public class ApcMatcher {
    * @param apcRecords
    * @return
    */
-  public List<ApcMatch> match(List<ArrivalDeparture> arrivals, List<ApcRecord> apcRecords) {
+  public List<ApcMatch> match(List<ArrivalDeparture> arrivals, List<ApcParsedRecord> apcRecords) {
     // a match is defined as overlap between apcRecord time and arrivalDeparture
     // more specifically
     // apcRecord will be an arrival

@@ -13,13 +13,12 @@ import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.avl.ApcParsedRecord;
 import org.transitclock.config.ClassConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.StringConfigValue;
-import org.transitclock.db.structs.ApcRecord;
-import org.transitclock.db.structs.apc.ApcMessageUnmarshaller;
-import org.transitclock.avl.ApcModule;
-import org.transitclock.db.structs.apc.SimpleApcMessageUnmarshaller;
+import org.transitclock.avl.ApcMessageUnmarshaller;
+import org.transitclock.avl.SimpleApcMessageUnmarshaller;
 import org.transitclock.modules.Module;
 import org.transitclock.monitoring.MonitoringService;
 
@@ -32,7 +31,7 @@ public class ApcSqsClientModule extends Module {
   private static final Logger logger =
           LoggerFactory.getLogger(ApcSqsClientModule.class);
 
-  private static final int DEFAULT_MESSAGE_LOG_FREQUENCY = 10;
+  private static final int DEFAULT_MESSAGE_LOG_FREQUENCY = 100;
   private AWSCredentials _sqsCredentials;
   private AmazonSQS _sqs;
   private AmazonSNSClient _sns = null;
@@ -52,9 +51,9 @@ public class ApcSqsClientModule extends Module {
 
   private static IntegerConfigValue apcPauseTimeInSeconds =
           new IntegerConfigValue("transitclock.apc.pauseTime",
-                  600,
+                  20,
                   "time to block between updates.  Longer means less AWS costs " +
-                          "at the risk of latency due to a failed network connection");
+                          "at the risk of latency due to a failed network connection.  AWS allows 0-20.");
   private static StringConfigValue sqsKey =
           new StringConfigValue("transitclock.apc.sqsKey", null, "The AWS Key with SQS read access");
 
@@ -87,6 +86,12 @@ public class ApcSqsClientModule extends Module {
                   "UTC",
                   "TimeZone of incoming APC messages");
 
+  private boolean shutdown = false;
+  // listener for new messages -- to audit/log, etc.
+  private SqsCallback callback = null;
+  private int messageCount = 0;
+  private long messageStartTime = System.currentTimeMillis();
+
   /**
    * Constructor. Subclasses must implement a constructor that takes
    * in agencyId and calls this constructor via super(agencyId).
@@ -94,8 +99,24 @@ public class ApcSqsClientModule extends Module {
    * @param agencyId
    */
   public ApcSqsClientModule(String agencyId) throws Exception {
+  this(agencyId, null);
+  }
+
+  // testing constructor using optional callback
+  public ApcSqsClientModule(String agencyId, SqsCallback callback) throws Exception {
     super(agencyId);
+    this.callback = callback;
     monitoring = MonitoringService.getInstance();
+    // if we've been configured via optionalModulesList then the following properties need to be set!
+    // deliberately halt the application launch otherwise to make it obvious
+    if (sqsKey.getValue() == null || sqsSecret.getValue() == null || apcUrl.getValue() == null) {
+      throw new IllegalStateException("ApcSqsClientModule invalid configuration, expecting sqsKey (" +
+              sqsKey.getValue() +
+              "), sqsSecret (" +
+              sqsSecret.getValue() + "), " +
+              "and apcUrl (" +
+              apcUrl.getValue() + ") to be populated");
+    }
     _sqsCredentials = new BasicAWSCredentials(sqsKey.getValue(), sqsSecret.getValue());
     connect();
 
@@ -106,16 +127,21 @@ public class ApcSqsClientModule extends Module {
 
   private void connect() {
     _sqs = new AmazonSQSClient(_sqsCredentials);
-    Region defaultRegion = Region.getRegion(Regions.valueOf(sqsRegion.getValue()));
+    Region defaultRegion = Region.getRegion(Regions.fromName(sqsRegion.getValue()));
     _sqs.setRegion(defaultRegion);
+  }
+
+  public void shutdown() {
+    shutdown = true;
   }
 
   @Override
   public void run() {
-    while (!Thread.interrupted()) {
+
+    while (!Thread.interrupted() && !shutdown) {
       try {
         processAPCDataFromSQS();
-      } catch (Exception e) {
+      } catch (Throwable e) {
         logger.error("Exception processing apc data {}:", e, e);
       }
     }
@@ -124,14 +150,14 @@ public class ApcSqsClientModule extends Module {
 
   private void processAPCDataFromSQS() {
     // we do this work on the module thread as this is expected to be low volume
-    int logFrequency = messageLogFrequency.getValue();
 
     ReceiveMessageRequest request = new ReceiveMessageRequest(_url);
     request.setWaitTimeSeconds(apcPauseTimeInSeconds.getValue());
     List<Message> messages = _sqs.receiveMessage(request).getMessages();
+    messageCount = messageCount + messages.size();
     archiveMessages(messages);
 
-    List<ApcRecord> apcRecords = null;
+    List<ApcParsedRecord> apcRecords = null;
     Message firstMessage = null;
     for (Message message : messages) {
       if (firstMessage == null) firstMessage = message;
@@ -140,10 +166,32 @@ public class ApcSqsClientModule extends Module {
               apcTimeStampTimeZone.getValue());
       // TODO add monitoring stats here
     }
+    if (callback != null) {
+      callback.receiveRawMessages(messages);
+      callback.receiveApcRecords(apcRecords);
+    }
     acknowledge(firstMessage);
 
-    ApcModule.getInstance().process(apcRecords);
+    // TODO!!!!
+    //ApcModule.getInstance().process(apcRecords);
 
+    logStatus();
+  }
+
+  private void logStatus() {
+    if (messageCount % messageLogFrequency.getValue() == 0) {
+      long delta = (System.currentTimeMillis() - messageStartTime)/1000;
+      long rate = 0;
+      if (delta != 0) {
+        rate = messageCount / delta;
+      }
+      logger.info("received {} messages in {} delta seconds ({}/s}",
+              messageCount,
+              delta,
+              rate);
+      messageStartTime = System.currentTimeMillis();
+      messageCount = 0;
+    }
   }
 
   private void acknowledge(Message message) {

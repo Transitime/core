@@ -1,9 +1,8 @@
-package org.transitclock.db.structs.apc;
+package org.transitclock.avl;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.transitclock.TestSupport;
-import org.transitclock.db.structs.ApcRecord;
 import org.transitclock.utils.Time;
 
 import java.io.InputStream;
@@ -37,10 +36,10 @@ public class ApcMessageUnmarshallerTest {
 
   @Test
   public void testToApcRecord() throws Exception {
-    List<ApcRecord> apcRecords = unmarshaller.toApcRecord(validRecords, "CST", "UTC");
+    List<ApcParsedRecord> apcRecords = unmarshaller.toApcRecord(validRecords, "CST", "UTC");
     assertNotNull(apcRecords);
     assertEquals(10, apcRecords.size());
-    ApcRecord a = apcRecords.get(0);
+    ApcParsedRecord a = apcRecords.get(0);
     assertNotNull(a);
     assertEquals("2139984326", a.getMessageId());
     assertEquals(toEpoch("2021-02-18", null,"CST"), a.getServiceDate());
@@ -76,7 +75,7 @@ public class ApcMessageUnmarshallerTest {
 
   @Test
   public void testInvalidMessageType() {
-    List<ApcRecord> apcRecords = unmarshaller.toApcRecord(invalidRecord, "CST", "UTC");
+    List<ApcParsedRecord> apcRecords = unmarshaller.toApcRecord(invalidRecord, "CST", "UTC");
     assertNotNull(apcRecords);
     assertEquals(0, apcRecords.size());
   }

@@ -1,6 +1,5 @@
 package org.transitclock.avl;
 
-import org.transitclock.db.structs.ApcRecord;
 import org.transitclock.db.structs.ArrivalDeparture;
 
 import java.util.ArrayList;
@@ -22,16 +21,16 @@ public class ArrivalDepartureIntervalList {
     Collections.sort(intervals);
   }
 
-  public List<ApcMatch> match(List<ApcRecord> apcRecords) {
+  public List<ApcMatch> match(List<ApcParsedRecord> apcRecords) {
     List<ApcMatch> matches = new ArrayList<>();
-    for (ApcRecord apc : apcRecords) {
+    for (ApcParsedRecord apc : apcRecords) {
       ApcMatch match = new ApcMatch(apc, match(apc));
       matches.add(match);
     }
     return matches;
   }
 
-  private List<ArrivalDeparture> match(ApcRecord apc) {
+  private List<ArrivalDeparture> match(ApcParsedRecord apc) {
     List<ArrivalDeparture> matches = new ArrayList<>();
 
     int n = intervals.size();

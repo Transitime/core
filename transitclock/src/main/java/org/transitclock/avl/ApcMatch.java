@@ -3,7 +3,6 @@ package org.transitclock.avl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.IntegerConfigValue;
-import org.transitclock.db.structs.ApcRecord;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Location;
 import org.transitclock.utils.Geo;
@@ -27,14 +26,17 @@ public class ApcMatch {
           "max distance in meters an ArrivalDeparture can " +
                   "be from stop and still be considered a match");
 
-  private ApcRecord apc;
+  private ApcParsedRecord apc;
   private List<ArrivalDeparture> arrivalDepartures;
-  public ApcMatch(ApcRecord apc, List<ArrivalDeparture> arrivalDepartures) {
+  public ApcMatch(ApcParsedRecord apc, List<ArrivalDeparture> arrivalDepartures) {
     this.apc = apc;
     this.arrivalDepartures = arrivalDepartures;
   }
 
-  public ApcRecord getApc() {
+  public ApcParsedRecord getApc() {
+    if (apc.getArrivalDeparture() == null) {
+      apc.setArrivalDeparture(getArrivalDeparture());
+    }
     return apc;
   }
 
@@ -100,7 +102,7 @@ public class ApcMatch {
     return ad.getStop().getLoc();
   }
 
-  private Location toApcLocation(ApcRecord apc) {
+  private Location toApcLocation(ApcParsedRecord apc) {
     return new Location(apc.getLat(), apc.getLon());
   }
 }

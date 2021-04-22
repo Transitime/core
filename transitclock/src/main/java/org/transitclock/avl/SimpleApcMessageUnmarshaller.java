@@ -1,4 +1,4 @@
-package org.transitclock.db.structs.apc;
+package org.transitclock.avl;
 
 import com.amazonaws.services.sqs.model.Message;
 import org.json.JSONArray;
@@ -6,14 +6,13 @@ import org.json.JSONObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.StringConfigValue;
-import org.transitclock.db.structs.ApcRecord;
 import org.transitclock.utils.Time;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -31,10 +30,10 @@ public class SimpleApcMessageUnmarshaller implements ApcMessageUnmarshaller {
           "transitclock.apc.dateFormat",
           "yyyyMMdd",
           "SimpleDateFormat specification of date");
-  public static IntegerConfigValue expectedMessageType = new IntegerConfigValue(
+  public static StringConfigValue expectedMessageType = new StringConfigValue(
           "transitclock.apc.supportedMessageType",
-          128,
-          "Ordinal validating the message type of the APC message");
+          "128,59",
+          "Comma delimited list of expected message types of the APC message");
 
   private static final Logger logger =
           LoggerFactory.getLogger(SimpleApcMessageUnmarshaller.class);
@@ -42,19 +41,23 @@ public class SimpleApcMessageUnmarshaller implements ApcMessageUnmarshaller {
   private Time time;
 
   @Override
-  public List<ApcRecord> toApcRecord(Message message, String serviceDateTz, String timestampTz) {
+  public List<ApcParsedRecord> toApcRecord(Message message, String serviceDateTz, String timestampTz) {
     String body = message.getBody();
     return toApcRecord(body,serviceDateTz, timestampTz);
   }
 
   @Override
-  public List<ApcRecord> toApcRecord(String body, String serviceDateTz, String timestampTz) {
-    List<ApcRecord> results = new ArrayList<>();
-    JSONArray array = new JSONArray(removeWrapper(body));
-    for (int i = 0; i < array.length(); i++ ) {
-      ApcRecord apc = toSingleRecord(array.getJSONObject(i), serviceDateTz, timestampTz);
-      if (apc != null)
-        results.add(apc);
+  public List<ApcParsedRecord> toApcRecord(String body, String serviceDateTz, String timestampTz) {
+    List<ApcParsedRecord> results = new ArrayList<>();
+    try {
+      JSONArray array = new JSONArray(removeWrapper(body));
+      for (int i = 0; i < array.length(); i++) {
+        ApcParsedRecord apc = toSingleRecord(array.getJSONObject(i), serviceDateTz, timestampTz);
+        if (apc != null)
+          results.add(apc);
+      }
+    } catch (Exception any) {
+      logger.error("exception parsing record {}:{}", body, any, any);
     }
     return results;
   }
@@ -65,11 +68,11 @@ public class SimpleApcMessageUnmarshaller implements ApcMessageUnmarshaller {
     return message.getBody();
   }
 
-  private ApcRecord toSingleRecord(JSONObject jsonObject, String serviceDateTz, String timestampTz) {
+  private ApcParsedRecord toSingleRecord(JSONObject jsonObject, String serviceDateTz, String timestampTz) {
 
     int messageType = safeGetInt(jsonObject, "message_type");
-    if (expectedMessageType.getValue() != null
-          && expectedMessageType.getValue() != messageType) {
+    if (getExpectedMessageTypes() != null
+          && !getExpectedMessageTypes().contains(String.valueOf(messageType))) {
       logger.info("invalid message type {}", messageType);
       return null;
     }
@@ -89,7 +92,7 @@ public class SimpleApcMessageUnmarshaller implements ApcMessageUnmarshaller {
     double lat = safeGetDouble(jsonObject, "lat");
     double lon = safeGetDouble(jsonObject, "lon");
 
-    ApcRecord a = new ApcRecord(messageId,
+    ApcParsedRecord a = new ApcParsedRecord(messageId,
             time,
             serviceDate,
             driverId,
@@ -106,14 +109,18 @@ public class SimpleApcMessageUnmarshaller implements ApcMessageUnmarshaller {
     return a;
   }
 
+  private List<String> getExpectedMessageTypes() {
+    return Arrays.asList(expectedMessageType.getValue().split(","));
+  }
+
   private double safeGetDouble(JSONObject jsonObject, String id) {
-    if (jsonObject.has(id))
+    if (jsonObject.has(id) && !jsonObject.isNull(id))
       return jsonObject.getDouble(id);
     return -1.0;
   }
 
   private long safeGetDate(JSONObject jsonObject, String id, String tz) {
-    if (jsonObject.has(id)) {
+    if (jsonObject.has(id) && !jsonObject.isNull(id)) {
       return parseDateToLong(jsonObject.get(id).toString(), tz);
     }
     return -1;
@@ -124,7 +131,7 @@ public class SimpleApcMessageUnmarshaller implements ApcMessageUnmarshaller {
   }
 
   private long safeGetTimestamp(JSONObject jsonObject, String id, String tz) {
-    if (jsonObject.has(id))
+    if (jsonObject.has(id) && !jsonObject.isNull(id))
       return parseTimestampToLong(jsonObject.getString(id), tz);
     return -1;
   }
@@ -152,13 +159,14 @@ public class SimpleApcMessageUnmarshaller implements ApcMessageUnmarshaller {
 
 
   private int safeGetInt(JSONObject jsonObject, String id) {
-    if (jsonObject.has(id))
+    if (jsonObject.has(id) && !jsonObject.isNull(id)) {
       return jsonObject.getInt(id);
+    }
     return -1;
   }
 
   private String safeGetString(JSONObject jsonObject, String id) {
-    if (jsonObject.has(id))
+    if (jsonObject.has(id) && !jsonObject.isNull(id))
       return jsonObject.get(id).toString();
     return null;
   }

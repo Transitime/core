@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.transitclock.TestSupport;
 import org.transitclock.db.structs.ApcRecordSupport;
 import org.transitclock.db.structs.ArrivalDepartureSupport;
-import org.transitclock.db.structs.ApcRecord;
 import org.transitclock.db.structs.ArrivalDeparture;
 
 import java.util.List;
@@ -31,13 +30,13 @@ public class ApcMatcherTest {
   public void match() throws Exception {
     List<ArrivalDeparture> arrivalDepartureList
             = arrivalDepartureSupport.loadArrivalDepartureList("arrivalDepartures3.csv");
-    List<ApcRecord> records = apcRecordSupport.loadApcRecords("apcMessages3.json");
+    List<ApcParsedRecord> records = apcRecordSupport.loadApcRecords("apcMessages3.json");
     List<ApcMatch> matches = matcher.match(arrivalDepartureList, records);
     assertNotNull(matches);
     assertEquals(10, matches.size());
 
     for (ApcMatch match : matches) {
-      ApcRecord apc = match.getApc();
+      ApcParsedRecord apc = match.getApc();
       assertNotNull(apc);
       ArrivalDeparture ad = match.getArrivalDeparture();
       if (ad == null) {
