@@ -5,8 +5,11 @@ import org.transitclock.TestSupport;
 import org.transitclock.avl.ApcParsedRecord;
 import org.transitclock.avl.SimpleApcMessageUnmarshaller;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipInputStream;
 
 import static org.transitclock.TestSupport.getStreamAsString;
 
@@ -26,9 +29,30 @@ public class ApcRecordSupport {
   }
 
   public List<ApcParsedRecord> loadApcRecords(String s) throws Exception {
-    InputStream is1 = this.getClass().getResourceAsStream(s);
+    InputStream is1;
+    if (s.endsWith(".zip")) {
+      ZipInputStream zin = new ZipInputStream(this.getClass().getResourceAsStream(s));
+      zin.getNextEntry();
+      is1 = zin;
+    } else {
+      is1 = this.getClass().getResourceAsStream(s);
+    }
+    if (is1 == null)
+      throw new FileNotFoundException("File " + s + " not found!");
     // apc data in UTC TZ
-    return unmarshaller.toApcRecord(getStreamAsString(is1), "CST","UTC");
+    String fileContents = getStreamAsString(is1);
+    if (fileContents.split("\\]\\[").length > 1) {
+      fileContents = fileContents.substring(1, fileContents.length()-1);
+      List<ApcParsedRecord> allRecords = new ArrayList<>();
+      int i = 0;
+      for (String s0 : fileContents.split("\\]\\[")) {
+        s0 = "[" + s0 + "]";
+        allRecords.addAll(unmarshaller.toApcRecord(s0,"CST","UTC"));
+        i++;
+      }
+      return allRecords;
+    }
+    return unmarshaller.toApcRecord(fileContents, "CST","UTC");
   }
 
 }

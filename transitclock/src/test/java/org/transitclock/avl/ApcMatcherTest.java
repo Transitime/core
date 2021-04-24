@@ -7,6 +7,7 @@ import org.transitclock.db.structs.ApcRecordSupport;
 import org.transitclock.db.structs.ArrivalDepartureSupport;
 import org.transitclock.db.structs.ArrivalDeparture;
 
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -20,7 +21,7 @@ public class ApcMatcherTest {
 
   @Before
   public void setUp() throws Exception {
-    matcher = new ApcMatcher();
+
     TestSupport.createTestCore();
 
 
@@ -31,7 +32,8 @@ public class ApcMatcherTest {
     List<ArrivalDeparture> arrivalDepartureList
             = arrivalDepartureSupport.loadArrivalDepartureList("arrivalDepartures3.csv");
     List<ApcParsedRecord> records = apcRecordSupport.loadApcRecords("apcMessages3.json");
-    List<ApcMatch> matches = matcher.match(arrivalDepartureList, records);
+    ApcMatcher matcher = new ApcMatcher(arrivalDepartureList);
+    List<ApcMatch> matches = matcher.match(records);
     assertNotNull(matches);
     assertEquals(10, matches.size());
 
@@ -40,7 +42,7 @@ public class ApcMatcherTest {
       assertNotNull(apc);
       ArrivalDeparture ad = match.getArrivalDeparture();
       if (ad == null) {
-        System.out.println("no match for ad " + apc);
+        System.out.println("no match for ad " + apc.getVehicleId() + " at " + new Date(apc.getArrivalEpoch()));
         // we successfully matched all example data to historical ArrivalDeparture data!
         assertNotNull(ad);
       }

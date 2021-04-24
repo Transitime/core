@@ -1,6 +1,7 @@
 package org.transitclock.avl;
 
 
+import org.transitclock.db.structs.ApcReport;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.utils.Time;
 
@@ -159,5 +160,21 @@ public class ApcParsedRecord {
   }
 
 
-
+  public ApcReport toApcReport() {
+    return new ApcReport(messageId,
+    time,
+    serviceDate,
+    driverId,
+    odo,
+    vehicleId,
+    boardings,
+    alightings,
+    doorOpen,
+    doorClose,
+    arrival,
+    departure,
+    lat,
+    lon,
+    arrivalDeparture);
+  }
 }

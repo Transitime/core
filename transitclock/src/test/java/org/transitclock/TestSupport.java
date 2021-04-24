@@ -2,6 +2,7 @@ package org.transitclock;
 
 import org.junit.Ignore;
 import org.transitclock.applications.Core;
+import org.transitclock.config.ConfigFileReader;
 import org.transitclock.utils.Time;
 
 import java.io.BufferedWriter;
@@ -11,6 +12,8 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
+
+import static org.junit.Assert.assertNotNull;
 
 @Ignore
 /**
@@ -61,6 +64,11 @@ public class TestSupport {
         Core.getInstance().setTime(new Time(getTimeZone()));
       }
     }
+    // load standard configuration
+    InputStream is = Core.getInstance().getClass().getResourceAsStream("transitclock.properties");
+    assertNotNull(is);
+    ConfigFileReader.readPropertiesConfigFile(is);
+
   }
 
   public static String getTimeZone() {

@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.StringConfigValue;
+import org.transitclock.configData.DbSetupConfig;
 import org.transitclock.core.ServiceUtils;
 import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.db.structs.Calendar;
@@ -160,7 +161,7 @@ public class DbConfig {
 	= new StringConfigValue("transitclock.db.validateQuery", 
 			"SELECT 1", 
 			"query to validate database connection");
-	
+
 	public String getValidateTestQuery() {
 		return validateTestQuery.getValue();
 	}

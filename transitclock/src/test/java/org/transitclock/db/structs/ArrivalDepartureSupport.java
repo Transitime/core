@@ -4,13 +4,14 @@ import org.transitclock.StopSupport;
 import org.transitclock.StructSupport;
 import org.transitclock.TestSupport;
 import org.transitclock.applications.Core;
-import org.transitclock.db.structs.ArrivalDeparture;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipInputStream;
 
 import static org.junit.Assert.assertNotNull;
 import static org.transitclock.TestSupport.getStreamAsString;
@@ -47,8 +48,15 @@ public class ArrivalDepartureSupport extends StructSupport {
 
   public List<ArrivalDeparture> loadArrivalDepartureList(String s) throws Exception {
     loadStopsMap();
-
-    InputStream is1 = this.getClass().getResourceAsStream(s);
+    InputStream is1;
+    if (s.endsWith(".zip")) {
+      ZipInputStream zin = new ZipInputStream(this.getClass().getResourceAsStream(s));
+      zin.getNextEntry();
+      is1 = zin;
+    } else {
+      is1 = this.getClass().getResourceAsStream(s);
+    }
+    if (is1 == null) throw new FileNotFoundException("File " + s + " could not be found");
     // ArrivalDeparture data in CST TZ
     return toArrivalDepartures(getStreamAsString(is1), "CST");
   }

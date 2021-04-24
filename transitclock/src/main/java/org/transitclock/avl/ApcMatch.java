@@ -28,12 +28,14 @@ public class ApcMatch {
 
   private ApcParsedRecord apc;
   private List<ArrivalDeparture> arrivalDepartures;
+
+
   public ApcMatch(ApcParsedRecord apc, List<ArrivalDeparture> arrivalDepartures) {
     this.apc = apc;
     this.arrivalDepartures = arrivalDepartures;
   }
 
-  public ApcParsedRecord getApc() {
+    public ApcParsedRecord getApc() {
     if (apc.getArrivalDeparture() == null) {
       apc.setArrivalDeparture(getArrivalDeparture());
     }
@@ -74,7 +76,7 @@ public class ApcMatch {
       }
     }
     if (closest > MAX_MATCH_DISTANCE.getValue()) {
-      if (arrivalDepartures != null && !arrivalDepartures.isEmpty()) {
+      if (arrivalDepartures != null && !arrivalDepartures.isEmpty() && best != null) {
         logger.error("distance {} precluded apc {}/{} from matching to ad {}/{}",
                 closest,
                 apc.getVehicleId(),
@@ -84,10 +86,12 @@ public class ApcMatch {
         return null;
       }
     }
-    logger.debug("match distance {}m / temporal difference {}s for {}",
-            Geo.oneDigitFormat(closest),
-            Time.secondsStr(apc.getTime() - best.getTime()),
-            best.getVehicleId());
+    if (best != null) {
+      logger.debug("match distance {}m / temporal difference {}s for {}",
+              Geo.oneDigitFormat(closest),
+              Time.secondsStr(apc.getTime() - best.getTime()),
+              best.getVehicleId());
+    }
     return best;
   }
 

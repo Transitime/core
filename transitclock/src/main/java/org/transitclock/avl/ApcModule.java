@@ -32,7 +32,6 @@ public class ApcModule {
   private MonitoringService monitoring;
   private static ApcModule singleton;
   private static Object lockObject = new Object();
-  private ApcMatcher matcher = new ApcMatcher();
 
   protected ApcModule() {
     monitoring = MonitoringService.getInstance();
@@ -57,7 +56,8 @@ public class ApcModule {
       return;
     }
     List<ArrivalDeparture> arrivals = findArrivalDepartures(range);
-    List<ApcMatch> matches = matcher.match(arrivals, apcRecords);
+    ApcMatcher matcher = new ApcMatcher(arrivals);
+    List<ApcMatch> matches = matcher.match(apcRecords);
     archive(matches);
   }
 
