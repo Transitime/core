@@ -11,6 +11,7 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.TimeZone;
 
 import static org.junit.Assert.assertNotNull;
@@ -43,18 +44,21 @@ public class TestSupport {
   }
 
   public static long toEpoch(String date, String time, String tz) throws Exception {
+    return toDate(date, time, tz).getTime();
+  }
+
+  public static Date toDate(String date, String time, String tz) throws Exception {
     SimpleDateFormat sdf;
     if (time == null) {
       sdf = new SimpleDateFormat("yyyy-MM-dd");
       if (tz != null) sdf.setTimeZone(TimeZone.getTimeZone(tz));
-      return sdf.parse(date).getTime();
+      return sdf.parse(date);
     }
     sdf = new SimpleDateFormat("yyyy-MM-ddHH:mm:ss");
-    if (tz != null) sdf.setTimeZone(TimeZone.getTimeZone(tz));
-    return sdf.parse(date+time).getTime();
-
+    TimeZone timeZone = TimeZone.getTimeZone(tz);
+    if (tz != null) sdf.setTimeZone(timeZone);
+    return sdf.parse(date+time);
   }
-
 
   public static void createTestCore() {
     // some structs require Core / DbConfig

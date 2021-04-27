@@ -220,6 +220,7 @@ public class ApcReport implements Serializable {
   return "apc["
           + "vehicleId=" + vehicleId
           + ",time=" + new Date(time)
+          + ",id=" + this.messageId
           + ",ons=" + getBoardings()
           + ",offs=" + getAlightings()
   + "]";

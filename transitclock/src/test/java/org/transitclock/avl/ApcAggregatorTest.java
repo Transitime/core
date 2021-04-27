@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.TestSupport;
-import org.transitclock.db.structs.ApcArrivalRate;
 import org.transitclock.db.structs.ApcReport;
 import org.transitclock.db.structs.ApcRecordSupport;
 import org.transitclock.db.structs.ArrivalDeparture;
@@ -34,12 +33,37 @@ public class ApcAggregatorTest {
 
   @Test
   public void analyze() throws Exception {
-    ApcAggregator aggregator = ApcAggregator.getInstance();
+    ApcAggregator aggregator = new ApcAggregator("CDT");
     List<ApcReport> matches = loadMatches();
-    List<ApcArrivalRate> rates = aggregator.analyze(matches);
-    // TODO -- in progress
-//    assertNotNull(rates);
-//    assertEquals(10, rates.size());
+    aggregator.analyze(matches);
+
+    /*
+    // test pruning of these duplicate messages
+    apc[vehicleId=2079,time=Wed Apr 21 16:30:13 EDT 2021,id=2179293311,ons=0,offs=3] "timestamp":"2021-04-21T20:30:13.997"
+    apc[vehicleId=3992,time=Wed Apr 21 16:30:20 EDT 2021,id=2179293351,ons=0,offs=4] "timestamp":"2021-04-21T20:30:20.09"
+    apc[vehicleId=3992,time=Wed Apr 21 16:30:38 EDT 2021,id=2179293435,ons=0,offs=4] (duplicate)...
+    ...
+     */
+    Integer count = aggregator.getCount("11861", TestSupport.toDate("2021-04-21", "20:28:01", "UTC"));
+    assertNotNull(count);
+    assertEquals(0, count.intValue());
+
+    count = aggregator.getCount("17994", TestSupport.toDate("2021-04-21", "23:58:01", "UTC"));
+    assertNotNull(count);
+    assertEquals(2, count.intValue());
+
+    count = aggregator.getCount("17976", TestSupport.toDate("2021-04-21", "16:59:00", "UTC"));
+    assertNotNull(count);
+    assertEquals(1, count.intValue());
+
+    count = aggregator.getCount("11861", TestSupport.toDate("2021-04-21", "15:51:00", "UTC"));
+    assertNotNull(count);
+    assertEquals(11, count.intValue());
+
+    count = aggregator.getCount("17990", TestSupport.toDate("2021-04-21", "21:45:00", "UTC"));
+    assertNotNull(count);
+    assertEquals(4, count.intValue());
+
   }
 
   private List<ApcReport> loadMatches() throws Exception {

@@ -3,7 +3,7 @@ package org.transitclock.avl;
 import org.transitclock.applications.Core;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.configData.AgencyConfig;
-import org.transitclock.db.structs.ApcArrivalRate;
+import org.transitclock.db.structs.Agency;
 import org.transitclock.db.structs.ApcReport;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.monitoring.MonitoringService;
@@ -12,6 +12,7 @@ import org.transitclock.utils.Time;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * Integrate with Automated Passenger Count data, parse, archive, and
@@ -32,17 +33,24 @@ public class ApcModule {
   private MonitoringService monitoring;
   private static ApcModule singleton;
   private static Object lockObject = new Object();
+  private ApcAggregator apcAggregator = null;
+  private String tz = null;
 
-  protected ApcModule() {
+
+  protected ApcModule(String tz) {
     monitoring = MonitoringService.getInstance();
     singleton = this;
+    this.tz = tz;
+    apcAggregator = new ApcAggregator(tz);
   }
 
   public static ApcModule getInstance() {
     if (singleton == null) {
       synchronized (lockObject) {
         if (singleton == null) {
-          singleton = new ApcModule();
+          String agencyId = AgencyConfig.getAgencyId();
+          TimeZone timeZoneFromDb = Agency.getTimeZoneFromDb(agencyId);
+          singleton = new ApcModule(timeZoneFromDb.toZoneId().getId());
         }
       }
     }
@@ -106,16 +114,10 @@ public class ApcModule {
    * @param matches
    * @return
    */
-   synchronized List<ApcArrivalRate> analyze(List<ApcReport> matches) {
+   synchronized void analyze(List<ApcReport> matches) {
     // validate/clean
-    List<ApcArrivalRate> rates = ApcAggregator.getInstance().analyze(matches);
+    apcAggregator.analyze(matches);
 
-    for (ApcArrivalRate rate : rates) {
-      Core.getInstance().getDbLogger().add(rate);
-    }
-
-
-    return rates;
   }
 
   // unit tests will need to override this!
