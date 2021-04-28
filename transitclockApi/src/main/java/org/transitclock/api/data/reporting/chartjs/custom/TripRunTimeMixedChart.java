@@ -14,19 +14,19 @@ import javax.xml.bind.annotation.XmlElement;
 public class TripRunTimeMixedChart {
 
     @XmlElement
-    private TripRunTimeData data;
+    private TripAggregatedRunTimeData data;
 
     public TripRunTimeMixedChart() {}
 
-    public TripRunTimeMixedChart(TripRunTimeData data) {
+    public TripRunTimeMixedChart(TripAggregatedRunTimeData data) {
         this.data = data;
     }
 
-    public TripRunTimeData getData() {
+    public TripAggregatedRunTimeData getData() {
         return data;
     }
 
-    public void setData(TripRunTimeData data) {
+    public void setData(TripAggregatedRunTimeData data) {
         this.data = data;
     }
 }

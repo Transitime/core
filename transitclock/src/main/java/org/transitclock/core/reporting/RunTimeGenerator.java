@@ -5,9 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.BooleanConfigValue;
-import org.transitclock.core.ServiceType;
-import org.transitclock.core.ServiceUtils;
-import org.transitclock.core.SpatialMatch;
+import org.transitclock.core.*;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.*;
 import org.transitclock.db.structs.*;
@@ -36,53 +34,78 @@ public class RunTimeGenerator {
 					"Optionally use scheduled arrival departure information when not available from realtime" +
 							"data.");
 
-	public  boolean generate(VehicleState vehicleState) {
-
+	public boolean generate(VehicleState vehicleState) {
 		try {
-			// Make sure match is valid
-			SpatialMatch newMatch = vehicleState.getMatch();
-			if(newMatch == null){
-				logger.error("Vehicle was not matched when trying to process running times. {}", vehicleState);
+			// check that vehicle state is valid
+			if(!isVehicleStateValid(vehicleState)){
 				return false;
 			}
 
-			// Make sure we're at the last stop
-			SpatialMatch matchAtPreviousStop = vehicleState.getMatch().getMatchAtPreviousStop();
-			Integer lastStopIndex;
-			if(matchAtPreviousStop==null || (lastStopIndex = atEndOfTrip(matchAtPreviousStop)) == null) {
+			// check that this is a valid run time candidate
+			TemporalMatch match = vehicleState.getMatch();
+			TemporalMatch prevMatch = vehicleState.getPreviousMatch();
+
+			if(!isValidRunTimeCandidate(match, prevMatch)){
 				return false;
 			}
 
-			// Check to see if we already processed this run time
-			SpatialMatch twoMatchesAgo = matchAtPreviousStop.getMatchAtPreviousStop();
-			if(twoMatchesAgo == null || (lastStopIndex == twoMatchesAgo.getStopPathIndex() &&
-					twoMatchesAgo.getStopPath().getStopId().equals(matchAtPreviousStop.getStopPath().getStopId()))){
-				return false;
-			}
+			int lastStopIndex = getLastStopIndex(prevMatch);
 
-
-			String tripId = matchAtPreviousStop.getAtStop().getTrip().getId();
-			long vehicleMatchAvlTime = vehicleState.getMatch().getAvlTime();
+			// Check to see if we're at the last stop
+			String tripId = prevMatch.getTrip().getId();
+			long vehicleMatchAvlTime = prevMatch.getAvlTime();
 			String vehicleId= vehicleState.getVehicleId();
-			Integer tripStartTime = matchAtPreviousStop.getTrip().getStartTime();
+			Integer tripStartTime = prevMatch.getTrip().getStartTime();
 
 
 			List<IpcArrivalDeparture> arrivalDeparturesForStop = getArrivalDeparturesForTrip(tripId,
 					vehicleMatchAvlTime, tripStartTime);
 
-			if(arrivalDeparturesForStop!=null)
-			{
-				boolean isValid = processRunTimesForEndOfTrip( vehicleId,
-																arrivalDeparturesForStop,
-																matchAtPreviousStop,
-																lastStopIndex
-															 );
-				return isValid;
+			if(!isArrivalDeparturesValid(arrivalDeparturesForStop)){
+				return false;
 			}
+
+			return processRunTimesForTrip(vehicleId, arrivalDeparturesForStop, prevMatch, match, lastStopIndex);
+
 		} catch (Exception e) {
 			logger.error("Exception when processing run times", e);
 		}
 		return false;
+	}
+
+	private boolean isVehicleStateValid(VehicleState vehicleState){
+		return vehicleState.isPredictable() &&
+				vehicleState.getMatch() != null &&
+				vehicleState.getMatch().getMatchAtPreviousStop() != null;
+	}
+
+
+	private boolean isValidRunTimeCandidate(TemporalMatch currentMatch,
+											TemporalMatch previousMatch) {
+
+		if(currentMatch != null && previousMatch != null &&
+				previousMatch.getTripIndex() < currentMatch.getTripIndex() &&
+				previousMatch.getBlock().getId().equals(currentMatch.getBlock().getId())){
+			return true;
+		}
+		return false;
+	}
+
+	private int getLastStopIndex(SpatialMatch matchAtPreviousStop){
+		Block block = matchAtPreviousStop.getBlock();
+		int tripIndex = matchAtPreviousStop.getTripIndex();
+		return block.numStopPaths(tripIndex) - 1;
+	}
+
+
+	public Integer atEndOfTrip(SpatialMatch matchAtPreviousStop) {
+		Block block = matchAtPreviousStop.getBlock();
+		int tripIndex = matchAtPreviousStop.getTripIndex();
+		int stopPathIndex = matchAtPreviousStop.getStopPathIndex();
+		if(stopPathIndex == block.numStopPaths(tripIndex) - 1){
+			return stopPathIndex;
+		}
+		return null;
 	}
 
 	public List<IpcArrivalDeparture> getArrivalDeparturesForTrip(String tripId, long vehicleMatchAvlTime, Integer startTime){
@@ -91,21 +114,20 @@ public class RunTimeGenerator {
 		return TripDataHistoryCacheFactory.getInstance().getTripHistory(key);
 	}
 
-	public boolean processRunTimesForEndOfTrip( String vehicleId,
-												List<IpcArrivalDeparture> arrivalDeparturesForStop,
-											   	SpatialMatch matchAtPreviousStop,
-											    Integer lastStopIndex){
+	public boolean processRunTimesForTrip(String vehicleId,
+										  List<IpcArrivalDeparture> arrivalDeparturesForStop,
+										  TemporalMatch matchAtPreviousStop,
+										  TemporalMatch matchAtCurrentStop,
+										  Integer lastStopIndex){
 
-
-
-		if(!isRunTimeValid(arrivalDeparturesForStop, lastStopIndex)){
-			return false;
-		}
 
 		Trip trip = matchAtPreviousStop.getTrip();
 		int dwellTimeCount = lastStopIndex;
 		Long totalDwellTime = null;
+		Date firstStopDepartureTime = null;
 		Date finalStopArrivalTime = null;
+		Integer firstStopPathIndex = null;
+		Integer finalStopPathIndex = null;
 
 		List<RunTimesForStops> runTimesForStops = new ArrayList<>();
 		RunTimesForRoutes runTimesForRoutes = new RunTimesForRoutes();
@@ -117,9 +139,10 @@ public class RunTimeGenerator {
 
 			if(isSpatialMatchAndArrivalDepartureMatch(arrivalDeparture, matchAtPreviousStop, vehicleId))
 			{
-				if(isLastStopForTrip(arrivalDeparture.getStopPathIndex(), lastStopIndex)){
+				if(finalStopArrivalTime == null){
 					if(arrivalDeparture.isArrival()){
 						finalStopArrivalTime = arrivalDeparture.getTime();
+						finalStopPathIndex = arrivalDeparture.getStopPathIndex();
 						totalDwellTime = 0l;
 						--dwellTimeCount;
 
@@ -137,6 +160,7 @@ public class RunTimeGenerator {
 						// Run Time For Stops Properties
 						int configRev = trip.getConfigRev();
 						String stopId = arrivalDeparture.getStopId();
+						String stopPathId = getStopPathId(stopPath);
 						int stopPathIndex = arrivalDeparture.getStopPathIndex();
 						Date arrivalTime = arrivalDeparture.getTime();
 						Date prevStopDepartureTime = getPrevStopDepartureTime(prevDeparture);
@@ -147,7 +171,7 @@ public class RunTimeGenerator {
 						Boolean timePoint = isTimePoint(stopPath);
 
 
-						// Setting dwell time and stopPathLenght to help calculate speed since
+						// Setting dwell time and stopPathLength to help calculate speed since
 						// we need to subtract dwell time to get arrival time and use stopPathLength
 						// to get distance travelled
 						arrivalDeparture.setDwellTime(dwellTime);
@@ -157,7 +181,7 @@ public class RunTimeGenerator {
 
 						RunTimesForStops runTimesForStop = new RunTimesForStops(
 								configRev,
-								stopId,
+								stopPathId,
 								stopPathIndex,
 								arrivalTime,
 								prevStopDepartureTime,
@@ -176,124 +200,153 @@ public class RunTimeGenerator {
 						continue;
 					}
 				}
-				else if(finalStopArrivalTime != null && isMiddleStopForTrip(arrivalDeparture.getStopPathIndex(), lastStopIndex)){
+				else if(finalStopArrivalTime != null &&
+						isNotLastStopForTrip(arrivalDeparture.getStopPathIndex(), lastStopIndex) &&
+						i < arrivalDeparturesForStop.size()-1){
 					if(arrivalDeparture.isDeparture()){
-						if(totalDwellTime != null && arrivalDeparture.getDwellTime() != null &&
-								dwellTimeCount == arrivalDeparture.getStopPathIndex()){
+						// Get scheduled time info for stopPath
+						ScheduleTime prevStopScheduledTime = getScheduledTime(trip, arrivalDeparture.getStopPathIndex() - 1);
+						ScheduleTime currentStopScheduledTime = getScheduledTime(trip, arrivalDeparture.getStopPathIndex());
 
-							// Get scheduled time info for stopPath
-							ScheduleTime prevStopScheduledTime = getScheduledTime(trip, arrivalDeparture.getStopPathIndex() - 1);
-							ScheduleTime currentStopScheduledTime = getScheduledTime(trip, arrivalDeparture.getStopPathIndex());
+						IpcArrivalDeparture prevDeparture =
+								getPreviousDeparture(i, arrivalDeparture.getStopPathIndex(), arrivalDeparturesForStop);
 
-							IpcArrivalDeparture prevDeparture =
-									getPreviousDeparture(i, arrivalDeparture.getStopPathIndex(), arrivalDeparturesForStop);
+						// Lookup stopPath for trip using ArrivalDeparture stopPathIndex
+						StopPath stopPath = trip.getStopPath(arrivalDeparture.getStopPathIndex());
 
-							// Lookup stopPath for trip using ArrivalDeparture stopPathIndex
-							StopPath stopPath = trip.getStopPath(arrivalDeparture.getStopPathIndex());
+						// Run Time For Stops Properties
+						int configRev = trip.getConfigRev();
+						String stopId = arrivalDeparture.getStopId();
+						String stopPathId = getStopPathId(stopPath);
+						int stopPathIndex = arrivalDeparture.getStopPathIndex();
+						Date prevStopDepartureTime = getPrevStopDepartureTime(prevDeparture);
+						Integer scheduledCurrentStopDepartureTime = getScheduledTime(currentStopScheduledTime);
+						Integer scheduledPrevStopDepartureTime = getScheduledTime(prevStopScheduledTime);
+						Long dwellTime = getDwellTime(arrivalDeparture, currentStopScheduledTime);
+						Boolean lastStop = false;
+						Boolean timePoint = isTimePoint(stopPath);
+						Date arrivalTime = getArrivalTimeFromDepartureTime(arrivalDeparture);
 
-							// Run Time For Stops Properties
-							int configRev = trip.getConfigRev();
-							String stopId = arrivalDeparture.getStopId();
-							int stopPathIndex = arrivalDeparture.getStopPathIndex();
-							Date departureTime = arrivalDeparture.getTime();
-							Date prevStopDepartureTime = getPrevStopDepartureTime(prevDeparture);
-							Integer scheduledCurrentStopDepartureTime = getScheduledTime(currentStopScheduledTime);
-							Integer scheduledPrevStopDepartureTime = getScheduledTime(prevStopScheduledTime);
-							Long dwellTime = getDwellTime(arrivalDeparture, currentStopScheduledTime);
-							Boolean lastStop = false;
-							Boolean timePoint = isTimePoint(stopPath);
+						// Setting dwell time and stopPathLenght to help calculate speed since
+						// we need to subtract dwell time to get arrival time and use stopPathLength
+						// to get distance travelled
+						arrivalDeparture.setDwellTime(dwellTime);
+						arrivalDeparture.setStopPathLength(getStopPathLength(stopPath));
+						Double speed = SpeedCalculator.getSpeedDataBetweenTwoArrivalDepartures(prevDeparture, arrivalDeparture);
 
-							// Setting dwell time and stopPathLenght to help calculate speed since
-							// we need to subtract dwell time to get arrival time and use stopPathLength
-							// to get distance travelled
-							arrivalDeparture.setDwellTime(dwellTime);
-							arrivalDeparture.setStopPathLength(getStopPathLength(stopPath));
-							Double speed = SpeedCalculator.getSpeedDataBetweenTwoArrivalDepartures(prevDeparture, arrivalDeparture);
+						// Setting first stop properties
+						boolean isFirstStop = isFirstStopForTrip(arrivalDeparture.getStopPathIndex());
+						if(isFirstStop){
+							speed = 0.0;
+							scheduledPrevStopDepartureTime = 0;
+						}
 
-							RunTimesForStops runTimesForStop = new RunTimesForStops(
-									configRev,
-									stopId,
-									stopPathIndex,
-									departureTime,
-									prevStopDepartureTime,
-									scheduledCurrentStopDepartureTime,
-									scheduledPrevStopDepartureTime,
-									dwellTime,
-									speed,
-									lastStop,
-									timePoint
-							);
-							runTimesForStop.setRunTimesForRoutes(runTimesForRoutes);
-							runTimesForStops.add(runTimesForStop);
+						RunTimesForStops runTimesForStop = new RunTimesForStops(
+								configRev,
+								stopPathId,
+								stopPathIndex,
+								arrivalTime,
+								prevStopDepartureTime,
+								scheduledCurrentStopDepartureTime,
+								scheduledPrevStopDepartureTime,
+								dwellTime,
+								speed,
+								lastStop,
+								timePoint
+						);
+						runTimesForStop.setRunTimesForRoutes(runTimesForRoutes);
+						runTimesForStops.add(runTimesForStop);
 
+						firstStopDepartureTime = arrivalDeparture.getTime();
+						firstStopPathIndex = arrivalDeparture.getStopPathIndex();
+
+						// Process Total Dwell Time
+						if(totalDwellTime != null && dwellTime != null &&
+								dwellTimeCount == arrivalDeparture.getStopPathIndex()) {
 							totalDwellTime += arrivalDeparture.getDwellTime();
 							--dwellTimeCount;
-						}
-						else {
+						} else {
 							totalDwellTime = null;
 						}
-
 					}
 					else {
 						continue;
 					}
 				}
-				else if(arrivalDeparture.isDeparture() && finalStopArrivalTime != null && i == 0){
-					boolean isFirstStop = isFirstStopForTrip(arrivalDeparture.getStopPathIndex());
+				else if(finalStopArrivalTime != null && i == arrivalDeparturesForStop.size()-1){
 
-					ServiceUtils serviceUtils = Core.getInstance().getServiceUtils();
-					ServiceType serviceType = serviceUtils.getServiceTypeForTrip(arrivalDeparture.getTime(),
-																				 trip.getStartTime(),
-																				 trip.getServiceId());
+					if(arrivalDeparture.isDeparture()) {
 
-					// Get scheduled time info for stopPath
-					ScheduleTime currentStopScheduledTime = getScheduledTime(trip, arrivalDeparture.getStopPathIndex());
+						boolean isFirstStop = isFirstStopForTrip(arrivalDeparture.getStopPathIndex());
 
-					// Lookup stopPath for trip using ArrivalDeparture stopPathIndex
-					StopPath stopPath = trip.getStopPath(arrivalDeparture.getStopPathIndex());
+						// Get scheduled time info for stopPath
+						ScheduleTime currentStopScheduledTime = getScheduledTime(trip, arrivalDeparture.getStopPathIndex());
 
-					// Run Time For Stops Properties
-					int configRev = trip.getConfigRev();
-					String stopId = arrivalDeparture.getStopId();
-					int stopPathIndex = arrivalDeparture.getStopPathIndex();
-					Date departureTime = arrivalDeparture.getTime();
-					Date prevStopDepartureTime = null;
-					Integer scheduledCurrentStopDepartureTime = getScheduledTime(currentStopScheduledTime);
-					Integer scheduledPrevStopDepartureTime = null;
-					Boolean lastStop = false;
-					Boolean timePoint = isTimePoint(stopPath);
-					Long dwellTime = getDwellTime(arrivalDeparture, currentStopScheduledTime);
-					Double speed = null;
+						// Lookup stopPath for trip using ArrivalDeparture stopPathIndex
+						StopPath stopPath = trip.getStopPath(arrivalDeparture.getStopPathIndex());
 
-					// Update total dwell time
-					if(isFirstStop && totalDwellTime != null && dwellTimeCount == arrivalDeparture.getStopPathIndex()){
-						totalDwellTime += dwellTime;
-					} else {
+
+						// Run Time For Stops Properties
+						int configRev = trip.getConfigRev();
+						String stopId = arrivalDeparture.getStopId();
+						String stopPathId = getStopPathId(stopPath);
+						int stopPathIndex = arrivalDeparture.getStopPathIndex();
+						Date prevStopDepartureTime = null;
+						Integer scheduledCurrentStopDepartureTime = getScheduledTime(currentStopScheduledTime);
+						Integer scheduledPrevStopDepartureTime = null;
+						Boolean lastStop = false;
+						Boolean timePoint = isTimePoint(stopPath);
+						Long dwellTime = getDwellTime(arrivalDeparture, currentStopScheduledTime);
+						Double speed = null;
+						Date arrivalTime = getArrivalTimeFromDepartureTime(arrivalDeparture);
+
+
+						// Setting first stop properties
+						if(isFirstStop){
+							speed = 0.0;
+							scheduledPrevStopDepartureTime = 0;
+						}
+
+						firstStopDepartureTime = arrivalDeparture.getTime();
+						firstStopPathIndex = arrivalDeparture.getStopPathIndex();
+
+						RunTimesForStops runTimesForStop = new RunTimesForStops(
+								configRev,
+								stopPathId,
+								stopPathIndex,
+								arrivalTime,
+								prevStopDepartureTime,
+								scheduledCurrentStopDepartureTime,
+								scheduledPrevStopDepartureTime,
+								dwellTime,
+								speed,
+								lastStop,
+								timePoint
+						);
+
+						runTimesForStops.add(runTimesForStop);
+						runTimesForStop.setRunTimesForRoutes(runTimesForRoutes);
+
+						if(totalDwellTime != null && dwellTime != null &&
+								dwellTimeCount == arrivalDeparture.getStopPathIndex()) {
+							totalDwellTime += arrivalDeparture.getDwellTime();
+							--dwellTimeCount;
+						} else {
+							totalDwellTime = null;
+						}
+					}
+
+					// Confirm totalDwellTime count is valid
+					if (dwellTimeCount >= 0 && dwellTimeCount != arrivalDeparture.getStopPathIndex()) {
 						totalDwellTime = null;
 					}
 
-					// Setting first stop properties
-					if(isFirstStop){
-						speed = 0.0;
-						scheduledPrevStopDepartureTime = 0;
-					}
+					// Process Run Times for Route
 
-					RunTimesForStops runTimesForStop = new RunTimesForStops(
-							configRev,
-							stopId,
-							stopPathIndex,
-							departureTime,
-							prevStopDepartureTime,
-							scheduledCurrentStopDepartureTime,
-							scheduledPrevStopDepartureTime,
-							dwellTime,
-							speed,
-							lastStop,
-							timePoint
-					);
-
-					runTimesForStops.add(runTimesForStop);
-					runTimesForStop.setRunTimesForRoutes(runTimesForRoutes);
+					ServiceUtils serviceUtils = Core.getInstance().getServiceUtils();
+					ServiceType serviceType = serviceUtils.getServiceTypeForTrip(arrivalDeparture.getTime(),
+							trip.getStartTime(),
+							trip.getServiceId());
 
 					runTimesForRoutes.setConfigRev(trip.getConfigRev());
 					runTimesForRoutes.setServiceId(trip.getServiceId());
@@ -302,7 +355,7 @@ public class RunTimeGenerator {
 					runTimesForRoutes.setTripPatternId(trip.getTripPattern().getId());
 					runTimesForRoutes.setTripId(trip.getId());
 					runTimesForRoutes.setHeadsign(trip.getHeadsign());
-					runTimesForRoutes.setStartTime(arrivalDeparture.getTime());
+					runTimesForRoutes.setStartTime(firstStopDepartureTime);
 					runTimesForRoutes.setEndTime(finalStopArrivalTime);
 					runTimesForRoutes.setScheduledStartTime(trip.getStartTime());
 					runTimesForRoutes.setScheduledEndTime(trip.getEndTime());
@@ -310,11 +363,17 @@ public class RunTimeGenerator {
 					runTimesForRoutes.setVehicleId(vehicleId);
 					runTimesForRoutes.setServiceType(serviceType);
 					runTimesForRoutes.setDwellTime(totalDwellTime);
+					runTimesForRoutes.setStartStopPathIndex(firstStopPathIndex);
+					runTimesForRoutes.setActualLastStopPathIndex(finalStopPathIndex);
+					runTimesForRoutes.setExpectedLastStopPathIndex(lastStopIndex);
 					runTimesForRoutes.setRunTimesForStops(runTimesForStops);
-					runTimesForRoutes.setStartStopPathIndex(arrivalDeparture.getStopPathIndex());
+
+					logger.debug("Previous Match {}, \n Current Match {} \n {} with {} stops", matchAtPreviousStop.toString(),
+							matchAtCurrentStop.toString(), runTimesForRoutes.toString(), runTimesForStops.size());
+
 
 					Core.getInstance().getDbLogger().add(runTimesForRoutes);
-					logger.debug("Processing Run Times for Route took {} msec", timer.elapsedMsec());
+					logger.debug("Processing Run Times for Route took {} msec", timer.elapsedMsecStr());
 					return true;
 				}
 			}
@@ -322,12 +381,33 @@ public class RunTimeGenerator {
 		return false;
 	}
 
-	private float getStopPathLength(StopPath stopPath){
-		return (float) stopPath.getLength();
+	private Date getArrivalTimeFromDepartureTime(IpcArrivalDeparture departure) {
+		if(departure.getDwellTime() != null){
+			long departureTime = departure.getTime().getTime();
+			return new Date(departureTime - departure.getDwellTime());
+		}
+		return null;
 	}
 
-	private boolean isTimePoint(StopPath stopPath){
-		return stopPath.isScheduleAdherenceStop();
+	private String getStopPathId(StopPath stopPath){
+		if(stopPath != null){
+			return stopPath.getId();
+		}
+		return null;
+	}
+
+	private float getStopPathLength(StopPath stopPath){
+		if(stopPath != null){
+			return (float) stopPath.getLength();
+		}
+		return Float.NaN;
+	}
+
+	private Boolean isTimePoint(StopPath stopPath){
+		if(stopPath != null) {
+			return stopPath.isScheduleAdherenceStop();
+		}
+		return null;
 	}
 
 	private Date getPrevStopDepartureTime(IpcArrivalDeparture prevDeparture){
@@ -347,22 +427,34 @@ public class RunTimeGenerator {
 	private IpcArrivalDeparture getPreviousDeparture(int arrivalDepartureIndex,
 															int currentStopPathIndex,
 															List<IpcArrivalDeparture> arrivalDepartures){
+		try {
+			if (currentStopPathIndex > 0 && arrivalDepartureIndex < arrivalDepartures.size() - 1) {
 
-		if(arrivalDepartureIndex > 0){
-			int prevStopPathIndex = currentStopPathIndex - 1;
-			int currentArrivalDepartureIndex = arrivalDepartureIndex + 1;
+				int prevStopPathIndex = currentStopPathIndex - 1;
+				int currentArrivalDepartureIndex = arrivalDepartureIndex + 1;
 
-			IpcArrivalDeparture prevArrivalDeparture = arrivalDepartures.get(currentArrivalDepartureIndex);
+				IpcArrivalDeparture currentPrevArrivalDeparture = arrivalDepartures.get(currentArrivalDepartureIndex);
 
-			while(currentArrivalDepartureIndex > 0 &&
-					(prevStopPathIndex == prevArrivalDeparture.getStopPathIndex() ||
-							currentStopPathIndex == prevArrivalDeparture.getStopPathIndex())){
-				if(prevStopPathIndex == prevArrivalDeparture.getStopPathIndex() && prevArrivalDeparture.isDeparture()){
-					return prevArrivalDeparture;
+				boolean arrivalDepartureIndexInBounds = currentArrivalDepartureIndex < arrivalDepartures.size() - 1;
+
+				while (arrivalDepartureIndexInBounds && currentPrevArrivalDeparture.getStopPathIndex() >= prevStopPathIndex) {
+
+					if (prevStopPathIndex == currentPrevArrivalDeparture.getStopPathIndex() && currentPrevArrivalDeparture.isDeparture()) {
+						return currentPrevArrivalDeparture;
+					}
+					++currentArrivalDepartureIndex;
+
+					// Update while loop conditions
+					arrivalDepartureIndexInBounds = currentArrivalDepartureIndex < arrivalDepartures.size();
+
+					if(arrivalDepartureIndexInBounds){
+						currentPrevArrivalDeparture = arrivalDepartures.get(currentArrivalDepartureIndex);
+					}
+
 				}
-				++currentArrivalDepartureIndex;
-				prevArrivalDeparture = arrivalDepartures.get(currentArrivalDepartureIndex);
 			}
+		} catch(Exception e){
+			logger.error("Unable to retrieve Previous Departure", e);
 		}
 		return null;
 	}
@@ -391,11 +483,10 @@ public class RunTimeGenerator {
 	}
 
 
-	public boolean isRunTimeValid(List<IpcArrivalDeparture> arrivalDeparturesForStop, int lastStopIndex){
-		if(arrivalDeparturesForStop == null ||
-				arrivalDeparturesForStop.size() < 2 ||
-				arrivalDeparturesForStop.get(0).getStopPathIndex() != lastStopIndex ||
-				arrivalDeparturesForStop.get(arrivalDeparturesForStop.size()-1).getStopPathIndex() != 0){
+	public boolean isArrivalDeparturesValid(List<IpcArrivalDeparture> arrivalDeparturesForStop){
+		if(arrivalDeparturesForStop == null || arrivalDeparturesForStop.size() < 2){
+			//|| arrivalDeparturesForStop.get(0).getStopPathIndex() != lastStopIndex
+			// || arrivalDeparturesForStop.get(arrivalDeparturesForStop.size()-1).getStopPathIndex() != 0){
 			return false;
 		}
 		return true;
@@ -417,29 +508,24 @@ public class RunTimeGenerator {
 		return currentStopPathIndex > 0 && currentStopPathIndex < lastStopIndex;
 	}
 
+	private boolean isNotLastStopForTrip(Integer currentStopPathIndex, Integer lastStopIndex){
+		return currentStopPathIndex < lastStopIndex;
+	}
+
 	private boolean isFirstStopForTrip(Integer currentStopPathIndex){
 		return currentStopPathIndex == 0;
 	}
 
-	public Integer atEndOfTrip(SpatialMatch matchAtPreviousStop) {
-		Block block = matchAtPreviousStop.getBlock();
-		int tripIndex = matchAtPreviousStop.getTripIndex();
-		int stopPathIndex = matchAtPreviousStop.getStopPathIndex();
-		if(stopPathIndex == block.numStopPaths(tripIndex) - 1){
-			return stopPathIndex;
-		}
-		return null;
-	}
-
 	public Integer getNextTripStartTime(Trip trip){
-		if(trip.getBlock().getTrip(trip.getIndexInBlock() + 1) != null){
-			return trip.getStartTime();
+		Trip nextTrip = trip.getBlock().getTrip(trip.getIndexInBlock() + 1);
+		if(nextTrip != null){
+			return nextTrip.getStartTime();
 		}
 		return null;
 	}
 
 	public ScheduleTime getScheduledTime(Trip trip, int stopPathIndex){
-		if (!trip.isNoSchedule()) {
+		if (stopPathIndex >= 0 && !trip.isNoSchedule()) {
 			return trip.getScheduleTime(stopPathIndex);
 		}
 		return null;

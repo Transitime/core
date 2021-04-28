@@ -8,7 +8,7 @@ import org.transitclock.reporting.keys.StopPathRunTimeKey;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TripStatistics {
+public class TripStopPathStatisticsV1 {
 
     private Trip trip;
     private int tripIndex;
@@ -20,7 +20,7 @@ public class TripStatistics {
     private Set<StopPathRunTimeKey> uniqueStopPathDwellTimes=new LinkedHashSet<>();
     private Map<StopPathRunTimeKey, StopPathStatistics> stopPathStatistics = new HashMap<>();
 
-    public TripStatistics(Trip trip, int tripIndex) {
+    public TripStopPathStatisticsV1(Trip trip, int tripIndex) {
         this.trip = trip;
         this.tripIndex = tripIndex;
         this.expectedStopPathCount = trip.getNumberStopPaths() - 1;

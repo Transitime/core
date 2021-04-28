@@ -32,7 +32,7 @@ public class RunTimesForStops implements Serializable {
 
     @Column
     @Temporal(TemporalType.TIMESTAMP)
-    private Date prevStopArrivalTime;
+    private Date prevStopDepartureTime;
 
     @Column
     private Integer scheduledTime;
@@ -53,6 +53,12 @@ public class RunTimesForStops implements Serializable {
     private Boolean timePoint;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+        @JoinColumn(updatable=false,name="runTimesForRoutes_vehicleId", referencedColumnName="vehicleId"),
+        @JoinColumn(updatable=false,name="runTimesForRoutes_tripId", referencedColumnName="tripId"),
+        @JoinColumn(updatable=false,name="runTimesForRoutes_startTime", referencedColumnName="startTime"),
+        @JoinColumn(updatable=false,name="runTimesForRoutes_configRev", referencedColumnName="configRev")
+    })
     private RunTimesForRoutes runTimesForRoutes;
 
 
@@ -62,7 +68,7 @@ public class RunTimesForStops implements Serializable {
                             String stopPathId,
                             int stopPathIndex,
                             Date time,
-                            Date prevStopArrivalTime,
+                            Date prevStopDepartureTime,
                             Integer scheduledTime,
                             Integer scheduledPrevStopArrivalTime,
                             Long dwellTime,
@@ -73,7 +79,7 @@ public class RunTimesForStops implements Serializable {
         this.stopPathId = stopPathId;
         this.stopPathIndex = stopPathIndex;
         this.time = time;
-        this.prevStopArrivalTime = prevStopArrivalTime;
+        this.prevStopDepartureTime = prevStopDepartureTime;
         this.scheduledTime = scheduledTime;
         this.scheduledPrevStopArrivalTime = scheduledPrevStopArrivalTime;
         this.dwellTime = dwellTime;
@@ -114,12 +120,12 @@ public class RunTimesForStops implements Serializable {
         this.time = time;
     }
 
-    public Date getPrevStopArrivalTime() {
-        return prevStopArrivalTime;
+    public Date getPrevStopDepartureTime() {
+        return prevStopDepartureTime;
     }
 
-    public void setPrevStopArrivalTime(Date prevStopArrivalTime) {
-        this.prevStopArrivalTime = prevStopArrivalTime;
+    public void setPrevStopDepartureTime(Date prevStopArrivalTime) {
+        this.prevStopDepartureTime = prevStopDepartureTime;
     }
 
     public Integer getScheduledTime() {
@@ -178,6 +184,13 @@ public class RunTimesForStops implements Serializable {
         this.runTimesForRoutes = runTimesForRoutes;
     }
 
+    public Long getRunTime() {
+        if (prevStopDepartureTime != null && time != null) {
+            return time.getTime() - prevStopDepartureTime.getTime();
+        }
+        return null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -187,7 +200,7 @@ public class RunTimesForStops implements Serializable {
                 stopPathIndex == that.stopPathIndex &&
                 Objects.equal(stopPathId, that.stopPathId) &&
                 Objects.equal(time, that.time) &&
-                Objects.equal(prevStopArrivalTime, that.prevStopArrivalTime) &&
+                Objects.equal(prevStopDepartureTime, that.prevStopDepartureTime) &&
                 Objects.equal(scheduledTime, that.scheduledTime) &&
                 Objects.equal(scheduledPrevStopArrivalTime, that.scheduledPrevStopArrivalTime) &&
                 Objects.equal(dwellTime, that.dwellTime) &&
@@ -199,7 +212,7 @@ public class RunTimesForStops implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(configRev, stopPathId, stopPathIndex, time, prevStopArrivalTime,
+        return Objects.hashCode(configRev, stopPathId, stopPathIndex, time, prevStopDepartureTime,
                 scheduledTime, scheduledPrevStopArrivalTime, dwellTime, speed, lastStop, timePoint,
                 runTimesForRoutes);
     }

@@ -48,7 +48,7 @@ public interface ReportingInterface extends Remote {
                            ServiceType serviceType, boolean timePointsOnly,
                            boolean currentTripsOnly, boolean readOnly) throws Exception;
 
-    List<IpcRunTimeForTrip> getRunTimeForTrips(LocalDate beginDate, LocalDate endDate,
+    IpcRunTimeForTripsAndDistribution getRunTimeForTrips(LocalDate beginDate, LocalDate endDate,
                                   LocalTime beginTime, LocalTime endTime,
                                   String routeIdOrShortName, String headsign,
                                   String tripPatternId, ServiceType serviceType, boolean timePointsOnly,

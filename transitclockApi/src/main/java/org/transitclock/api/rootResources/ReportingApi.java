@@ -376,7 +376,8 @@ public class ReportingApi {
                 serviceTypeEnum = ServiceType.valueOf(serviceType.toUpperCase());
             }
 
-            List<IpcRunTimeForTrip> ipcRunTimeTrips = reportingInterface.getRunTimeForTrips(beginDate.getDate(),
+            IpcRunTimeForTripsAndDistribution ipcRunTimeForTripsAndDistribution = reportingInterface.getRunTimeForTrips(
+                                                                                            beginDate.getDate(),
                                                                                             endDate.getDate(),
                                                                                             beginTime.getTime(),
                                                                                             endTime.getTime(),
@@ -388,7 +389,7 @@ public class ReportingApi {
                                                                              false,
                                                                                    true);
 
-            Object response = TripRunTimeOutput.getRunTimes(ipcRunTimeTrips);
+            Object response = TripRunTimeOutput.getRunTimes(ipcRunTimeForTripsAndDistribution);
 
             return stdParameters.createResponse(response);
         } catch (Exception e) {
