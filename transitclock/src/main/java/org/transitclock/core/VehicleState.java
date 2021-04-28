@@ -65,6 +65,7 @@ public class VehicleState {
 	// So can make sure that departure time is after the arrival time
 	private Arrival arrivalToStoreToDb;
 	private long lastArrivalTime = 0;
+	private int lastArrivalStopPathIndex = -1;
 	// verify new arrival is greater than last departure
 	private long lastDepartureTime = 0;
 	private Date lastAvlTime = null;
@@ -982,6 +983,22 @@ public class VehicleState {
 	}
 
 	/**
+	 * Stores the last arrival stopPathIndex so that can validate if new departure is for same stop path
+	 * @param stopPathIndex
+	 */
+	public void setLastArrivalStopPathIndex(int stopPathIndex){
+		lastArrivalStopPathIndex = stopPathIndex;
+	}
+
+	/**
+	 * Returns the last stored arrival stopPathIndex so can validate if new departure is for same stop path
+	 * @return
+	 */
+	public int getLastArrivalStopPathIndex() {
+		return lastArrivalStopPathIndex;
+	}
+
+	/**
 	 * Stores the last arrival time so that can make sure that departure
 	 * times are after the arrival times.
 	 * @param arrivalTime
@@ -989,6 +1006,7 @@ public class VehicleState {
 	public void setLastArrivalTime(long arrivalTime) {
 		lastArrivalTime = arrivalTime;
 	}
+
 
 	/**
 	 * Returns the last stored arrival time so can make sure that departure
