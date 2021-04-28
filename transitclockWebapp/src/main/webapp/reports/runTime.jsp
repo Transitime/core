@@ -505,7 +505,7 @@
 
                 </div>
                 <div class="visualization-container">
-                  <%--  <h3 id="visualization-container-header"> Route Breakdown</h3>--%>
+                    <%--  <h3 id="visualization-container-header"> Route Breakdown</h3>--%>
                     <div id="runTimeVisualization" hidden="true">
 
                     </div>
@@ -678,7 +678,7 @@
     function generatePercentileTable(stopsData, formattedScheduled, formattedRunTimeTrips){
 
         var tableTD = "<tr><th>Trip</th><th>Schedule</th><th>N %ile</th></tr>";
-
+        var sumOfData = 0;
         stopsData.forEach(function (eachTrip, i) {
 
             var eachData = {
@@ -687,13 +687,18 @@
                 percentile: formattedRunTimeTrips[i] +"min"
             };
             // percentileData.push(eachData);
-
+            sumOfData += parseFloat(formattedRunTimeTrips[i]);
             tableTD += "<tr>";
             tableTD += "<td>"+eachData.trip+"</td>";
             tableTD += "<td>"+eachData.schedule+"</td>";
             tableTD += "<td>"+eachData.percentile+"</td>";
             tableTD += "</tr>";
         });
+
+        var average = Math.round(sumOfData/stopsData.length);
+        var percentileSummaryData = average +"min";
+
+        $("#percentile-summary-content").html(percentileSummaryData);
 
         return tableTD;
     }
@@ -725,14 +730,17 @@
 
         var formattedRunTimeTrips = generateRunTimes(dummyTripRunTimes, 50);
         var stopsData = getStopsData(response.data.trips);
-        var percentileSummaryData = formattedScheduled.average +"min";
+
         var percentileData = [];
 
 
         var tableTD = generatePercentileTable(stopsData, formattedScheduled.minsData, formattedRunTimeTrips);
 
         var percentileSelect = $('<select id="percentile-select-box" name="percentileSelect"></select>');
-
+        percentileSelectOptions[percentileSelectOptions.length-1] = {
+            value: "99",
+            name: "99%"
+        };
         percentileSelectOptions.forEach(function (eachTrip, i) {
             var option = $('<option></option>');
             option.attr('value', eachTrip.value);
@@ -749,10 +757,15 @@
 
             if ($("#percentile-select-box").val().trim() != "") {
 
-                var formattedRunTimeTrips = generateRunTimes(dummyTripRunTimes, $("#percentile-select-box").val().trim());
+                var valuePercentage = $("#percentile-select-box").val().trim();
+                // if(valuePercentage == 100){
+                //     valuePercentage = 99;
+                // }
+                var formattedRunTimeTrips = generateRunTimes(dummyTripRunTimes, valuePercentage );
+                // var formattedRunTimeTrips = generateRunTimes(dummyTripRunTimes, $("#percentile-select-box").val().trim());
                 // var nonSortedIndexValues = percentileCalculation(formattedRunTimeTrips.minsData, $("#percentile-select-box").val().trim());
 
-               //  var filteredStopsData = [];
+                //  var filteredStopsData = [];
                 // var filteredScheduled = [];
                 // var filteredRunTimeTrips = [];
 
@@ -774,7 +787,7 @@
 
         });
 
-        $("#percentile-summary-content").html(percentileSummaryData);
+
         $(".percentile-summary-details").html(tableTD);
 
     }
@@ -1047,7 +1060,7 @@
                         tripSelectBox.append( '<span class="select2-selection__arrow"><b role="presentation"></b></span>');
 
                         $("#trips-container").html("");
-                        $("#trips-container").append('<h3 for="tripBoxType" id="visualization-container-header">Run Times for Trip Stops :</h3>');
+                        $("#trips-container").append('<h3 for="tripBoxType" id="visualization-container-header">Run Times for Trips :</h3>');
                         $("#trips-container").append(tripSelectBox);
 
                         $("#trips-select-box").change(function () {
@@ -1055,11 +1068,11 @@
                             if ($("#trips-select-box").val().trim() != "") {
                                 showStopView();
 
-                                $("#visualization-container-header").html("Run Times for Trips:");
+                                $("#visualization-container-header").html("Run Times for Trip Stops");
                             } else {
                                 visualizeData();
 
-                                $("#visualization-container-header").html("Run Times for Trip Stops");
+                                $("#visualization-container-header").html("Run Times for Trips:");
                             }
 
                         });
