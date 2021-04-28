@@ -402,8 +402,10 @@ public class ArrivalDepartureGeneratorDefaultImpl
 
 		// Remember this arrival time so that can make sure that subsequent
 		// departures are for after the arrival time.
-		if (arrival.getTime() > vehicleState.getLastArrivalTime())
+		if (arrival.getTime() > vehicleState.getLastArrivalTime()) {
 			vehicleState.setLastArrivalTime(arrivalTime);
+			vehicleState.setLastArrivalStopPathIndex(stopPathIndex);
+		}
 		return arrival;
 	}
 
@@ -706,14 +708,17 @@ public class ArrivalDepartureGeneratorDefaultImpl
 
 			// TODO - dwell time for first stop?
 			//Integer firstStopDwellTime = block.getPathStopTime(tripIndex, stopPathIndex);
-			Long firstStopDwellTime = recalculateDwellTimeUsingThresholds(null);
 
 			long departureTime =
 					avlReportTime.getTime() - travelTimeFromFirstStopToMatch;
 
+
+
+
 			// Create departure time for first stop of trip if it has left that
 			// stop
 			if (!newMatch.isAtStop(tripIndex, stopPathIndex)) {
+				Long firstStopDwellTime = getDwellTime(null, departureTime, block, tripIndex, stopPathIndex, null);
 				storeInDbAndLog(createDepartureTime(vehicleState, departureTime,
 						block, tripIndex, stopPathIndex, firstStopDwellTime));
 			}
@@ -735,7 +740,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				if (!newMatch.isAtStop(tripIndex, stopPathIndex)) {
 					int stopTime = block.getPathStopTime(tripIndex, stopPathIndex);
 					departureTime = arrivalTime + stopTime;
-					Long dwellTime = recalculateDwellTimeUsingThresholds(departureTime - arrivalTime);
+					Long dwellTime = getDwellTime(arrivalTime, departureTime, block, tripIndex, stopPathIndex, stopPathIndex);
 					storeInDbAndLog(createDepartureTime(vehicleState, departureTime,
 							block, tripIndex, stopPathIndex, dwellTime));
 				}
@@ -769,6 +774,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 */
 	private Departure createDeparturePostArrival(VehicleState vehicleState, long departureTime, Block block,
 											   int tripIndex, int stopPathIndex, long departureTimeBasedOnNewMatch) {
+		Integer arrivalStopPathIndex;
 		String vehicleId = vehicleState.getVehicleId();
 		AvlReport avlReport = vehicleState.getAvlReport();
 		AvlReport previousAvlReport =
@@ -827,7 +833,9 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				}
 				arrivalToStoreInDb = arrivalToStoreInDb
 						.withUpdatedTime(new Date(arrivalTime));
+
 			}
+			arrivalStopPathIndex = arrivalToStoreInDb.getStopPathIndex();
 
 			// Now that have the corrected arrival time store it in db
 			// and reset vehicleState to indicate that have dealt with it.
@@ -841,6 +849,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			// if travel times indicate that the vehicle departed a long time
 			// ago.
 			arrivalTime = vehicleState.getLastArrivalTime();
+			arrivalStopPathIndex = vehicleState.getLastArrivalStopPathIndex();
 			if (departureTime <= arrivalTime) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("vehicleId={} the determined departure was " +
@@ -871,7 +880,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			}
 		}
 
-		Long dwellTime = recalculateDwellTimeUsingThresholds(departureTime - arrivalTime);
+		Long dwellTime = getDwellTime(arrivalTime, departureTime, block, tripIndex, stopPathIndex, arrivalStopPathIndex);
 		Departure verifiedDeparture = createDepartureTime(vehicleState, departureTime, block, tripIndex, stopPathIndex, dwellTime);
 		// remember this departure time to ensure subsequent arrivals are in order
 		if (verifiedDeparture.getTime() > vehicleState.getLastDepartureTime()) {
@@ -1315,7 +1324,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			timeWithoutSpeedRatio += stopTime;
 			long departureTime =
 					beginTime + Math.round(timeWithoutSpeedRatio * speedRatio);
-			Long dwellTime = recalculateDwellTimeUsingThresholds(departureTime - arrivalTime);
+			Long dwellTime = getDwellTime(arrivalTime, departureTime, block, indices.getTripIndex(),
+					indices.getStopPathIndex(), indices.getStopPathIndex());
 			ArrivalDeparture departure = createDepartureTime(vehicleState,
 					departureTime,
 					newMatch.getBlock(),
@@ -1340,6 +1350,33 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		logger.debug("For vehicleId={} done determining if it traversed " +
 				"stops in between the new and the old AVL report.",
 				vehicleId);
+	}
+
+	private Long getDwellTime(Long arrivalTime, Long departureTime,Block block,int tripIndex,
+							  int departureStopPathIndex, Integer arrivalStopPathIndex){
+
+		if (departureStopPathIndex == 0 && departureTime != null) {
+			Trip trip = block.getTrip(tripIndex);
+			if (trip != null) {
+				long tripStartTimeMsecs = trip.getStartTime() * 1000;
+				long msecsIntoDay =
+						Core.getInstance().getTime().getMsecsIntoDay(new Date(departureTime), tripStartTimeMsecs);
+				if (msecsIntoDay < tripStartTimeMsecs) {
+					return 0l;
+				} else {
+					return recalculateDwellTimeUsingThresholds(msecsIntoDay - tripStartTimeMsecs);
+				}
+			}
+		} else if (departureStopPathIndex != block.numStopPaths(tripIndex) - 1) {
+			if (arrivalTime != null && departureTime != null &&
+					arrivalStopPathIndex != null && departureStopPathIndex == arrivalStopPathIndex) {
+				return recalculateDwellTimeUsingThresholds(departureTime - arrivalTime);
+			}
+		} else {
+			return 0l;
+		}
+
+		return null;
 	}
 
 	/**
