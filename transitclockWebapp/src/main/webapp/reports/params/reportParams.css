@@ -298,8 +298,12 @@ div#ui-datepicker-div {
     overflow: auto;
 }
 
+.inner-spacing {
+    padding: 10px 10px;
+}
+
 .custom-canvas {
-    margin-bottom: 100px;
+    margin-bottom: 40px;
 }
 
 .ui-datepicker-header.ui-widget-header.ui-helper-clearfix.ui-corner-all {
@@ -338,11 +342,120 @@ span.ui-datepicker-month {
 }
 
 .trip-block .maxWidth{
-    max-width: 350px;
-    margin: 10px;
+    max-width: 400px;
+    margin: 25px 0;
 }
 
 .select2-container .select2-selection--multiple .select2-selection__rendered {
     overflow: auto;
     max-height: 100px;
+}
+
+.individual-route {
+    clear: both;
+}
+
+.border-table table,
+.border-table th,
+.border-table td {
+    border: 1px solid #e5e5e5;
+    padding: 10px;
+    color: #444;
+}
+
+.border-table{
+    border-collapse: collapse;
+    border-spacing: 0px;
+}
+
+.visualization-container {
+    border: 1px solid #e5e5e5;
+    padding: 10px;
+}
+
+
+#run-time-tabs.ui-widget-content {
+    background: none;
+    border: 0;
+    padding: 0;
+}
+
+#run-time-tabs .ui-state-hover,
+#run-time-tabs  .ui-widget-content .ui-state-hover,
+#run-time-tabs  .ui-widget-header .ui-state-hover
+#run-time-tabs .ui-state-active,
+#run-time-tabs .ui-widget-content .ui-state-active,
+#run-time-tabs  .ui-widget-header .ui-state-active {
+
+    font-weight: normal;
+    outline:none;
+    /* color: #fff !important; */
+}
+
+#run-time-tabs .ui-state-active, #run-time-tabs .ui-widget-content .ui-state-active, #run-time-tabs .ui-widget-header .ui-state-active a {
+    color: #fff
+}
+
+#run-time-tabs .ui-widget-header {
+    background: none;
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+   /* border: none;*/
+    border-radius: 0;
+}
+
+#run-time-tabs .ui-corner-top {
+    border-radius: 0;
+}
+
+.ui-state-default a, .ui-state-default a:link, .ui-state-default a:visited {
+    color: #444;
+}
+
+#run-time-tabs.ui-tabs .ui-tabs-panel {
+    overflow: auto;
+    height: 80vh;
+}
+
+.ui-state-focus, a:focus {
+    outline: none;
+}
+
+.ui-tabs .ui-tabs-nav .ui-tabs-anchor {
+    border: 1px solid #e5e5e5;
+    margin-bottom: -2px;
+    border-bottom: 0;
+}
+
+#run-time-tabs .ui-state-hover .ui-tabs-anchor,
+#run-time-tabs .ui-widget-content .ui-state-hover .ui-tabs-anchor,
+#run-time-tabs .ui-widget-header .ui-state-hover .ui-tabs-anchor,
+#run-time-tabs .ui-state-active .ui-tabs-anchor,
+#run-time-tabs .ui-widget-content .ui-state-active .ui-tabs-anchor,
+#run-time-tabs .ui-widget-header .ui-state-active .ui-tabs-anchor {
+    border-top: 4px solid #029932;
+    color: #444;
+    margin-bottom: -2px;
+    border-bottom: 0;
+    background: #fff;
+}
+
+.ui-tabs .ui-tabs-nav li {
+    border: none;
+}
+
+label#visualization-container-header {
+    width: 50%;
+}
+
+#trips-container {
+    margin-bottom: 20px;
+}
+
+h3#visualization-container-header {
+    font-size: 23px;
+    /* font-weight: bold; */
+    font-family: Trebuchet MS,Tahoma,Verdana,Arial,sans-serif;
+    margin-top: 0px;
 }
