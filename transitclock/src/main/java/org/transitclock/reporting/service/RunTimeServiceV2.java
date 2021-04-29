@@ -6,17 +6,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.core.ServiceType;
 import org.transitclock.db.hibernate.HibernateUtils;
+import org.transitclock.db.query.ArrivalDepartureQuery;
 import org.transitclock.db.query.RunTimeForRouteQuery;
 import org.transitclock.db.structs.*;
 import org.transitclock.ipc.data.*;
 import org.transitclock.reporting.*;
 import org.transitclock.reporting.dao.RunTimeRoutesDao;
+import org.transitclock.reporting.keys.ArrivalDepartureTripKey;
+import org.transitclock.reporting.keys.StopPathRunTimeKey;
 import org.transitclock.reporting.keys.TripConfigRevKey;
 
 import javax.inject.Inject;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.transitclock.ipc.util.GtfsDbDataUtil.getRouteShortName;
 
@@ -220,9 +225,9 @@ public class RunTimeServiceV2 {
 
         List<RunTimesForRoutes> runTimesForRoutes = dao.getRunTimesForRoutes(rtQuery);
 
-        Map<String, TripStopPathStatisticsV2> routeStatisticsByRouteName = processTripStatsMap(runTimesForRoutes);
+        Map<String, TripStopPathStatisticsV2> tripStatisticsByTripId = processTripStatsMap(runTimesForRoutes);
 
-        List<IpcRunTimeForTrip> ipcRunTimeForTripList = getRunTimeStatsForTripsByStopPath(routeStatisticsByRouteName);
+        List<IpcRunTimeForTrip> ipcRunTimeForTripList = getRunTimeStatsForTripsByStopPath(tripStatisticsByTripId);
 
         Map<String, List<Long>> runTimesByTripId = getRunTimesByTripId(runTimesForRoutes);
 
@@ -331,5 +336,111 @@ public class RunTimeServiceV2 {
 
     private boolean invalidTripStatistics(TripStopPathStatisticsV2 tripStatistics) {
         return !tripStatistics.hasAllStopPathsForRunTimes() || !tripStatistics.hasAllStopPathsForDwellTimes();
+    }
+
+    /**
+     * Get RunTime Information for Trip Stop Paths
+     * @param beginDate
+     * @param endDate
+     * @param beginTime
+     * @param endTime
+     * @param routeIdOrShortName
+     * @param tripId
+     * @param serviceType
+     * @param agencyId
+     * @param readOnly
+     * @return
+     */
+    public List<IpcRunTimeForStopPath> getRunTimeForStopPaths(LocalDate beginDate,
+                                                              LocalDate endDate,
+                                                              LocalTime beginTime,
+                                                              LocalTime endTime,
+                                                              String routeIdOrShortName,
+                                                              String tripId,
+                                                              ServiceType serviceType,
+                                                              String agencyId,
+                                                              boolean readOnly) throws Exception {
+
+        String routeShortName = getRouteShortName(routeIdOrShortName);
+
+        Integer beginTimeSeconds = beginTime != null ? beginTime.toSecondOfDay() : null;
+        Integer endTimeSeconds = endTime != null ? endTime.toSecondOfDay(): null;
+
+        RunTimeForRouteQuery.Builder rtBuilder = new RunTimeForRouteQuery.Builder();
+        RunTimeForRouteQuery rtQuery = rtBuilder
+                .beginDate(beginDate)
+                .endDate(endDate)
+                .beginTime(beginTimeSeconds)
+                .endTime(endTimeSeconds)
+                .serviceType(serviceType)
+                .routeShortName(routeShortName)
+                .tripId(tripId)
+                .includeRunTimesForStops(true)
+                .readOnly(readOnly)
+                .build();
+
+        List<RunTimesForRoutes> runTimesForRoutes = dao.getRunTimesForRoutes(rtQuery);
+
+        Map<String, TripStopPathStatisticsV2> tripStatisticsByTripId = processTripStatsMap(runTimesForRoutes);
+
+        List<IpcRunTimeForStopPath> runTimeForStopPaths = getRunTimeStatsForStopPaths(tripStatisticsByTripId);
+
+        return runTimeForStopPaths;
+    }
+
+
+    private List<IpcRunTimeForStopPath> getRunTimeStatsForStopPaths(Map<String, TripStopPathStatisticsV2> tripStatsByTripId){
+
+        List<IpcRunTimeForStopPath> ipcRunTimeForStopPaths = new ArrayList<>();
+
+
+        // Loop through each TripStats grouped by Trip Id
+        for(Map.Entry<String, TripStopPathStatisticsV2> tripStatEntry : tripStatsByTripId.entrySet()){
+
+            TripStopPathStatisticsV2 tripStatistics = tripStatEntry.getValue();
+
+            //Validation -- Make sure trip is complete
+            if(invalidTripStatistics(tripStatistics)){
+                continue;
+            }
+
+            Map<StopPathRunTimeKey, StopPathStatisticsV2> stopPathStatsMap = tripStatistics.getAllStopPathStatistics();
+
+            for(Map.Entry<StopPathRunTimeKey, StopPathStatisticsV2> stopPathEntry : stopPathStatsMap.entrySet()) {
+
+                StopPathRunTimeKey stopPathRunTimeKey = stopPathEntry.getKey();
+                StopPathStatisticsV2 stopPathStatistics = stopPathEntry.getValue();
+
+                Double medianRunTime = stopPathStatistics.getMedianRunTime();
+                Double fixedTime = stopPathStatistics.getMinRunTime();
+                Double dwellTime = stopPathStatistics.getMedianDwellTime();
+                Double variableTime = null;
+
+                // At minimum need median runTime and dwellTime to have complete runTime
+                if (medianRunTime == null || dwellTime == null) {
+                    continue;
+                }
+
+                if (medianRunTime != null && fixedTime != null) {
+                    variableTime = medianRunTime - fixedTime;
+                }
+
+
+                ipcRunTimeForStopPaths.add(
+                        new IpcRunTimeForStopPath(
+                                stopPathRunTimeKey.getStopPathId(),
+                                stopPathRunTimeKey.getStopPathIndex(),
+                                null,
+                                null,
+                                medianRunTime,
+                                fixedTime,
+                                variableTime,
+                                dwellTime
+                        )
+                );
+            }
+        }
+
+        return ipcRunTimeForStopPaths;
     }
 }

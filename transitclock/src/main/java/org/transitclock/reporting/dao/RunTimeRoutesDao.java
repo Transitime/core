@@ -51,6 +51,7 @@ public class RunTimeRoutesDao {
                 getServiceTypeWhere(rtQuery, parameterNameAndValues) +
                 getHeadSignWhere(rtQuery, parameterNameAndValues) +
                 getTripPatternWhere(rtQuery, parameterNameAndValues) +
+                getTripIdWhere(rtQuery, parameterNameAndValues) +
                 "ORDER BY rt.routeShortName, rt.startTime DESC";
 
         try {
@@ -155,6 +156,16 @@ public class RunTimeRoutesDao {
         if(StringUtils.isNotBlank(tripPatternId)) {
             hql += " AND rt.tripPatternId = :tripPatternId ";
             parameterNameAndValues.put("tripPatternId", tripPatternId);
+        }
+        return hql;
+    }
+
+    private String getTripIdWhere(RunTimeForRouteQuery rtQuery, Map<String, Object> parameterNameAndValues) {
+        String hql = "";
+        String tripId = rtQuery.getTripId();
+        if(StringUtils.isNotBlank(tripId)) {
+            hql += " AND rt.tripId = :tripId ";
+            parameterNameAndValues.put("tripId", tripId);
         }
         return hql;
     }

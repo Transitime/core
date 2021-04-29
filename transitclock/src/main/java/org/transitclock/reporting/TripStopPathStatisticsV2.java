@@ -19,7 +19,6 @@ public class TripStopPathStatisticsV2 {
     private Set<StopPathRunTimeKey> uniqueStopPathDwellTimes = new LinkedHashSet<>();
     private Map<StopPathRunTimeKey, StopPathStatisticsV2> stopPathStatistics = new HashMap<>();
     private Map<TripTimeVehicleKey, Long> runTimesForTrips = new HashMap<>();
-    //private Map<TripTimeVehicleKey, Map<StopPathRunTimeKey,StopPathRunTime>> stopPathRunTimesPerUniqueTrip = new HashMap();
 
     public TripStopPathStatisticsV2(Trip primaryTrip, int nextTripTime) {
         this.primaryTrip = primaryTrip;

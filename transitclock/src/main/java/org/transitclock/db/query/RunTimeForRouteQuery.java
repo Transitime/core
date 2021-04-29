@@ -14,6 +14,7 @@ public class RunTimeForRouteQuery {
     private String headsign;
     private String tripPatternId;
     private String routeShortName;
+    private String tripId;
     private ServiceType serviceType;
     private boolean timePointsOnly;
     private boolean scheduledTimesOnly;
@@ -27,6 +28,7 @@ public class RunTimeForRouteQuery {
         this.endTime = builder.endTime;
         this.routeShortName = builder.routeShortName;
         this.headsign = builder.headsign;
+        this.tripId = builder.tripId;
         this.tripPatternId = builder.tripPatternId;
         this.serviceType = builder.serviceType;
         this.timePointsOnly = builder.timePointsOnly;
@@ -63,6 +65,10 @@ public class RunTimeForRouteQuery {
         return tripPatternId;
     }
 
+    public String getTripId() {
+        return tripId;
+    }
+
     public ServiceType getServiceType() {
         return serviceType;
     }
@@ -91,6 +97,7 @@ public class RunTimeForRouteQuery {
         private Integer endTime;
         private String routeShortName;
         private String headsign;
+        private String tripId;
         private String tripPatternId;
         private ServiceType serviceType;
         private boolean timePointsOnly = false;
@@ -132,6 +139,11 @@ public class RunTimeForRouteQuery {
 
         public Builder tripPatternId(String tripPatternId) {
             this.tripPatternId = tripPatternId;
+            return this;
+        }
+
+        public Builder tripId(String tripId) {
+            this.tripId = tripId;
             return this;
         }
 
