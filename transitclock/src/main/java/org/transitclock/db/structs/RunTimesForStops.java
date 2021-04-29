@@ -185,8 +185,11 @@ public class RunTimesForStops implements Serializable {
     }
 
     public Long getRunTime() {
-        if (prevStopDepartureTime != null && time != null) {
-            return time.getTime() - prevStopDepartureTime.getTime();
+        if(stopPathIndex == 0){
+            return 0l;
+        }
+        else if (prevStopDepartureTime != null && time != null && dwellTime != null) {
+            return (time.getTime() - dwellTime) - prevStopDepartureTime.getTime();
         }
         return null;
     }

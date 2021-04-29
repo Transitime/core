@@ -44,19 +44,14 @@ public class RunTimeGenerator {
 			// check that this is a valid run time candidate
 			TemporalMatch match = vehicleState.getMatch();
 			TemporalMatch prevMatch = vehicleState.getPreviousMatch();
-
-			if(!isValidRunTimeCandidate(match, prevMatch)){
+			if(!hasCrossedToNextTrip(match, prevMatch)){
 				return false;
 			}
 
-			int lastStopIndex = getLastStopIndex(prevMatch);
-
-			// Check to see if we're at the last stop
+			// Lookup Arrivals Departures for Trip
 			String tripId = prevMatch.getTrip().getId();
 			long vehicleMatchAvlTime = prevMatch.getAvlTime();
-			String vehicleId= vehicleState.getVehicleId();
 			Integer tripStartTime = prevMatch.getTrip().getStartTime();
-
 
 			List<IpcArrivalDeparture> arrivalDeparturesForStop = getArrivalDeparturesForTrip(tripId,
 					vehicleMatchAvlTime, tripStartTime);
@@ -65,7 +60,10 @@ public class RunTimeGenerator {
 				return false;
 			}
 
-			return processRunTimesForTrip(vehicleId, arrivalDeparturesForStop, prevMatch, match, lastStopIndex);
+			int lastStopIndex = getLastStopIndex(prevMatch);
+			String vehicleId= vehicleState.getVehicleId();
+			Trip trip = prevMatch.getTrip();
+			return processRunTimesForTrip(vehicleId, trip, arrivalDeparturesForStop, prevMatch, match, lastStopIndex);
 
 		} catch (Exception e) {
 			logger.error("Exception when processing run times", e);
@@ -80,8 +78,8 @@ public class RunTimeGenerator {
 	}
 
 
-	private boolean isValidRunTimeCandidate(TemporalMatch currentMatch,
-											TemporalMatch previousMatch) {
+	private boolean hasCrossedToNextTrip(TemporalMatch currentMatch,
+										 TemporalMatch previousMatch) {
 
 		if(currentMatch != null && previousMatch != null &&
 				previousMatch.getTripIndex() < currentMatch.getTripIndex() &&
@@ -115,13 +113,13 @@ public class RunTimeGenerator {
 	}
 
 	public boolean processRunTimesForTrip(String vehicleId,
+										  Trip trip,
 										  List<IpcArrivalDeparture> arrivalDeparturesForStop,
 										  TemporalMatch matchAtPreviousStop,
 										  TemporalMatch matchAtCurrentStop,
 										  Integer lastStopIndex){
 
 
-		Trip trip = matchAtPreviousStop.getTrip();
 		int dwellTimeCount = lastStopIndex;
 		Long totalDwellTime = null;
 		Date firstStopDepartureTime = null;
@@ -137,7 +135,7 @@ public class RunTimeGenerator {
 		{
 			IpcArrivalDeparture arrivalDeparture = arrivalDeparturesForStop.get(i);
 
-			if(isSpatialMatchAndArrivalDepartureMatch(arrivalDeparture, matchAtPreviousStop, vehicleId))
+			if(isSpatialMatchAndArrivalDepartureMatch(arrivalDeparture, trip.getId(), vehicleId))
 			{
 				if(finalStopArrivalTime == null){
 					if(arrivalDeparture.isArrival()){
@@ -225,7 +223,7 @@ public class RunTimeGenerator {
 						Long dwellTime = getDwellTime(arrivalDeparture, currentStopScheduledTime);
 						Boolean lastStop = false;
 						Boolean timePoint = isTimePoint(stopPath);
-						Date arrivalTime = getArrivalTimeFromDepartureTime(arrivalDeparture);
+						Date departureTime = arrivalDeparture.getTime();
 
 						// Setting dwell time and stopPathLenght to help calculate speed since
 						// we need to subtract dwell time to get arrival time and use stopPathLength
@@ -245,7 +243,7 @@ public class RunTimeGenerator {
 								configRev,
 								stopPathId,
 								stopPathIndex,
-								arrivalTime,
+								departureTime,
 								prevStopDepartureTime,
 								scheduledCurrentStopDepartureTime,
 								scheduledPrevStopDepartureTime,
@@ -298,7 +296,7 @@ public class RunTimeGenerator {
 						Boolean timePoint = isTimePoint(stopPath);
 						Long dwellTime = getDwellTime(arrivalDeparture, currentStopScheduledTime);
 						Double speed = null;
-						Date arrivalTime = getArrivalTimeFromDepartureTime(arrivalDeparture);
+						Date departureTime = arrivalDeparture.getTime();
 
 
 						// Setting first stop properties
@@ -314,7 +312,7 @@ public class RunTimeGenerator {
 								configRev,
 								stopPathId,
 								stopPathIndex,
-								arrivalTime,
+								departureTime,
 								prevStopDepartureTime,
 								scheduledCurrentStopDepartureTime,
 								scheduledPrevStopDepartureTime,
@@ -342,11 +340,9 @@ public class RunTimeGenerator {
 					}
 
 					// Process Run Times for Route
-
 					ServiceUtils serviceUtils = Core.getInstance().getServiceUtils();
 					ServiceType serviceType = serviceUtils.getServiceTypeForTrip(arrivalDeparture.getTime(),
-							trip.getStartTime(),
-							trip.getServiceId());
+							trip.getStartTime(), trip.getServiceId());
 
 					runTimesForRoutes.setConfigRev(trip.getConfigRev());
 					runTimesForRoutes.setServiceId(trip.getServiceId());
@@ -368,9 +364,14 @@ public class RunTimeGenerator {
 					runTimesForRoutes.setExpectedLastStopPathIndex(lastStopIndex);
 					runTimesForRoutes.setRunTimesForStops(runTimesForStops);
 
-					logger.debug("Previous Match {}, \n Current Match {} \n {} with {} stops", matchAtPreviousStop.toString(),
-							matchAtCurrentStop.toString(), runTimesForRoutes.toString(), runTimesForStops.size());
+					if(matchAtPreviousStop != null){
+						logger.debug("Previous Match {}", matchAtPreviousStop.toString());
+					}
+					if(matchAtPreviousStop != null){
+						logger.debug("Current Match {}", matchAtCurrentStop.toString());
+					}
 
+					logger.debug("{} with {} stops", runTimesForRoutes.toString(), runTimesForStops.size());
 
 					Core.getInstance().getDbLogger().add(runTimesForRoutes);
 					logger.debug("Processing Run Times for Route took {} msec", timer.elapsedMsecStr());
@@ -485,27 +486,16 @@ public class RunTimeGenerator {
 
 	public boolean isArrivalDeparturesValid(List<IpcArrivalDeparture> arrivalDeparturesForStop){
 		if(arrivalDeparturesForStop == null || arrivalDeparturesForStop.size() < 2){
-			//|| arrivalDeparturesForStop.get(0).getStopPathIndex() != lastStopIndex
-			// || arrivalDeparturesForStop.get(arrivalDeparturesForStop.size()-1).getStopPathIndex() != 0){
 			return false;
 		}
 		return true;
 	}
 
 	private boolean isSpatialMatchAndArrivalDepartureMatch(IpcArrivalDeparture arrivalDeparture,
-														   SpatialMatch matchAtPreviousStop,
+														   String tripId,
 														   String vehicleId){
-		return arrivalDeparture.getTripId().equals(matchAtPreviousStop.getTrip().getId()) &&
+		return arrivalDeparture.getTripId().equals(tripId) &&
 				arrivalDeparture.getVehicleId().equals(vehicleId);
-				//matchAtPreviousStop.getTripIndex() == arrivalDeparture.getTripIndex();
-	}
-
-	private boolean isLastStopForTrip(Integer currentStopPathIndex, Integer lastStopIndex){
-		return currentStopPathIndex == lastStopIndex;
-	}
-
-	private boolean isMiddleStopForTrip(Integer currentStopPathIndex, Integer lastStopIndex){
-		return currentStopPathIndex > 0 && currentStopPathIndex < lastStopIndex;
 	}
 
 	private boolean isNotLastStopForTrip(Integer currentStopPathIndex, Integer lastStopIndex){
