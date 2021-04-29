@@ -16,7 +16,7 @@
  */
 package org.transitclock.ipc.interfaces;
 
-import org.transitclock.core.dataCache.CanceledTripKey;
+import org.transitclock.core.dataCache.canceledTrip.CanceledTripKey;
 import org.transitclock.db.structs.Location;
 import org.transitclock.ipc.data.IpcCanceledTrip;
 import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
@@ -107,7 +107,7 @@ public interface PredictionsInterface extends Remote {
 	/**
 	 * Returns a list of the latest canceled trips by vehicleId
 	 */
-	public HashMap<CanceledTripKey, IpcCanceledTrip> getAllCanceledTrips() throws RemoteException;
+	public HashMap<String, IpcCanceledTrip> getAllCanceledTrips() throws RemoteException;
 
 
 	/**

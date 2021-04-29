@@ -1,4 +1,4 @@
-package org.transitclock.core.dataCache;
+package org.transitclock.core.dataCache.canceledTrip;
 
 import java.io.Serializable;
 import java.util.Objects;
