@@ -1,4 +1,4 @@
-package org.transitclock.core.dataCache;
+package org.transitclock.core.dataCache.canceledTrip;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class CanceledTripManager {
+public class CanceledTripAndVehicleCache {
 
     private static LongConfigValue canceledTripCacheExpireSec =
             new LongConfigValue("transitclock.avl.canceledTripCacheExpireSec", 60l,
@@ -18,7 +18,7 @@ public class CanceledTripManager {
     private Cache<CanceledTripKey, IpcCanceledTrip> canceledTripCache;
 
     // This is a singleton class
-    private static CanceledTripManager singleton = new CanceledTripManager();
+    private static CanceledTripAndVehicleCache singleton = new CanceledTripAndVehicleCache();
 
     /********************** Member Functions **************************/
 
@@ -26,7 +26,7 @@ public class CanceledTripManager {
      * Constructor made private because this is singleton class where
      * getInstance() should be used to get the VehicleStateManager.
      */
-    private CanceledTripManager() {
+    private CanceledTripAndVehicleCache() {
         canceledTripCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(canceledTripCacheExpireSec.getValue(), TimeUnit.SECONDS)
                 .build();
@@ -36,11 +36,11 @@ public class CanceledTripManager {
      * Returns the singleton CanceledTripManager
      * @return
      */
-    public static CanceledTripManager getInstance() {
+    public static CanceledTripAndVehicleCache getInstance() {
         if(singleton == null){
-            synchronized (CanceledTripManager.class){
+            synchronized (CanceledTripAndVehicleCache.class){
                 if(singleton == null){
-                    singleton = new CanceledTripManager();
+                    singleton = new CanceledTripAndVehicleCache();
                 }
             }
         }

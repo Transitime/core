@@ -29,9 +29,10 @@ import org.transitclock.core.SpatialMatcher.MatchingType;
 import org.transitclock.core.autoAssigner.AutoBlockAssigner;
 import org.transitclock.core.blockAssigner.BlockAssigner;
 import org.transitclock.core.dataCache.PredictionDataCache;
-import org.transitclock.core.dataCache.CanceledTripManager;
+import org.transitclock.core.dataCache.canceledTrip.CanceledTripAndVehicleCache;
 import org.transitclock.core.dataCache.VehicleDataCache;
 import org.transitclock.core.dataCache.VehicleStateManager;
+import org.transitclock.core.dataCache.canceledTrip.CanceledTripCache;
 import org.transitclock.db.structs.*;
 import org.transitclock.db.structs.AvlReport.AssignmentType;
 import org.transitclock.logging.Markers;
@@ -1583,11 +1584,10 @@ public class AvlProcessor {
 	private boolean isCanceled(VehicleState vehicleState) {
 
 		AvlReport report = vehicleState.getAvlReport();
-		String vehicleId = report.getVehicleId();
 		String tripId = getTripId(report);
 
-		if(vehicleId != null && tripId != null){
-			return CanceledTripManager.getInstance().isCanceled(vehicleId, tripId);
+		if(tripId != null){
+			return CanceledTripCache.getInstance().isCanceled(tripId);
 		}
 
 		return false;
