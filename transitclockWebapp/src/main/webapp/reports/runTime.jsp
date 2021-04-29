@@ -17,7 +17,6 @@
     <script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.plugin.js"></script>
     <script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.datepick.js"></script>
 
-
     <link href="params/reportParams.css" rel="stylesheet"/>
     <style>
 
@@ -392,114 +391,145 @@
     </div>
 
 
-    <div id="mainPage" class="scrollable-element">
-        <div id="mainResults">
-            <div id="paramDetails" class="paramDetails" style="float: left;">
-                <p style='font-size: 0.8em;'></p>
-            </div>
-
-            <br>
-
-
-            <div id="avgRunTime" class="individual-route"
-                 style="display: inline-block; width: 90%; vertical-align: middle; margin-left:auto; margin-right:auto;">
-                <p style="font-size: 0.8em;display: inline-block;"></p>
-                <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
-                <p style="font-size: 0.8em;display: inline-block;"></p>
-                <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
-                <p style="font-size: 0.8em;display: inline-block;"></p>
-                <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
-                <p style="font-size: 0.8em;display: inline-block;"></p>
-                <p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>
-            </div>
-
-            <div  style="width:100%; display: flex; justify-content: center;" class="individual-route">
-                <input type="button" id="visualizeButton" class="visualizeButton" value="Visualize Trips"
-                       style="margin-top: 10px; margin-bottom: 10px; margin-left:auto; margin-right:auto; width:70%"
-                       hidden="true">
-            </div>
+    <div id="mainPage" class="scrollable-element inner-spacing">
+        <div id="paramDetails" class="paramDetails">
+            <p style='font-size: 0.8em;'></p>
         </div>
+        <br>
 
-        <div id="comparisonModal"  class="individual-route" hidden="true">
-            <div id="modalContents" style="margin-right: 30px; margin-left: 30px; margin-top: 10px;">
-                <div id="modalHeader" style="text-align: left; vertical-align: middle; font-size: medium">
-                    Trip Run Time Comparison
-                    <button id='closeModal' type='button' style='float:right; margin-right: -10px;'>&times;</button>
-                </div>
-                <div id="paramDetailsModal" class="paramDetails" style="margin-top: 20px; margin-bottom: 20px;"></div>
+        <div id="run-time-tabs">
+            <ul>
+                <li><a href="#component">Component</a></li>
+                <li><a href="#percentage">Percentage</a></li>
+                <li><a href="#distribution">Distribution</a></li>
+            </ul>
 
-                <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
-                <link rel="stylesheet" type="text/css"
-                      href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
+            <div id="component">
+                <div id="mainResults">
 
-                <script>
-                    $(function () {
-                        var calendarIconTooltip = "Popup calendar to select date";
 
-                        $("#modalDatepicker").datepick({
-                            dateFormat: "yy-mm-dd",
-                            showOtherMonths: true,
-                            selectOtherMonths: true,
-                            // Show button for calendar
-                            buttonImage: "img/calendar.gif",
-                            buttonImageOnly: true,
-                            showOn: "both",
-                            // Don't allow going past current date
-                            maxDate: 0,
-                            // onClose is for restricting end date to be after start date,
-                            // though it is potentially confusing to user
-                            rangeSelect: true,
-                            showTrigger: '<button type="button" class="trigger">' +
-                                '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
-                            onClose: function (selectedDate) {
-                                // Strangely need to set the title attribute for the icon again
-                                // so that don't revert back to a "..." tooltip
-                                // FIXME $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
-                            }
-                        });
 
-                        // Use a better tooltip than the default "..." for the calendar icon
-                        $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
-                    })
-                </script>
 
-                <div style='font-size: medium; margin-bottom: 2px;'>Select Comparison Range:</div>
+                    <div class="individual-route">
+                        <h3>Summary</h3>
+                        <table class="border-table">
+                            <tr>
+                                <th>Average</th>
+                                <th>Fixed</th>
+                                <th>Variable</th>
+                                <th>Dwell</th>
+                            </tr>
+                            <tr class="average-time-details">
+                            </tr>
+                        </table>
+                    </div>
 
-                <div class="param-modal">
-                    <label for="modalDatepicker">Date:</label>
-                    <input type="text" id="modalDatepicker" name="modalDatepicker"
-                           title="The range of dates that you want to examine data for.
-                                       <br><br> Begin date must be before the end date."
-                           size="14"
-                           value="Date range"/>
+
                 </div>
 
-                <div class="param-modal">
-                    <label for="serviceDayType">Service Day:</label>
-                    <select id="modalServiceDayType" name="modalServiceDayType">
-                        <option value="">All</option>
-                        <option value="weekday">Weekday</option>
-                        <option value="saturday">Saturday</option>
-                        <option value="sunday">Sunday</option>
-                    </select>
+                <div id="comparisonModal"  class="individual-route" hidden="true">
+                    <div id="modalContents" style="margin-right: 30px; margin-left: 30px; margin-top: 10px;">
+                        <div id="modalHeader" style="text-align: left; vertical-align: middle; font-size: medium">
+                            Trip Run Time Comparison
+                            <button id='closeModal' type='button' style='float:right; margin-right: -10px;'>&times;</button>
+                        </div>
+                        <div id="paramDetailsModal" class="paramDetails" style="margin-top: 20px; margin-bottom: 20px;"></div>
+
+                        <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
+                        <link rel="stylesheet" type="text/css"
+                              href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
+
+                        <script>
+                            $(function () {
+                                var calendarIconTooltip = "Popup calendar to select date";
+
+                                $("#modalDatepicker").datepick({
+                                    dateFormat: "yy-mm-dd",
+                                    showOtherMonths: true,
+                                    selectOtherMonths: true,
+                                    // Show button for calendar
+                                    buttonImage: "img/calendar.gif",
+                                    buttonImageOnly: true,
+                                    showOn: "both",
+                                    // Don't allow going past current date
+                                    maxDate: 0,
+                                    // onClose is for restricting end date to be after start date,
+                                    // though it is potentially confusing to user
+                                    rangeSelect: true,
+                                    showTrigger: '<button type="button" class="trigger">' +
+                                        '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
+                                    onClose: function (selectedDate) {
+                                        // Strangely need to set the title attribute for the icon again
+                                        // so that don't revert back to a "..." tooltip
+                                        // FIXME $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
+                                    }
+                                });
+
+                                // Use a better tooltip than the default "..." for the calendar icon
+                                $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
+                            })
+                        </script>
+
+                        <div style='font-size: medium; margin-bottom: 2px;'>Select Comparison Range:</div>
+
+                        <div class="param-modal">
+                            <label for="modalDatepicker">Date:</label>
+                            <input type="text" id="modalDatepicker" name="modalDatepicker"
+                                   title="The range of dates that you want to examine data for.
+                                               <br><br> Begin date must be before the end date."
+                                   size="14"
+                                   value="Date range"/>
+                        </div>
+
+                        <div class="param-modal">
+                            <label for="serviceDayType">Service Day:</label>
+                            <select id="modalServiceDayType" name="modalServiceDayType">
+                                <option value="">All</option>
+                                <option value="weekday">Weekday</option>
+                                <option value="saturday">Saturday</option>
+                                <option value="sunday">Sunday</option>
+                            </select>
+                        </div>
+                        <div style="width:100%; display: flex; justify-content: center;">
+                            <input type="button" id="modalSubmit" class="submit" value="Submit">
+                        </div>
+                    </div>
                 </div>
-                <div style="width:100%; display: flex; justify-content: center;">
-                    <input type="button" id="modalSubmit" class="submit" value="Submit">
+
+                <div id="comparisonResults" class="individual-route" hidden="true"></div>
+
+                <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+
+                <div class="individual-route trip-block " >
+                    <div class="param" id="trips-container"></div>
+
                 </div>
+                <div class="visualization-container">
+                    <%--  <h3 id="visualization-container-header"> Route Breakdown</h3>--%>
+                    <div id="runTimeVisualization" hidden="true">
+
+                    </div>
+                </div>
+                <br>
+                <br>
             </div>
+
+            <div id="percentage">
+                <div class="percentile-select-container" id="percentile-select-container"></div>
+                <h3>Summary</h3>
+                <div id="percentile-summary-content"></div>
+                <h3>Trip Breakdown</h3>
+                <table class="border-table percentile-summary-details">
+
+                </table>
+            </div>
+
+            <div id="distribution">
+                Distribution Tab
+            </div>
+
         </div>
 
-        <div id="comparisonResults" class="individual-route" hidden="true"></div>
-
-        <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
-
-        <div class="individual-route trip-block " >
-            <div class="param maxWidth" id="trips-container"></div>
-
-        </div>
-        <div id="runTimeVisualization" hidden="true">
-
-        </div>
     </div>
 </div>
 </body>
@@ -511,6 +541,7 @@
 
     $("#route").attr("style", "width: 200px");
     $(".individual-route-only").hide();
+    $( "#run-time-tabs" ).tabs();
 
     $("#route").change(function () {
         if ($("#route").val().trim() != "") {
@@ -558,6 +589,208 @@
         }
     });
 
+    function range(start, end, custom) {
+        return Array(end - start + 1).fill().map(function(_, idx) {
+            if(custom){
+                return custom;
+            }
+            return { "name": (5 *(idx+1) + "%" ), "value": (5 *(idx+1))}
+        })
+    }
+
+    function findMinMax(arr) {
+
+        var min = arr[0], max = arr[0];
+
+        for (var i = 1, len=arr.length; i < len; i++) {
+            var v = arr[i].y;
+            min = (v < min) ? v : min;
+            max = (v > max) ? v : max;
+        }
+
+        return [min, max];
+    }
+
+    function percentileCalculation(data, param){
+
+        var sortedData = data.sort(function(a, b) {
+            return a - b;
+        });
+        var sortedDataLength = sortedData.length;
+        var percentageValue = param;
+        var valueOfPercentile = sortedDataLength * percentageValue / 100;
+        var pickedValue = 0;
+        var flooredValue = Math.floor(valueOfPercentile) === valueOfPercentile;
+        var sortedIndexValues = [];
+        var nonSortedIndexValues = [];
+        var valuesPert = [];
+
+        if(flooredValue){
+            var u = data[valueOfPercentile- 1];
+            var a = data[valueOfPercentile];
+            sortedIndexValues.push(u);
+            sortedIndexValues.push(a);
+
+
+            pickedValue = (data[valueOfPercentile- 1] + data[valueOfPercentile]) / 2;
+        } else {
+            var ceilValue = Math.ceil(valueOfPercentile);
+            sortedIndexValues.push(ceilValue-1);
+            pickedValue = sortedData[ceilValue - 1];
+        }
+        data.forEach(function(eachValue,index){
+            if(sortedIndexValues.length == 2 && (sortedData[sortedIndexValues[0]] === eachValue || sortedData[sortedIndexValues[1]] === eachValue)){
+                nonSortedIndexValues.push(index);
+            }else if(sortedIndexValues.length == 1 && (sortedData[sortedIndexValues[0]] === eachValue)){
+                nonSortedIndexValues.push(index);
+            }
+
+        });
+
+
+        return nonSortedIndexValues;
+    }
+
+    function convertToMins(scheduledData){
+        var data = [];
+        var sumOfData = 0;
+        var average;
+        for (var i = 0 in scheduledData) {
+
+            data.push(parseFloat(scheduledData[i]));
+            sumOfData += parseFloat(scheduledData[i] );
+
+        }
+
+        average = Math.round(sumOfData/scheduledData.length);
+        var minMax = findMinMax(scheduledData);
+
+        return {
+            minsData : data,
+            average: average,
+            min: minMax[0],
+            max: minMax[1]
+
+        }
+    }
+
+
+    function generatePercentileTable(stopsData, formattedScheduled, formattedRunTimeTrips){
+
+        var tableTD = "<tr><th>Trip</th><th>Schedule</th><th>N %ile</th></tr>";
+        var sumOfData = 0;
+        stopsData.forEach(function (eachTrip, i) {
+
+            var eachData = {
+                trip: eachTrip,
+                schedule: formattedScheduled[i]+"min",
+                percentile: formattedRunTimeTrips[i] +"min"
+            };
+            // percentileData.push(eachData);
+            sumOfData += parseFloat(formattedRunTimeTrips[i]);
+            tableTD += "<tr>";
+            tableTD += "<td>"+eachData.trip+"</td>";
+            tableTD += "<td>"+eachData.schedule+"</td>";
+            tableTD += "<td>"+eachData.percentile+"</td>";
+            tableTD += "</tr>";
+        });
+
+        var average = Math.round(sumOfData/stopsData.length);
+        var percentileSummaryData = average +"min";
+
+        $("#percentile-summary-content").html(percentileSummaryData);
+
+        return tableTD;
+    }
+
+    function generateRunTimes(tripRunTimes, percentile){
+        var filteredRunTimeTrips = [];
+        tripRunTimes.forEach(function (eachTrip, i) {
+            if(!eachTrip.formattedRunTimes){
+                eachTrip.formattedRunTimes = msToMin(eachTrip.runTimes);
+            }
+            var nonSortedIndex =   percentileCalculation(eachTrip.formattedRunTimes, percentile);
+            filteredRunTimeTrips.push(eachTrip.formattedRunTimes[nonSortedIndex[0]] || 0);
+        });
+
+        return filteredRunTimeTrips;
+    }
+    function percentageTabDetails(response){
+
+        $("#percentile-select-container").html("");
+        $("#percentile-summary-content").html("");
+        $(".percentile-summary-details").html("");
+
+        var percentileSelectOptions = range(1, 20);
+
+        var dummyTripRunTimes = range(1, response.data.trips.length,  {"runTimes": [2400499, 2430499, 2475499]});
+
+
+        var formattedScheduled = convertToMins(response.data.scheduled);
+
+        var formattedRunTimeTrips = generateRunTimes(dummyTripRunTimes, 50);
+        var stopsData = getStopsData(response.data.trips);
+
+        var percentileData = [];
+
+
+        var tableTD = generatePercentileTable(stopsData, formattedScheduled.minsData, formattedRunTimeTrips);
+
+        var percentileSelect = $('<select id="percentile-select-box" name="percentileSelect"></select>');
+        percentileSelectOptions[percentileSelectOptions.length-1] = {
+            value: "99",
+            name: "99%"
+        };
+        percentileSelectOptions.forEach(function (eachTrip, i) {
+            var option = $('<option></option>');
+            option.attr('value', eachTrip.value);
+            option.text(eachTrip.name);
+            percentileSelect.append(option);
+        });
+
+        percentileSelect.append( '<span class="select2-selection__arrow"><b role="presentation"></b></span>');
+        $("#percentile-select-container").append('<label for="percentileSelect">Percentile</label>');
+        $("#percentile-select-container").append(percentileSelect);
+
+        $("#percentile-select-box").change(function () {
+            var tableTD ;
+
+            if ($("#percentile-select-box").val().trim() != "") {
+
+                var valuePercentage = $("#percentile-select-box").val().trim();
+                // if(valuePercentage == 100){
+                //     valuePercentage = 99;
+                // }
+                var formattedRunTimeTrips = generateRunTimes(dummyTripRunTimes, valuePercentage );
+                // var formattedRunTimeTrips = generateRunTimes(dummyTripRunTimes, $("#percentile-select-box").val().trim());
+                // var nonSortedIndexValues = percentileCalculation(formattedRunTimeTrips.minsData, $("#percentile-select-box").val().trim());
+
+                //  var filteredStopsData = [];
+                // var filteredScheduled = [];
+                // var filteredRunTimeTrips = [];
+
+
+                /* nonSortedIndexValues.forEach(function(eachValue){
+                    filteredStopsData.push(stopsData[eachValue]);
+                    filteredScheduled.push(formattedScheduled.minsData[eachValue]);
+                    filteredRunTimeTrips.push(formattedRunTimeTrips.minsData[eachValue]);
+                }); */
+
+                tableTD = generatePercentileTable(stopsData, formattedScheduled.minsData, formattedRunTimeTrips);
+                console.log($("#percentile-select-box").val().trim());
+            } else {
+                tableTD = generatePercentileTable(stopsData, formattedScheduled.minsData, 0);
+                console.log($("#percentile-select-box").val().trim());
+            }
+
+            $(".percentile-summary-details").html(tableTD);
+
+        });
+
+
+        $(".percentile-summary-details").html(tableTD);
+
+    }
 
     function populateDirection() {
 
@@ -677,6 +910,19 @@
         return params;
     }
 
+    function getStopsData(trips){
+        var stopsData = [];
+        trips.forEach(function (eachTrip, i) {
+            var values = eachTrip.split("-");
+            var optionValue = values[1].trim();
+            if(stopsData.indexOf(optionValue) < 0){
+                stopsData.push(optionValue);
+            }
+
+        });
+        return stopsData;
+    }
+
     function msToMin(data) {
         var highest = 0;
 
@@ -762,7 +1008,6 @@
 
     function visualizeData() {
         $("#submit").attr("disabled", true);
-        $("#visualizeButton").attr("disabled", true);
 
         highestPoints = [];
         request = getParams(false)
@@ -793,7 +1038,7 @@
             traditional: true,
             dataType: "json",
             success: function (response) {
-                $("#visualizeButton").attr("disabled", false);
+
                 $("#submit").attr("disabled", false);
                 if(response.data && ((response.data.trips && response.data.trips.length > 0) ||
                     (response.data.routes && response.data.routes.length > 0))){
@@ -802,15 +1047,7 @@
                     if(response.data.trips && response.data.trips.length ){
 
                         var tripSelectBox = $('<select id="trips-select-box" name="tripBoxType"><option value="">All</option></select>');
-                        var stopsData = [];
-                        response.data.trips.forEach(function (eachTrip, i) {
-                            var values = eachTrip.split("-");
-                            var optionValue = values[1].trim();
-                            if(stopsData.indexOf(optionValue) < 0){
-                                stopsData.push(optionValue);
-                            }
-
-                        });
+                        var stopsData = getStopsData(response.data.trips);
                         stopsData.forEach(function (eachTrip, i) {
 
                             var option = $('<option></option>');
@@ -823,15 +1060,19 @@
                         tripSelectBox.append( '<span class="select2-selection__arrow"><b role="presentation"></b></span>');
 
                         $("#trips-container").html("");
-                        $("#trips-container").append('<label for="tripBoxType">Trip Selection:</label>');
+                        $("#trips-container").append('<h3 for="tripBoxType" id="visualization-container-header">Run Times for Trips :</h3>');
                         $("#trips-container").append(tripSelectBox);
 
                         $("#trips-select-box").change(function () {
 
                             if ($("#trips-select-box").val().trim() != "") {
                                 showStopView();
+
+                                $("#visualization-container-header").html("Run Times for Trip Stops");
                             } else {
                                 visualizeData();
+
+                                $("#visualization-container-header").html("Run Times for Trips:");
                             }
 
                         });
@@ -871,10 +1112,10 @@
                         }) ; */
                     } else{
                         generateIndividualRouteChart(response);
-
-
-
+                        percentageTabDetails(response);
                     }
+
+
 
                     $("#comparisonResults").hide();
                     $("#runTimeVisualization").show();
@@ -887,7 +1128,7 @@
             },
             error: function (e) {
                 alert("Error retrieving trip-by-trip summary.");
-                $("#visualizeButton").attr("disabled", false);
+
                 $("#submit").attr("disabled", false);
             }
         })
@@ -1228,20 +1469,14 @@
                     var avgVar = typeof (response.variable) == 'undefined' ? "N/A" : (response.variable / 60000).toFixed(1);
                     var avgDwell = typeof (response.dwell) == 'undefined' ? "N/A" : (response.dwell / 60000).toFixed(1);
 
-
-                    $("#avgRunTime").html(
-                        "<p style='font-size: 0.8em;display: inline-block; vertical-align: middle;'>Average run time</p>" +
-                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 50px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle; text-align: center;'>" + avgRunTime + "</p>" +
-                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 50px;'>Fixed</p>" +
-                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 50px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle; text-align: center;'>" + avgFixed + "</p>" +
-                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; vertical-align: middle;'>Variable</p>" +
-                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle; text-align: center;'>" + avgVar + "</p>" +
-                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; vertical-align: middle;'>Dwell</p>" +
-                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle; text-align: center;'>" + avgDwell + "</p>"
-                    );
-
+                    var tableTD = "<td>"+avgRunTime+"</td>";
+                    tableTD += "<td>"+avgFixed+"</td>";
+                    tableTD += "<td>"+avgVar+"</td>";
+                    tableTD += "<td>"+avgDwell+"</td>";
+                    $(".average-time-details").html(tableTD);
                     $("#mainResults").show();
-                    $("#visualizeButton").show();
+                    visualizeData();
+
                 }
 
             },
@@ -1331,12 +1566,6 @@
 
     $("#closeModal").click(function () {
         $("#comparisonModal").hide();
-    })
-
-    $(".visualizeButton").click(function () {
-        if (!($("#runTimeVisualization").is(":visible"))) {
-            visualizeData();
-        }
     })
 
 </script>
