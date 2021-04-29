@@ -27,7 +27,7 @@ import org.transitclock.api.data.IpcPredictionComparator;
 import org.transitclock.api.utils.AgencyTimezoneCache;
 import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
-import org.transitclock.core.dataCache.CanceledTripKey;
+import org.transitclock.core.dataCache.canceledTrip.CanceledTripKey;
 import org.transitclock.core.holdingmethod.PredictionTimeComparator;
 import org.transitclock.ipc.clients.ConfigInterfaceFactory;
 import org.transitclock.ipc.clients.PredictionsInterfaceFactory;
@@ -253,7 +253,7 @@ public class GtfsRtTripFeed {
 		return StopTimeUpdate.ScheduleRelationship.SCHEDULED;
 	}
 
-	private TripUpdate createCanceledTripUpdate(String vehicleId, IpcCanceledTrip canceledTrip){
+	private TripUpdate createCanceledTripUpdate(IpcCanceledTrip canceledTrip){
 		// Create the parent TripUpdate object that is returned.
 		TripUpdate.Builder tripUpdate = TripUpdate.newBuilder();
 
@@ -270,15 +270,16 @@ public class GtfsRtTripFeed {
 
 		tripDescriptor.setScheduleRelationship(TripDescriptor.ScheduleRelationship.CANCELED);
 
-		// Add timestamp
-		tripUpdate.setTimestamp(canceledTrip.getTimeStamp() / Time.MS_PER_SEC);
+		if (canceledTrip.getTimeStamp() != null)
+			tripUpdate.setTimestamp(canceledTrip.getTimeStamp() / Time.MS_PER_SEC);
+
 
 		tripUpdate.setTrip(tripDescriptor);
 
 		// Add the VehicleDescriptor information
-		if(vehicleId != null) {
+		if(canceledTrip.getVehicleId() != null) {
 			VehicleDescriptor.Builder vehicleDescriptor =
-					VehicleDescriptor.newBuilder().setId(vehicleId);
+					VehicleDescriptor.newBuilder().setId(canceledTrip.getVehicleId());
 			tripUpdate.setVehicle(vehicleDescriptor);
 		}
 
@@ -288,18 +289,18 @@ public class GtfsRtTripFeed {
 	}
 
 	private boolean isTripCanceledAndCached(List<IpcPrediction> predictions,
-											Map<CanceledTripKey, IpcCanceledTrip> canceledTrips,
+											Map<String, IpcCanceledTrip> canceledTrips,
 											boolean serviceSuffixId) {
 		IpcPrediction firstPred = predictions.get(0);
 		String tripId = firstPred.getTripId();
 		String vehicleId = firstPred.getVehicleId();
 
-		IpcCanceledTrip canceledTrip = canceledTrips.get(new CanceledTripKey(vehicleId, tripId));
+		IpcCanceledTrip canceledTrip = canceledTrips.get(tripId);
 		if(canceledTrip != null) {
 			String canceledTripTripId = canceledTrip.getTripId();
-			logger.info("Found canceled tripId {} found for firstPred tripId {} and vehicleId {}",canceledTripTripId, tripId, vehicleId);
+			logger.debug("Found canceled tripId {} found for firstPred tripId {} and vehicleId {}",canceledTripTripId, tripId, vehicleId);
 		} else {
-			logger.info("No canceled trip found for firstPred tripId {} and vehicleId {}", tripId, vehicleId);
+			logger.debug("No canceled trip found for firstPred tripId {} and vehicleId {}", tripId, vehicleId);
 		}
 
 		if(canceledTrip != null && canceledTrip.getTripId() != null && canceledTrip.getTripId().equalsIgnoreCase(tripId)){
@@ -328,7 +329,7 @@ public class GtfsRtTripFeed {
 		//Create a comparator to sort each trip data
 		Comparator<IpcPrediction> comparator=new IpcPredictionComparator();
 
-		HashMap<CanceledTripKey, IpcCanceledTrip> allCanceledTrips = getAllCanceledTrips();
+		HashMap<String, IpcCanceledTrip> allCanceledTrips = getAllCanceledTrips();
 		HashMap<String, HashSet<IpcSkippedStop>> allSkippedStops = getSkippedStops();
 		boolean serviceIdSuffix = getServiceIdSuffix();
 
@@ -353,21 +354,19 @@ public class GtfsRtTripFeed {
 			}
 		}
 
-		for(Map.Entry<CanceledTripKey, IpcCanceledTrip> entry : allCanceledTrips.entrySet()){
-			CanceledTripKey key = entry.getKey();
+		for(Map.Entry<String, IpcCanceledTrip> entry : allCanceledTrips.entrySet()){
 			IpcCanceledTrip canceledTrip = entry.getValue();
 
 			if(canceledTrip != null){
 				FeedEntity.Builder feedEntity = FeedEntity.newBuilder()
 						.setId(canceledTrip.getTripId());
 				try {
-					TripUpdate tripUpdate = createCanceledTripUpdate(key.getVehicleId(), canceledTrip);
+					TripUpdate tripUpdate = createCanceledTripUpdate(canceledTrip);
 					if(tripUpdate == null) continue;
 					feedEntity.setTripUpdate(tripUpdate);
 					message.addEntity(feedEntity);
 				} catch (Exception e) {
-					logger.error("Error parsing canceled trip update data {} for vehicle id {}.",
-							canceledTrip, key.getVehicleId(), e);
+					logger.error("Error parsing canceled trip update data {}",canceledTrip, e);
 				}
 			}
 		}
@@ -375,14 +374,14 @@ public class GtfsRtTripFeed {
 		return message.build();
 	}
 
-	private HashMap<CanceledTripKey, IpcCanceledTrip> getAllCanceledTrips(){
-		HashMap<CanceledTripKey, IpcCanceledTrip> allCanceledTrips = new HashMap<>();
+	private HashMap<String, IpcCanceledTrip> getAllCanceledTrips(){
+		HashMap<String, IpcCanceledTrip> allCanceledTrips = new HashMap<>();
 		try {
 			allCanceledTrips = PredictionsInterfaceFactory.get(agencyId).getAllCanceledTrips();
 			if(allCanceledTrips != null && !allCanceledTrips.isEmpty()) {
-				for(Map.Entry<CanceledTripKey, IpcCanceledTrip> entry : allCanceledTrips.entrySet()){
-					logger.info("Canceled Trip vehicle id and trip id is {}", entry.getKey());
-					logger.info(entry.getValue().toString());
+				for(Map.Entry<String, IpcCanceledTrip> entry : allCanceledTrips.entrySet()){
+					logger.debug("Canceled Trip id is {}", entry.getKey());
+					logger.debug(entry.getValue().toString());
 				}
 			}
 		} catch (RemoteException e) {

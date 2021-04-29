@@ -19,10 +19,11 @@ package org.transitclock.ipc.servers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
-import org.transitclock.core.dataCache.CanceledTripKey;
+import org.transitclock.core.dataCache.canceledTrip.CanceledTripCache;
+import org.transitclock.core.dataCache.canceledTrip.CanceledTripKey;
 import org.transitclock.core.dataCache.SkippedStopsManager;
 import org.transitclock.ipc.data.IpcCanceledTrip;
-import org.transitclock.core.dataCache.CanceledTripManager;
+import org.transitclock.core.dataCache.canceledTrip.CanceledTripAndVehicleCache;
 import org.transitclock.core.dataCache.PredictionDataCache;
 import org.transitclock.db.structs.Location;
 import org.transitclock.gtfs.StopsByLoc;
@@ -136,8 +137,8 @@ public class PredictionsServer
 	 * @see org.transitclock.ipc.interfaces.PredictionsInterface#getAllCanceledTrips()
 	 */
 	@Override
-	public HashMap<CanceledTripKey, IpcCanceledTrip> getAllCanceledTrips(){
-		return CanceledTripManager.getInstance().getAll();
+	public HashMap<String, IpcCanceledTrip> getAllCanceledTrips(){
+		return CanceledTripCache.getInstance().getAll();
 	}
 
 	/* (non-Javadoc)

@@ -6,9 +6,11 @@ import com.google.transit.realtime.GtfsRealtime.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
+import org.transitclock.config.StringConfigValue;
 import org.transitclock.core.blockAssigner.BlockAssigner;
-import org.transitclock.core.dataCache.CanceledTripKey;
-import org.transitclock.core.dataCache.CanceledTripManager;
+import org.transitclock.core.dataCache.canceledTrip.CanceledTripCache;
+import org.transitclock.core.dataCache.canceledTrip.CanceledTripKey;
+import org.transitclock.core.dataCache.canceledTrip.CanceledTripAndVehicleCache;
 import org.transitclock.core.dataCache.SkippedStopsManager;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
@@ -17,8 +19,10 @@ import org.transitclock.ipc.data.IpcSkippedStop;
 import org.transitclock.utils.IntervalTimer;
 
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -27,6 +31,16 @@ public abstract class GtfsRtTripUpdatesReaderBase {
 
     private static final Logger logger = LoggerFactory
             .getLogger(GtfsRtTripUpdatesReaderBase.class);
+
+    private static StringConfigValue gtfsRealtimeHeaderKey =
+            new StringConfigValue("transitclock.avl.apiKeyHeader",
+                    null,
+                    "api key header value if necessary, null if not needed");
+
+    private static StringConfigValue gtfsRealtimeHeaderValue =
+            new StringConfigValue("transitclock.avl.apiKeyValue",
+                    null,
+                    "api key value if necessary, null if not needed");
 
     /********************** Member Functions **************************/
 
@@ -45,10 +59,19 @@ public abstract class GtfsRtTripUpdatesReaderBase {
             URI uri = new URI(urlString);
             URL url = uri.toURL();
 
+            HttpURLConnection
+                    connection = (HttpURLConnection) url.openConnection();
+
+            if (gtfsRealtimeHeaderKey.getValue() != null &&
+                    gtfsRealtimeHeaderValue.getValue() != null) {
+                connection.addRequestProperty(gtfsRealtimeHeaderKey.getValue(), gtfsRealtimeHeaderValue.getValue());
+                connection.addRequestProperty("Cache-Control", "no-cache");
+            }
+
             // Create a CodedInputStream instead of just a regular InputStream
             // so that can change the size limit. Otherwise if file is greater
             // than 64MB get an exception.
-            InputStream inputStream = url.openStream();
+            InputStream inputStream = connection.getInputStream();
             CodedInputStream codedStream =
                     CodedInputStream.newInstance(inputStream);
             // What to use instead of default 64MB limit
@@ -88,7 +111,7 @@ public abstract class GtfsRtTripUpdatesReaderBase {
         IntervalTimer timer = new IntervalTimer();
 
         Map<String, HashSet<IpcSkippedStop>> skippedStopsMap = new HashMap<>();
-        Map<CanceledTripKey, IpcCanceledTrip> cancelledTripsMap = new HashMap<>();
+        Map<String, IpcCanceledTrip> cancelledTripsMap = new HashMap<>();
 
         // For each entity/vehicle process the data
         int counter = 0;
@@ -113,10 +136,30 @@ public abstract class GtfsRtTripUpdatesReaderBase {
                 String tripId = getTripId(tripDescriptor);
                 if (tripId == null)
                     continue;
-                IpcCanceledTrip canceledTrip = new IpcCanceledTrip(tripId,
-                        tripDescriptor.getRouteId(), tripDescriptor.getStartDate(), tripUpdate.getTimestamp());
 
-                cancelledTripsMap.put(getCanceledTripKey(vehicleDescriptor, tripId), canceledTrip);
+                String vehicleId = null;
+                if(vehicleDescriptor != null && vehicleDescriptor.hasId()){
+                    vehicleId = vehicleDescriptor.getId();
+                }
+
+                String startDate = null;
+                if(tripDescriptor.hasStartDate()){
+                    startDate = tripDescriptor.getStartDate();
+                }
+
+                Long timestamp = null;
+                if(tripUpdate.hasTimestamp()){
+                    timestamp = tripUpdate.getTimestamp();
+                }
+
+                String routeId = null;
+                if(tripDescriptor.hasRouteId()){
+                    routeId = tripDescriptor.getRouteId();
+                }
+
+                IpcCanceledTrip canceledTrip = new IpcCanceledTrip(tripId, routeId, vehicleId, startDate, timestamp);
+
+                cancelledTripsMap.put(tripId, canceledTrip);
                 logger.debug("Adding canceledTrip to map {}", canceledTrip);
 
             }
@@ -146,7 +189,7 @@ public abstract class GtfsRtTripUpdatesReaderBase {
             ++counter;
         }
 
-        CanceledTripManager.getInstance().putAll(cancelledTripsMap);
+        CanceledTripCache.getInstance().putAll(cancelledTripsMap);
         SkippedStopsManager.getInstance().putAll(skippedStopsMap);
 
         logger.info("Successfully processed {} Trips from " +
