@@ -422,18 +422,20 @@ public class ServiceUtils {
 	}
 
 	private boolean isServiceTypeActiveForServiceCal(ServiceType serviceType, Calendar calendar){
-		if(serviceType.equals(ServiceType.SUNDAY) && calendar.getSunday()){
-			return Boolean.TRUE;
-		} else if(serviceType.equals(ServiceType.SATURDAY) && calendar.getSaturday()) {
-			return Boolean.TRUE;
-		} else if(serviceType.equals(ServiceType.WEEKDAY) && (
-				calendar.getMonday() ||
-				calendar.getTuesday() ||
-				calendar.getWednesday() ||
-				calendar.getThursday() ||
-				calendar.getFriday()
-		)){
-			return Boolean.TRUE;
+		if(serviceType != null && calendar != null) {
+			if (serviceType.equals(ServiceType.SUNDAY) && calendar.getSunday()) {
+				return Boolean.TRUE;
+			} else if (serviceType.equals(ServiceType.SATURDAY) && calendar.getSaturday()) {
+				return Boolean.TRUE;
+			} else if (serviceType.equals(ServiceType.WEEKDAY) && (
+					calendar.getMonday() ||
+							calendar.getTuesday() ||
+							calendar.getWednesday() ||
+							calendar.getThursday() ||
+							calendar.getFriday()
+			)) {
+				return Boolean.TRUE;
+			}
 		}
 		return Boolean.FALSE;
 	}

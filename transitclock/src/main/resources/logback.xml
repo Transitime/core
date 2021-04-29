@@ -373,6 +373,18 @@
 	</appender>
 
 
+	 <appender name="RUN_TIME_GENERATOR"
+                          class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                        <fileNamePattern>${LOG_FILE_ROOT}/run_time_generator.log.gz</fileNamePattern>
+                </rollingPolicy>
+                <encoder>
+                        <charset>UTF-8</charset>
+                        <pattern>${DEFAULT_PATTERN}</pattern>
+                </encoder>
+        </appender>
+
+
 	<!--====================================================== -->
 	<!--=============== Loggers defined here ================= -->
 	<!--====================================================== -->
@@ -470,12 +482,12 @@
 	<!-- <logger name="org.transitclock.config" level="error" additivity="false">
 		<appender-ref ref="ERROR_SMTP" /> </logger> -->
 
-	<logger name="org.transitclock.core.predAccuracy.PredictionAccuracyModule" level="debug"
+	<logger name="org.transitclock.core.predAccuracy.PredictionAccuracyModule" level="info"
 		additivity="false">
 		<appender-ref ref="PRED_ACCURACY" />
 	</logger>
 
-	<logger name="org.transitclock.core.predAccuracy.gtfsrt.GTFSRealtimePredictionAccuracyModule" level="debug"
+	<logger name="org.transitclock.core.predAccuracy.gtfsrt.GTFSRealtimePredictionAccuracyModule" level="info"
 		additivity="false">
 		<appender-ref ref="EXTERNAL_PRED_ACCURACY" />
 	</logger>
@@ -535,6 +547,11 @@
 			level="debug" additivity="true">
 		<appender-ref ref="UPDATE_TRAVEL_TIMES" />
 	</logger>
+
+	<logger name="org.transitclock.core.reporting.RunTimeGenerator"
+                        level="debug" additivity="false">
+                <appender-ref ref="RUN_TIME_GENERATOR" />
+        </logger>
 
 	<!-- In order to log the hibernate SQL queries need to set org.hibernate.SQL
 		to debug. To show the values of the parameters need to set org.hibernate.type

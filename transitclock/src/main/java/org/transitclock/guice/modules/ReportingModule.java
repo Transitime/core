@@ -5,6 +5,7 @@ import com.google.inject.Scopes;
 import org.transitclock.reporting.dao.RunTimeRoutesDao;
 import org.transitclock.reporting.service.OnTimePerformanceService;
 import org.transitclock.reporting.service.RunTimeService;
+import org.transitclock.reporting.service.RunTimeServiceV2;
 import org.transitclock.reporting.service.SpeedMapService;
 
 public class ReportingModule extends AbstractModule {
@@ -12,6 +13,7 @@ public class ReportingModule extends AbstractModule {
     protected void configure() {
         bind(RunTimeRoutesDao.class).in(Scopes.SINGLETON);
         bind(RunTimeService.class).in(Scopes.SINGLETON);
+        bind(RunTimeServiceV2.class).in(Scopes.SINGLETON);
         bind(OnTimePerformanceService.class).in(Scopes.SINGLETON);
         bind(SpeedMapService.class).in(Scopes.SINGLETON);
     }

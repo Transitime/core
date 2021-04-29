@@ -1,27 +1,26 @@
 package org.transitclock.db.structs;
 
 import com.google.common.base.Objects;
+import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitclock.core.ServiceType;
 import org.transitclock.db.hibernate.HibernateUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @DynamicUpdate
 @Table(name="RunTimesForRoutes",
-        indexes = { @Index(name="RunTimesForRoutesTimeIndex",
-                        columnList="startTime" ),
-                    @Index(name="RunTimesForRoutesRouteNameIndex",
+        indexes = { @Index(name="RunTimesForRoutesRouteNameIndex",
                         columnList="routeShortName" ),
-                    @Index(name="RunTimesForRoutesTripIdIndex",
-                        columnList="tripId" ),
-                    @Index(name="RunTimesForRoutesVehicleIdIndex",
-                        columnList="vehicleId" ),
                     @Index(name="RunTimesForRoutesServiceTypeIndex",
-                        columnList="serviceType" )
+                        columnList="serviceType" ),
+                    @Index(name="RunTimesForRoutesStartStopPathIndex",
+                        columnList="startStopPathIndex" )
                     } )
 
 public class RunTimesForRoutes implements Serializable {
@@ -78,13 +77,37 @@ public class RunTimesForRoutes implements Serializable {
     @Column
     private Long dwellTime;
 
+    @Column
+    private Integer startStopPathIndex;
+
+    @Column
+    private Integer actualLastStopPathIndex;
+
+    @Column
+    private Integer expectedLastStopPathIndex;
+
+    @OneToMany(mappedBy = "runTimesForRoutes", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<RunTimesForStops> runTimesForStops;
+
     public RunTimesForRoutes() {
     }
 
-    public RunTimesForRoutes(int configRev, String serviceId, String directionId, String routeShortName,
-                             String tripPatternId, String tripId, String headsign, Date startTime, Date endTime,
-                             Integer scheduledStartTime, Integer scheduledEndTime, Integer nextTripStartTime,
-                             String vehicleId, ServiceType serviceType, Long dwellTime) {
+    public RunTimesForRoutes(int configRev,
+                             String serviceId,
+                             String directionId,
+                             String routeShortName,
+                             String tripPatternId,
+                             String tripId,
+                             String headsign,
+                             Date startTime,
+                             Date endTime,
+                             Integer scheduledStartTime,
+                             Integer scheduledEndTime,
+                             Integer nextTripStartTime,
+                             String vehicleId,
+                             ServiceType serviceType,
+                             Long dwellTime,
+                             Integer startStopIndex) {
         this.configRev = configRev;
         this.serviceId = serviceId;
         this.directionId = directionId;
@@ -222,6 +245,49 @@ public class RunTimesForRoutes implements Serializable {
         this.dwellTime = dwellTime;
     }
 
+    public List<RunTimesForStops> getRunTimesForStops() {
+        return runTimesForStops;
+    }
+
+    public void setRunTimesForStops(List<RunTimesForStops> runTimesForStops) {
+        this.runTimesForStops = runTimesForStops;
+    }
+
+    public int getStartStopPathIndex() {
+        return startStopPathIndex;
+    }
+
+    public void setStartStopPathIndex(int startStopIndex) {
+        this.startStopPathIndex = startStopIndex;
+    }
+
+    public boolean hasFirstStop(){
+        return startStopPathIndex != null && startStopPathIndex == 0;
+    }
+
+    public Long getRunTime(){
+        if(endTime == null || startTime == null){
+            return null;
+        }
+        return endTime.getTime() - startTime.getTime();
+    }
+
+    public Integer getActualLastStopPathIndex() {
+        return actualLastStopPathIndex;
+    }
+
+    public void setActualLastStopPathIndex(Integer actualLastStopPathIndex) {
+        this.actualLastStopPathIndex = actualLastStopPathIndex;
+    }
+
+    public Integer getExpectedLastStopPathIndex() {
+        return expectedLastStopPathIndex;
+    }
+
+    public void setExpectedLastStopPathIndex(Integer expectedLastStopPathIndex) {
+        this.expectedLastStopPathIndex = expectedLastStopPathIndex;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -241,14 +307,16 @@ public class RunTimesForRoutes implements Serializable {
                 Objects.equal(nextTripStartTime, that.nextTripStartTime) &&
                 Objects.equal(vehicleId, that.vehicleId) &&
                 serviceType == that.serviceType &&
-                Objects.equal(dwellTime, that.dwellTime);
+                Objects.equal(dwellTime, that.dwellTime) &&
+                Objects.equal(startStopPathIndex, that.startStopPathIndex) &&
+                Objects.equal(actualLastStopPathIndex, that.actualLastStopPathIndex) &&
+                Objects.equal(expectedLastStopPathIndex, that.expectedLastStopPathIndex) &&
+                Objects.equal(runTimesForStops, that.runTimesForStops);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(configRev, serviceId, directionId, routeShortName, tripPatternId, tripId, headsign,
-                startTime, endTime, scheduledStartTime, scheduledEndTime, nextTripStartTime, vehicleId, serviceType,
-                dwellTime);
+        return Objects.hashCode(configRev, serviceId, directionId, routeShortName, tripPatternId, tripId, headsign, startTime, endTime, scheduledStartTime, scheduledEndTime, nextTripStartTime, vehicleId, serviceType, dwellTime, startStopPathIndex, actualLastStopPathIndex, expectedLastStopPathIndex, runTimesForStops);
     }
 
     @Override
@@ -269,6 +337,9 @@ public class RunTimesForRoutes implements Serializable {
                 ", vehicleId='" + vehicleId + '\'' +
                 ", serviceType=" + serviceType +
                 ", dwellTime=" + dwellTime +
+                ", startStopPathIndex=" + startStopPathIndex +
+                ", actualLastStopPathIndex=" + actualLastStopPathIndex +
+                ", expectedLastStopPathIndex=" + expectedLastStopPathIndex +
                 '}';
     }
 }

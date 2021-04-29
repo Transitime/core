@@ -14,13 +14,12 @@ import org.transitclock.reporting.RouteStatistics;
 import org.transitclock.reporting.dao.RunTimeRoutesDao;
 import org.transitclock.reporting.keys.StopPathRunTimeKey;
 import org.transitclock.reporting.StopPathStatistics;
-import org.transitclock.reporting.TripStatistics;
+import org.transitclock.reporting.TripStopPathStatisticsV1;
 import org.transitclock.ipc.data.IpcDoubleSummaryStatistics;
 import org.transitclock.ipc.data.IpcRunTime;
 import org.transitclock.ipc.data.IpcRunTimeForTrip;
 import org.transitclock.reporting.keys.ArrivalDepartureTripKey;
 import org.transitclock.reporting.keys.TripDateKey;
-import org.transitclock.utils.IntervalTimer;
 
 import javax.inject.Inject;
 import java.time.*;
@@ -209,7 +208,7 @@ public class RunTimeService {
 
         Collection<List<ArrivalDeparture>> arrivalDeparturesByTrip = arrivalDeparturesByTripMap.values();
 
-        Map<String, TripStatistics> tripStatsByRunTimeKey = new HashMap<>();
+        Map<String, TripStopPathStatisticsV1> tripStatsByRunTimeKey = new HashMap<>();
         for(List<ArrivalDeparture> arrivalDepartureList : arrivalDeparturesByTrip){
             processTripStatsMap(tripStatsByRunTimeKey, arrivalDepartureList);
         }
@@ -245,7 +244,7 @@ public class RunTimeService {
      * @param tripStatsByTripId
      * @param arrDepList
      */
-    private void processTripStatsMap(Map<String, TripStatistics> tripStatsByTripId,
+    private void processTripStatsMap(Map<String, TripStopPathStatisticsV1> tripStatsByTripId,
                                      List<ArrivalDeparture> arrDepList) {
 
         for (int i=0; i<arrDepList.size()-1; ++i) {
@@ -264,7 +263,7 @@ public class RunTimeService {
      * @param arrDep1
      * @param arrDep2
      */
-    private void processTravelTimeBetweenTwoArrivalDepartures(Map<String, TripStatistics> tripStatsByTripId,
+    private void processTravelTimeBetweenTwoArrivalDepartures(Map<String, TripStopPathStatisticsV1> tripStatsByTripId,
                                                               ArrivalDeparture arrDep1,
                                                               ArrivalDeparture arrDep2) {
 
@@ -335,37 +334,37 @@ public class RunTimeService {
         }
     }
 
-    private void addStopPathRunTimeToMap(Map<String, TripStatistics> tripStatsByTripId,
+    private void addStopPathRunTimeToMap(Map<String, TripStopPathStatisticsV1> tripStatsByTripId,
                                          ArrivalDeparture ad,
                                          Double runTime){
-        TripStatistics tps = getTripStats(tripStatsByTripId, ad);
+        TripStopPathStatisticsV1 tps = getTripStats(tripStatsByTripId, ad);
         tps.addStopPathRunTime(ad, runTime);
     }
 
-    private void addStopPathDwellTimeToMap(Map<String, TripStatistics> tripStatsByTripId,
+    private void addStopPathDwellTimeToMap(Map<String, TripStopPathStatisticsV1> tripStatsByTripId,
                                            ArrivalDeparture ad,
                                            Double dwellTime){
-        TripStatistics tps = getTripStats(tripStatsByTripId, ad);
+        TripStopPathStatisticsV1 tps = getTripStats(tripStatsByTripId, ad);
         tps.addStopPathDwellTime(ad, dwellTime);
     }
 
-    private TripStatistics getTripStats(Map<String, TripStatistics> tripStatsByTripId,
-                                        ArrivalDeparture ad){
+    private TripStopPathStatisticsV1 getTripStats(Map<String, TripStopPathStatisticsV1> tripStatsByTripId,
+                                                  ArrivalDeparture ad){
         String key = ad.getTripId();
-        TripStatistics tps = tripStatsByTripId.get(key);
+        TripStopPathStatisticsV1 tps = tripStatsByTripId.get(key);
         if(tps == null){
-            tps = new TripStatistics(ad.getTripFromDb(), ad.getTripIndex());
+            tps = new TripStopPathStatisticsV1(ad.getTripFromDb(), ad.getTripIndex());
             tripStatsByTripId.put(key, tps);
         }
         return tps;
     }
 
-    private IpcRunTime getRunTimeStats(Map<String, TripStatistics> tripStatsByRunTimeKey){
+    private IpcRunTime getRunTimeStats(Map<String, TripStopPathStatisticsV1> tripStatsByRunTimeKey){
         DoubleSummaryStatistics avgRunTimeStats = new DoubleSummaryStatistics();
         DoubleSummaryStatistics fixedTimeStats = new DoubleSummaryStatistics();
         DoubleSummaryStatistics avgDwellTimeStats = new DoubleSummaryStatistics();
 
-        for(Map.Entry<String, TripStatistics> entry : tripStatsByRunTimeKey.entrySet()){
+        for(Map.Entry<String, TripStopPathStatisticsV1> entry : tripStatsByRunTimeKey.entrySet()){
 
             Double avgTripRunTime = entry.getValue().getTripAverageRunTime();
             if(avgTripRunTime != null && avgTripRunTime > 0){
@@ -466,7 +465,7 @@ public class RunTimeService {
 
             Collection<List<ArrivalDeparture>> arrivalDeparturesByTrip = arrivalDeparturesByTripMap.values();
 
-            Map<String, TripStatistics> tripStatsByTripId = new HashMap<>();
+            Map<String, TripStopPathStatisticsV1> tripStatsByTripId = new HashMap<>();
             for (List<ArrivalDeparture> arrivalDepartureList : arrivalDeparturesByTrip) {
                 processTripStatsMap(tripStatsByTripId, arrivalDepartureList);
             }
@@ -508,15 +507,15 @@ public class RunTimeService {
         return scheduledTripsGroupedById;
     }
 
-    private List<IpcRunTimeForTrip> getRunTimeStatsForTrips(Map<String, TripStatistics> tripStatsByTripId){
+    private List<IpcRunTimeForTrip> getRunTimeStatsForTrips(Map<String, TripStopPathStatisticsV1> tripStatsByTripId){
 
         List<IpcRunTimeForTrip> ipcRunTimeForTrips = new ArrayList<>();
 
 
         // Loop through each TripStats grouped by Trip Id
-        for(Map.Entry<String, TripStatistics> tripStatEntry : tripStatsByTripId.entrySet()){
+        for(Map.Entry<String, TripStopPathStatisticsV1> tripStatEntry : tripStatsByTripId.entrySet()){
 
-            TripStatistics tripStatistics = tripStatEntry.getValue();
+            TripStopPathStatisticsV1 tripStatistics = tripStatEntry.getValue();
 
             //Validation -- Make sure trip is complete
             if(!tripStatistics.hasAllStopPathsForRunTimes() || !tripStatistics.hasAllStopPathsForDwellTimes()){
@@ -647,7 +646,7 @@ public class RunTimeService {
 
             Collection<List<ArrivalDeparture>> arrivalDeparturesByTrip = arrivalDeparturesByTripMap.values();
 
-            Map<String, TripStatistics> tripStatsByTripId = new HashMap<>();
+            Map<String, TripStopPathStatisticsV1> tripStatsByTripId = new HashMap<>();
             for (List<ArrivalDeparture> arrivalDepartureList : arrivalDeparturesByTrip) {
                 processTripStatsMap(tripStatsByTripId, arrivalDepartureList);
             }
@@ -660,15 +659,15 @@ public class RunTimeService {
         return null;
     }
 
-    private List<IpcRunTimeForStopPath> getRunTimeStatsForStopPaths(Map<String, TripStatistics> tripStatsByTripId){
+    private List<IpcRunTimeForStopPath> getRunTimeStatsForStopPaths(Map<String, TripStopPathStatisticsV1> tripStatsByTripId){
 
         List<IpcRunTimeForStopPath> ipcRunTimeForStopPaths = new ArrayList<>();
 
 
         // Loop through each TripStats grouped by Trip Id
-        for(Map.Entry<String, TripStatistics> tripStatEntry : tripStatsByTripId.entrySet()){
+        for(Map.Entry<String, TripStopPathStatisticsV1> tripStatEntry : tripStatsByTripId.entrySet()){
 
-            TripStatistics tripStatistics = tripStatEntry.getValue();
+            TripStopPathStatisticsV1 tripStatistics = tripStatEntry.getValue();
 
             //Validation -- Make sure trip is complete
             if(!tripStatistics.hasAllStopPathsForRunTimes() || !tripStatistics.hasAllStopPathsForDwellTimes()){
@@ -763,6 +762,7 @@ public class RunTimeService {
                 .beginTime(beginTimeSeconds)
                 .endTime(endTimeSeconds)
                 .serviceType(serviceType)
+                .includeRunTimesForStops(false)
                 .readOnly(readOnly)
                 .build();
 

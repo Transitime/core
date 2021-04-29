@@ -2,6 +2,7 @@ package org.transitclock.ipc.data;
 
 import org.transitclock.core.TemporalDifference;
 import org.transitclock.db.structs.ArrivalDeparture;
+import org.transitclock.ipc.interfaces.ArrivalDepartureSpeed;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import java.io.Serializable;
@@ -12,7 +13,7 @@ import java.util.Date;
  * @author Sean Og Crudden
  *
  */
-public class IpcArrivalDeparture implements Serializable {
+public class IpcArrivalDeparture implements ArrivalDepartureSpeed, Serializable {
 
 	
 	/**
@@ -33,7 +34,7 @@ public class IpcArrivalDeparture implements Serializable {
 	@XmlAttribute
 	private String tripId;
 	@XmlAttribute
-	private transient Date avlTime;
+	private Date avlTime;
 	@XmlAttribute
 	private transient TemporalDifference scheduledAdherence;
 	@XmlAttribute
@@ -47,7 +48,7 @@ public class IpcArrivalDeparture implements Serializable {
 	@XmlAttribute
 	private String directionId;
 	@XmlAttribute
-	private transient int tripIndex;
+	private int tripIndex;
 	@XmlAttribute
 	private int stopPathIndex;
 	@XmlAttribute
@@ -60,6 +61,8 @@ public class IpcArrivalDeparture implements Serializable {
 	private String tripPatternId;
 	@XmlAttribute
 	private Date scheduledDate;
+	@XmlAttribute
+	private String stopPathId;
 
 	protected IpcArrivalDeparture(){}
 
@@ -73,7 +76,7 @@ public class IpcArrivalDeparture implements Serializable {
 		this.isArrival=arrivalDepature.isArrival();
 		this.stopId=arrivalDepature.getStopId();
 		this.stopPathIndex=arrivalDepature.getStopPathIndex();
-		
+
 		this.scheduledAdherence=arrivalDepature.getScheduleAdherence();
 		this.freqStartTime=arrivalDepature.getFreqStartTime();
 		this.directionId=arrivalDepature.getDirectionId();
@@ -82,6 +85,7 @@ public class IpcArrivalDeparture implements Serializable {
 		this.dwellTime=arrivalDepature.getDwellTime();
 		this.tripPatternId=arrivalDepature.getTripPatternId();
 		this.scheduledDate=arrivalDepature.getScheduledDate();
+		this.stopPathId = arrivalDepature.getStopPathId();
 	}
 	
 	
@@ -96,6 +100,7 @@ public class IpcArrivalDeparture implements Serializable {
 	public Date getTime() {
 		return time;
 	}
+	public Date getDate() { return time; }
 	public void setTime(Date time) {
 		this.time = time;
 	}
@@ -166,9 +171,26 @@ public class IpcArrivalDeparture implements Serializable {
 	public void setTripIndex(int tripIndex) {
 		this.tripIndex = tripIndex;
 	}
+
+	public TemporalDifference getScheduleAdherence() {
+		// If there is no schedule time for this stop then there
+		// is no schedule adherence information.
+		if (scheduledDate == null)
+			return null;
+
+		// Return the schedule adherence
+		return new TemporalDifference(scheduledDate.getTime() - time.getTime());
+	}
+
 	public int getStopPathIndex() {
 		return stopPathIndex;
 	}
+
+	@Override
+	public String getStopPathId() {
+		return null;
+	}
+
 	public void setStopPathIndex(int stopPathIndex) {
 		this.stopPathIndex = stopPathIndex;
 	}
@@ -220,6 +242,7 @@ public class IpcArrivalDeparture implements Serializable {
 	public Date getScheduledDate() {
 		return scheduledDate;
 	}
+
 
 	@Override
 	public int hashCode() {

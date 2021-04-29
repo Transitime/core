@@ -1,5 +1,6 @@
 package org.transitclock.reporting.dao;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -41,12 +42,15 @@ public class RunTimeRoutesDao {
         Map<String, Object> parameterNameAndValues = new HashMap<>();
 
         String hql = "SELECT " +
-                "rt " +
+                "distinct rt " +
                 "FROM " +
                 "RunTimesForRoutes rt " +
+                getRunTimesForStopsJoin(rtQuery) +
                 "WHERE " +
                 getTimeRange(rtQuery, parameterNameAndValues) +
                 getServiceTypeWhere(rtQuery, parameterNameAndValues) +
+                getHeadSignWhere(rtQuery, parameterNameAndValues) +
+                getTripPatternWhere(rtQuery, parameterNameAndValues) +
                 "ORDER BY rt.routeShortName, rt.startTime DESC";
 
         try {
@@ -69,6 +73,13 @@ public class RunTimeRoutesDao {
             // it might actually be detrimental and slow things down.
             session.close();
         }
+    }
+
+    private String getRunTimesForStopsJoin(RunTimeForRouteQuery rtQuery) {
+        if(rtQuery.includeRunTimesForStops()){
+            return "JOIN FETCH rt.runTimesForStops rts ";
+        }
+        return "";
     }
 
     public static String getTimeRange(RunTimeForRouteQuery rtQuery, Map<String, Object> parameterNameAndValues) {
@@ -124,6 +135,26 @@ public class RunTimeRoutesDao {
         if(serviceType != null) {
             hql += " AND rt.serviceType = :serviceType ";
             parameterNameAndValues.put("serviceType", serviceType);
+        }
+        return hql;
+    }
+
+    private String getHeadSignWhere(RunTimeForRouteQuery rtQuery, Map<String, Object> parameterNameAndValues) {
+        String hql = "";
+        String headsign = rtQuery.getHeadsign();
+        if(StringUtils.isNotBlank(headsign)) {
+            hql += " AND rt.headsign = :headsign ";
+            parameterNameAndValues.put("headsign", headsign);
+        }
+        return hql;
+    }
+
+    private String getTripPatternWhere(RunTimeForRouteQuery rtQuery, Map<String, Object> parameterNameAndValues) {
+        String hql = "";
+        String tripPatternId = rtQuery.getTripPatternId();
+        if(StringUtils.isNotBlank(tripPatternId)) {
+            hql += " AND rt.tripPatternId = :tripPatternId ";
+            parameterNameAndValues.put("tripPatternId", tripPatternId);
         }
         return hql;
     }

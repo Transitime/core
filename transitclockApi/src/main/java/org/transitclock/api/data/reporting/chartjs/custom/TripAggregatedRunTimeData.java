@@ -4,7 +4,10 @@ import javax.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TripRunTimeData {
+public class TripAggregatedRunTimeData {
+
+    public TripAggregatedRunTimeData() { }
+
     @XmlElement(name = "trips")
     private List<String> tripsList = new ArrayList<>();
 
@@ -22,6 +25,9 @@ public class TripRunTimeData {
 
     @XmlElement(name = "nextTripStart")
     private List<Long> nextTripStartList = new ArrayList<>();
+
+    @XmlElement(name = "tripRunTimes")
+    private List<TripIndividualRunTimeData> tripRunTimes = new ArrayList<>();
 
     public List<String> getTripsList() {
         return tripsList;
@@ -47,4 +53,7 @@ public class TripRunTimeData {
         return nextTripStartList;
     }
 
+    public List<TripIndividualRunTimeData> getTripRunTimes() {
+        return tripRunTimes;
+    }
 }

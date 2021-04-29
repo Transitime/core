@@ -183,9 +183,12 @@ public class SpeedMapService {
 
         // If looking at departure from one stop to the arrival time at the
         // very next stop then can determine the travel times between the stops.
-        if (arrDep1.getStopPathIndex() - arrDep2.getStopPathIndex() != 1
+
+        /*if (arrDep1.getStopPathIndex() - arrDep2.getStopPathIndex() != 1
                 && arrDep1.isDeparture()
-                && arrDep2.isArrival()) {
+                && arrDep2.isArrival()) {*/
+        if(arrDep1.getStopPathIndex() - arrDep2.getStopPathIndex() == -1){
+
             // Determine the travel times and add them to the map
             travelSpeedForStopPath = determineTravelSpeedForStopPath(arrDep1,arrDep2);
 

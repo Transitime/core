@@ -11,11 +11,14 @@ public class RunTimeForRouteQuery {
     private LocalDate endDate;
     private Integer beginTime;
     private Integer endTime;
+    private String headsign;
+    private String tripPatternId;
     private String routeShortName;
     private ServiceType serviceType;
     private boolean timePointsOnly;
     private boolean scheduledTimesOnly;
     private boolean readOnly;
+    private boolean includeRunTimesForStops;
 
     private RunTimeForRouteQuery(Builder builder){
         this.beginDate = builder.beginDate;
@@ -23,10 +26,13 @@ public class RunTimeForRouteQuery {
         this.beginTime = builder.beginTime;
         this.endTime = builder.endTime;
         this.routeShortName = builder.routeShortName;
+        this.headsign = builder.headsign;
+        this.tripPatternId = builder.tripPatternId;
         this.serviceType = builder.serviceType;
         this.timePointsOnly = builder.timePointsOnly;
         this.scheduledTimesOnly = builder.scheduledTimesOnly;
         this.readOnly = builder.readOnly;
+        this.includeRunTimesForStops = builder.includeRunTimesForStops;
     }
 
     public LocalDate getBeginDate() {
@@ -49,6 +55,14 @@ public class RunTimeForRouteQuery {
         return routeShortName;
     }
 
+    public String getHeadsign() {
+        return headsign;
+    }
+
+    public String getTripPatternId() {
+        return tripPatternId;
+    }
+
     public ServiceType getServiceType() {
         return serviceType;
     }
@@ -65,6 +79,10 @@ public class RunTimeForRouteQuery {
         return readOnly;
     }
 
+    public boolean includeRunTimesForStops() {
+        return includeRunTimesForStops;
+    }
+
     public static class Builder{
 
         private LocalDate beginDate;
@@ -72,10 +90,13 @@ public class RunTimeForRouteQuery {
         private Integer beginTime;
         private Integer endTime;
         private String routeShortName;
+        private String headsign;
+        private String tripPatternId;
         private ServiceType serviceType;
         private boolean timePointsOnly = false;
         private boolean scheduledTimesOnly = false;
         private boolean readOnly = false;
+        private boolean includeRunTimesForStops = false;
 
         public Builder(){}
 
@@ -104,6 +125,16 @@ public class RunTimeForRouteQuery {
             return this;
         }
 
+        public Builder headsign(String headsign) {
+            this.headsign = headsign;
+            return this;
+        }
+
+        public Builder tripPatternId(String tripPatternId) {
+            this.tripPatternId = tripPatternId;
+            return this;
+        }
+
         public Builder serviceType(ServiceType serviceType) {
             this.serviceType = serviceType;
             return this;
@@ -121,6 +152,11 @@ public class RunTimeForRouteQuery {
 
         public Builder readOnly(boolean readOnly) {
             this.readOnly = readOnly;
+            return this;
+        }
+
+        public Builder includeRunTimesForStops(boolean includeRunTimesForStops){
+            this.includeRunTimesForStops = includeRunTimesForStops;
             return this;
         }
 

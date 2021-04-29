@@ -8,6 +8,7 @@ import org.transitclock.ipc.interfaces.ReportingInterface;
 import org.transitclock.ipc.rmi.AbstractServer;
 import org.transitclock.reporting.service.OnTimePerformanceService;
 import org.transitclock.reporting.service.RunTimeService;
+import org.transitclock.reporting.service.RunTimeServiceV2;
 import org.transitclock.reporting.service.SpeedMapService;
 
 import javax.inject.Inject;
@@ -30,6 +31,9 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
 
     @Inject
     private RunTimeService runTimeService;
+
+    @Inject
+    private RunTimeServiceV2 runTimeServiceV2;
 
     @Inject
     private OnTimePerformanceService onTimePerformanceService;
@@ -107,20 +111,23 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
     }
 
     @Override
-    public List<IpcRunTimeForTrip> getRunTimeForTrips(LocalDate beginDate,
-                                                      LocalDate endDate,
-                                                      LocalTime beginTime,
-                                                      LocalTime endTime,
-                                                      String routeIdOrShortName,
-                                                      String headsign,
-                                                      String tripPatternId,
-                                                      ServiceType serviceType,
-                                                      boolean timePointsOnly,
-                                                      boolean currentTripsOnly,
-                                                      boolean readOnly) throws Exception {
+    public IpcRunTimeForTripsAndDistribution getRunTimeForTrips(LocalDate beginDate,
+                                                                      LocalDate endDate,
+                                                                      LocalTime beginTime,
+                                                                      LocalTime endTime,
+                                                                      String routeIdOrShortName,
+                                                                      String headsign,
+                                                                      String tripPatternId,
+                                                                      ServiceType serviceType,
+                                                                      boolean timePointsOnly,
+                                                                      boolean currentTripsOnly,
+                                                                      boolean readOnly) throws Exception {
 
-        return runTimeService.getRunTimeForTrips(beginDate, endDate, beginTime, endTime, routeIdOrShortName, headsign,
-                tripPatternId, serviceType, timePointsOnly, currentTripsOnly, this.getAgencyId(), readOnly);
+        /*return runTimeService.getRunTimeForTrips(beginDate, endDate, beginTime, endTime, routeIdOrShortName, headsign,
+                tripPatternId, serviceType, timePointsOnly, currentTripsOnly, this.getAgencyId(), readOnly);*/
+
+        return runTimeServiceV2.getRunTimeForTripsByStopPath(beginDate, endDate, beginTime, endTime, routeIdOrShortName, headsign,
+                tripPatternId, serviceType, readOnly);
     }
 
     @Override
