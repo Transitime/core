@@ -304,7 +304,7 @@ public class TripStopPathStatisticsV2 {
     }
 
     public boolean hasAllStopPathsForRunTimes() {
-        return uniqueStopPathRunTimes.size() == expectedStopPathCount;
+        return uniqueStopPathRunTimes.size() == expectedStopPathCount + 1;
     }
 
     public boolean hasAllStopPathsForDwellTimes() {

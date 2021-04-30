@@ -45,6 +45,9 @@ public class StopPathStatisticsV2 {
     }
 
     public Double getMedianDwellTime() {
+        if(isLastStop){
+            return 0.0;
+        }
         return dwellTimeStats.getMedian();
     }
 
