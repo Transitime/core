@@ -87,7 +87,7 @@
         <%-- For passing agency param to the report --%>
         <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
 
-        <jsp:include page="params/routeAllOrSingle.jsp"/>
+        <jsp:include page="params/routeMultiple.jsp"/>
 
         <div id="search" style="margin-top: 20px;">
             Search
@@ -135,20 +135,60 @@
     // Global so can keep track and delete all vehicles at once
     var vehicleLayer;
 
+    function formatRoute (route) {
+        if (!route.id || route.id == " ") {
+            return route.text;
+        }
+        return route.id;
+    }
+
+    function selectUnSelectCallBack(e){
+
+        var configuredTitle = $( "#route" ).attr("title");
+
+        $( "#select2-route-container" ).tooltip({ content: configuredTitle,
+            position: { my: "left+10 center", at: "right center" } });
+
+        var selectedDataList = $("#route").select2("data");
+        var selectedRouteId = "";
+        var selectedRouteValues = "";
+        $(selectedDataList).each(function(index, eachList){
+            selectedRouteId += "r=" + eachList.id + ($(selectedDataList).length-1 === index ? "": "&");
+            selectedRouteValues += eachList.id + ($(selectedDataList).length-1 === index ? "": "&");
+        });
+
+        if (selectedRouteId.trim() != "") {
+            var url = apiUrlPrefix + "/command/routesDetails?" + selectedRouteId;
+            $.getJSON(url, routeConfigCallback);
+        }
+        getAndProcessSchAdhData(selectedRouteValues, $("#vehiclesSearch").val())
+    }
+
+
     $.getJSON(apiUrlPrefix + "/command/routes?keepDuplicates=true",
         function (routes) {
             // Generate list of routes for the selector
             var selectorData = [{id: '', text: 'Select Route'}];
             for (var i in routes.routes) {
                 var route = routes.routes[i];
-                selectorData.push({id: route.id, text: route.name})
+                selectorData.push({id: route.shortName, text: route.name})
             }
 
             $("#route").select2({
-                data: selectorData
-            }).on("select2:select", function (e) {
-                getAndProcessSchAdhData($("#route").val(), $("#vehiclesSearch").val())
-            });
+                data : selectorData,
+                templateSelection: formatRoute
+            })
+                // Need to reset tooltip after selector is used. Sheesh!
+                .on("select2:select", selectUnSelectCallBack)
+                .on("select2:unselect", selectUnSelectCallBack);
+
+
+            /*  $("#route").select2({
+                 data: selectorData
+             }).on("select2:select", function (e) {
+                 $.getJSON(apiUrlPrefix + "/command/routesDetails", routeConfigCallback);
+                 getAndProcessSchAdhData($("#route").val(), $("#vehiclesSearch").val())
+             }); */
         }
     );
 
@@ -176,8 +216,22 @@
      * Reads in and processes schedule adherence data
      */
     function getAndProcessSchAdhData(routeId, vehicleId) {
+
+        var selectedDataList = [];
+
+        if( $("#route").val() != null ) {
+            selectedDataList =  $("#route").select2("data");
+        }
+
+
+        var selectedRouteId = "";
+       // var selectedRouteValues = "";
+        $(selectedDataList).each(function(index, eachList){
+            selectedRouteId += "r=" + eachList.id + ($(selectedDataList).length-1 === index ? "": "&");
+        });
+
         // Do API call to get schedule adherence data
-        $.getJSON(apiUrlPrefix + "/command/vehiclesDetails?onlyAssigned=true", {r: routeId},
+        $.getJSON(apiUrlPrefix + "/command/vehiclesDetails?onlyAssigned=true"+ selectedRouteId,
             // Process data
             function (jsonData) {
                 var newVehicleLayer = L.featureGroup();
@@ -279,9 +333,21 @@
     /**
      * Reads in route data obtained via AJAX and draws route on map.
      */
+    var routeFeatureGroup = null;
     function routeConfigCallback(routeData, status) {
         // So can make sure routes are drawn below the stops
-        var routeFeatureGroup = L.featureGroup();
+
+        if(routeFeatureGroup && map){
+            map.removeLayer(routeFeatureGroup);
+        }
+       routeFeatureGroup = L.featureGroup();
+        var locsToFit = [];
+
+var routeOptions2 = JSON.parse(JSON.stringify((routeOptions)));
+        routeOptions2.weight = 6;
+        routeOptions2.color = "#1887fc ";
+        routeOptions2.fillOpacity = 0.6;
+
 
         // For each route
         for (var r = 0; r < routeData.routes.length; ++r) {
@@ -293,14 +359,19 @@
                 for (var j = 0; j < shape.loc.length; ++j) {
                     var loc = shape.loc[j];
                     latLngs.push(L.latLng(loc.lat, loc.lon));
+                    locsToFit.push(L.latLng(loc.lat, loc.lon));
                 }
-                var polyline = L.polyline(latLngs, routeOptions);
+                var polyline = L.polyline(latLngs, routeOptions2);
                 routeFeatureGroup.addLayer(polyline);
             }
         }
 
         // Add all of the paths and stops to the map at once via the FeatureGroup
         routeFeatureGroup.addTo(map);
+
+        if (locsToFit.length > 0) {
+            map.fitBounds(locsToFit);
+        }
 
         // It can happen that vehicles get drawn before the route paths.
         // In this case need call bringToBack() on the paths so that
@@ -340,7 +411,7 @@
             });
 
         // Get route config data and draw all routes
-        $.getJSON(apiUrlPrefix + "/command/routesDetails", routeConfigCallback);
+       // $.getJSON(apiUrlPrefix + "/command/routesDetails", routeConfigCallback);
 
         // Start showing schedule adherence data and update every 10 seconds.
         // Updating every is more than is truly useful since won't get significant
