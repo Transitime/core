@@ -400,7 +400,7 @@
         <div id="run-time-tabs">
             <ul>
                 <li><a href="#component">Component</a></li>
-                <li><a href="#percentage">Percentage</a></li>
+                <li><a href="#percentage">Run Time</a></li>
                 <li><a href="#distribution">Distribution</a></li>
             </ul>
 
@@ -677,7 +677,7 @@
 
     function generatePercentileTable(stopsData, formattedScheduled, formattedRunTimeTrips){
 
-        var tableTD = "<tr><th>Trip</th><th>Schedule</th><th>N %ile</th></tr>";
+        var tableTD = "<tr><th>Trip</th><th>Schedule</th><th>Percentile</th></tr>";
         var sumOfData = 0;
         stopsData.forEach(function (eachTrip, i) {
 
@@ -723,12 +723,13 @@
 
         var percentileSelectOptions = range(1, 20);
 
-        var dummyTripRunTimes = range(1, response.data.trips.length,  {"runTimes": [2400499, 2430499, 2475499]});
+        // var dummyTripRunTimes = range(1, response.data.trips.length,  {"runTimes": [2400499, 2430499, 2475499]});
 
+        var tripRunTimes =  response.data.tripRunTimes;
 
         var formattedScheduled = convertToMins(response.data.scheduled);
 
-        var formattedRunTimeTrips = generateRunTimes(dummyTripRunTimes, 50);
+        var formattedRunTimeTrips = generateRunTimes(tripRunTimes, 50);
         var stopsData = getStopsData(response.data.trips);
 
         var percentileData = [];
