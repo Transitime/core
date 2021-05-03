@@ -73,44 +73,44 @@
     <title>TransitClock Map</title>
 </head>
 <body>
-    <%@include file="/template/header.jsp" %>
-    <div id="paramsSidebar">
-        <div id="title" style="font-size:x-large">
-            Live Map
-        </div>
+<%@include file="/template/header.jsp" %>
+<div id="paramsSidebar">
+    <div id="title" style="font-size:x-large">
+        Live Map
+    </div>
 
-        <div id="paramsFields">
-            <%-- For passing agency param to the report --%>
-            <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
+    <div id="paramsFields">
+        <%-- For passing agency param to the report --%>
+        <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
 
-                <jsp:include page="params/routeMultiple.jsp" />
-            <div id="search" style="margin-top: 20px;">
-                Search
-                <br>
-                <div class="param">
-                    <input type="text" id="stopsSearch" placeholder="Stops" name="stopsSearch">
-                    <button type="submit" id="stopsSubmit" onclick="showStopDetails($('#route').val(), $('#stopsSearch').val())">Show stop</button>
-                </div>
-
-                <div class="param">
-                    <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
-                    <button type="submit" id="vehiclesSubmit" onclick="openVehiclePopup(getVehicleMarker($('#vehiclesSearch').val()))">Show vehicle</button>
-                </div>
+        <jsp:include page="params/routeMultiple.jsp" />
+        <div id="search" style="margin-top: 20px;">
+            Search
+            <br>
+            <div class="param">
+                <input type="text" id="stopsSearch" placeholder="Stops" name="stopsSearch">
+                <button type="submit" id="stopsSubmit" onclick="showStopDetails($('#route').val(), $('#stopsSearch').val())">Show stop</button>
             </div>
-        </div>
-        <div id="links">
-            <div id="dispatcherLink">
-                <a href="realTimeDispatcher.jsp?a=1">Dispatcher View >></a>
-            </div>
-            <div id="schAdhLink">
-                <a href="realTimeScheduleAdherence.jsp?a=1">Schedule Adherence View >></a>
+
+            <div class="param">
+                <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
+                <button type="submit" id="vehiclesSubmit" onclick="openVehiclePopup(getVehicleMarker($('#vehiclesSearch').val()))">Show vehicle</button>
             </div>
         </div>
     </div>
-
-    <div id="mainPage" style="width: 79%; height: 100%; display: inline-block;">
-        <div id="map"></div>
+    <div id="links">
+        <div id="dispatcherLink">
+            <a href="realTimeDispatcher.jsp?a=1">Dispatcher View >></a>
+        </div>
+        <div id="schAdhLink">
+            <a href="realTimeScheduleAdherence.jsp?a=1">Schedule Adherence View >></a>
+        </div>
     </div>
+</div>
+
+<div id="mainPage" style="width: 79%; height: 100%; display: inline-block;">
+    <div id="map"></div>
+</div>
 
 
 <script>
@@ -128,6 +128,19 @@
         // Use jquery-dateFormat javascript library
         return $.format.date(offsetDate, 'HH:mm:ss');
     }
+
+    $("#stopsSearch").keydown(function(e){
+        if(e.which == 13) {
+            showStopDetails($('#route').val(), $('#stopsSearch').val());
+        }
+
+    });
+    $("#vehiclesSearch").keydown(function(e){
+        if(e.which == 13) {
+            openVehiclePopup(getVehicleMarker($('#vehiclesSearch').val()));
+        }
+
+    });
 
     /**
      * Handle the route specification
@@ -334,46 +347,46 @@
 
                     if (stopMarker.stop.id == $("#stopsSearch").val()) {
                         showStopPopup(stopMarker);
+                    }
                 }
             }
-        }
 
-        // Draw the paths for the route
-        for (var i=0; i<route.shape.length; ++i) {
-            var shape = route.shape[i];
-            var options = shapeOptions;
-            // shape.minor ? minorShapeOptions : shapeOptions;
+            // Draw the paths for the route
+            for (var i=0; i<route.shape.length; ++i) {
+                var shape = route.shape[i];
+                var options = shapeOptions;
+                // shape.minor ? minorShapeOptions : shapeOptions;
 
-            var latLngs = [];
-            for (var j=0; j<shape.loc.length; ++j) {
-                var loc = shape.loc[j];
-                latLngs.push(L.latLng(loc.lat, loc.lon));
+                var latLngs = [];
+                for (var j=0; j<shape.loc.length; ++j) {
+                    var loc = shape.loc[j];
+                    latLngs.push(L.latLng(loc.lat, loc.lon));
+                }
+                var polyline = L.polyline(latLngs, options).addTo(map);
+
+                routeFeatureGroup.addLayer(polyline);
+
+                // Store shape data obtained via AJAX with polyline so it can be used in popup
+                polyline.shape = shape;
+
             }
-            var polyline = L.polyline(latLngs, options).addTo(map);
 
-            routeFeatureGroup.addLayer(polyline);
+            // Add all of the paths and stops to the map at once via the FeatureGroup
+            routeFeatureGroup.addTo(map);
 
-            // Store shape data obtained via AJAX with polyline so it can be used in popup
-            polyline.shape = shape;
+            // If stop was specified for getting route then locationOfNextPredictedVehicle
+            // is also returned. Use this vehicle location when fitting bounds of map
+            // so that user will always see the next vehicle coming.
+            if (route.locationOfNextPredictedVehicle) {
+                locsToFit.push(L.latLng(route.locationOfNextPredictedVehicle.lat,
+                    route.locationOfNextPredictedVehicle.lon));
+            }
+            // Get map to fit route
+            if (locsToFit.length > 0) {
+                map.fitBounds(locsToFit);
+            }
 
-        }
-
-        // Add all of the paths and stops to the map at once via the FeatureGroup
-        routeFeatureGroup.addTo(map);
-
-        // If stop was specified for getting route then locationOfNextPredictedVehicle
-        // is also returned. Use this vehicle location when fitting bounds of map
-        // so that user will always see the next vehicle coming.
-        if (route.locationOfNextPredictedVehicle) {
-            locsToFit.push(L.latLng(route.locationOfNextPredictedVehicle.lat,
-                route.locationOfNextPredictedVehicle.lon));
-        }
-        // Get map to fit route
-        if (locsToFit.length > 0) {
-            map.fitBounds(locsToFit);
-        }
-
-    });
+        });
 
 
 
@@ -1062,7 +1075,7 @@
             })
                 // Need to reset tooltip after selector is used. Sheesh!
                 .on("select2:select", selectUnSelectCallBack)
-        .on("select2:unselect", selectUnSelectCallBack);
+                .on("select2:unselect", selectUnSelectCallBack);
 
             // start getting vehicle location data now instead instead of waiting till route selected.
             updateVehiclesUsingApiData();

@@ -126,6 +126,22 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
         return $.format.date(offsetDate, 'HH:mm:ss');
     }
 
+    $("#stopsSearch").keydown(function(e){
+        if(e.which == 13) {
+
+
+            showStopDetails($('#routes').val(), $('#stopsSearch').val())
+
+        }
+
+    });
+    $("#vehiclesSearch").keydown(function(e){
+        if(e.which == 13) {
+            openVehiclePopup(getVehicleMarker($('#vehiclesSearch').val()))
+        }
+
+    });
+
     /**
      * Handle the route specification
      */
