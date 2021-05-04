@@ -82,7 +82,7 @@ label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-rig
     display: flex;
     flex-flow: row;
     justify-content: space-between;
-    margin-top: 6%;
+    margin-top: 4%;
 }
 .param > * {
     font-size: 14px;
@@ -458,4 +458,34 @@ h3#visualization-container-header {
     /* font-weight: bold; */
     font-family: Trebuchet MS,Tahoma,Verdana,Arial,sans-serif;
     margin-top: 0px;
+}
+
+#vehiclesSearch, #stopsSearch {
+    width: 59%;
+}
+
+#vehiclesSubmit, #stopsSubmit {
+    width: 35%;
+    padding: 5px 0px;
+}
+
+#search{
+    padding-top: 25px;
+}
+
+.paramLabel, .paramCheckbox label{
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.paramCheckbox label {
+    display: inline-block;
+    white-space: nowrap;
+}
+.paramCheckbox input {
+    vertical-align: middle;
+}
+.paramCheckbox label span {
+    vertical-align: middle;
+    padding-right: 10px;
 }

@@ -74,27 +74,29 @@
 </head>
 <body>
 <%@include file="/template/header.jsp" %>
+
 <div id="paramsSidebar">
-    <div id="title" style="font-size:x-large">
+    <div class="title">
         Live Map
     </div>
-
     <div id="paramsFields">
-        <%-- For passing agency param to the report --%>
-        <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
+        <div id="routesParam" class="margintop">
+            <div class="paramLabel">Routes</div>
+            <%-- For passing agency param to the report --%>
+            <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
+            <jsp:include page="params/routeMultipleNoLabel.jsp" />
+        </div>
 
-        <jsp:include page="params/routeMultiple.jsp" />
-        <div id="search" style="margin-top: 20px;">
-            Search
-            <br>
+        <div id="search" class="margintop">
+            <div class="paramLabel">Search</div>
             <div class="param">
                 <input type="text" id="stopsSearch" placeholder="Stops" name="stopsSearch">
-                <button type="submit" id="stopsSubmit" onclick="showStopDetails($('#route').val(), $('#stopsSearch').val())">Show stop</button>
+                <button type="submit" id="stopsSubmit" onclick="showStopDetails($('#routes').val(), $('#stopsSearch').val())">Show Stop</button>
             </div>
 
             <div class="param">
                 <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
-                <button type="submit" id="vehiclesSubmit" onclick="openVehiclePopup(getVehicleMarker($('#vehiclesSearch').val()))">Show vehicle</button>
+                <button type="submit" id="vehiclesSubmit" onclick="openVehiclePopup(getVehicleMarker($('#vehiclesSearch').val()))">Show Vehicle</button>
             </div>
         </div>
     </div>
@@ -107,6 +109,7 @@
         </div>
     </div>
 </div>
+
 
 <div id="mainPage" style="width: 79%; height: 100%; display: inline-block;">
     <div id="map"></div>

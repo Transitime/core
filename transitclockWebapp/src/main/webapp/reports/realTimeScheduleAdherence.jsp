@@ -84,18 +84,19 @@
     </div>
 
     <div id="paramsFields">
-        <%-- For passing agency param to the report --%>
-        <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
+        <div id="routesParam" class="margintop">
+            <div class="paramLabel">Routes</div>
+            <%-- For passing agency param to the report --%>
+            <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
+            <jsp:include page="params/routeMultipleNoLabel.jsp" />
+        </div>
 
-        <jsp:include page="params/routeMultiple.jsp"/>
-
-        <div id="search" style="margin-top: 20px;">
-            Search
-            <br>
+        <div id="search" class="margintop">
+            <div class="paramLabel">Search</div>
             <div class="param">
                 <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
                 <button type="submit" id="vehiclesSubmit"
-                        onclick="getAndProcessSchAdhData($('#route').val(), $('#vehiclesSearch').val())">Show vehicle
+                        onclick="getAndProcessSchAdhData($('#route').val(), $('#vehiclesSearch').val())">Show Vehicle
                 </button>
             </div>
         </div>

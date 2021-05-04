@@ -82,22 +82,23 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
             <div class="title">
                 Real Time Vehicle Monitoring
             </div>
-            <div id="routesDiv" class="param">
-                <label for="routes">Routes:</label>
-                <select id="routes"  multiple="multiple"></select>
+            <div id="routesParam" class="margintop">
+                <div class="paramLabel">Routes</div>
+                <div id="routesDiv" class="param">
+                    <select id="routes"  multiple="multiple"></select>
+                </div>
             </div>
-            <div id="search" class="margintop">
-                Search
 
-                <br>
+            <div id="search" class="margintop">
+                <div class="paramLabel">Search</div>
                 <div class="param">
                     <input type="text" id="stopsSearch" placeholder="Stops" name="stopsSearch">
-                    <button type="submit" id="stopsSubmit" onclick="showStopDetails($('#routes').val(), $('#stopsSearch').val())">Show stop</button>
+                    <button type="submit" id="stopsSubmit" onclick="showStopDetails($('#routes').val(), $('#stopsSearch').val())">Show Stop</button>
                 </div>
 
                 <div class="param">
                     <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
-                    <button type="submit" id="vehiclesSubmit" onclick="openVehiclePopup(getVehicleMarker($('#vehiclesSearch').val()))">Show vehicle</button>
+                    <button type="submit" id="vehiclesSubmit" onclick="openVehiclePopup(getVehicleMarker($('#vehiclesSearch').val()))">Show Vehicle</button>
                 </div>
             </div>
         </div>
@@ -968,8 +969,8 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
     var mapTileUrl = '<%= WebConfigParams.getMapTileUrl() %>';
     L.tileLayer(mapTileUrl, {
         // Specifying a shorter version of attribution. Original really too long.
-        //attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-        attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery ©<%= WebConfigParams.getMapTileCopyright() %>',
+        //attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery ï¿½ <a href="http://mapbox.com">Mapbox</a>',
+        attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery ï¿½<%= WebConfigParams.getMapTileCopyright() %>',
         maxZoom: 19
     }).addTo(map);
 
