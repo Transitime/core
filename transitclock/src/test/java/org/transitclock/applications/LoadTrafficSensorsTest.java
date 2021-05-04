@@ -33,6 +33,7 @@ import static org.junit.Assert.*;
 /**
  * Test the loading/scoring of LoadTrafficSensors application.
  */
+@Ignore
 public class LoadTrafficSensorsTest {
 
   private LoadTrafficSensors app;

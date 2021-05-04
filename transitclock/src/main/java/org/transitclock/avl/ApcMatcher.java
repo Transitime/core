@@ -36,7 +36,6 @@ public class ApcMatcher {
   private List<ArrivalDeparture> arrivals = null;
   private Map<String, List<ArrivalDeparture>> cache = null;
   private boolean debug = false;
-
   public ApcMatcher(List<ArrivalDeparture> arrivals) {
     this.arrivals = arrivals;
   }
@@ -79,7 +78,7 @@ public class ApcMatcher {
       }
       count++;
       if (count % 1000 == 0) {
-        logger.info("searched {} of {}", count, apcRecords.size());
+        logger.debug("searched {} of {}", count, apcRecords.size());
       }
     }
 
@@ -126,5 +125,6 @@ public class ApcMatcher {
   private String hash(ArrivalDeparture ad) {
     return ad.getVehicleId() + "." + new SimpleDateFormat("yyyyMMddHHmm").format(new Date(ad.getTime()));
   }
+
 
 }

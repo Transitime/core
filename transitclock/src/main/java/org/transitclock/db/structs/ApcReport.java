@@ -29,6 +29,8 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -45,7 +47,8 @@ public class ApcReport implements Serializable {
   @Id
   private final String messageId;
   @Column
-  private final long time;
+  @Temporal(TemporalType.TIMESTAMP)
+  private final Date time;
   @Column
   private final long serviceDate;
   @Column(length=HibernateUtils.DEFAULT_ID_SIZE)
@@ -79,7 +82,7 @@ public class ApcReport implements Serializable {
 
   private ApcReport() {
     messageId = null;
-    time = -1;
+    time = null;
     serviceDate = 1;
     driverId = null;
     odo = -1;
@@ -111,7 +114,7 @@ public class ApcReport implements Serializable {
                    double lon,
                    ArrivalDeparture ad) {
     this.messageId = messageId;
-    this.time = time;
+    this.time = new Date(time);
     this.serviceDate = serviceDate;
     this.driverId = driverId;
     this.odo = odo;
@@ -131,7 +134,7 @@ public class ApcReport implements Serializable {
     return messageId;
   }
 
-  public long getTime() {
+  public Date getTime() {
     return time;
   }
 
@@ -219,7 +222,7 @@ public class ApcReport implements Serializable {
   public String toString() {
   return "apc["
           + "vehicleId=" + vehicleId
-          + ",time=" + new Date(time)
+          + ",time=" + time
           + ",id=" + this.messageId
           + ",ons=" + getBoardings()
           + ",offs=" + getAlightings()

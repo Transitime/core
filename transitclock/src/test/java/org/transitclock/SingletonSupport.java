@@ -16,11 +16,10 @@ import java.util.TimeZone;
 
 import static org.junit.Assert.assertNotNull;
 
-@Ignore
 /**
  * Helper methods for Unit Tests.
  */
-public class TestSupport {
+public class SingletonSupport {
 
   public static final String AGENCY_ID = "a1";
 
@@ -62,12 +61,8 @@ public class TestSupport {
 
   public static void createTestCore() {
     // some structs require Core / DbConfig
-    if (!Core.isCoreApplication()) {
-      Core.createTestCore(AGENCY_ID);
-      if (Core.getInstance().getTime() == null) {
-        Core.getInstance().setTime(new Time(getTimeZone()));
-      }
-    }
+    Core.createTestCore(AGENCY_ID);
+    Core.getInstance().setTime(new Time(getTimeZone()));
     // load standard configuration
     InputStream is = Core.getInstance().getClass().getResourceAsStream("transitclock.properties");
     assertNotNull(is);

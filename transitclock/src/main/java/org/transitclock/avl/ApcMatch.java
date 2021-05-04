@@ -77,7 +77,7 @@ public class ApcMatch {
     }
     if (closest > MAX_MATCH_DISTANCE.getValue()) {
       if (arrivalDepartures != null && !arrivalDepartures.isEmpty() && best != null) {
-        logger.error("distance {} precluded apc {}/{} from matching to ad {}/{}",
+        logger.debug("distance {} precluded apc {}/{} from matching to ad {}/{}",
                 closest,
                 apc.getVehicleId(),
                 new Date(apc.getTime()),
@@ -100,7 +100,7 @@ public class ApcMatch {
       return null;
     }
     if (ad.getStop() == null) {
-      logger.error("no stop found for stop_id {}", ad.getStopId());
+        logger.debug("no stop found for stop_id {}", ad.getStopId());
       return null;
     }
     return ad.getStop().getLoc();
@@ -109,4 +109,5 @@ public class ApcMatch {
   private Location toApcLocation(ApcParsedRecord apc) {
     return new Location(apc.getLat(), apc.getLon());
   }
+
 }

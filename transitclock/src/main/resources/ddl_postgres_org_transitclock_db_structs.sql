@@ -36,7 +36,7 @@
         lon float8,
         odo int4,
         serviceDate int8,
-        time int8,
+        time timestamp,
         vehicleId varchar(60),
         arrivalDeparture_vehicleId varchar(60),
         arrivalDeparture_tripId varchar(60),

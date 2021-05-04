@@ -1,17 +1,22 @@
 package org.transitclock.avl;
 
+import org.apache.commons.lang3.time.DateUtils;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitclock.TestSupport;
+import org.transitclock.SingletonSupport;
+import org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman.KalmanDataGenerator;
 import org.transitclock.db.structs.ApcReport;
 import org.transitclock.db.structs.ApcRecordSupport;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.ArrivalDepartureSupport;
 import org.transitclock.utils.IntervalTimer;
+import org.transitclock.utils.Time;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -25,10 +30,50 @@ public class ApcAggregatorTest {
   private ArrivalDepartureSupport arrivalDepartureSupport = new ArrivalDepartureSupport();
   private ApcRecordSupport apcRecordSupport = new ApcRecordSupport();
   private ApcMatcher matcher = null;
+  private KalmanDataGenerator generator;
 
   @BeforeClass
-  public static void setup() throws Exception {
-    TestSupport.createTestCore();
+  public static void setupClass() throws Exception {
+    SingletonSupport.createTestCore();
+  }
+
+  @Before
+  public void setup() throws Exception {
+    generator =  new KalmanDataGenerator(System.currentTimeMillis());
+  }
+
+  @Test
+  public void testPrune() {
+    ApcAggregator aggregator = new ApcAggregator("CDT");
+    int cacheCount = 0;
+    int incrementSize = 5;
+    for (int daysBack = 1; daysBack<=5; daysBack++) {
+      List<ApcReport> matches = createTestMatches(daysBack, incrementSize);
+      cacheCount = cacheCount + matches.size();
+      aggregator.analyze(matches);
+      assertEquals(cacheCount, aggregator.cacheSize());
+    }
+    for (int daysBack = 3; daysBack>=0; daysBack--) {
+      aggregator.setApcCacheDays(daysBack);
+      assertEquals(cacheCount, aggregator.cacheSize());
+      aggregator.prune();
+      cacheCount = cacheCount - incrementSize;
+      assertEquals(cacheCount, aggregator.cacheSize());
+    }
+  }
+
+  private List<ApcReport> createTestMatches(int daysBack, int incrementSize) {
+    List<ApcReport> reports = new ArrayList<>();
+    long referenceTime = DateUtils.addDays(new Date(), -1 * daysBack).getTime();
+    for (int i = 0; i<incrementSize; i++) {
+      // add some noise into reference time
+      referenceTime = referenceTime + (5 * Time.MS_PER_MIN);
+      List<ApcParsedRecord> apcParsedRecords = generator.getApcParsedRecords(referenceTime, 0, i);
+      for (ApcParsedRecord apr : apcParsedRecords) {
+        reports.add(apr.toApcReport());
+      }
+    }
+    return reports;
   }
 
   @Test
@@ -44,25 +89,26 @@ public class ApcAggregatorTest {
     apc[vehicleId=3992,time=Wed Apr 21 16:30:38 EDT 2021,id=2179293435,ons=0,offs=4] (duplicate)...
     ...
      */
-    Integer count = aggregator.getCount("11861", TestSupport.toDate("2021-04-21", "20:28:01", "UTC"));
-    assertNotNull(count);
-    assertEquals(0, count.intValue());
 
-    count = aggregator.getCount("17994", TestSupport.toDate("2021-04-21", "23:58:01", "UTC"));
+    Integer count = aggregator.getBoardingsPerMinute("11861", SingletonSupport.toDate("2021-04-21", "20:28:01", "UTC"));
     assertNotNull(count);
-    assertEquals(2, count.intValue());
+    assertEquals("11861 failed", 0, count.intValue());
 
-    count = aggregator.getCount("17976", TestSupport.toDate("2021-04-21", "16:59:00", "UTC"));
+    count = aggregator.getBoardingsPerMinute("17994", SingletonSupport.toDate("2021-04-21", "23:58:01", "UTC"));
     assertNotNull(count);
-    assertEquals(1, count.intValue());
+    assertEquals("17994 failed", 2, count.intValue());
 
-    count = aggregator.getCount("11861", TestSupport.toDate("2021-04-21", "15:51:00", "UTC"));
+    count = aggregator.getBoardingsPerMinute("17976", SingletonSupport.toDate("2021-04-21", "16:59:00", "UTC"));
     assertNotNull(count);
-    assertEquals(11, count.intValue());
+    assertEquals("17976 failed", 1, count.intValue());
 
-    count = aggregator.getCount("17990", TestSupport.toDate("2021-04-21", "21:45:00", "UTC"));
+    count = aggregator.getBoardingsPerMinute("11861", SingletonSupport.toDate("2021-04-21", "15:51:00", "UTC"));
     assertNotNull(count);
-    assertEquals(4, count.intValue());
+    assertEquals("11861 failed", 11, count.intValue());
+
+    count = aggregator.getBoardingsPerMinute("17990", SingletonSupport.toDate("2021-04-21", "21:45:00", "UTC"));
+    assertNotNull(count);
+    assertEquals("17990 failed", 4, count.intValue());
 
   }
 
@@ -102,4 +148,6 @@ public class ApcAggregatorTest {
         + " (" + (matched/total) + ")");
     return reports;
   }
+
+
 }

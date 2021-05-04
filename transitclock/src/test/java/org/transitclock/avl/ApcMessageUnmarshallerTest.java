@@ -2,7 +2,7 @@ package org.transitclock.avl;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.transitclock.TestSupport;
+import org.transitclock.SingletonSupport;
 import org.transitclock.utils.Time;
 
 import java.io.InputStream;
@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.transitclock.TestSupport.toEpoch;
+import static org.transitclock.SingletonSupport.toEpoch;
 
 public class ApcMessageUnmarshallerTest {
 
@@ -46,7 +46,7 @@ public class ApcMessageUnmarshallerTest {
     // NOTE:  service date needs to be relative to time zone for follow on calculations to work
     assertEquals(new Date(toEpoch("2021-02-18", "00:00:00","CST")), new Date(a.getServiceDate()));
 
-    assertEquals(new Date(TestSupport.toEpoch("2021-02-18", "21:07:18", "UTC")), new Date(a.getTime()));
+    assertEquals(new Date(SingletonSupport.toEpoch("2021-02-18", "21:07:18", "UTC")), new Date(a.getTime()));
 
     assertEquals("79497", a.getDriverId());
     // TODO fom: Figure Of Merit; quality of GPS lock
@@ -55,16 +55,16 @@ public class ApcMessageUnmarshallerTest {
     // 907min = 15:07 CST
     assertEquals("907.0 min", Time.elapsedTimeStr(a.getDoorOpen() * Time.SEC_IN_MSECS));
 
-    assertEquals(new Date(TestSupport.toEpoch("2021-02-18", "15:07:02", "CST")), new Date(a.getDoorOpenEpoch()));
-    assertEquals(new Date(TestSupport.toEpoch("2021-02-18", "21:07:02", "UTC")), new Date(a.getDoorOpenEpoch()));
-    assertEquals(TestSupport.toEpoch("2021-02-18", "21:07:02", "UTC"), a.getDoorOpenEpoch());
+    assertEquals(new Date(SingletonSupport.toEpoch("2021-02-18", "15:07:02", "CST")), new Date(a.getDoorOpenEpoch()));
+    assertEquals(new Date(SingletonSupport.toEpoch("2021-02-18", "21:07:02", "UTC")), new Date(a.getDoorOpenEpoch()));
+    assertEquals(SingletonSupport.toEpoch("2021-02-18", "21:07:02", "UTC"), a.getDoorOpenEpoch());
     assertEquals(54429, a.getDoorClose());
-    assertEquals(new Date(TestSupport.toEpoch("2021-02-18", "21:07:09", "UTC")), new Date(a.getDoorCloseEpoch()));
-    assertEquals(TestSupport.toEpoch("2021-02-18", "21:07:09", "UTC"), a.getDoorCloseEpoch());
+    assertEquals(new Date(SingletonSupport.toEpoch("2021-02-18", "21:07:09", "UTC")), new Date(a.getDoorCloseEpoch()));
+    assertEquals(SingletonSupport.toEpoch("2021-02-18", "21:07:09", "UTC"), a.getDoorCloseEpoch());
     assertEquals(54442, a.getDeparture());
-    assertEquals(new Date(TestSupport.toEpoch("2021-02-18", "21:07:22", "UTC")), new Date(a.getDepartureEpoch()));
+    assertEquals(new Date(SingletonSupport.toEpoch("2021-02-18", "21:07:22", "UTC")), new Date(a.getDepartureEpoch()));
     assertEquals(54409, a.getArrival());
-    assertEquals(new Date(TestSupport.toEpoch("2021-02-18", "21:06:49", "UTC")), new Date(a.getArrivalEpoch()));
+    assertEquals(new Date(SingletonSupport.toEpoch("2021-02-18", "21:06:49", "UTC")), new Date(a.getArrivalEpoch()));
 
     assertEquals(1, a.getBoardings());
     assertEquals(0, a.getAlightings());
@@ -103,7 +103,7 @@ public class ApcMessageUnmarshallerTest {
   }
 
   private String getStreamAsString(InputStream inputStream) throws Exception {
-    return TestSupport.getStreamAsString(inputStream);
+    return SingletonSupport.getStreamAsString(inputStream);
   }
 
 

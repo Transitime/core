@@ -36,7 +36,7 @@
         lon double precision,
         odo number(10,0),
         serviceDate number(19,0),
-        time number(19,0),
+        time timestamp,
         vehicleId varchar2(60 char),
         arrivalDeparture_vehicleId varchar2(60 char),
         arrivalDeparture_tripId varchar2(60 char),

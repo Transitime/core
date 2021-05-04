@@ -159,6 +159,25 @@ public class ApcParsedRecord {
     this.arrivalDeparture = null;
   }
 
+  public ApcParsedRecord(ApcReport report) {
+    this.messageId = report.getMessageId();
+    this.time = report.getTime().getTime();
+    this.serviceDate = report.getServiceDate();
+    this.driverId = report.getDriverId();
+    this.odo = report.getOdo();
+    this.vehicleId = report.getVehicleId();
+    this.boardings = report.getBoardings();
+    this.alightings = report.getAlightings();
+    this.doorOpen = report.getDoorOpen();
+    this.doorClose = report.getDoorClose();
+    this.arrival = report.getArrival();
+    this.departure = report.getDeparture();
+    this.lat = report.getLat();
+    this.lon = report.getLon();
+    this.arrivalDeparture = report.getArrivalDeparture();
+  }
+
+
 
   public ApcReport toApcReport() {
     return new ApcReport(messageId,

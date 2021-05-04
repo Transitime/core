@@ -2,8 +2,11 @@ package org.transitclock.avl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.db.structs.ApcReport;
+import org.transitclock.utils.Time;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -12,6 +15,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +26,11 @@ import java.util.TimeZone;
  */
 public class ApcAggregator {
 
+  public static final IntegerConfigValue apcCacheDaysDefault = new IntegerConfigValue(
+          "transitclock.apc.cacheDays",
+          null,
+          "days of cached data to keep"
+  );
   private static final Logger logger =
           LoggerFactory.getLogger(ApcAggregator.class);
 
@@ -29,19 +38,29 @@ public class ApcAggregator {
   private HashMap<String, List<ApcReport>> cache = new HashMap<String, List<ApcReport>>();
   private Map<String, Integer> countsByHash = new HashMap<>();
   private boolean debug = true;
+  private Integer apcCacheDays = null;
 
   public ApcAggregator(String tz) {
     this.tz = tz;
   }
 
-  public Integer getCount(String stopId, Date arrival) {
+  public Integer getApcCacheDays() {
+    if (apcCacheDays != null)
+      return apcCacheDays;
+    return apcCacheDaysDefault.getValue();
+  }
+  public void setApcCacheDays(int cacheDays) {
+    this.apcCacheDays = cacheDays;
+  }
+
+  public Integer getBoardingsPerMinute(String stopId, Date arrival) {
     String hash = hash(stopId, arrival);
     List<ApcReport> apcReports = cache.get(hash);
     return sum(apcReports);
   }
 
   public synchronized void analyze(List<ApcReport> matches ) {
-    cache.clear();
+
     if (matches == null) return;
     for (ApcReport match : matches) {
       String hash = hash(match);
@@ -55,6 +74,44 @@ public class ApcAggregator {
     if (debug) {
       debugStats();
     }
+    prune();
+  }
+
+  // remove expired elements from the cache
+   void prune() {
+    Iterator<Map.Entry<String, List<ApcReport>>> iterator = cache.entrySet().iterator();
+    while (iterator.hasNext()) {
+      Map.Entry<String, List<ApcReport>> entry = iterator.next();
+      if (isOutdated(entry.getKey())) {
+        iterator.remove();
+        // clean up stats as well
+        countsByHash.remove(entry.getKey());
+      }
+    }
+  }
+
+  private boolean isOutdated(String key) {
+    if (getApcCacheDays() == null) return false; // keep forever
+    return daysOld(key) > getApcCacheDays();
+  }
+
+  private int daysOld(String key) {
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
+    String dateComponent = getDateComponentOfKey(key);
+    long keyEpoch;
+    try {
+      Date parse = sdf.parse(dateComponent);
+      keyEpoch = parse.getTime();
+      return new Long((System.currentTimeMillis() - keyEpoch) / Time.MS_PER_DAY).intValue();
+    } catch (ParseException e) {
+      logger.error("invalid key in cache {} with date component {}", key, dateComponent);
+    }
+    return -1;
+  }
+
+  private String getDateComponentOfKey(String key) {
+    return key.substring(key.lastIndexOf(".")+1,
+            key.length());
   }
 
   private boolean containsKey(String hash) {
@@ -67,7 +124,7 @@ public class ApcAggregator {
     sortedEntries.addAll(entries);
     Collections.sort(sortedEntries, new CountsComparator());
     // log top 5
-    for (int index=0; index<5; index++) {
+    for (int index=0; index < 5 && index < countsByHash.size(); index++) {
       logger.info("{} most incremented at {}, value {}",
               index,
               sortedEntries.get(index).getKey(),
@@ -119,6 +176,9 @@ public class ApcAggregator {
     return sum;
   }
 
+  public int cacheSize() {
+    return cache.size();
+  }
 
   private class CountsComparator implements Comparator {
     @Override

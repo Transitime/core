@@ -17,6 +17,7 @@
 package org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.transitclock.db.structs.TrafficSensorData;
 import org.transitclock.utils.Time;
@@ -25,6 +26,7 @@ import java.util.Date;
 
 import static org.junit.Assert.*;
 
+@Ignore
 public class TrafficDataCacheTest {
 
   TrafficDataCache cache;

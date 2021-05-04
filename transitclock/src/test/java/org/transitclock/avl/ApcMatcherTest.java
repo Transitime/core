@@ -2,7 +2,7 @@ package org.transitclock.avl;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.transitclock.TestSupport;
+import org.transitclock.SingletonSupport;
 import org.transitclock.db.structs.ApcRecordSupport;
 import org.transitclock.db.structs.ArrivalDepartureSupport;
 import org.transitclock.db.structs.ArrivalDeparture;
@@ -21,10 +21,7 @@ public class ApcMatcherTest {
 
   @Before
   public void setUp() throws Exception {
-
-    TestSupport.createTestCore();
-
-
+    SingletonSupport.createTestCore();
   }
 
   @Test

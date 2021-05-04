@@ -36,7 +36,7 @@
         lon double precision,
         odo integer,
         serviceDate bigint,
-        time bigint,
+        time datetime(3),
         vehicleId varchar(60),
         arrivalDeparture_vehicleId varchar(60),
         arrivalDeparture_tripId varchar(60),

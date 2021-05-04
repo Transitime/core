@@ -31,6 +31,7 @@ import org.transitclock.core.predictiongenerator.datafilter.TravelTimeFilterFact
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.PredictionEvent;
+import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.monitoring.MonitoringService;
@@ -307,6 +308,33 @@ public class HistoricalPredictionLibrary {
 		}
 		return times;
     }
+
+	public static Long getHeadway(String referenceStopId, long referenceTime, String routeId) {
+		StopArrivalDepartureCacheKey currentStopKey = new StopArrivalDepartureCacheKey(referenceStopId,
+						new Date(referenceTime));
+		List<IpcArrivalDeparture> currentStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(currentStopKey);
+		if (currentStopList == null || currentStopList.isEmpty()) {
+			logger.info("no headway stopList for {}:{}", referenceStopId, new Date(referenceTime));
+			return null;
+		}
+		for (int i = 0; i < currentStopList.size(); i++) {
+			IpcArrivalDeparture headwayStop = currentStopList.get(i);
+			if (headwayStop.isArrival()) {
+				// here we restrict to same route
+				Trip trip = Core.getInstance().getDbConfig().getTrip(headwayStop.getTripId());
+				if (routeId == null || trip.getRouteId().equals(routeId)) {
+					logger.debug("headway = {} - {} ", headwayStop.getTime(), new Date(referenceTime));
+					return headwayStop.getTime().getTime() - referenceTime;
+				}
+			}
+		}
+		return null;
+
+	}
+
+	public static Long getHeadway(VehicleState vehicleState, Indices indices) {
+		return getHeadway(indices.getStopPath().getStopId(), vehicleState.getMatch().getAvlTime(), indices.getTrip().getRouteId());
+	}
 
 	private static IpcArrivalDeparture getArrival(int stopPathIndex, List<IpcArrivalDeparture> results)
 	{

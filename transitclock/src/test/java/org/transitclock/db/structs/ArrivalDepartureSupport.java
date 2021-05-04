@@ -2,7 +2,7 @@ package org.transitclock.db.structs;
 
 import org.transitclock.StopSupport;
 import org.transitclock.StructSupport;
-import org.transitclock.TestSupport;
+import org.transitclock.SingletonSupport;
 import org.transitclock.applications.Core;
 
 import java.io.FileNotFoundException;
@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.zip.ZipInputStream;
 
 import static org.junit.Assert.assertNotNull;
-import static org.transitclock.TestSupport.getStreamAsString;
+import static org.transitclock.SingletonSupport.getStreamAsString;
 
 /**
  * Helper methods for ArrivalDepartures within Unit Tests.
@@ -62,7 +62,7 @@ public class ArrivalDepartureSupport extends StructSupport {
   }
 
   private void loadStopsMap() throws Exception {
-    TestSupport.createTestCore();
+    SingletonSupport.createTestCore();
     if (Core.getInstance().getDbConfig().isEmptyStopsMap()) {
       InputStream stopsStream = this.getClass().getResourceAsStream("stops1.txt");
       assertNotNull(stopsStream);

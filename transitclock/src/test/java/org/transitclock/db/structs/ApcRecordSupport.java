@@ -1,7 +1,7 @@
 package org.transitclock.db.structs;
 
 import com.amazonaws.services.sqs.model.Message;
-import org.transitclock.TestSupport;
+import org.transitclock.SingletonSupport;
 import org.transitclock.avl.ApcParsedRecord;
 import org.transitclock.avl.SimpleApcMessageUnmarshaller;
 
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipInputStream;
 
-import static org.transitclock.TestSupport.getStreamAsString;
+import static org.transitclock.SingletonSupport.getStreamAsString;
 
 /**
  * convenience methods for unit testing APCRecords.
@@ -25,7 +25,7 @@ public class ApcRecordSupport {
     for (Message message : records) {
       sb.append(unmarshaller.toString(message));
     }
-    TestSupport.writeToFile(filename, sb.toString());
+    SingletonSupport.writeToFile(filename, sb.toString());
   }
 
   public List<ApcParsedRecord> loadApcRecords(String s) throws Exception {

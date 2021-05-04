@@ -2343,6 +2343,7 @@ public class GtfsData {
 	}
 	
 	public boolean isTripPatternIdAlreadyUsed(String tripPatternId) {
+		if (tripPatternIdSet == null) return false; // for testing
 		return tripPatternIdSet.contains(tripPatternId);
 	}
 	

@@ -16,7 +16,8 @@
  */
 package org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman;
 
-import org.transitclock.TestSupport;
+import org.transitclock.SingletonSupport;
+import org.transitclock.avl.ApcParsedRecord;
 import org.transitclock.core.Indices;
 import org.transitclock.core.SpatialMatch;
 import org.transitclock.core.TemporalDifference;
@@ -24,7 +25,9 @@ import org.transitclock.core.TemporalMatch;
 import org.transitclock.core.TravelTimeDetails;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.KalmanError;
+import org.transitclock.db.structs.ApcReport;
 import org.transitclock.db.structs.Arrival;
+import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.Departure;
@@ -57,7 +60,7 @@ public class KalmanDataGenerator {
   public static final String VEHICLE = "1234";
   public static final int CONFIG_REV = -1;
   public static final int TRAVEL_TIMES_REV = -2;
-  public static final String AGENCY_ID = TestSupport.AGENCY_ID;
+  public static final String AGENCY_ID = SingletonSupport.AGENCY_ID;
   public static final String BLOCK_ID = "block1";
   public static final String ROUTE_ID = "route1";
   public static final String SERVICE_ID = "winter";
@@ -87,15 +90,19 @@ public class KalmanDataGenerator {
   }
 
   public VehicleState getVehicleState() {
+    return getVehicleState(0, 0, 300);
+  }
+
+  public VehicleState getVehicleState(int tripIndex, int stopPathIndex, int scheduleDeviation) {
     VehicleState vs = new VehicleState(VEHICLE);
     SpatialMatch spatialMatch = new SpatialMatch(getAvlTime(),
             getBlock(),
-    0, 0, 0,
-    0.0, 0.0);
-    TemporalMatch match = new TemporalMatch(spatialMatch, new TemporalDifference(300));
+            tripIndex, stopPathIndex, 0,
+            0.0, 0.0);
+    TemporalMatch match = new TemporalMatch(spatialMatch, new TemporalDifference(scheduleDeviation));
     vs.setMatch(match);
-
     return vs;
+
   }
 
   public AvlReport getAvlReport() {
@@ -143,7 +150,7 @@ public class KalmanDataGenerator {
     t.setRoute(route);
     t.setTripPattern(pattern);
     t.setTravelTimes(getTravelTimes(t));
-    t.getStopPaths().add(getStopPaths().get(0));
+    t.getStopPaths().addAll(getStopPaths());
     ScheduleTime scheduleTime = new ScheduleTime(getScheduleTime(getArrivalTime().getTime()),
             getScheduleTime(getDepartureTime().getTime()));
     ArrayList<ScheduleTime> times = new ArrayList<>();
@@ -158,7 +165,7 @@ public class KalmanDataGenerator {
   }
 
   public String getTimeZone() {
-    return TestSupport.getTimeZone();
+    return SingletonSupport.getTimeZone();
   }
 
   public GtfsRoute getGtfsRoute() {
@@ -201,7 +208,7 @@ public class KalmanDataGenerator {
 
   private TripPattern getTripPattern(Trip t) {
     return  new TripPattern(CONFIG_REV, SHAPE_ID, getStopPaths(),
-            t, getGtfsData());
+            t, getGtfsData(t));
 
   }
 
@@ -233,7 +240,7 @@ public class KalmanDataGenerator {
     return ttt;
   }
 
-  public GtfsData getGtfsData() {
+  public GtfsData getGtfsData(Trip t) {
     GtfsData gd = new GtfsTestData(
             getAvlTime(),
             CONFIG_REV,
@@ -252,38 +259,48 @@ public class KalmanDataGenerator {
             200,
             false,
             new TitleFormatter("", false));
+
     return gd;
   }
 
   public List<StopPath> getStopPaths() {
     List<StopPath> paths = new ArrayList<>();
-    StopPath path = new StopPath(
-            CONFIG_REV,
-            PATH_ID,
-            STOP_ID,
-            1,
-            false,
-            ROUTE_ID,
-            false,
-            false,
-            false,
-            null,
-            null,
-            null);
-    path.setTripPatternId(TRIP_PATTERN_ID);
-    path.setLocations(getLocations());
-    path.onLoad(null, null);
-    paths.add(path);
+    for (int i = 0; i < 5; i++) {
+      StopPath path = new StopPath(
+              CONFIG_REV,
+              PATH_ID,
+              "stop" + i,
+              i,
+              false,
+              ROUTE_ID,
+              false,
+              false,
+              false,
+              null,
+              null,
+              null);
+      path.setTripPatternId(TRIP_PATTERN_ID);
+      path.setLocations(getLocations(i));
+      path.onLoad(null, null);
+      paths.add(path);
+    }
     return paths;
   }
 
-  public ArrayList<Location> getLocations() {
+  public ArrayList<Location> getLocations(int stopsAway) {
     ArrayList<Location> locations = new ArrayList<>();
-    Location l1 = new Location(38.831741, -77.116982);
+    Location l1 = getLocation(stopsAway, 0);
     locations.add(l1);
-    Location l2 = new Location(38.833675, -77.115494);
+    Location l2 = getLocation(stopsAway, stopsAway);
     locations.add(l2);
     return locations;
+  }
+
+  public Location getLocation(int xIncrement, int yIncrement) {
+    double distanceIncrement = 0.001 * 4; //444m
+    return new Location(
+            38.831741 + (xIncrement * distanceIncrement),
+            -77.116982 + (yIncrement * distanceIncrement));
   }
 
   public GtfsTrip getGtfsTrip() {
@@ -361,5 +378,69 @@ public class KalmanDataGenerator {
 
   public KalmanError getErrorValue(Indices indices) {
     return new KalmanError(72.40);
+  }
+
+  public VehicleState getVehicleStateForApc(long tripStartTime, int tripIndex, int stopPathIndex, int scheduleDeviation) {
+    VehicleState vs = getVehicleState(tripIndex, stopPathIndex, scheduleDeviation);
+    vs.putTripStartTime(0, tripStartTime);
+    return vs;
+  }
+
+  public String getAgencyId() {
+    return AGENCY_ID;
+  }
+
+  public List<ApcParsedRecord> getApcParsedRecords(long referenceTime, int tripIndex, int stopPathIndex) {
+    List<ApcParsedRecord> records = new ArrayList<>();
+    long startOfDay = Time.getStartOfDay(new Date(referenceTime));
+    ApcParsedRecord apc = new ApcParsedRecord(
+            new Long(System.currentTimeMillis()).toString(),
+    referenceTime,
+    startOfDay,
+    "driverId",
+    0,
+    VEHICLE,
+    1,
+    1,
+    0,
+    0,
+            new Long((referenceTime - startOfDay)/Time.MS_PER_SEC).intValue(),
+            new Long((referenceTime - startOfDay + Time.SEC_PER_MIN)/Time.MS_PER_SEC).intValue(),
+    0.01,
+    0.01);
+    ArrivalDeparture.Builder ad = new ArrivalDeparture.Builder(VEHICLE,
+    referenceTime,
+    referenceTime,
+    null,
+    DIRECTION_ID,
+    tripIndex,
+    stopPathIndex,
+    stopPathIndex,
+    true,
+    -1,
+    1,
+    BLOCK_ID,
+    TRIP_ID,
+    STOP_ID,
+    0,
+    0.0f,
+    ROUTE_ID,
+    ROUTE_ID,
+    SERVICE_ID,
+    null,
+    null,
+    TRIP_PATTERN_ID,
+    STOP_PATH_ID);
+    apc.setArrivalDeparture(ad.create());
+    records.add(apc);
+    return records;
+  }
+
+  public List<ApcReport> getApcReports(long referenceTime, int tripIndex, int stopPathIndex) {
+    List<ApcReport> reports = new ArrayList<>();
+    for (ApcParsedRecord apc : getApcParsedRecords(referenceTime, tripIndex, stopPathIndex)) {
+      reports.add(apc.toApcReport());
+    }
+    return reports;
   }
 }

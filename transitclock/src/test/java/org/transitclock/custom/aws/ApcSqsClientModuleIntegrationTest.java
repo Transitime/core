@@ -2,9 +2,11 @@ package org.transitclock.custom.aws;
 
 import com.amazonaws.services.sqs.model.Message;
 import org.junit.Test;
-import org.junit.Ignore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitclock.avl.ApcParsedRecord;
 import org.transitclock.config.ConfigFileReader;
+import org.transitclock.config.StringConfigValue;
 import org.transitclock.db.structs.ApcRecordSupport;
 
 import java.io.File;
@@ -24,14 +26,24 @@ import static org.junit.Assert.*;
  */
 public class ApcSqsClientModuleIntegrationTest {
 
+  private static final Logger logger =
+          LoggerFactory.getLogger(ApcSqsClientModuleIntegrationTest.class);
   private ApcSqsClientModule sqs;
   private ApcRecordSupport apcRecordSupport = new ApcRecordSupport();
+  private static StringConfigValue sqsKey =
+          new StringConfigValue("transitclock.apc.sqsKey", null, "The AWS Key with SQS read access");
+
 
   @Test
-  @Ignore // this is an integration test so don't run every time
   public void testConnect() throws Exception {
     // load environment configuration
     ConfigFileReader.processConfig();
+
+    if (sqsKey.getValue() == null) {
+      logger.error("ApcSqsClientModuleIntegrationTest not configured, exiting");
+      return;
+    }
+
     ApcSqsCallback sponge = new ApcSqsCallback();
     sqs = new ApcSqsClientModule("1", sponge);
     sqs.start();
