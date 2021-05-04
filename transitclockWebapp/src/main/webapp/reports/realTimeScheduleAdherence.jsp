@@ -160,6 +160,8 @@
         if (selectedRouteId.trim() != "") {
             var url = apiUrlPrefix + "/command/routesDetails?" + selectedRouteId;
             $.getJSON(url, routeConfigCallback);
+        }   else  if(routeFeatureGroup && map){
+            map.removeLayer(routeFeatureGroup);
         }
         getAndProcessSchAdhData(selectedRouteValues, $("#vehiclesSearch").val())
     }

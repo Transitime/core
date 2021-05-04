@@ -400,7 +400,9 @@
         <div id="run-time-tabs">
             <ul>
                 <li><a href="#component">Component</a></li>
+
                 <li><a href="#percentage">Percentile</a></li>
+
                 <li><a href="#distribution">Distribution</a></li>
             </ul>
 
@@ -676,8 +678,9 @@
 
 
     function generatePercentileTable(stopsData, formattedScheduled, formattedRunTimeTrips){
-
+      
         var tableTD = "<tr><th>Trip</th><th>Schedule</th><th>Run Time</th></tr>";
+      
         var sumOfData = 0;
         stopsData.tripName.forEach(function (eachTrip, i) {
 
