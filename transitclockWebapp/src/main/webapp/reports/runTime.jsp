@@ -1073,7 +1073,16 @@
                                 $("#visualization-container-header").html(" Trip Run Times");
                             }
                         });
-                        $("#runTimeVisualization").html(' <canvas id="visualizationCanvas" maintainAspectRatio="false" responsive="true"></canvas>');
+                        var defaultHeight = (response.data.trips.length ) *38;
+                        var defaultWidth = window.innerWidth;
+
+                        if(defaultHeight < (window.innerHeight/2 - 100)) {
+                            defaultHeight =  window.innerHeight;
+                        }
+
+                        $("#runTimeVisualization").html(' <canvas id="visualizationCanvas" class="custom-canvas"  height="'+defaultHeight+'" width="'+defaultWidth+'"></canvas>');
+
+                        //  $("#runTimeVisualization").html(' <canvas id="visualizationCanvas" maintainAspectRatio="false" responsive="true"></canvas>');
                     } else{
                         var defaultHeight = (response.data.routes.length ) *38;
                         var defaultWidth = window.innerWidth;
