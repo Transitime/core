@@ -229,7 +229,7 @@
         var selectedRouteId = "";
        // var selectedRouteValues = "";
         $(selectedDataList).each(function(index, eachList){
-            selectedRouteId += "r=" + eachList.id + ($(selectedDataList).length-1 === index ? "": "&");
+            selectedRouteId += "&r=" + eachList.id + ($(selectedDataList).length-1 === index ? "": "&");
         });
 
         // Do API call to get schedule adherence data
