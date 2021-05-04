@@ -30,7 +30,7 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
 
     <link rel="stylesheet" href="<%= request.getContextPath() %>/reports/params/reportParams.css" />
 
-<%-- MBTA wants some color customization. Load in options file if mbta --%>
+    <%-- MBTA wants some color customization. Load in options file if mbta --%>
     <% if (request.getParameter("a").startsWith("mbta")) { %>
     <link rel="stylesheet" href="css/mbtaMapUi.css"/>
     <script src="javascript/mbtaMapUiOptions.js"></script>
@@ -88,6 +88,7 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
             </div>
             <div id="search" class="margintop">
                 Search
+
                 <br>
                 <div class="param">
                     <input type="text" id="stopsSearch" placeholder="Stops" name="stopsSearch">
@@ -112,7 +113,12 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
 
 
     var agencyTimezoneOffset , timerGroup;
-
+    function formatRoute (route) {
+        if (!route.id || route.id == " ") {
+            return route.text;
+        }
+        return route.id;
+    }
     /**
      * For formating epoch times to human readable times, possibly including
      * a timezone offest. The time param in epoch time in seconds (not msec).
@@ -1020,7 +1026,7 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
                 var selectorData = [{id: '', text: 'Select Route'}];
                 for (var i in routes.routes) {
                     var route = routes.routes[i];
-                    selectorData.push({id: route.id, text: route.name})
+                    selectorData.push({id: route.shortName, text: route.name})
                 }
 
                 function selectUnselect(e) {
@@ -1039,9 +1045,12 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
                     $(selectedDataList).each(function(index, eachList){
                         selectedRouteId += "r=" + eachList.id + ($(selectedDataList).length-1 === index ? "": "&");
                     });
-
-                    var url = apiUrlPrefix + "/command/routesDetails?" + selectedRouteId;
-                    $.getJSON(url, routeConfigCallback);
+                    if (selectedRouteId.trim() != "") {
+                        var url = apiUrlPrefix + "/command/routesDetails?" + selectedRouteId;
+                        $.getJSON(url, routeConfigCallback);
+                    } else if (map && routeFeatureGroup) {
+                        map.removeLayer(routeFeatureGroup);
+                    }
 
                     // Reset the polling rate back down to minimum value since selecting new route
                     avlPollingRate = MIN_AVL_POLLING_RATE;
@@ -1065,10 +1074,11 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
                 // search capability
                 $("#routes").select2({
                     placeholder: "Select Route",
+                    templateSelection: formatRoute,
                     data: selectorData
                 }).on("select2:select", selectUnselect)
-                  .on("select2:unselect", selectUnselect);
-                    // Called when user selects route. Draws route and associated vehicles on map.
+                    .on("select2:unselect", selectUnselect);
+                // Called when user selects route. Draws route and associated vehicles on map.
 
 
                 // If showing unassigned vehicles then start getting vehicle
