@@ -400,7 +400,7 @@
         <div id="run-time-tabs">
             <ul>
                 <li><a href="#component">Component</a></li>
-                <li><a href="#percentage">Run Time</a></li>
+                <li><a href="#percentage">Percentile</a></li>
                 <li><a href="#distribution">Distribution</a></li>
             </ul>
 
@@ -411,7 +411,7 @@
 
 
                     <div class="individual-route">
-                        <h3>Summary</h3>
+                        <h3>Trip Run Time Summary</h3>
                         <table class="border-table">
                             <tr>
                                 <th>Average</th>
@@ -516,9 +516,9 @@
 
             <div id="percentage">
                 <div class="percentile-select-container" id="percentile-select-container"></div>
-                <h3>Summary</h3>
+                <h3>Average Percentile RunTime</h3>
                 <div id="percentile-summary-content"></div>
-                <h3>Trip Breakdown</h3>
+                <h3>Trip Run Time For Percentile</h3>
                 <table class="border-table percentile-summary-details">
 
                 </table>
@@ -677,14 +677,14 @@
 
     function generatePercentileTable(stopsData, formattedScheduled, formattedRunTimeTrips){
 
-        var tableTD = "<tr><th>Trip</th><th>Schedule</th><th>Percentile</th></tr>";
+        var tableTD = "<tr><th>Trip</th><th>Schedule</th><th>Run Time</th></tr>";
         var sumOfData = 0;
-        stopsData.forEach(function (eachTrip, i) {
+        stopsData.tripName.forEach(function (eachTrip, i) {
 
             var eachData = {
                 trip: eachTrip,
-                schedule: formattedScheduled[i]+"min",
-                percentile: formattedRunTimeTrips[i] +"min"
+                schedule: formattedScheduled[i]+" min",
+                percentile: formattedRunTimeTrips[i] +" min"
             };
             // percentileData.push(eachData);
             sumOfData += parseFloat(formattedRunTimeTrips[i]);
@@ -695,8 +695,8 @@
             tableTD += "</tr>";
         });
 
-        var average = Math.round(sumOfData/stopsData.length);
-        var percentileSummaryData = average +"min";
+        var average = Math.round(sumOfData/stopsData.tripVal.length);
+        var percentileSummaryData = average +" min";
 
         $("#percentile-summary-content").html(percentileSummaryData);
 
@@ -762,7 +762,7 @@
                 // if(valuePercentage == 100){
                 //     valuePercentage = 99;
                 // }
-                var formattedRunTimeTrips = generateRunTimes(dummyTripRunTimes, valuePercentage );
+                var formattedRunTimeTrips = generateRunTimes(tripRunTimes, valuePercentage );
                 // var formattedRunTimeTrips = generateRunTimes(dummyTripRunTimes, $("#percentile-select-box").val().trim());
                 // var nonSortedIndexValues = percentileCalculation(formattedRunTimeTrips.minsData, $("#percentile-select-box").val().trim());
 
@@ -912,12 +912,15 @@
     }
 
     function getStopsData(trips){
-        var stopsData = [];
+        var stopsData = {};
+        stopsData.tripName = [];
+        stopsData.tripVal = []
         trips.forEach(function (eachTrip, i) {
             var values = eachTrip.split("-");
             var optionValue = values[1].trim();
-            if(stopsData.indexOf(optionValue) < 0){
-                stopsData.push(optionValue);
+            if(stopsData.tripVal.indexOf(optionValue) < 0){
+                stopsData.tripName.push(eachTrip);
+                stopsData.tripVal.push(optionValue);
             }
 
         });
@@ -1047,13 +1050,14 @@
 
                     if(response.data.trips && response.data.trips.length ){
 
-                        var tripSelectBox = $('<select id="trips-select-box" name="tripBoxType"><option value="">All</option></select>');
+                        var tripSelectBox = $('<select id="trips-select-box" name="tripBoxType"><option value="">All Trips</option></select>');
                         var stopsData = getStopsData(response.data.trips);
-                        stopsData.forEach(function (eachTrip, i) {
+
+                        stopsData.tripVal.forEach(function (eachTrip, i) {
 
                             var option = $('<option></option>');
-                            option.attr('value', eachTrip);
-                            option.text(eachTrip);
+                            option.attr('value', stopsData.tripVal[i]);
+                            option.text(stopsData.tripName[i]);
                             tripSelectBox.append(option);
 
                         });
@@ -1061,21 +1065,18 @@
                         tripSelectBox.append( '<span class="select2-selection__arrow"><b role="presentation"></b></span>');
 
                         $("#trips-container").html("");
-                        $("#trips-container").append('<h3 for="tripBoxType" id="visualization-container-header">Run Times for Trips :</h3>');
+                        $("#trips-container").append('<h3 for="tripBoxType" id="visualization-container-header">Trip Run Times</h3>');
                         $("#trips-container").append(tripSelectBox);
 
                         $("#trips-select-box").change(function () {
 
                             if ($("#trips-select-box").val().trim() != "") {
                                 showStopView();
-
-                                $("#visualization-container-header").html("Run Times for Trip Stops");
+                                $("#visualization-container-header").html("Stop Run Times");
                             } else {
                                 visualizeData();
-
-                                $("#visualization-container-header").html("Run Times for Trips:");
+                                $("#visualization-container-header").html(" Trip Run Times");
                             }
-
                         });
                         $("#runTimeVisualization").html(' <canvas id="visualizationCanvas" maintainAspectRatio="false" responsive="true"></canvas>');
                     } else{
@@ -1465,10 +1466,10 @@
                     $("#paramDetails").html("<p style='font-size: 0.8em;'>" + (request.r == "" ? "All routes" : "Route " + request.r) + " to " + (request.headsign == "" ? "All directions" : request.headsign) + " | " + (request.tripPattern == "" ? "All Trip Patterns" : request.tripPattern) + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "<a id='compareLink' style='font-size: 0.8em; margin-bottom: 1em; margin-left: 4em; color: blue; text-decoration: underline; cursor: pointer' onclick='openModal()'>Compare</a></p>");
                     $("#paramDetailsModal").html("<p style='font-size: 0.7em;'>" + (request.r == "" ? "All routes" : "Route " + request.r) + " to " + (request.headsign == "" ? "All directions" : request.headsign) + " | " + (request.tripPattern == "" ? "All Trip Patterns" : request.tripPattern) + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "</p>");
 
-                    var avgRunTime = typeof (response.avgRunTime) == 'undefined' ? "N/A" : (response.avgRunTime / 60000).toFixed(1);
-                    var avgFixed = typeof (response.fixed) == 'undefined' ? "N/A" : (response.fixed / 60000).toFixed(1);
-                    var avgVar = typeof (response.variable) == 'undefined' ? "N/A" : (response.variable / 60000).toFixed(1);
-                    var avgDwell = typeof (response.dwell) == 'undefined' ? "N/A" : (response.dwell / 60000).toFixed(1);
+                    var avgRunTime = typeof (response.avgRunTime) == 'undefined' ? "N/A" : (response.avgRunTime / 60000).toFixed(1) + " min";
+                    var avgFixed = typeof (response.fixed) == 'undefined' ? "N/A" : (response.fixed / 60000).toFixed(1) + " min";
+                    var avgVar = typeof (response.variable) == 'undefined' ? "N/A" : (response.variable / 60000).toFixed(1) + " min";
+                    var avgDwell = typeof (response.dwell) == 'undefined' ? "N/A" : (response.dwell / 60000).toFixed(1) + " min";
 
                     var tableTD = "<td>"+avgRunTime+"</td>";
                     tableTD += "<td>"+avgFixed+"</td>";
