@@ -18,7 +18,7 @@ public class StopPathRunTimeOutput implements Serializable {
     public static StopPathRunTimeMixedChart getRunTimes(List<IpcRunTimeForStopPath> runTimeForStopPaths){
         StopPathRunTimeData data = new StopPathRunTimeData();
         for(IpcRunTimeForStopPath runTimeForStopPath : sortRunTimes(runTimeForStopPaths)){
-            data.getStopPathsList().add(getFormattedTripId(runTimeForStopPath));
+            data.getStopPathsList().add(getFormattedStopPath(runTimeForStopPath));
             data.getFixedList().add(getValueAsLong(runTimeForStopPath.getFixed()));
             data.getVariableList().add(getValueAsLong(runTimeForStopPath.getVariable()));
             data.getDwellList().add(getValueAsLong(runTimeForStopPath.getDwell()));
@@ -27,8 +27,8 @@ public class StopPathRunTimeOutput implements Serializable {
         return new StopPathRunTimeMixedChart(data);
     }
 
-    private static String getFormattedTripId(IpcRunTimeForStopPath runTimeForStopPath){
-        return runTimeForStopPath.getStopPathId();
+    private static String getFormattedStopPath(IpcRunTimeForStopPath runTimeForStopPath){
+        return ReportDataFormatter.formatStopPath(runTimeForStopPath.getStopPathId());
     }
 
     private static List<IpcRunTimeForStopPath> sortRunTimes(List<IpcRunTimeForStopPath> runTimeForStopPaths){
