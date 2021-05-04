@@ -976,9 +976,6 @@
         /*Orginal URL*/
         var stopDataURL = apiUrlPrefix +  "/report/runTime/avgStopPathRunTimes";
 
-        /*DONT COMMIT URL*/
-        // var stopDataURL = "http://gtfsrt.dev.dart.obaweb.org/api/v1/key/5c348c1d/agency/1/"+"report/runTime/avgStopPathRunTimes";
-
         $.ajax({
             url: stopDataURL,
             // Pass in query string parameters to page being requested
@@ -1027,12 +1024,7 @@
             delete  request.headsign;
             isAllRoutes = true;
             visualDataURL =  apiUrlPrefix + "/report/runTime/routeRunTimes";
-
-            /*DONT COMMIT URL*/
-            // visualDataURL = "http://gtfsrt.dev.dart.obaweb.org/api/v1/key/5c348c1d/agency/1" + "/report/runTime/routeRunTimes";
         }
-
-
 
         $.ajax({
             url: visualDataURL,
@@ -1090,34 +1082,12 @@
 
                     }
 
-
                     if(isAllRoutes){
                         generateAllRouteChart(response);
-                        /*generateAllRouteChart({
-                            "data": {
-                                "routes": [
-                                    "011",
-                                    "012",
-                                    "013",
-                                    "014",
-                                    "015",
-                                    "016",
-                                    "017",
-                                    "018",
-                                    "019",
-                                    "020"
-                                ],
-                                "early": [10, 5, 3, 30, 120, 0, 0, 15, 0, 10, 30],
-                                "onTime": [0, 0, 0, 1, 1, 10, 1, 10, 0, 0, 0],
-                                "late": [30, 0, 15, 20, 30, 45, 3, 1, 10, 0, 50],
-                            }
-                        }) ; */
                     } else{
                         generateIndividualRouteChart(response);
                         percentageTabDetails(response);
                     }
-
-
 
                     $("#comparisonResults").hide();
                     $("#runTimeVisualization").show();
@@ -1160,18 +1130,7 @@
                             ticks: options && options.yAxis && options.yAxis.ticks || {
                                 stepSize: 1
                             }
-                        },
-                        // {
-                        //     id: "icons",
-                        //     stacked: false,
-                        //     display: true,
-                        //     ticks: {
-                        //         beginAtZero: true,
-                        //         min: 0,
-                        //         max: 8,
-                        //         stepSize: 1
-                        //     }
-                        // }
+                        }
                     ]
                 },
                 legend: {
@@ -1234,7 +1193,6 @@
                     label: "Scheduled",
                     showLine: false,
                     fill: false,
-                    // yAxisId: "icons"
                 }],
             labels: response.data.stopPaths
         }
@@ -1379,7 +1337,6 @@
             labels: nonPercentileResponse.data.routes
         }
 
-        // barGraph.options.scales.xAxes[0].ticks.max = calculateMaxMins(highestPoints);
         barGraph.update();
 
 
