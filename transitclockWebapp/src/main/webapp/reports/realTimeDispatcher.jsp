@@ -73,11 +73,18 @@
                 <%-- For passing agency param to the report --%>
                 <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
 
-                <div id="search" style="margin-top: 20px;">
-                    Search
-                    <br>
+                <div id="search">
+                    <div class="paramLabel">Search</div>
                     <div class="param">
                         <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
+                    </div>
+                </div>
+                <div id="assigned" style="margin-top: 30px;">
+                    <div class="paramCheckbox">
+                        <label for="assignedFilter">
+                            <span>Assigned Only</span>
+                            <input type="checkbox" id="assignedFilter" name="assignedFilter">
+                        </label>
                     </div>
                 </div>
             </div>
@@ -99,10 +106,12 @@
                         <tr>
                             <th>Vehicle</th>
                             <th>Last Report</th>
-                            <th>Heading</th>
+                            <th>Block</th>
                             <th>Speed</th>
-                            <th>Route Assignment</th>
+                            <th>Route</th>
                             <th>Sched Adherence</th>
+                            <th></th>
+                            <th></th>
                             <th>Operator ID</th>
                             <th>View on Map</th>
                         </tr>
@@ -120,17 +129,35 @@
     $(document).ready(function () {
 
         $('#resultsTable').DataTable({
+            "lengthMenu": [[15, 50, 100, -1], [15, 50, 100, "All"]],
             columns: [
                 { data: 'vehicle', defaultContent: "" },
                 { data: 'last_report', defaultContent: "" },
-                { data: 'heading', defaultContent: ""},
-                { data: 'speed', defaultContent: "" },
+                { data: 'block_id', defaultContent: ""},
+                { data: 'speed', defaultContent: "", render: function(data,type, row) {
+                    if ( type === "sort" || type === 'type' ) {
+                        return data;
+                    }
+                    if(row['speed']) {
+                        return row['speed'] + ' mph';
+                    }
+                    return "";
+                }},
                 { data: 'route_assignment', defaultContent: "" },
                 { data: 'schedule_adherence', defaultContent: "" },
+                { data: 'schedule_adherence_time_diff', defaultContent: ""},
+                { data: 'assigned', defaultContent: ""},
                 { data: 'operator_id', defaultContent: "" },
                 { data: 'map_link', render: function (data, type, row) {
-                    return '<a href="realTimeLiveMap.jsp?a=1&v=' + row['vehicle'] + '">>></a>'
+                    return '<a href="realTimeLiveMap.jsp?a=1&v=' + row['vehicle'] + '">>></a>';
                 }}
+            ],
+            columnDefs: [
+                { orderData:[6], targets: [5] },
+                {
+                    targets: [6, 7],
+                    visible: false,
+                }
             ],
             ajax: {
                 url: apiUrlPrefix + "/report/live/dispatch",
@@ -149,5 +176,14 @@
 
     $('#vehiclesSearch').on( 'keyup', function () {
         $("#resultsTable").DataTable().columns( 0 ).search( this.value ).draw();
+    } );
+
+    $('#assignedFilter').on( 'change', function () {
+
+        if($("#assignedFilter").is(':checked'))
+            $("#resultsTable").DataTable().columns( 7 ).search('true').draw();
+        else{
+            $("#resultsTable").DataTable().columns( 7 ).search('').draw();
+        }
     } );
 </script>

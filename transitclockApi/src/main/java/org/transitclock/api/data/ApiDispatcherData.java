@@ -1,5 +1,7 @@
 package org.transitclock.api.data;
 
+import org.apache.commons.lang3.StringUtils;
+
 import javax.xml.bind.annotation.XmlAttribute;
 
 public class ApiDispatcherData {
@@ -9,8 +11,8 @@ public class ApiDispatcherData {
     @XmlAttribute(name = "last_report")
     String lastReportTime;
 
-    @XmlAttribute(name = "heading")
-    String heading;
+    @XmlAttribute(name = "block_id")
+    String blockId;
 
     @XmlAttribute(name = "speed")
     String speed;
@@ -21,20 +23,30 @@ public class ApiDispatcherData {
     @XmlAttribute(name = "schedule_adherence")
     String scheduleAdherence;
 
+    @XmlAttribute(name = "schedule_adherence_time_diff")
+    Integer scheduleAdherenceTimeDiff;
+
     @XmlAttribute(name = "operator_id")
     String operatorId;
 
+    @XmlAttribute(name = "assigned")
+    boolean isAssigned;
+
     public ApiDispatcherData() {}
 
-    public ApiDispatcherData(String vehicleId, String lastReportTime, String heading, String speed,
-                             String route, String scheduleAdherence, String operatorId){
+    public ApiDispatcherData(String vehicleId, String lastReportTime, String blockId, String speed,
+                             String route, String scheduleAdherence, Integer scheduleAdherenceTimeDiff, String operatorId){
         this.vehicleId = vehicleId;
         this.lastReportTime = lastReportTime;
-        this.heading = heading;
+        this.blockId = blockId;
         this.speed = speed;
         this.route = route;
         this. scheduleAdherence = scheduleAdherence;
+        this. scheduleAdherenceTimeDiff = scheduleAdherenceTimeDiff;
         this.operatorId = operatorId;
+        if(StringUtils.isNotBlank(blockId)){
+            isAssigned = true;
+        }
     }
 
     public String getVehicleId() {
@@ -45,8 +57,8 @@ public class ApiDispatcherData {
         return lastReportTime;
     }
 
-    public String getHeading() {
-        return heading;
+    public String getBlockId() {
+        return blockId;
     }
 
     public String getSpeed() {
@@ -63,5 +75,13 @@ public class ApiDispatcherData {
 
     public String getOperatorId() {
         return operatorId;
+    }
+
+    public Integer getScheduleAdherenceTimeDiff() {
+        return scheduleAdherenceTimeDiff;
+    }
+
+    public boolean isAssigned() {
+        return isAssigned;
     }
 }

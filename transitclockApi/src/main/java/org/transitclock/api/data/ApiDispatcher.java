@@ -22,13 +22,15 @@ public class ApiDispatcher {
         for(IpcVehicle vehicle : vehicles){
             String vehicleId = vehicle.getId();
             String lastReportTime = Time.timeStr(vehicle.getGpsTime());
-            String heading = NumberFormatter.getRoundedValueAsString(vehicle.getHeading(), 1);
+            String blockId = vehicle.getBlockId();
+            //String heading = NumberFormatter.getRoundedValueAsString(vehicle.getHeading(), 1);
             String speed = getFormattedSpeed(vehicle.getSpeed(), speedFormat);
             String route = vehicle.getRouteShortName();
             String scheduleAdherence = getFormattedScheduleAdherence(vehicle);
+            Integer scheduleAdherenceTimeDiff = getScheduleAdherenceTimeDiff(vehicle);
             String operatorId = null;
-            dispatcherData.add(new ApiDispatcherData(vehicleId, lastReportTime, heading, speed, route,
-                    scheduleAdherence, operatorId));
+            dispatcherData.add(new ApiDispatcherData(vehicleId, lastReportTime, blockId, speed, route,
+                    scheduleAdherence, scheduleAdherenceTimeDiff, operatorId));
         }
     }
 
@@ -43,6 +45,17 @@ public class ApiDispatcher {
         try {
             if (vehicle.getRealTimeSchedAdh() != null) {
                 return vehicle.getRealTimeSchedAdh().toString();
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private Integer getScheduleAdherenceTimeDiff(IpcVehicle vehicle){
+        try {
+            if (vehicle.getRealTimeSchedAdh() != null) {
+                return vehicle.getRealTimeSchedAdh().getTemporalDifference();
             }
         }catch(Exception e){
             e.printStackTrace();
