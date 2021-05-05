@@ -13,9 +13,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
   <%@include file="/template/includes.jsp" %>
-  
-  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
-  <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+
+  <link rel="stylesheet" href="//unpkg.com/leaflet@0.7.3/dist/leaflet.css" />
+  <script src="//unpkg.com/leaflet@0.7.3/dist/leaflet.js"></script>
 
 <style>
 html, body, #map { 
