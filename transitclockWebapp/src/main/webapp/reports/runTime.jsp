@@ -1432,7 +1432,7 @@
                 } else {
                     $("#submit").removeAttr("disabled");
 
-                    $("#paramDetails").html("<p style='font-size: 0.8em;'>" + (request.r == "" ? "All routes" : "Route " + request.r) + " to " + (request.headsign == "" ? "All directions" : request.headsign) + " | " + (request.tripPattern == "" ? "All Trip Patterns" : request.tripPattern) + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "<a id='compareLink' style='font-size: 0.8em; margin-bottom: 1em; margin-left: 4em; color: blue; text-decoration: underline; cursor: pointer' onclick='openModal()'>Compare</a></p>");
+                    $("#paramDetails").html("<p style='font-size: 0.8em;'>" + (request.r == "" ? "All routes" : "Route " + request.r) + " to " + (request.headsign == "" ? "All directions" : request.headsign) + " | " + (request.tripPattern == "" ? "All Trip Patterns" : request.tripPattern) + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "</p>");
                     $("#paramDetailsModal").html("<p style='font-size: 0.7em;'>" + (request.r == "" ? "All routes" : "Route " + request.r) + " to " + (request.headsign == "" ? "All directions" : request.headsign) + " | " + (request.tripPattern == "" ? "All Trip Patterns" : request.tripPattern) + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "</p>");
 
                     var avgRunTime = typeof (response.avgRunTime) == 'undefined' ? "N/A" : (response.avgRunTime / 60000).toFixed(1) + " min";
