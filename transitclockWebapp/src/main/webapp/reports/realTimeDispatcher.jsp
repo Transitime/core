@@ -112,7 +112,7 @@
                             <th>Sched Adherence</th>
                             <th></th>
                             <th></th>
-                            <th>Operator ID</th>
+                            <th>Headway</th>
                             <th>View on Map</th>
                         </tr>
                     </thead>
@@ -147,7 +147,15 @@
                 { data: 'schedule_adherence', defaultContent: "" },
                 { data: 'schedule_adherence_time_diff', defaultContent: ""},
                 { data: 'assigned', defaultContent: ""},
-                { data: 'operator_id', defaultContent: "" },
+                { data: 'headway', defaultContent: "", render: function(data,type,row) {
+                    if ( type === "sort" || type === 'type' ) {
+                        return data;
+                    }
+                    if(row['headway'] > 0) {
+                        return msToHMS(row['headway']);
+                    }
+                    return "";
+                }},
                 { data: 'map_link', render: function (data, type, row) {
                     return '<a href="realTimeLiveMap.jsp?a=1&v=' + row['vehicle'] + '">>></a>';
                 }}
