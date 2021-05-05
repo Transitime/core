@@ -1073,7 +1073,7 @@
                                 $("#visualization-container-header").html(" Trip Run Times");
                             }
                         });
-                        var defaultHeight = (response.data.trips.length ) *38;
+                        var defaultHeight = (response.data.trips.length ) *100;
                         var defaultWidth = window.innerWidth;
 
                         if(defaultHeight < (window.innerHeight/2 - 100)) {
@@ -1084,7 +1084,7 @@
 
                         //  $("#runTimeVisualization").html(' <canvas id="visualizationCanvas" maintainAspectRatio="false" responsive="true"></canvas>');
                     } else{
-                        var defaultHeight = (response.data.routes.length ) *38;
+                        var defaultHeight = (response.data.routes.length ) *100;
                         var defaultWidth = window.innerWidth;
 
                         if(defaultHeight < (window.innerHeight/2 - 100)) {
