@@ -51,6 +51,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 	private final Double distanceOfNextStopFromTripStart;
 	private final Double distanceAlongTrip;
 	private double headway;
+	private double scheduledHeadway;
 
 	private static final long serialVersionUID = 8154105842499551461L;
 
@@ -91,9 +92,12 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			if(vs.getHeadway()!=null)
 			{
 				this.headway=vs.getHeadway().getHeadway();
+				this.scheduledHeadway=vs.getHeadway().getScheduledHeadway();
 			}
-			else
-				this.headway=-1;
+			else {
+				this.headway = -1;
+				this.scheduledHeadway = -1;
+			}
 		} else {
 			// Vehicle not assigned to trip so null out parameters
 			this.originStopId = null;
@@ -306,9 +310,14 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 	public Double getDistanceAlongTrip() {
 		return distanceAlongTrip;
 	}
+
 	public double getHeadway()
 	{
 		return headway;
+	}
+
+	public double getScheduledHeadway() {
+		return scheduledHeadway;
 	}
 
 	@Override

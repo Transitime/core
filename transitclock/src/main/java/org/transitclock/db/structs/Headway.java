@@ -224,7 +224,9 @@ public class Headway implements Serializable {
 		this.secondDeparture = secondDeparture;
 	}
 
-	
+	public Double getScheduledHeadway() {
+		return scheduledHeadway;
+	}
 
 	@Override
 	public int hashCode() {
