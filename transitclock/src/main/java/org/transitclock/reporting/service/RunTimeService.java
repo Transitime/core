@@ -383,14 +383,18 @@ public class RunTimeService {
 
         }
 
-        Double avgRunTime = avgRunTimeStats.getCount() > 0 ? avgRunTimeStats.getAverage() : null;
         Double fixedTime = fixedTimeStats.getCount() > 0 ? fixedTimeStats.getMin() : null;
         Double dwellTime = avgDwellTimeStats.getCount() > 0 ? avgDwellTimeStats.getAverage() : null;
+        Double avgRunTime = avgRunTimeStats.getCount() > 0 ? avgRunTimeStats.getAverage() : null;
         Double variableTime = null;
 
 
         if(avgRunTime != null && fixedTime != null) {
             variableTime = avgRunTime - fixedTime;
+        }
+
+        if(avgRunTime != null && dwellTime != null){
+            avgRunTime += dwellTime;
         }
 
         return new IpcRunTime(avgRunTime, fixedTime, variableTime, dwellTime);
