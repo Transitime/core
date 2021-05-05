@@ -209,8 +209,11 @@
             content += "<br/><b>SchAhd:</b> " + vehicle.schAdhStr;
         if (vehicle.block)
             content += "<br/><b>Block:</b> " + vehicle.block;
+        if (vehicle.tripId)
+            content += "<br/><b>Trip:</b> " + vehicle.tripId;
         if (vehicle.driver)
             content += "<br/><b>Driver:</b> " + vehicle.driver;
+
 
         return content;
     }
