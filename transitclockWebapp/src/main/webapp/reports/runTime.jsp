@@ -1197,7 +1197,7 @@
                     backgroundColor: '#8c8c8c',
                     label: "Dwell",
                     yAxisId: "bars"
-                },
+                }/*,
                 {
                     type: "scatter",
                     data: arraysToXAndY([msToMin(response.data.scheduled), response.data.stopPaths]),
@@ -1205,7 +1205,7 @@
                     label: "Scheduled",
                     showLine: false,
                     fill: false,
-                }],
+                }*/],
             labels: response.data.stopPaths
         }
 
