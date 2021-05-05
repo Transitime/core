@@ -32,10 +32,14 @@ public class ApiDispatcherData {
     @XmlAttribute(name = "assigned")
     boolean isAssigned;
 
+    @XmlAttribute(name = "headway")
+    Double headway;
+
     public ApiDispatcherData() {}
 
     public ApiDispatcherData(String vehicleId, String lastReportTime, String blockId, String speed,
-                             String route, String scheduleAdherence, Integer scheduleAdherenceTimeDiff, String operatorId){
+                             String route, String scheduleAdherence, Integer scheduleAdherenceTimeDiff, String operatorId,
+                             Double headway){
         this.vehicleId = vehicleId;
         this.lastReportTime = lastReportTime;
         this.blockId = blockId;
@@ -47,6 +51,7 @@ public class ApiDispatcherData {
         if(StringUtils.isNotBlank(blockId)){
             isAssigned = true;
         }
+        this.headway = headway;
     }
 
     public String getVehicleId() {
@@ -83,5 +88,9 @@ public class ApiDispatcherData {
 
     public boolean isAssigned() {
         return isAssigned;
+    }
+
+    public Double getHeadway() {
+        return headway;
     }
 }

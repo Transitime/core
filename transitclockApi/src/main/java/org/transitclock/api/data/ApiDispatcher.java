@@ -4,6 +4,7 @@ package org.transitclock.api.data;
 import org.transitclock.api.utils.MathUtils;
 import org.transitclock.api.utils.NumberFormatter;
 import org.transitclock.ipc.data.IpcVehicle;
+import org.transitclock.ipc.data.IpcVehicleComplete;
 import org.transitclock.utils.Time;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -28,9 +29,14 @@ public class ApiDispatcher {
             String route = vehicle.getRouteShortName();
             String scheduleAdherence = getFormattedScheduleAdherence(vehicle);
             Integer scheduleAdherenceTimeDiff = getScheduleAdherenceTimeDiff(vehicle);
+            Double headway = null;
+            if(vehicle instanceof IpcVehicleComplete)
+            {
+                headway = ((IpcVehicleComplete)vehicle).getHeadway();
+            }
             String operatorId = null;
             dispatcherData.add(new ApiDispatcherData(vehicleId, lastReportTime, blockId, speed, route,
-                    scheduleAdherence, scheduleAdherenceTimeDiff, operatorId));
+                    scheduleAdherence, scheduleAdherenceTimeDiff, operatorId, headway));
         }
     }
 
