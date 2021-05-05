@@ -39,22 +39,6 @@ function dataReadCallback(jsonData) {
 	}
 }
 
-function convertSecInDayToString(secInDay) {
-    var timeStr = "";
-    if (secInDay < 0) {
-        timeStr="-";
-        secInDay = -secInDay;
-    }
-    var hours = Math.floor(secInDay / (60*60));
-    var minutes = Math.floor((secInDay % (60*60)) / 60);
-
-    if (hours<10) timeStr += "0";
-    timeStr += hours + ":";
-    if (minutes < 10) timeStr += "0";
-    timeStr += minutes;
-    return timeStr;
-}
-
 // Initiate AJAX call to get data to put into table
 $( document ).ready(function() {
   $.ajax({

@@ -421,44 +421,38 @@
      * to be displayed for the vehicles popup.
      */
     function getVehiclePopupContent(vehicleData) {
-        var layoverStr = vehicleData.layover ?
-            ("<br/><b>Layover:</b> " + vehicleData.layover) : "";
-        var layoverDepartureStr = vehicleData.layover ?
-            ("<br/><b>Departure:</b> " +
-                dateFormat(vehicleData.layoverDepTime)) : "";
-        var nextStopNameStr = vehicleData.nextStopName ?
-            ("<br/><b>Next Stop:</b> " + vehicleData.nextStopName) : "";
-        if (vehicleData.nextStopId)
-            nextStopNameStr += "<br/><b>Next Stop Id:</b> " + vehicleData.nextStopId;
-        var driver = vehicleData.driver ?
-            "<br/><b>Driver:</b> " + vehicleData.driver : "";
-        var latLonHeadingStr = "<br/><b>Lat:</b> " + vehicleData.loc.lat
-            + "<br/><b>Lon:</b> " + vehicleData.loc.lon
-            + "<br/><b>Heading:</b> " + vehicleData.loc.heading
-            + "<br/><b>Speed:</b> " + formatSpeed(vehicleData.loc.speed);
-        var gpsTimeStr = dateFormat(vehicleData.loc.time);
-        var directionStr = "<br/><b>Direction:</b> " + vehicleData.direction;
-        var tripPatternStr = "<br/><b>Trip Pattern:</b> " + vehicleData.tripPattern;
-        var startTimeStr = vehicleData.isScheduledService ? "" : "<br/><b>Start Time:</b> "+dateFormat(vehicleData.freqStartTime/1000);
-        var schAdhStr = vehicleData.isScheduledService ? "<br/><b>SchAdh:</b> " + vehicleData.schAdhStr : ""
-        var mapsLink = 'http://google.com/maps?q=loc:' + vehicleData.loc.lat + ',' + vehicleData.loc.lon;
-        var content = "<b>Vehicle:</b> " +
-            vehicleData.id +"<span id='updated-time-holder' age='"+vehicleData.updatedTime+"'  time-initial='"+new Date().getTime()+"'> | Data updated "+vehicleData.updatedTime+" seconds ago"
-            + "</span><br/><b>Route: </b> " + vehicleData.routeShortName
-            + latLonHeadingStr
-            + "<br/><b>GPS Time:</b> " + gpsTimeStr
-            + "<br/><b>Headsign:</b> " + vehicleData.headsign
-            + directionStr
-            + schAdhStr
-            + "<br/><b>Block:</b> " + vehicleData.block
-            + "<br/><b>Trip:</b> " + vehicleData.trip
-            + tripPatternStr
-            + startTimeStr
-            + layoverStr
-            + layoverDepartureStr
-            + nextStopNameStr
-            + driver
-            +"<br/><a href=" + mapsLink + " target='_blank' >View Location in Google Maps</a>";
+        var content = "";
+        var mapsLink = "";
+        //content += (typeof vehicleData.updatedTime !== "undefined") ? "<span id='updated-time-holder' age='"+vehicleData.updatedTime+"'  time-initial='"+new Date().getTime()+"'><b>Updated:</b> "+vehicleData.updatedTime+" seconds ago</span>" : "";
+        content += (typeof vehicleData.id !== "undefined") ? "<b>Vehicle:</b> " + vehicleData.id : "";
+        content += (typeof vehicleData.routeShortName !== "undefined") ? "<br/><b>Route: </b> " + vehicleData.routeShortName : "";
+        content += (typeof vehicleData.headsign !== "undefined" && typeof vehicleData.direction !== "undefined") ?
+            "<br/><b>To:</b> " + vehicleData.headsign + " (" + vehicleData.direction + ")" : "";
+        if(typeof vehicleData.loc !== "undefined") {
+            //content += vehicleData.loc.time ? "<br/><b>GPS Time:</b> " + dateFormat(vehicleData.loc.time) : "";
+            //content += vehicleData.vehicleData.loc.lat && vehicleData.loc.lon ?
+            //        "<br/><b>Location: </b> " + vehicleData.loc.lat + "," + vehicleData.loc.lon : "";
+            //content += vehicleData.loc.heading ? "<br/><b>Heading:</b> " + vehicleData.loc.heading : "";
+            content += vehicleData.loc.speed ? "<br/><b>Speed:</b> " + formatSpeed(vehicleData.loc.speed) : "";
+           var mapsLink = (typeof vehicleData.loc.lat !== "undefined" && typeof vehicleData.loc.lon !== "undefined") ?
+                'http://google.com/maps?q=loc:' + vehicleData.loc.lat + ',' + vehicleData.loc.lon : "";
+        }
+        //content += vehicleData.block ? "<br/><b>Block:</b> " + vehicleData.block : "";
+        //.content += vehicleData.trip ? "<br/><b>Trip:</b> " + vehicleData.trip : "";
+        //content += vehicleData.tripPattern ? "<br/><b>Trip Pattern:</b> " + vehicleData.tripPattern : "";
+        content += (typeof vehicleData.headway !== "undefined" && vehicleData.headway > -1 )?
+            "<br/><b>Headway:</b> " + msToHMS(vehicleData.headway) : "";
+        //content += vehicleData.isScheduledService ? "" : "<br/><b>Start Time:</b> " + dateFormat(vehicleData.freqStartTime/1000);
+        //content += vehicleData.isScheduledService ? "<br/><b>Schedule Adherence:</b> " + vehicleData.schAdhStr : "";
+        content += (typeof vehicleData.nextStopName !== "undefined") ? ("<br/><b>Next Stop:</b> " + vehicleData.nextStopName) : "";
+        content += (typeof vehicleData.nextStopId !== "undefined") ? "<br/><b>Next Stop Id:</b> " + vehicleData.nextStopId : "";
+        content += (typeof vehicleData.layover !== "undefined") ? ("<br/><b>In Layover:</b> " + vehicleData.layover) : "";
+        content += (typeof vehicleData.layover !== "undefined" && typeof vehicleData.layoverDepTime !== "undefined") ?
+            ("<br/><b>Scheduled Departure:</b> " +  dateFormat(vehicleData.layoverDepTime)) : "";
+        content += (typeof vehicleData.driver !== "undefined") ? "<br/><b>Driver:</b> " + vehicleData.driver : "";
+        content += mapsLink ? "<br/><a href=" + mapsLink + " target='_blank' >View Location in Google Maps</a>" : "";
+
+
         clearInterval(timerGroup);
         setUpdatedTime()
         return content;
@@ -475,7 +469,7 @@
             var age = parseInt(selector.getAttribute("age"),10);
             var differencefUpdate = age + (new Date().getTime() - timeInitial) / 1000;
 
-            selector.innerHTML = " | Data updated " + getUpdatedTimeText(differencefUpdate) ;
+            selector.innerHTML = "<b>Updated:</b> " + getUpdatedTimeText(differencefUpdate) ;
 
         }, 1000);}
 

@@ -11,6 +11,7 @@
      loaded so can override those parameters as necessary. --%>
 <link rel="stylesheet" href="<%= request.getContextPath() %>/css/general.css">
 <script src="<%= request.getContextPath() %>/javascript/transitime.js"></script>
+<script src="<%= request.getContextPath() %>/javascript/time.js"></script>
 
 <script>
 
