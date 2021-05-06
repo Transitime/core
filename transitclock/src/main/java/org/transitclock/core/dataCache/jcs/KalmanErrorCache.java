@@ -18,15 +18,17 @@ import java.util.Set;
  */
 public class KalmanErrorCache implements ErrorCache  {
 	final private static String cacheName = "KalmanErrorCache";
+	final private static String dwellCacheName = "KalmanDwellErrorCache";
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(KalmanErrorCache.class);
 
 	private CacheAccess<KalmanErrorCacheKey, KalmanError>  cache = null;
+	private CacheAccess<KalmanErrorCacheKey, KalmanError>  dwellCache = null;
 	
 	public KalmanErrorCache() {
-		cache = JCS.getInstance(cacheName);	
-		
+		cache = JCS.getInstance(cacheName);
+		dwellCache = JCS.getInstance(dwellCacheName);
 	}
 	
 	/* (non-Javadoc)
@@ -35,13 +37,8 @@ public class KalmanErrorCache implements ErrorCache  {
 	@Override
 	@SuppressWarnings("unchecked")
 	synchronized public KalmanError getErrorValue(Indices indices) {		
-		
 		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices);
-		
-		KalmanError result = cache.get(key);
-		
-		return result;
-					
+		return cache.get(key);
 	}
 	/* (non-Javadoc)
 	 * @see org.transitclock.core.dataCache.ErrorCache#getErrorValue(org.transitclock.core.dataCache.KalmanErrorCacheKey)
@@ -49,44 +46,61 @@ public class KalmanErrorCache implements ErrorCache  {
 	@Override
 	@SuppressWarnings("unchecked")
 	synchronized public KalmanError getErrorValue(KalmanErrorCacheKey key) {		
-		 System.out.println(cache.getStats().toString());
-		 
-		 KalmanError result = cache.get(key);
-		
-		 return result;	
+		 return cache.get(key);
 	}
+
+	@Override
+	public KalmanError getDwellErrorValue(Indices indices) {
+		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices);
+		return dwellCache.get(key);
+
+	}
+
+	@Override
+	public KalmanError getDwellErrorValue(KalmanErrorCacheKey key) {
+		return dwellCache.get(key);
+
+	}
+
 	/* (non-Javadoc)
 	 * @see org.transitclock.core.dataCache.ErrorCache#putErrorValue(org.transitclock.core.Indices, java.lang.Double)
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	synchronized public void putErrorValue(Indices indices,  Double value) {
-		
 		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices);
-				
 		putErrorValue(key,value);
-		
 	}
 
 	@Override
 	public void putErrorValue(KalmanErrorCacheKey key, Double value) {
-			
-				
 		KalmanError error= (KalmanError)cache.get(key);
-		
-		if(error==null)
-		{
+		if(error==null) {
 			error=new KalmanError(value);			
-		}else
-		{
+		} else {
 			error.setError(value);	
 		}
-			
-								
 		cache.put(key,error);
 	}
 
-	
+	@Override
+	public void putDwellErrorValue(Indices indices, Double value) {
+		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices);
+		putDwellErrorValue(key,value);
+	}
+
+	@Override
+	public void putDwellErrorValue(KalmanErrorCacheKey key, Double value) {
+		KalmanError error= (KalmanError)dwellCache.get(key);
+		if(error==null) {
+			error=new KalmanError(value);
+		} else {
+			error.setError(value);
+		}
+		dwellCache.put(key,error);
+	}
+
+
 	public List<KalmanErrorCacheKey> getKeys() {
 		ArrayList<KalmanErrorCacheKey> fulllist=new ArrayList<KalmanErrorCacheKey>();
 		Set<String> names = JCS.getGroupCacheInstance(cacheName).getGroupNames();

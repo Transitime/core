@@ -8,6 +8,6 @@ public class ApcDataProcessorTest {
 
   @Test
   public void loadYesterdaysRates() {
-    fail();
+    fail("TODO hookup to scheduler");
   }
 }

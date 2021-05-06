@@ -380,6 +380,10 @@ public class KalmanDataGenerator {
     return new KalmanError(72.40);
   }
 
+  public KalmanError getDwellErrorValue(Indices indices) {
+    return new KalmanError(25.1);
+  }
+
   public VehicleState getVehicleStateForApc(long tripStartTime, int tripIndex, int stopPathIndex, int scheduleDeviation) {
     VehicleState vs = getVehicleState(tripIndex, stopPathIndex, scheduleDeviation);
     vs.putTripStartTime(0, tripStartTime);
@@ -443,4 +447,5 @@ public class KalmanDataGenerator {
     }
     return reports;
   }
+
 }

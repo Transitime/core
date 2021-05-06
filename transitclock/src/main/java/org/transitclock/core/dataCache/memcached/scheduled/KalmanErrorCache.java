@@ -25,6 +25,7 @@ public class KalmanErrorCache implements ErrorCache {
 
 	MemcachedClient memcachedClient = null;
 	private static String keystub = "KALMANERROR_";
+	private static String dwellKeystub = "DWELLERROR_";
 	Integer expiryDuration=Time.SEC_PER_DAY*28;
 	
 	private static final Logger logger = LoggerFactory
@@ -38,13 +39,17 @@ public class KalmanErrorCache implements ErrorCache {
 	@Override
 	public KalmanError getErrorValue(Indices indices) {
 		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices);
-		
 		return getErrorValue(key);
 	}
 
 	@Override
-	public KalmanError getErrorValue(KalmanErrorCacheKey key) {
+	public KalmanError getDwellErrorValue(Indices indices) {
+		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices);
+		return getDwellErrorValue(key);
+	}
 
+	@Override
+	public KalmanError getErrorValue(KalmanErrorCacheKey key) {
 		Double errorValue = (Double) memcachedClient.get(createKey(key));
 		if (errorValue == null || errorValue.isNaN()) {
 			return null;
@@ -53,31 +58,48 @@ public class KalmanErrorCache implements ErrorCache {
 	}
 
 	@Override
+	public KalmanError getDwellErrorValue(KalmanErrorCacheKey key) {
+		Double errorValue = (Double) memcachedClient.get(createDwellKey(key));
+		if (errorValue == null || errorValue.isNaN()) {
+			return null;
+		}
+		return new KalmanError(errorValue);
+	}
+
+	@Override
 	public void putErrorValue(Indices indices, Double value) {
-		
-
 		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices);
-
 		putErrorValue(key, value);
 	}
 
 	@Override
 	public void putErrorValue(KalmanErrorCacheKey key, Double value) {
-		
 		memcachedClient.set(createKey(key), expiryDuration, value);
-
 	}
 
-	
+	@Override
+	public void putDwellErrorValue(Indices indices, Double value) {
+		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices);
+		putDwellErrorValue(key, value);
+	}
+
+	@Override
+	public void putDwellErrorValue(KalmanErrorCacheKey key, Double value) {
+		memcachedClient.set(createDwellKey(key), expiryDuration, value);
+	}
+
+
 	public List<KalmanErrorCacheKey> getKeys() {
-		
 		logger.info("Not implemented for memecached.");
 		return null;
 	}
 
 	private String createKey(KalmanErrorCacheKey key) {
 		return keystub + key.getTripId() + "_" + key.getStopPathIndex();
-
 	}
+	private String createDwellKey(KalmanErrorCacheKey key) {
+		return dwellKeystub + key.getTripId() + "_" + key.getStopPathIndex();
+	}
+
 
 }

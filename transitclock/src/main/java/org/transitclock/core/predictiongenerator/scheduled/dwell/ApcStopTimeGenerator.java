@@ -4,9 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.avl.ApcDataProcessor;
 import org.transitclock.avl.ApcModule;
+import org.transitclock.config.DoubleConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.Indices;
 import org.transitclock.core.VehicleState;
+import org.transitclock.core.dataCache.KalmanError;
 import org.transitclock.core.predictiongenerator.HistoricalPredictionLibrary;
 import org.transitclock.core.predictiongenerator.kalman.KalmanPredictionResult;
 import org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman.KalmanPredictionGeneratorImpl;
@@ -45,6 +47,10 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
           "transitclock.prediction.data.kalman.maxdaystosearch", new Integer(21),
           "Max number of days to look back for data. This will also be effected by how old the data in the cache is.");
 
+  private static final DoubleConfigValue initialErrorValue = new DoubleConfigValue(
+          "transitclock.prediction.data.kalman.initialerrorvalue", new Double(100),
+          "Initial Kalman error value to use to start filter.");
+
   private static final Logger logger = LoggerFactory.getLogger(ApcStopTimeGenerator.class);
 
   @Override
@@ -73,13 +79,22 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
       return super.getStopTimeForPath(indices, avlReport, vehicleState);
     }
 
-    return predict(dwellTime, historicalDwellTime, getLastPredictionError());
+    KalmanPredictionResult result = predict(dwellTime, historicalDwellTime, getLastPredictionError(indices));
+    getKalmanErrorCache().putDwellErrorValue(indices, result.getFilterError());
+    return new Double(result.getResult()).longValue();
   }
 
-  private double getLastPredictionError() {
-    if (true)
-      throw new UnsupportedOperationException("impl cache here...");
-    return 1.0;
+  private double getLastPredictionError(Indices indices) {
+    KalmanError result;
+    try {
+      result = getKalmanErrorCache().getDwellErrorValue(indices);
+    } catch (Exception e) {
+      result = null;
+    }
+    if (result == null) {
+      return initialErrorValue.getValue();
+    }
+    return result.getError();
   }
 
   private boolean hasApcData() {
@@ -95,7 +110,7 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     return null;
   }
 
-  private long predict(long dwellTime, List<Double> historicalDwellTimes,
+  private KalmanPredictionResult predict(long dwellTime, List<Double> historicalDwellTimes,
                        double lastPredictionError) {
 
     double average = historicalAverage(historicalDwellTimes);
@@ -112,7 +127,7 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
 
             filterError(variance, gain));
 
-    return new Double(result.getResult()).longValue();
+    return result;
   }
 
   private double prediction(double gain, double loopGain, List<Double> historicalDwellTimes, long dwellTime, double average) {

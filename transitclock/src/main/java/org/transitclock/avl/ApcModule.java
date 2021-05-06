@@ -1,10 +1,12 @@
 package org.transitclock.avl;
 
 import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.modules.Module;
 import org.transitclock.utils.Time;
 
 import java.util.Date;
+import java.util.List;
 
 public class ApcModule extends Module {
 
@@ -61,6 +63,11 @@ public class ApcModule extends Module {
     return null;
   }
 
+  public void populateFromDb(List<ArrivalDeparture> arrivalDepartures) {
+    if (processor != null && processor.isEnabled() && arrivalDepartures != null) {
+      processor.populateFromDb(arrivalDepartures);
+    }
+  }
   private Date addTime(Date arrivalTime, long millis) {
     return new Date(arrivalTime.getTime() + millis);
   }

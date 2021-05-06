@@ -23,6 +23,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.avl.ApcModule;
 import org.transitclock.config.ConfigFileReader;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.configData.AgencyConfig;
@@ -496,6 +497,10 @@ public class Core {
 
 				if (i < 5 && TrafficManager.getInstance() != null && TrafficManager.getInstance().isEnabled()) {
 					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.TrafficDataHistoryCache);
+					pp.enqueue(ct);
+				}
+				if (ApcModule.getInstance() != null) {
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.ApcCache);
 					pp.enqueue(ct);
 				}
 

@@ -63,6 +63,17 @@
 			<ehcache:offheap unit="MB">5</ehcache:offheap>
 		</ehcache:resources>
 	</ehcache:cache>
+	<ehcache:cache alias="KalmanDwellErrorCache">
+		<ehcache:key-type>org.transitclock.core.dataCache.KalmanErrorCacheKey</ehcache:key-type>
+		<ehcache:value-type>org.transitclock.core.dataCache.KalmanError</ehcache:value-type>
+		<ehcache:expiry>
+			<ehcache:ttl unit="hours">24</ehcache:ttl>
+		</ehcache:expiry>
+		<ehcache:resources>
+			<ehcache:heap unit="entries">10000</ehcache:heap>
+			<ehcache:offheap unit="MB">5</ehcache:offheap>
+		</ehcache:resources>
+	</ehcache:cache>
 
 	<ehcache:cache alias="HistoricalAverageCache">
 		<ehcache:key-type>org.transitclock.core.dataCache.StopPathCacheKey</ehcache:key-type>
