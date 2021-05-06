@@ -170,8 +170,8 @@ public class RunTimeServiceV2 {
             if(runTimesForRoute.getRunTime() != null){
                 String tripId =  runTimesForRoute.getTripId();
                 Long runTime = runTimesForRoute.getRunTime();
-                List<Long> runTimes = runTimesByTripId.get(runTimesByTripId.get(tripId));
                 if(runTime != null){
+                    List<Long> runTimes = runTimesByTripId.get(tripId);
                     if(runTimes == null){
                         runTimes = new ArrayList<>();
                         runTimesByTripId.put(tripId, runTimes);
