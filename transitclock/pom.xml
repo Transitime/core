@@ -10,18 +10,6 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	<repositories>
-		<!-- Needed to fix problem with one-jar not working with AWS SDK. Was getting
-                error message "Fatal: Failed to load the internal config for AWS" -->
-		<repository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>bintray-kevinlee-maven</id>
-			<name>bintray</name>
-			<url>http://dl.bintray.com/kevinlee/maven</url>
-		</repository>
-	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
 			<id>repo.obaweb.org</id>

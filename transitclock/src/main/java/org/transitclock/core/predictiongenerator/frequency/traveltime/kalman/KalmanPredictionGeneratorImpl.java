@@ -157,7 +157,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
         getMonitoring().rateMetric("PredictionKalmanHeadwayHit", false);
       }
     } catch (Exception e) {
-      logger.error("kalman prediction error", e);
+			logger.error("getTravelTimeForPath exception {}", e, e);
     }
     // instrument kalman miss
     getMonitoring().rateMetric("PredictionKalmanHit", false);

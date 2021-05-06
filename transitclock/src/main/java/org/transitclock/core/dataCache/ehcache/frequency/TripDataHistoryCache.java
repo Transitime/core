@@ -225,8 +225,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 					return tocheck;
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("exception {}", e, e);
 			}			
 		}		
 		return null;		

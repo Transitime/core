@@ -6,6 +6,13 @@
     <packaging>pom</packaging>
     <name>transitclock</name>
     <url>http://www.transitclock.org//</url>
+  <repositories>
+    <repository>
+      <id>repo.camsys-apps.com</id>
+      <url>https://repo.camsys-apps.com/third-party/</url>
+    </repository>
+  </repositories>
+
     <modules>
         <module>transitclock</module>
         <module>transitclockApi</module>

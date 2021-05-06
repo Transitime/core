@@ -427,8 +427,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			try {
 				ScheduleBasedHistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("exception {} pushing to cache for ad {}", e, arrivalDeparture, e);
 			}
 		}
 
@@ -436,8 +435,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			try {
 				FrequencyBasedHistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("exception {} pushing to cache for ad {}", e, arrivalDeparture, e);
 			}
 
 		if(HoldingTimeGeneratorFactory.getInstance()!=null)
@@ -456,8 +454,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				HoldingTimeGeneratorFactory.getInstance().handleDeparture(vehicleState, arrivalDeparture);
 
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("exception {} pushing to cache for ad {}", e, arrivalDeparture, e);
 			}
 		
 		}

@@ -83,9 +83,8 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 			Collections.sort(list, new IpcArrivalDepartureComparator());
 			memcachedClient.set(createKey(key), expiryDuration, list);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
+			logger.error("exception pushing to memcache {}", e, e);
+		}
 		return key;
 	}
 
