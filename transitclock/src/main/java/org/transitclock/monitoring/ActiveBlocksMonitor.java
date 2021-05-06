@@ -62,8 +62,7 @@ public class ActiveBlocksMonitor extends MonitorBase {
             if(activeBlockCount > 0){
                 activeBlockCountPercentage = activeBlockCount / totalBlockCount;
             }
-            monitoringService.saveMetric("PercentageActiveBlockCount", activeBlockCountPercentage , 1,
-                    MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, true);
+            monitoringService.averageMetric("PercentageActiveBlockCount", activeBlockCountPercentage);
             lastUpdate = new Date();
         }
         return false;

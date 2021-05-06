@@ -220,7 +220,17 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 			return null;
 		}
 	}
-	public static void main(String[] args) 
+
+	@Override
+	public void populateCacheFromDb(List<ArrivalDeparture> results) {
+		synchronized (cache) {
+			for (ArrivalDeparture result : results) {
+				addSample(result);
+			}
+		}
+	}
+
+	public static void main(String[] args)
 	{
 		 double startvalue=1000;
 		 double result1 = Math.log10(startvalue);

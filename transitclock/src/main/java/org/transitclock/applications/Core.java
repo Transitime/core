@@ -20,6 +20,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,12 +32,14 @@ import org.transitclock.configData.CoreConfig;
 import org.transitclock.core.ServiceUtils;
 import org.transitclock.core.TimeoutHandlerModule;
 import org.transitclock.core.dataCache.CacheTask;
+import org.transitclock.core.dataCache.DwellTimeModelCacheFactory;
 import org.transitclock.core.dataCache.ParallelProcessor;
 import org.transitclock.core.dataCache.PredictionDataCache;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.core.dataCache.VehicleDataCache;
 import org.transitclock.core.dataCache.ehcache.CacheManagerFactory;
+import org.transitclock.core.dataCache.ehcache.StopArrivalDepartureCache;
 import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
 import org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman.TrafficManager;
@@ -44,6 +47,7 @@ import org.transitclock.db.hibernate.DataDbLogger;
 import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.db.structs.ActiveRevisions;
 import org.transitclock.db.structs.Agency;
+import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.guice.modules.ReportingModule;
 import org.transitclock.ipc.servers.*;
@@ -239,9 +243,15 @@ public class Core {
 	 * @returns the Core singleton object for this application, or null if it
 	 *          could not be created
 	 */
-	public synchronized static Core getInstance() {
-		if (Core.singleton == null)
-			createCore();
+	public static Core getInstance() {
+		if (singleton == null) {
+			// only synchronize if we have to!
+			synchronized (cacheReloadStartTimeStr) {
+				if (singleton == null) {
+					createCore();
+				}
+			}
+		}
 
 		return singleton;
 	}
@@ -441,22 +451,27 @@ public class Core {
 
 		if(cacheReloadStartTimeStr.getValue().length()>0&&cacheReloadEndTimeStr.getValue().length()>0)
 		{
+			Criteria criteria = session.createCriteria(ArrivalDeparture.class);
+			List<ArrivalDeparture> results = StopArrivalDepartureCache.createArrivalDeparturesCriteria(criteria,
+							new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()),
+							new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
+
 			if(TripDataHistoryCacheFactory.getInstance()!=null)
 			{
 				logger.info("Populating TripDataHistoryCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
-				TripDataHistoryCacheFactory.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new 		Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
+				TripDataHistoryCacheFactory.getInstance().populateCacheFromDb(results);
 			}
 			
 			if(FrequencyBasedHistoricalAverageCache.getInstance()!=null)
 			{
 				logger.info("Populating FrequencyBasedHistoricalAverageCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
-				FrequencyBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
+				FrequencyBasedHistoricalAverageCache.getInstance().populateCacheFromDb(results);
 			}
 			
 			if(StopArrivalDepartureCacheFactory.getInstance()!=null)
 			{
 				logger.info("Populating StopArrivalDepartureCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
-				StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
+				StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(results);
 			}
 
 			if (TrafficManager.getInstance() != null) {
@@ -469,38 +484,48 @@ public class Core {
 			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
 			{
 				Date startDate=DateUtils.addDays(endDate, -1);
+				logger.info("ParallelProcessor loading {} to {}", startDate, endDate);
+				session = HibernateUtils.getSession();
+				Criteria criteria = session.createCriteria(ArrivalDeparture.class);
+				List<ArrivalDeparture> defaultInput = StopArrivalDepartureCache.createArrivalDeparturesCriteria(criteria, startDate, endDate);
+				logger.info("ParallelProcessor loaded {} to {}", startDate, endDate);
 
 				if(TripDataHistoryCacheFactory.getInstance()!=null)
 				{
-					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.TripDataHistoryCacheFactory);
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.TripDataHistoryCacheFactory, defaultInput);
 					pp.enqueue(ct);
 				}
 
 				// Only need to populate two days worth of stop arrival departure cache
 				if(i < 2 && StopArrivalDepartureCacheFactory.getInstance()!=null)
 				{
-					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.StopArrivalDepartureCacheFactory);
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.StopArrivalDepartureCacheFactory, defaultInput);
 					pp.enqueue(ct);
 				}
 
 				if(FrequencyBasedHistoricalAverageCache.getInstance()!=null)
 				{
-					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.FrequencyBasedHistoricalAverageCache);
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.FrequencyBasedHistoricalAverageCache, defaultInput);
 					pp.enqueue(ct);
 				}
 
 				if(ScheduleBasedHistoricalAverageCache.getInstance()!=null)
 				{
-					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.ScheduleBasedHistoricalAverageCache);
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.ScheduleBasedHistoricalAverageCache, defaultInput);
+					pp.enqueue(ct);
+				}
+
+				if(DwellTimeModelCacheFactory.getInstance() != null) {
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.DwellTimeModelCacheFactory, defaultInput);
 					pp.enqueue(ct);
 				}
 
 				if (i < 5 && TrafficManager.getInstance() != null && TrafficManager.getInstance().isEnabled()) {
-					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.TrafficDataHistoryCache);
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.TrafficDataHistoryCache, defaultInput);
 					pp.enqueue(ct);
 				}
 				if (ApcModule.getInstance() != null) {
-					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.ApcCache);
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.ApcCache, defaultInput);
 					pp.enqueue(ct);
 				}
 
@@ -547,7 +572,11 @@ public class Core {
 
 			// For making sure logger configured properly
 			outputLoggerStatus();
-			
+
+			// populate caches needs core!
+			// load now before its lazy-loaded under contention
+			createCore();
+
 			if (CoreConfig.getFillHistoricalCaches()){
 				try {
 					populateCaches();								
@@ -573,9 +602,7 @@ public class Core {
 		            }
 		    }));
 			
-			// Initialize the core now
-			createCore();
-			
+
 			// Start any optional modules.
 			List<String> optionalModuleNames = CoreConfig.getOptionalModules();
 			if (optionalModuleNames.size() > 0) {

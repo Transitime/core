@@ -660,10 +660,18 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 
 		int index = prediction.getGtfsStopSeq();
 		if (index < prediction.getTrip().getScheduleTimes().size()) {
-			long epochInMillis = serviceDay
-					+ prediction.getTrip().getScheduleTimes().get(index).getTime()
-					* Time.MS_PER_SEC;
-			return epochInMillis;
+			try {
+				long epochInMillis = serviceDay
+								+ prediction.getTrip().getScheduleTimes().get(index).getTime()
+								* Time.MS_PER_SEC;
+				return epochInMillis;
+			} catch (ArrayIndexOutOfBoundsException bound) {
+				logger.error("error retrieving schedule times {} for trip {}", index, prediction.getTrip().getId());
+				return null;
+			} catch (NullPointerException npe) {
+				logger.error("error retrieving schedule times {} for trip {}", index, prediction.getTrip().getId());
+				return null;
+			}
 		}
 		return null; // we may be unscheduled or at end of trip
 	}

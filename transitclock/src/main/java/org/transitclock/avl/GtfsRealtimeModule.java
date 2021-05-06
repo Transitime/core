@@ -25,6 +25,7 @@ import org.transitclock.config.StringConfigValue;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.feed.gtfsRt.GtfsRtVehiclePositionsReader;
 import org.transitclock.modules.Module;
+import org.transitclock.monitoring.MonitoringService;
 
 import java.util.Collection;
 
@@ -79,8 +80,9 @@ public class GtfsRealtimeModule extends PollUrlAvlModule {
 	protected void getAndProcessData() {
 	  
 	  String[] urls = getGtfsRealtimeURI().split(",");
-	  
-	  
+
+		int assignments = 0;
+		int records = 0;
 	  for (String urlStr : urls) {
   	  try {
     	  logger.info("reading {}", urlStr);
@@ -89,6 +91,9 @@ public class GtfsRealtimeModule extends PollUrlAvlModule {
     		logger.info("read complete");
     		for (AvlReport avlReport : avlReports) {
     			processAvlReport(avlReport);
+    			records++;
+    			if (avlReport.getAssignmentId() != null)
+						assignments++;
     		}
     		logger.info("processed {} reports for feed {}", avlReports.size(), urlStr);
   	  } catch (Exception any) {
@@ -96,6 +101,8 @@ public class GtfsRealtimeModule extends PollUrlAvlModule {
   	  }
   		
 	  }
+	  MonitoringService.getInstance().averageMetric("PredictionAvlInputRecords", records);
+		MonitoringService.getInstance().averageMetric("PredictionAvlInputAssignments", assignments);
 		
 	}
 

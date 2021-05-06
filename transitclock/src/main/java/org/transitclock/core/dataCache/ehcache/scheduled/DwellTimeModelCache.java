@@ -50,23 +50,21 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 		cache = cm.getCache(cacheName, StopPathCacheKey.class, DwellModel.class);
 	}
 	@Override
-	synchronized public void addSample(ArrivalDeparture event, Headway headway, long dwellTime) {
+	public void addSample(ArrivalDeparture event, Headway headway, long dwellTime) {
 
 		StopPathCacheKey key=new StopPathCacheKey(headway.getTripId(), event.getStopPathIndex(), false);
+		DwellModel empty = DwellTimeModelFactory.getInstance();
+		empty.putSample((int) dwellTime, (int) headway.getHeadway(), null);
 
-		DwellModel model = null;
-
-		if(cache.get(key)!=null)
-		{
-			model=(DwellModel) cache.get(key);
-
-			model.putSample((int)dwellTime, (int)headway.getHeadway(),null);
-		}else
-		{
-			model=DwellTimeModelFactory.getInstance();
+		synchronized (cache) {
+			DwellModel model = cache.get(key);
+			if (model == null) {
+				cache.put(key, empty);
+			} else {
+				model.putSample((int) dwellTime, (int) headway.getHeadway(), null);
+				cache.put(key, model);
+			}
 		}
-		model.putSample((int)dwellTime, (int)headway.getHeadway(),null);
-		cache.put(key, model);
 	}
 
 	@Override
@@ -205,6 +203,20 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 		return null;
 	}
 
+	@Override
+	public void populateCacheFromDb(List<ArrivalDeparture> results) {
+		logger.info("running populateCacheFromDb...");
+		synchronized (cache) {
+			for (ArrivalDeparture result : results) {
+				try {
+					addSample(result);
+				} catch (Exception e) {
+					logger.error("Exception caching {}", e, e);
+				}
+			}
+		}
+		logger.info("finished populateCacheFromDb...");
+	}
 
 
 }

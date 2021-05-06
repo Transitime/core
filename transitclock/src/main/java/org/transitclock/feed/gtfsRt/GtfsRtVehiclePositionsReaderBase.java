@@ -21,6 +21,8 @@ import com.google.protobuf.CodedInputStream;
 import com.google.transit.realtime.GtfsRealtime.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.avl.AvlExecutor;
+import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.AvlReport.AssignmentType;
@@ -53,6 +55,10 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 					null,
 					"api key value if necessary, null if not needed");
 
+	private static IntegerConfigValue minQueueSizeForRefresh =
+					new IntegerConfigValue("transitclock.avl.minQueueSizeForRefresh",
+									0,
+									"beyond this queue size refreshes will block waiting for queue to empty");
 
 	private final String urlString;
 	
@@ -278,9 +284,19 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 			logger.info("Parsing GTFS-realtime file into a FeedMessage took " +
 					"{} msec", timer.elapsedMsec());
 			
-			// Process each individual VehiclePostions message
+			// Process each individual VehiclePositions message
 			processMessage(feed);
 			inputStream.close();
+
+			int size = AvlExecutor.getInstance().getQueueSize();
+			while (size > minQueueSizeForRefresh.getValue()) {
+				// if configured, block until avl queue empties out
+				// the prevents queue starvation
+				Thread.sleep(100);
+				size = AvlExecutor.getInstance().getQueueSize();
+			}
+			logger.info("Processing GTFS-realtime complete in {} msec", timer.elapsedMsec());
+
 		} catch (Exception e) {
 			logger.error("Exception when reading GTFS-realtime data from " +
 					"URL {}", 

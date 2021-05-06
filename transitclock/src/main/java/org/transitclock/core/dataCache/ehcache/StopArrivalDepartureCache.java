@@ -60,9 +60,9 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 	/* (non-Javadoc)
 	 * @see org.transitclock.core.dataCache.ehcache.StopArrivalDepartureCacheInterface#getStopHistory(org.transitclock.core.dataCache.StopArrivalDepartureCacheKey)
 	 */
-	
+
 	@SuppressWarnings("unchecked")
-	synchronized public List<IpcArrivalDeparture> getStopHistory(StopArrivalDepartureCacheKey key) {
+	public List<IpcArrivalDeparture> getStopHistory(StopArrivalDepartureCacheKey key) {
 
 		//logger.debug(cache.toString());
 		Calendar date = Calendar.getInstance();
@@ -73,21 +73,23 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 		date.set(Calendar.SECOND, 0);
 		date.set(Calendar.MILLISECOND, 0);
 		key.setDate(date.getTime());
+		// cache retrieval should be synchronized as Kyro is not thread safe
+		synchronized (cache) {
 		StopEvents result = cache.get(key);
-		
+
 		if (result != null) {
 			return (List<IpcArrivalDeparture>) result.getEvents();
 		} else {
 			return null;
+			}
 		}
 	}
 
 	/* (non-Javadoc)
 	 * @see org.transitclock.core.dataCache.ehcache.StopArrivalDepartureCacheInterface#putArrivalDeparture(org.transitclock.db.structs.ArrivalDeparture)
 	 */
-	
 	@SuppressWarnings("unchecked")
-	synchronized public StopArrivalDepartureCacheKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
+	public StopArrivalDepartureCacheKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
 
 		logger.trace("Putting :" + arrivalDeparture.toString() + " in StopArrivalDepartureCache cache.");
 	
@@ -98,29 +100,28 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);
 		date.set(Calendar.MILLISECOND, 0);
-		if(arrivalDeparture.getStop()!=null)
-		{
-			StopArrivalDepartureCacheKey key = new StopArrivalDepartureCacheKey(arrivalDeparture.getStop().getId(),
-					date.getTime());
-					
-			StopEvents element = cache.get(key);
-	
-			if (element == null) {														
-				element=new StopEvents();	
-			}
-			
-			try {
-				element.addEvent(new IpcArrivalDeparture(arrivalDeparture));
-			} catch (Exception e) {				
-				logger.error("Error adding "+arrivalDeparture.toString()+" event to StopArrivalDepartureCache.", e);				
-			}			
-									
-			cache.put(key,element);
-
+		if(arrivalDeparture.getStop() == null) return null;
+		StopArrivalDepartureCacheKey key = new StopArrivalDepartureCacheKey(arrivalDeparture.getStop().getId(),
+				date.getTime());
+		IpcArrivalDeparture ipc;
+		StopEvents empty = new StopEvents();
+		try {
+			ipc = new IpcArrivalDeparture(arrivalDeparture);
+		} catch (Exception e) {
+			logger.error("Exception adding " + arrivalDeparture.toString() + " event to StopArrivalDepartureCache.", e);
 			return key;
-		}else
-		{
-			return null;
+		}
+		empty.addEvent(ipc);
+
+		synchronized (cache) {
+			StopEvents element = cache.get(key);
+			if (element == null) {
+				cache.put(key, empty);
+			} else {
+				element.addEvent(ipc);
+				cache.put(key, element);
+			}
+			return key;
 		}
 	}
 
@@ -128,29 +129,19 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 		return iterable == null ? Collections.<T> emptyList() : iterable;
 	}
 
-	public void populateCacheFromDb(Session session, Date startDate, Date endDate) {
-		Criteria criteria = session.createCriteria(ArrivalDeparture.class);
+	public void populateCacheFromDb(List<ArrivalDeparture> results) {
+		try {
+			int counter = 0;
 
-
-		List<ArrivalDeparture> results = createArrivalDeparturesCriteria(criteria, startDate, endDate);
-		int counter = 0;
-
-		for (ArrivalDeparture result : results) {
-			if(counter % 1000 == 0){
-				logger.info("{} out of {} Stop Arrival Departure Records for period {} to {} ({}%)", counter, results.size(), startDate, endDate, (int)((counter * 100.0f) / results.size()));
+			for (ArrivalDeparture result : results) {
+				if (counter % 1000 == 0) {
+					logger.info("{} out of {} Stop Arrival Departure Records ({}%)", counter, results.size(), (int) ((counter * 100.0f) / results.size()));
+				}
+				putArrivalDeparture(result);
+				counter++;
 			}
-
-			// as we are adding A/Ds, smooth any negative arrivals
-			StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(result);
-			//TODO might be better with its own populateCacheFromdb
-			try
-			{
-				DwellTimeModelCacheFactory.getInstance().addSample(result);
-			}catch(Exception Ex)
-			{
-				Ex.printStackTrace();
-			}
-			counter++;
+		} catch (Throwable t) {
+			logger.error("Exception in populateCacheFromDb {}", t, t);
 		}
 	}
 

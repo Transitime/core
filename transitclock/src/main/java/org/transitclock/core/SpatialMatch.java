@@ -341,7 +341,7 @@ public class SpatialMatch {
 		for (int i=getStopPathIndex(); i<stopPaths.size(); ++i) {
 			StopPath stopPath = stopPaths.get(i);
 			ScheduleTime scheduleTime = getTrip().getScheduleTime(i);
-			if (scheduleTime.getTime() != null) {
+			if (scheduleTime != null && scheduleTime.getTime() != null) {
 				stopPathWithScheduleTime = stopPath;
 				stopPathIndex = i;
 				break;

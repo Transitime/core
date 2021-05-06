@@ -134,7 +134,7 @@ public class DataDbLogger {
 	// keep track of primary key values to reduce database duplicate exceptions
 	private Map<String, String> vehicleToPrimayKeyMap = new HashMap<>();
 
-	private static final Logger logger = 
+	private static final Logger logger =
 			LoggerFactory.getLogger(DataDbLogger.class);
 
 	/********************** Member Functions **************************/
@@ -276,7 +276,7 @@ public class DataDbLogger {
 		return headwayQueue.add(data);
 	}
 
-	
+
 	/**
 	 * Determines set of class names in the queue. Useful for logging
 	 * error message when queue getting filled up so know what kind of

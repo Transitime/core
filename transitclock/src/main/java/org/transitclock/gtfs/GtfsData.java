@@ -2763,17 +2763,17 @@ public class GtfsData {
     SessionFactory sessionFactory =  
         HibernateUtils.getSessionFactory(getAgencyId());
     Session statsSession = sessionFactory.openSession();
-    monitoringService.saveMetric("PredictionLatestConfigRev", configRev*1.0, 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-    monitoringService.saveMetric("PredictionLatestTravelTimesRev", travelTimesRev*1.0, 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    monitoringService.averageMetric("PredictionLatestConfigRev", configRev*1.0);
+    monitoringService.averageMetric("PredictionLatestTravelTimesRev", travelTimesRev*1.0);
     Long count = Trip.countTravelTimesForTrips(statsSession, travelTimesRev);
     if (count != null) {
-      monitoringService.saveMetric("PredictionTravelTimesForTripsCount", count*1.0, 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+      monitoringService.averageMetric("PredictionTravelTimesForTripsCount", count*1.0);
     } else {
-      monitoringService.saveMetric("PredictionTravelTimesForTripsCount", -1.0, 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+      monitoringService.averageMetric("PredictionTravelTimesForTripsCount", -1.0);
     }
-    monitoringService.saveMetric("PredictionTravelTimesForTripsExpectedCount", expectedTravelTimesCount*1.0, 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-    monitoringService.saveMetric("PredictionTravelTimesForTripsOriginalCount", originalTravelTimesCount*1.0, 1, MonitoringService.MetricType.SCALAR, MonitoringService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-
+    monitoringService.averageMetric("PredictionTravelTimesForTripsExpectedCount", expectedTravelTimesCount*1.0);
+    monitoringService.averageMetric("PredictionTravelTimesForTripsOriginalCount", originalTravelTimesCount*1.0);
+		monitoringService.flush();
     logger.info("Found {} TravelTimesForTrips for {}:{} with expected={}, orginal={}", 
         count, configRev, travelTimesRev, expectedTravelTimesCount, originalTravelTimesCount);
     return count;
