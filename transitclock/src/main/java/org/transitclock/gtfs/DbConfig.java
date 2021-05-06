@@ -124,6 +124,7 @@ public class DbConfig {
 	private List<Frequency> frequencies;
 	private List<Transfer> transfers;
 	private List<FeedInfo> feedInfo;
+	private Map<String, Map<String, RouteDirection>> routeDirectionsByRoute;
 
 
 	// Keyed by stop_id.
@@ -855,6 +856,19 @@ public class DbConfig {
 		feedInfo = FeedInfo.getFeedInfo(globalSession, configRev);
 
 
+		List<RouteDirection> routeDirections =  RouteDirection.getRouteDirection(globalSession, configRev);
+		routeDirectionsByRoute = new HashMap<>();
+
+		for(RouteDirection routeDirection : routeDirections){
+			Map<String, RouteDirection> routeDirectionByDirection =
+					routeDirectionsByRoute.get(routeDirection.getRouteShortName());
+			if(routeDirectionByDirection == null){
+				routeDirectionByDirection = new HashMap<>();
+				routeDirectionsByRoute.put(routeDirection.getRouteShortName(), routeDirectionByDirection);
+			}
+			routeDirectionByDirection.put(routeDirection.getDirectionId(),routeDirection);
+		}
+
 		logger.debug("Reading everything else took {} msec",
 				timer.elapsedMsec());
 	}
@@ -1226,5 +1240,6 @@ public class DbConfig {
 		outputCollection("Frequencies", dbConfig.frequencies);
 		outputCollection("Transfers", dbConfig.transfers);
 		outputCollection("FeedInfo", dbConfig.feedInfo);
+		outputCollection("RouteDirection", dbConfig.routeDirectionsByRoute.values());
 	}
 }

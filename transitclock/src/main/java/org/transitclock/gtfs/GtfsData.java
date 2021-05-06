@@ -147,6 +147,7 @@ public class GtfsData {
 	private List<FareRule> fareRules;
 	private List<Transfer> transfers;
 	private List<FeedInfo> feedInfoList;
+	private List<RouteDirection> routeDirectionList;
 
 	// This is the format that dates are in for CSV. Should
 	// be accessed only through getDateFormatter() to make
@@ -2221,7 +2222,7 @@ public class GtfsData {
 	private void processFeedInfo() {
 		// Let user know what is going on
 		logger.info("Processing feed_info.txt data...");
-		feedInfoList = new ArrayList<FeedInfo>();
+		feedInfoList = new ArrayList<>();
 		// Read in the feed_info.txt GTFS data from file
 		GtfsFeedInfosReader feedInfosReader =
 				new GtfsFeedInfosReader(gtfsDirectoryName);
@@ -2234,6 +2235,28 @@ public class GtfsData {
 
 		// Let user know what is going on
 		logger.info("Finished processing feed_info.txt data. ");
+	}
+
+	/**
+	 * Reads route_direction.txt file
+	 */
+	private void processRouteDirection() {
+		// Let user know what is going on
+		logger.info("Processing TriMet route_direction.txt data...");
+		routeDirectionList = new ArrayList<>();
+		// Read in the route_direction.txt GTFS data from file
+		GtfsRouteDirectionReader routeDirectionReader = new GtfsRouteDirectionReader(gtfsDirectoryName);
+		List<GtfsRouteDirection> gtfsRouteDirections = routeDirectionReader.get();
+
+		for (GtfsRouteDirection gtfsRouteDirection : gtfsRouteDirections) {
+			if(!gtfsRouteDirection.containsEmptyColumn()){
+				RouteDirection routeDirection = new RouteDirection(revs.getConfigRev(), gtfsRouteDirection);
+				routeDirectionList.add(routeDirection);
+			}
+		}
+
+		// Let user know what is going on
+		logger.info("Finished processing route_direction.txt data.");
 	}
 
 	/******************** Getter Methods ****************************/
@@ -2508,6 +2531,8 @@ public class GtfsData {
 		return feedInfoList;
 	}
 
+	public List<RouteDirection> getRouteDirection() { return routeDirectionList; }
+
 
 	/**
 	 * Returns information about the current revision.
@@ -2672,6 +2697,7 @@ public class GtfsData {
 		processFareRules();
 		processTransfers();
 		processFeedInfo();
+		processRouteDirection();
 		
 		// Sometimes will be using a partial configuration. For example, for 
 		// MBTA commuter rail only want to use the trips defined for 

@@ -181,6 +181,13 @@ public class DbWriter {
 		for (FeedInfo feedInfo : gtfsData.getFeedInfo()) {
 			writeObject(session, feedInfo);
 		}
+
+		logger.info("Saving route_direction to database...");
+		RouteDirection.deleteFromRev(session, configRev);
+		for (RouteDirection routeDirection : gtfsData.getRouteDirection()) {
+			writeObject(session, routeDirection);
+		}
+
 		
 		// Write out the ConfigRevision data
 		writeObject(session, gtfsData.getConfigRevision());
