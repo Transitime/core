@@ -22,6 +22,9 @@ import org.apache.commons.cli.*;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.avl.ApcModule;
@@ -87,6 +90,9 @@ public class Core {
 
 	private final ServiceUtils service;
 	private Time time;
+	// quartz scheduler
+	private Scheduler scheduler = null;
+
 
 	// So that can access the current time, even when in playback mode
 	private SystemTime systemTime = new SystemCurrentTime();
@@ -190,6 +196,15 @@ public class Core {
 
 		service = new ServiceUtils(configData);
 		time = new Time(configData);
+
+		try {
+			// Grab the Scheduler instance from the Factory
+			scheduler = StdSchedulerFactory.getDefaultScheduler();
+			scheduler.start();
+		} catch (SchedulerException e) {
+			logger.error("quartz failed to start.  Scheduler will not run.  Exception:{}", e, e);
+		}
+
 	}
 
 	/**
@@ -273,6 +288,14 @@ public class Core {
 	 */
 	public DbConfig getDbConfig() {
 		return configData;
+	}
+
+	/**
+	 * access to the quartz scheduler.
+	 * @return
+	 */
+	public Scheduler getScheduler() {
+		return scheduler;
 	}
 
 	/**
@@ -591,13 +614,16 @@ public class Core {
 		            public void run() 
 		            {
 		            	try {
-							logger.info("Closing cache.");
-							CacheManagerFactory.getInstance().close();
-							logger.info("Cache closed.");
-						} catch (Exception e) {
-							logger.error("Cache close failed.");
-							logger.error(e.getMessage(),e);
-						}
+												logger.info("Closing cache.");
+												CacheManagerFactory.getInstance().close();
+												logger.info("Cache closed.");
+												if (Core.getInstance().scheduler != null) {
+													Core.getInstance().scheduler.shutdown();
+												}
+											} catch (Exception e) {
+												logger.error("Cache close failed.");
+												logger.error(e.getMessage(),e);
+											}
 		            	System.exit(0);		            	
 		            }
 		    }));

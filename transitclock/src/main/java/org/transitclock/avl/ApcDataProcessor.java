@@ -1,12 +1,22 @@
 package org.transitclock.avl;
 
+import org.quartz.Job;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.config.StringConfigValue;
 import org.transitclock.configData.AgencyConfig;
 import org.transitclock.db.structs.Agency;
 import org.transitclock.db.structs.ApcReport;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.monitoring.MonitoringService;
+import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
 
 import java.util.ArrayList;
@@ -15,11 +25,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import static org.quartz.CronScheduleBuilder.cronSchedule;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.TriggerBuilder.newTrigger;
+
 /**
  * Integrate with Automated Passenger Count data, parse, archive, and
  * feed into dwell time calculations.
  */
 public class ApcDataProcessor {
+
+  private static final Logger logger = LoggerFactory.getLogger(ApcDataProcessor.class);
 
   public static final IntegerConfigValue arrivalDepartureWindowMinutes
           = new IntegerConfigValue("transitclock.apc.arrivalDepartureLoadingWindowInMinutes",
@@ -30,6 +46,10 @@ public class ApcDataProcessor {
           = new IntegerConfigValue("transitclock.apc.startTimeHour",
           4,
           "Hour to begin apc analysis");
+  public static final StringConfigValue cronPattern
+          = new StringConfigValue("transitclock.apc.cron",
+          "0 0 4 * * ?",
+          "extended cron pattern (includes seconds) to run apc update on");
 
   private MonitoringService monitoring;
   private static ApcDataProcessor singleton;
@@ -55,10 +75,31 @@ public class ApcDataProcessor {
             timeZoneFromDb = TimeZone.getDefault();
           }
           singleton = new ApcDataProcessor(timeZoneFromDb.toZoneId().getId());
+          singleton.init();
         }
       }
     }
     return singleton;
+  }
+
+  private void init() {
+    JobDetail job = newJob(ApcDataProcessorJob.class)
+            .withIdentity("apcJob", "transitclock")
+            .build();
+
+    // Trigger the job to run now, and then repeat every 40 seconds
+    Trigger trigger = newTrigger()
+            .withIdentity("apcTrigger", "transitclock")
+            .startNow()
+            .withSchedule(cronSchedule(cronPattern.getValue()))
+            .build();
+
+    // Tell quartz to schedule the job using our trigger
+    try {
+      Core.getInstance().getScheduler().scheduleJob(job, trigger);
+    } catch (SchedulerException e) {
+      logger.error("Scheduling ApcDataProcessor Job failed");
+    }
   }
 
   public void enable() {
@@ -81,8 +122,11 @@ public class ApcDataProcessor {
     archive(matches);
   }
 
-  // TODO hook this up to core parallel processor
   public void populateFromDb(List<ArrivalDeparture> arrivalDepartures) {
+    if (arrivalDepartures == null || arrivalDepartures.isEmpty()) {
+      logger.error("populateFromDb called with nothing to do, exiting.");
+      return;
+    }
     TimeRange apcTimeRange = findRangeForArrivalRecords(arrivalDepartures);
     List<ApcParsedRecord> apcRecords = findApcRecords(apcTimeRange);
     internalProcess(apcRecords, arrivalDepartures);
@@ -110,16 +154,27 @@ public class ApcDataProcessor {
     return records;
   }
 
-
-  // TODO call this off scheduler or timer....
-  // TODO rename as well...
-  public void loadYesterdaysRates() {
-    TimeRange apcRange = getRangeForMatches(System.currentTimeMillis());
-    List<ArrivalDeparture> arrivalDepartures = findArrivalDepartures(apcRange);
-    populateFromDb(arrivalDepartures);
+  public int loadYesterdaysRates() {
+    IntervalTimer timer = new IntervalTimer();
+    try {
+      TimeRange apcRange = getRangeForMatches(System.currentTimeMillis());
+      List<ArrivalDeparture> arrivalDepartures = findArrivalDepartures(apcRange);
+      if (arrivalDepartures != null) {
+        populateFromDb(arrivalDepartures);
+        return arrivalDepartures.size();
+      } else {
+        logger.error("no arrival/departures found for range {}", apcRange);
+      }
+    } finally {
+      logger.error("loadYesterdayRates complete in {} msec", timer.elapsedMsecStr());
+    }
+    return -1;
   }
 
   private List<ApcReport> findMatches(TimeRange rangeForMatches) {
+    if (rangeForMatches == null) {
+      throw new NullPointerException("rangeForMatches cannot be null");
+    }
     String agencyId = AgencyConfig.getAgencyId();
     return ApcReport.getApcReportsFromDb(agencyId,
             rangeForMatches.getBeginTime(),
@@ -209,6 +264,22 @@ public class ApcDataProcessor {
 
     public Date getEndTime() {
       return new Date(finish);
+    }
+
+    @Override
+    public String toString() {
+      return ""
+              + getBeginTime()
+              + " -> "
+              + getEndTime();
+    }
+  }
+
+  public static class ApcDataProcessorJob implements Job {
+
+    @Override
+    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+      ApcDataProcessor.getInstance().loadYesterdaysRates();
     }
   }
 }
