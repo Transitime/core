@@ -219,8 +219,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 				getMonitoring().rateMetric("PredictionKalmanHeadwayHit", false);
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("getTravelTimeForPath exception {}", e, e);
 		}
 		// instrument kalman miss
 		getMonitoring().rateMetric("PredictionKalmanHit", false);
@@ -261,13 +260,13 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 			result = cache.getErrorValue(indices);
 			if(result==null)
 			{		
-				logger.debug("Kalman Error value set to default: "+initialErrorValue.getValue() +" for key: "+new KalmanErrorCacheKey(indices).toString());
+				logger.debug("Kalman Error value set to default: "+initialErrorValue.getValue() +" for indices: " + indices.toString());
 				result=new KalmanError(initialErrorValue.getValue());
 			}
 			return result;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Exception {} retrieving from cache with indices {}",
+							e, indices, e);
 		}
 		return new KalmanError(initialErrorValue.getValue());
 	}

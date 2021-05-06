@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.core.HeadwayGenerator;
 import org.transitclock.core.VehicleState;
@@ -29,6 +31,9 @@ import org.transitclock.ipc.data.IpcVehicleComplete;
  * Maybe should be a list and have a predicted headway at each stop along the route. So key for headway could be (stop, vehicle, trip, start_time).
  */
 public class LastDepartureHeadwayGenerator implements HeadwayGenerator {
+
+	private static final Logger logger =
+					LoggerFactory.getLogger(LastDepartureHeadwayGenerator.class);
 
 	@Override
 	public  Headway generate(VehicleState vehicleState) {
@@ -94,8 +99,7 @@ public class LastDepartureHeadwayGenerator implements HeadwayGenerator {
 				}
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("exception generating headway {}", e, e);
 		}
 		return null;
 	}

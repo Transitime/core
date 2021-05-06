@@ -88,8 +88,7 @@ public class LastVehiclePredictionGeneratorImpl extends
 				return travelTimeDetails.getTravelTime();
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("exception {} in getTravelTimeForPath", e, e);
 		}
 				
 		//logger.debug("No last vehicle data found, generating default prediction : " + indices.toString());
