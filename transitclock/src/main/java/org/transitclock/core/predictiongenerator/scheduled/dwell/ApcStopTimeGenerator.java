@@ -132,7 +132,10 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
 
   private double prediction(double gain, double loopGain, List<Double> historicalDwellTimes, long dwellTime, double average) {
     double averageHistoricalDuration = historicalAverage(historicalDwellTimes);
-    return (loopGain * dwellTime) + (gain * averageHistoricalDuration);
+    double prediction = (loopGain * dwellTime) + (gain * averageHistoricalDuration);
+    logger.debug("(loopGain={} * dwellTime={}) + (gain={} * averageHistoricalDuration={}) = {}",
+            loopGain, dwellTime, gain, averageHistoricalDuration);
+    return prediction;
   }
 
   private double filterError(double variance, double loopGain) {
