@@ -77,16 +77,16 @@ public class GtfsBasedDataGenerator {
   }
 
   public List<ApcReport> getApcReports(long referenceTime, int tripIndex, int stopPathIndex,
-                                       String stopId, String vehicleId) {
+                                       String stopId, String vehicleId, int boardings) {
     List<ApcReport> reports = new ArrayList<>();
-    for (ApcParsedRecord apc : getApcParsedRecords(referenceTime, tripIndex, stopPathIndex, stopId, vehicleId)) {
+    for (ApcParsedRecord apc : getApcParsedRecords(referenceTime, tripIndex, stopPathIndex, stopId, vehicleId, boardings)) {
       reports.add(apc.toApcReport());
     }
     return reports;
   }
 
   public List<ApcParsedRecord> getApcParsedRecords(long referenceTime, int tripIndex, int stopPathIndex,
-                                                   String stopId, String vehicleId) {
+                                                   String stopId, String vehicleId, int boardings) {
     List<ApcParsedRecord> records = new ArrayList<>();
     long startOfDay = Time.getStartOfDay(new Date(referenceTime));
     ApcParsedRecord apc = new ApcParsedRecord(
@@ -96,7 +96,7 @@ public class GtfsBasedDataGenerator {
             "driverId",
             0,
             vehicleId,
-            1,
+            boardings,
             1,
             0,
             0,

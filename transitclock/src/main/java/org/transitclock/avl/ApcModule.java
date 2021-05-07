@@ -50,15 +50,21 @@ public class ApcModule extends Module {
    */
   public Double getBoardingsPerSecond(String stopId, Date arrivalTime) {
     Integer totalArrivals = 0;
+    int window = 0;
     for (int i = -arrivalRateWindow.getValue(); i <= arrivalRateWindow.getValue(); i++){
       Integer arrivals = processor.getBoardingsPerMinute(stopId, addTime(arrivalTime, i * Time.MS_PER_MIN));
+      window++;
       if (arrivals != null) {
         if (totalArrivals == null) totalArrivals = 0;
         totalArrivals = totalArrivals + arrivals;
       }
     }
-    if (totalArrivals != null && totalArrivals != 0)
-      return new Double(totalArrivals) / (arrivalRateWindow.getValue()*2) / Time.SEC_PER_MIN;
+    if (totalArrivals != null && totalArrivals != 0) {
+      double boardingPerSecond = new Double(totalArrivals) / window / Time.SEC_PER_MIN;
+      logger.info("boardingsPerMinute={} = totalArrivals={} / arrivalRateWindow={}",
+              boardingPerSecond * Time.SEC_PER_MIN, totalArrivals, window);
+      return boardingPerSecond;
+    }
 
     return null;
   }
