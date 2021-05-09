@@ -13,6 +13,7 @@ import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.applications.Core;
 import org.transitclock.avl.ApcParsedRecord;
 import org.transitclock.config.ClassConfigValue;
 import org.transitclock.config.IntegerConfigValue;
@@ -155,7 +156,8 @@ public class ApcSqsClientModule extends Module {
     request.setWaitTimeSeconds(apcPauseTimeInSeconds.getValue());
     List<Message> messages = _sqs.receiveMessage(request).getMessages();
     messageCount = messageCount + messages.size();
-    archiveMessages(messages);
+    monitoring.averageMetric("PredictionApcInputRecords", messages.size());
+    replicateMessages(messages);
 
     List<ApcParsedRecord> apcRecords = null;
     Message firstMessage = null;
@@ -164,18 +166,24 @@ public class ApcSqsClientModule extends Module {
       apcRecords = _messageUnmarshaller.toApcRecord(message,
               apcServiceDateTimeZone.getValue(),
               apcTimeStampTimeZone.getValue());
-      // TODO add monitoring stats here
     }
     if (callback != null) {
       callback.receiveRawMessages(messages);
       callback.receiveApcRecords(apcRecords);
     }
     acknowledge(firstMessage);
+    archiveMessages(apcRecords);
 
-    // TODO!!!!
-    //ApcModule.getInstance().process(apcRecords);
 
     logStatus();
+  }
+
+  private void archiveMessages(List<ApcParsedRecord> records) {
+    if (records == null) return;
+    for (ApcParsedRecord record : records) {
+      Core.getInstance().getDbLogger().add(record);
+    }
+    monitoring.averageMetric("PredictionApcParsedRecords", records.size());
   }
 
   private void logStatus() {
@@ -205,7 +213,11 @@ public class ApcSqsClientModule extends Module {
     }
   }
 
-  private void archiveMessages(List<Message> messages) {
+  /**
+   * post to SNS topic so messages can be replicated.
+   * @param messages
+   */
+  private void replicateMessages(List<Message> messages) {
     if (messages == null
             || messages.isEmpty()
             || _sns == null) return;

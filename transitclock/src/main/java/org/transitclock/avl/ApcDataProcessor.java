@@ -127,8 +127,11 @@ public class ApcDataProcessor {
       logger.error("populateFromDb called with nothing to do, exiting.");
       return;
     }
+
     TimeRange apcTimeRange = findRangeForArrivalRecords(arrivalDepartures);
+    logger.info("populateFromDb loading time range {}...", apcTimeRange);
     List<ApcParsedRecord> apcRecords = findApcRecords(apcTimeRange);
+    logger.info("populateFromDb loading time range {} complete, processing", apcTimeRange);
     internalProcess(apcRecords, arrivalDepartures);
   }
 
@@ -158,7 +161,9 @@ public class ApcDataProcessor {
     IntervalTimer timer = new IntervalTimer();
     try {
       TimeRange apcRange = getRangeForMatches(System.currentTimeMillis());
+      logger.info("loading apc records for range {}...", apcRange);
       List<ArrivalDeparture> arrivalDepartures = findArrivalDepartures(apcRange);
+      logger.info("loaded A/Ds for range {}", arrivalDepartures);
       if (arrivalDepartures != null) {
         populateFromDb(arrivalDepartures);
         return arrivalDepartures.size();
