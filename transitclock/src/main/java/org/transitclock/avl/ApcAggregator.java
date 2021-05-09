@@ -96,17 +96,25 @@ public class ApcAggregator {
   }
 
   private int daysOld(String key) {
+    long keyEpoch = epoch(key);
+    if (keyEpoch <= 0)
+      return -1;
+    return new Long((System.currentTimeMillis() - keyEpoch) / Time.MS_PER_DAY).intValue();
+  }
+
+  private long epoch(String key) {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
     String dateComponent = getDateComponentOfKey(key);
     long keyEpoch;
     try {
       Date parse = sdf.parse(dateComponent);
       keyEpoch = parse.getTime();
-      return new Long((System.currentTimeMillis() - keyEpoch) / Time.MS_PER_DAY).intValue();
+      return keyEpoch;
     } catch (ParseException e) {
       logger.error("invalid key in cache {} with date component {}", key, dateComponent);
     }
     return -1;
+
   }
 
   private String getDateComponentOfKey(String key) {
@@ -119,6 +127,11 @@ public class ApcAggregator {
   }
 
   private void debugStats() {
+    ApcCacheStatistics stats = computeStatistics();
+    logger.info("apc cache stats oldest {}, newest {} of size {}",
+            stats.getOldest(),
+            stats.getNewest(),
+            stats.getSize());
     Set<Map.Entry<String, Integer>> entries = countsByHash.entrySet();
     ArrayList<Map.Entry<String, Integer>> sortedEntries = new ArrayList<>();
     sortedEntries.addAll(entries);
@@ -131,6 +144,22 @@ public class ApcAggregator {
               sortedEntries.get(index).getValue(),
               cache.get(sortedEntries.get(index).getKey()));
     }
+  }
+
+  private synchronized ApcCacheStatistics computeStatistics() {
+    long oldest = Long.MIN_VALUE;
+    long newest = Long.MAX_VALUE;
+    int size = cacheSize();
+
+    for (String key : cache.keySet()) {
+      long keyEpoch = epoch(key);
+      if (keyEpoch <= 0) continue;
+      if (keyEpoch < newest)
+        newest = keyEpoch;
+      if (keyEpoch > oldest)
+        oldest = keyEpoch;
+    }
+    return new ApcCacheStatistics(new Date(oldest), new Date(newest), size);
   }
 
 
@@ -186,6 +215,27 @@ public class ApcAggregator {
       Map.Entry<String, Integer> e1 = (Map.Entry<String, Integer>) o1;
       Map.Entry<String, Integer> e2 = (Map.Entry<String, Integer>) o2;
       return e2.getValue().compareTo(e1.getValue());
+    }
+  }
+
+  private class ApcCacheStatistics {
+    private Date oldest = null;
+    private Date newest = null;
+    private Integer size = null;
+
+    public ApcCacheStatistics(Date oldest, Date newest, Integer size) {
+      this.oldest = oldest;
+      this.newest = newest;
+      this.size = size;
+    }
+    public Date getOldest() {
+      return oldest;
+    }
+    public Date getNewest() {
+      return  newest;
+    }
+    public int getSize() {
+      return size;
     }
   }
 }
