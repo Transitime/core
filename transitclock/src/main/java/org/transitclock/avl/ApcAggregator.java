@@ -61,7 +61,11 @@ public class ApcAggregator {
 
   public synchronized void analyze(List<ApcReport> matches ) {
 
-    if (matches == null) return;
+    if (matches == null) {
+      logger.info("no matches");
+      return;
+    }
+    logger.info("analyze called with {} matches", matches.size());
     for (ApcReport match : matches) {
       String hash = hash(match);
       if (hash == null) continue;

@@ -136,6 +136,7 @@ public class ApcDataProcessor {
   }
 
   private List<ApcMatch> internalProcess(List<ApcParsedRecord> apcRecords, List<ArrivalDeparture> arrivalDepartures) {
+    logger.info("internalProcess called");
     ApcMatcher matcher = new ApcMatcher(arrivalDepartures);
     List<ApcMatch> matches = matcher.match(apcRecords);
 
@@ -144,6 +145,7 @@ public class ApcDataProcessor {
       reports.add(match.getApc().toApcReport());
     }
 
+    logger.info("internalProcess analyzing {} matches", matches.size());
     analyze(reports);
     return matches;
   }
@@ -219,6 +221,8 @@ public class ApcDataProcessor {
    * @return
    */
    public synchronized void analyze(List<ApcReport> matches) {
+     if (matches != null)
+      logger.info("analyzing {} matches", matches.size());
     // validate/clean
     apcAggregator.analyze(matches);
   }
