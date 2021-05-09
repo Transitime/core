@@ -70,10 +70,14 @@ public class ApcModule extends Module {
   }
 
   public void populateFromDb(List<ArrivalDeparture> arrivalDepartures) {
+    logger.info("calling apc populateFromDb");
     if (processor != null && processor.isEnabled() && arrivalDepartures != null) {
       processor.populateFromDb(arrivalDepartures);
+    } else {
+     logger.info("populateFromDb called with nothing to do");
     }
   }
+
   private Date addTime(Date arrivalTime, long millis) {
     return new Date(arrivalTime.getTime() + millis);
   }

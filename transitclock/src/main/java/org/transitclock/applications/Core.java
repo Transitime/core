@@ -548,8 +548,11 @@ public class Core {
 					pp.enqueue(ct);
 				}
 				if (ApcModule.getInstance() != null) {
+					logger.info("queuing apc for startDate {}", startDate);
 					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.ApcCache, defaultInput);
 					pp.enqueue(ct);
+				} else {
+					logger.info("skipping APC integration startDate {}, apcModule not configured", startDate);
 				}
 
 				endDate=startDate;
