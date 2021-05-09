@@ -1,5 +1,7 @@
 package org.transitclock.avl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.modules.Module;
@@ -8,36 +10,34 @@ import org.transitclock.utils.Time;
 import java.util.Date;
 import java.util.List;
 
-public class ApcModule extends Module {
+public class ApcModule {
+
+  private static final Logger logger = LoggerFactory.getLogger(ApcModule.class);
 
   public static IntegerConfigValue arrivalRateWindow
           = new IntegerConfigValue("transitclock.apc.arrivalRateWindowInMinutes",
           7,
           "Minutes to consider in arrival rate calculation");
-  private static ApcModule instance;
+  private static ApcModule instance = null;
   private ApcDataProcessor processor;
-  /**
-   * Constructor. Subclasses must implement a constructor that takes
-   * in agencyId and calls this constructor via super(agencyId).
-   *
-   * @param agencyId
-   */
-  public ApcModule(String agencyId) {
-    super(agencyId);
-    instance = this;
+
+  private ApcModule() {
   }
 
   public static ApcModule getInstance() {
+    if (instance == null) {
+      synchronized (arrivalRateWindow) {
+        if (instance == null) {
+          instance = new ApcModule();
+          instance.init();
+        }
+      }
+    }
     return instance;
   }
 
   public ApcDataProcessor getProcessor() {
     return processor;
-  }
-  @Override
-  public void run() {
-    init();
-    // TODO call Core.populateFromDB
   }
 
   /**

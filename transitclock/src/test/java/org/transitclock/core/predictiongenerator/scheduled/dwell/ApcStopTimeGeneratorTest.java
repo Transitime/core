@@ -46,9 +46,7 @@ public class ApcStopTimeGeneratorTest {
     // setup core instance to prevent exceptions
     SingletonSupport.createTestCore();
 
-    ApcModule module = new ApcModule(dataGenerator.getAgencyId());
-
-    module.run();
+    ApcModule module = ApcModule.getInstance();
 
     long yesterdayReferenceTime = referenceTime - Time.MS_PER_DAY;
     long referenceTimeN2 = yesterdayReferenceTime - Time.MS_PER_DAY;
