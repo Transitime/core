@@ -181,7 +181,7 @@ public class ApcSqsClientModule extends Module {
   private void archiveMessages(List<ApcParsedRecord> records) {
     if (records == null) return;
     for (ApcParsedRecord record : records) {
-      Core.getInstance().getDbLogger().add(record);
+      Core.getInstance().getDbLogger().add(record.toApcReport());
     }
     monitoring.averageMetric("PredictionApcParsedRecords", records.size());
   }
