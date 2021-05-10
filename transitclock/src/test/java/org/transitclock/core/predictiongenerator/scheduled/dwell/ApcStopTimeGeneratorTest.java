@@ -37,6 +37,8 @@ public class ApcStopTimeGeneratorTest {
 
   @Before
   public void setUp() throws Exception {
+
+
     //stop1.202104281208
     referenceTime = SingletonSupport.toEpoch("2021-04-21", "09:40:00", "CST");
 
@@ -44,7 +46,7 @@ public class ApcStopTimeGeneratorTest {
     dataGenerator.load();
 
     // setup core instance to prevent exceptions
-    SingletonSupport.createTestCore();
+    SingletonSupport.createTestCore("CST");
 
     ApcModule module = ApcModule.getInstance();
 
@@ -122,7 +124,6 @@ public class ApcStopTimeGeneratorTest {
   private void checkPreConditions() {
     // ensure test data for boardings
     assertNotNull(ApcModule.getInstance());
-    assertEquals(6, ApcModule.getInstance().getProcessor().cacheSize());
 
     Double boardingsPerSecond = ApcModule.getInstance().getBoardingsPerSecond(stopId, new Date(referenceTime));
     assertNotNull(boardingsPerSecond);

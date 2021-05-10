@@ -161,6 +161,8 @@ public class GtfsBasedDataGenerator {
     long tripStartEpoch = Time.getStartOfDay(new Date(avlTime)) + tripStartSeconds * Time.MS_PER_SEC;
     vs.putTripStartTime(tripIndex, tripStartEpoch);
     vs.setLastArrivalTime(avlTime + (scheduleDeviationSeconds * Time.MS_PER_SEC));
+    vs.setAvlReport(new AvlReport(VEHICLE, vs.getLastArrivalTime(), 0.001, 0.0001,
+    0.0f, 0.0f, "test"));
     return vs;
 
   }

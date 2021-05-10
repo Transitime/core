@@ -60,9 +60,13 @@ public class SingletonSupport {
   }
 
   public static void createTestCore() {
+    createTestCore(getTimeZone());
+  }
+
+  public static void createTestCore(String tz) {
     // some structs require Core / DbConfig
     Core.createTestCore(AGENCY_ID);
-    Core.getInstance().setTime(new Time(getTimeZone()));
+    Core.getInstance().setTime(new Time(tz));
     // load standard configuration
     InputStream is = Core.getInstance().getClass().getResourceAsStream("transitclock.properties");
     assertNotNull(is);

@@ -54,7 +54,7 @@ public class ApcDataProcessor {
   private MonitoringService monitoring;
   private static ApcDataProcessor singleton;
   private static Object lockObject = new Object();
-  private ApcAggregator apcAggregator = null;
+  private ApcCache apcAggregator = null;
   private String tz = null;
   private boolean enabled = false;
 
@@ -62,7 +62,7 @@ public class ApcDataProcessor {
     monitoring = MonitoringService.getInstance();
     singleton = this;
     this.tz = tz;
-    apcAggregator = new ApcAggregator(tz);
+    apcAggregator = new ApcCache(tz);
   }
 
   public static ApcDataProcessor getInstance() {

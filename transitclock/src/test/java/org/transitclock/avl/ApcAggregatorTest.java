@@ -42,25 +42,6 @@ public class ApcAggregatorTest {
     generator =  new KalmanDataGenerator(System.currentTimeMillis());
   }
 
-  @Test
-  public void testPrune() {
-    ApcAggregator aggregator = new ApcAggregator("CDT");
-    int cacheCount = 0;
-    int incrementSize = 5;
-    for (int daysBack = 1; daysBack<=5; daysBack++) {
-      List<ApcReport> matches = createTestMatches(daysBack, incrementSize);
-      cacheCount = cacheCount + matches.size();
-      aggregator.analyze(matches);
-      assertEquals(cacheCount, aggregator.cacheSize());
-    }
-    for (int daysBack = 3; daysBack>=0; daysBack--) {
-      aggregator.setApcCacheDays(daysBack);
-      assertEquals(cacheCount, aggregator.cacheSize());
-      aggregator.prune();
-      cacheCount = cacheCount - incrementSize;
-      assertEquals(cacheCount, aggregator.cacheSize());
-    }
-  }
 
   private List<ApcReport> createTestMatches(int daysBack, int incrementSize) {
     List<ApcReport> reports = new ArrayList<>();
@@ -78,7 +59,7 @@ public class ApcAggregatorTest {
 
   @Test
   public void analyze() throws Exception {
-    ApcAggregator aggregator = new ApcAggregator("CDT");
+    ApcCache aggregator = new ApcCache("CDT");
     List<ApcReport> matches = loadMatches();
     aggregator.analyze(matches);
 
