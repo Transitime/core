@@ -5,6 +5,7 @@ import java.util.DoubleSummaryStatistics;
 public class StopPathStatisticsV2 {
     private final String tripId;
     private final String stopPathId;
+    private final String stopName;
     private final int stopPathIndex;
     private final boolean isLastStop;
     private final boolean isFirstStop;
@@ -12,10 +13,11 @@ public class StopPathStatisticsV2 {
     DoubleMedianStatistics dwellTimeStats = new DoubleMedianStatistics();
     DoubleMedianStatistics runTimeStats = new DoubleMedianStatistics();
 
-    public StopPathStatisticsV2(String tripId, String stopPathId, int stopPathIndex, boolean isLastStop) {
+    public StopPathStatisticsV2(String tripId, String stopPathId, int stopPathIndex, String stopName, boolean isLastStop) {
         this.tripId = tripId;
         this.stopPathId = stopPathId;
         this.stopPathIndex = stopPathIndex;
+        this.stopName =  stopName;
         this.isLastStop = isLastStop;
         this.isFirstStop = stopPathIndex == 0;
     }
@@ -59,5 +61,9 @@ public class StopPathStatisticsV2 {
 
     public boolean isFirstStop(){
         return isFirstStop;
+    }
+
+    public String getStopName() {
+        return stopName;
     }
 }

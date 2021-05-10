@@ -718,6 +718,7 @@ public class RunTimeService {
                 ipcRunTimeForStopPaths.add(
                         new IpcRunTimeForStopPath(
                             stopPathRunTimeKey.getStopPathId(),
+                            null,
                             stopPathRunTimeKey.getStopPathIndex(),
                             null,
                             null,

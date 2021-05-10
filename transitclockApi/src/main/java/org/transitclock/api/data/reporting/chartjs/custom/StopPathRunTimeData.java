@@ -8,6 +8,9 @@ public class StopPathRunTimeData {
     @XmlElement(name = "stopPaths")
     private List<String> stopPathsList = new ArrayList<>();
 
+    @XmlElement(name = "stopNames")
+    private List<String> stopNames = new ArrayList<>();
+
     @XmlElement(name = "fixed")
     private List<Long> fixedList = new ArrayList<>();
 
@@ -22,6 +25,10 @@ public class StopPathRunTimeData {
 
     public List<String> getStopPathsList() {
         return stopPathsList;
+    }
+
+    public List<String> getStopNames() {
+        return stopNames;
     }
 
     public List<Long> getFixedList() {

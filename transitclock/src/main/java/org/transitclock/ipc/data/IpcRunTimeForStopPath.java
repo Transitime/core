@@ -4,20 +4,27 @@ import com.google.common.base.Objects;
 
 public class IpcRunTimeForStopPath extends IpcRunTime {
     private String stopPathId;
+    private String stopName;
     private Integer stopPathIndex;
     private Integer prevStopSchDepartureTime;
     private Integer currentStopSchDepartureTime;
     private  Double scheduledCompletionTime;
 
-    public IpcRunTimeForStopPath(String stopPathId, Integer stopPathIndex, Integer prevStopSchDepartureTime,
-                                 Integer currentStopSchDepartureTime, Double avgRunTime, Double fixed, Double variable,
+    public IpcRunTimeForStopPath(String stopPathId,
+                                 String stopName,
+                                 Integer stopPathIndex,
+                                 Integer prevStopSchDepartureTime,
+                                 Integer currentStopSchDepartureTime,
+                                 Double avgRunTime,
+                                 Double fixed,
+                                 Double variable,
                                  Double dwell){
         super(avgRunTime, fixed, variable, dwell);
         this.stopPathId = stopPathId;
+        this.stopName = stopName;
         this.stopPathIndex = stopPathIndex;
         this.prevStopSchDepartureTime = prevStopSchDepartureTime;
         this.currentStopSchDepartureTime = currentStopSchDepartureTime;
-
 
         if(prevStopSchDepartureTime != null && currentStopSchDepartureTime != null) {
             double schTimeLengthMsec = (currentStopSchDepartureTime - prevStopSchDepartureTime) * 1000;
@@ -28,6 +35,10 @@ public class IpcRunTimeForStopPath extends IpcRunTime {
 
     public String getStopPathId() {
         return stopPathId;
+    }
+
+    public String getStopName() {
+        return stopName;
     }
 
     public Integer getStopPathIndex() {

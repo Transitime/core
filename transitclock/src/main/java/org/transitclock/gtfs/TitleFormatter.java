@@ -227,7 +227,7 @@ public class TitleFormatter {
 	 * @param str
 	 * @return
 	 */
-	private static String capitalize(String str) {
+	public static String capitalize(String str) {
 		// Delimiters specify word dividers. The text at beginning or  after a 
 		// whitespace or to the right of a delimiter is capitalized. Otherwise
 		// it will be in lower case.

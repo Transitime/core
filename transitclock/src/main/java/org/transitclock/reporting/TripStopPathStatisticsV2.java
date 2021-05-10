@@ -2,6 +2,7 @@ package org.transitclock.reporting;
 
 import org.transitclock.core.travelTimes.DataFetcher;
 import org.transitclock.db.structs.*;
+import org.transitclock.gtfs.TitleFormatter;
 import org.transitclock.reporting.keys.StopPathRunTimeKey;
 import org.transitclock.reporting.keys.TripTimeVehicleKey;
 
@@ -13,13 +14,13 @@ public class TripStopPathStatisticsV2 {
     private Trip primaryTrip;
     private Integer nextTripTime;
     private int expectedStopPathCount;
-    Map<String, StopPath> stopPathsGroupedById;
+    private Map<String, StopPath> stopPathsGroupedById;
 
     private Set<StopPathRunTimeKey> uniqueStopPathRunTimes = new LinkedHashSet<>();
     private Set<StopPathRunTimeKey> uniqueStopPathDwellTimes = new LinkedHashSet<>();
     private Map<StopPathRunTimeKey, StopPathStatisticsV2> stopPathStatistics = new HashMap<>();
     private Map<TripTimeVehicleKey, Long> runTimesForTrips = new HashMap<>();
-
+    
     public TripStopPathStatisticsV2(Trip primaryTrip, int nextTripTime) {
         this.primaryTrip = primaryTrip;
         this.nextTripTime = nextTripTime;
@@ -316,9 +317,27 @@ public class TripStopPathStatisticsV2 {
         StopPathStatisticsV2 result = stopPathStatistics.get(key);
         if (result == null) {
             result = new StopPathStatisticsV2(runTimesForStops.getRunTimesForRoutes().getTripId(),
-                    runTimesForStops.getStopPathId(), runTimesForStops.getStopPathIndex(), runTimesForStops.getLastStop());
+                                              runTimesForStops.getStopPathId(),
+                                              runTimesForStops.getStopPathIndex(),
+                                              getStopNameForStopPath(runTimesForStops.getStopPathId(), runTimesForStops.getStopPathIndex()),
+                                              runTimesForStops.getLastStop());
             stopPathStatistics.put(key, result);
         }
         return result;
+    }
+
+    private String getStopNameForStopPath(String stopPathId, int stopPathIndex){
+        StopPath stopPath = stopPathsGroupedById.get(stopPathId);
+        if(stopPath != null && stopPath.getStopName() != null){
+            return getStopNamePrefix(stopPathIndex) + TitleFormatter.capitalize(stopPath.getStopName());
+        }
+        return null;
+    }
+
+    private String getStopNamePrefix(int stopPathIndex){
+        if(stopPathIndex == 0){
+            return "";
+        }
+        return "To ";
     }
 }

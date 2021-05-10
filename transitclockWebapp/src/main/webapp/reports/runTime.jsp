@@ -1206,7 +1206,7 @@
                     showLine: false,
                     fill: false,
                 }*/],
-            labels: response.data.stopPaths
+            labels: response.data.stopNames
         }
 
         barGraph.options.scales.xAxes[0].ticks.max = calculateMaxMins(highestPoints);

@@ -410,6 +410,7 @@ public class RunTimeServiceV2 {
 
                 StopPathRunTimeKey stopPathRunTimeKey = stopPathEntry.getKey();
                 StopPathStatisticsV2 stopPathStatistics = stopPathEntry.getValue();
+                String stopName = stopPathStatistics.getStopName();
 
                 Double medianRunTime = stopPathStatistics.getMedianRunTime();
                 Double fixedTime = stopPathStatistics.getMinRunTime();
@@ -425,10 +426,10 @@ public class RunTimeServiceV2 {
                     variableTime = medianRunTime - fixedTime;
                 }
 
-
                 ipcRunTimeForStopPaths.add(
                         new IpcRunTimeForStopPath(
                                 stopPathRunTimeKey.getStopPathId(),
+                                stopName,
                                 stopPathRunTimeKey.getStopPathIndex(),
                                 null,
                                 null,

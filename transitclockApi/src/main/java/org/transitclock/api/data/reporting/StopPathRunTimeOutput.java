@@ -19,6 +19,7 @@ public class StopPathRunTimeOutput implements Serializable {
         StopPathRunTimeData data = new StopPathRunTimeData();
         for(IpcRunTimeForStopPath runTimeForStopPath : sortRunTimes(runTimeForStopPaths)){
             data.getStopPathsList().add(getFormattedStopPath(runTimeForStopPath));
+            data.getStopNames().add(runTimeForStopPath.getStopName());
             data.getFixedList().add(getValueAsLong(runTimeForStopPath.getFixed()));
             data.getVariableList().add(getValueAsLong(runTimeForStopPath.getVariable()));
             data.getDwellList().add(getValueAsLong(runTimeForStopPath.getDwell()));
