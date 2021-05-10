@@ -859,7 +859,10 @@
         $.ajax({
             url: apiUrlPrefix + "/command/headsigns",
             // Pass in query string parameters to page being requested
-            data: {r: $("#route").val()},
+            data: {
+                r: $("#route").val(),
+                formatLabel: false
+            },
             // Needed so that parameters passed properly to page being requested
             traditional: true,
             dataType: "json",

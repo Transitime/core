@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.transitclock.applications.Core;
 import org.transitclock.db.structs.Extent;
 import org.transitclock.db.structs.StopPath;
 import org.transitclock.db.structs.TripPattern;
@@ -37,6 +38,7 @@ public class IpcTripPattern implements Serializable {
 	private final String id;
 	private final String headsign;
 	private final String directionId;
+	private final String directionName;
 	private final String routeId;
 	private final String routeShortName;
 	private final Extent extent;
@@ -54,6 +56,7 @@ public class IpcTripPattern implements Serializable {
 		this.id = dbTripPattern.getId();
 		this.headsign = dbTripPattern.getHeadsign();
 		this.directionId = dbTripPattern.getDirectionId();
+		this.directionName = getDirectionName(dbTripPattern.getRouteShortName(), dbTripPattern.getDirectionId());
 		this.routeId = dbTripPattern.getRouteId();
 		this.routeShortName = dbTripPattern.getRouteShortName();
 		this.extent = dbTripPattern.getExtent();
@@ -67,6 +70,10 @@ public class IpcTripPattern implements Serializable {
 			this.stopPaths.add(new IpcStopPath(stopPath));
 	}
 
+	private String getDirectionName(String routeShortName, String directionId) {
+		return Core.getInstance().getDbConfig().getDirectionName(routeShortName, directionId);
+	}
+
 	@Override
 	public String toString() {
 		return "IpcTripPattern [" 
@@ -74,6 +81,7 @@ public class IpcTripPattern implements Serializable {
 				+ ", id=" + id
 				+ ", headsign=" + headsign 
 				+ ", directionId=" + directionId
+				+ ", directionName" + directionName
 				+ ", routeId=" + routeId 
 				+ ", routeShortName=" + routeShortName
 				+ ", extent=" + extent 
@@ -96,6 +104,10 @@ public class IpcTripPattern implements Serializable {
 
 	public String getDirectionId() {
 		return directionId;
+	}
+
+	public String getDirectionName() {
+		return directionName;
 	}
 
 	public String getRouteId() {
@@ -125,5 +137,6 @@ public class IpcTripPattern implements Serializable {
 	public List<IpcStopPath> getStopPaths() {
 		return stopPaths;
 	}
+
 	
 }

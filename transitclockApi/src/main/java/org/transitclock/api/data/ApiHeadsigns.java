@@ -58,10 +58,10 @@ public class ApiHeadsigns{
      * @param tripPatterns
      * @param agency so can get agency name
      */
-    public ApiHeadsigns(Collection<IpcTripPattern> tripPatterns, Agency agency) {
+    public ApiHeadsigns(Collection<IpcTripPattern> tripPatterns, Agency agency, boolean formatLabel) {
         headsignsData = new TreeSet<>();
         for (IpcTripPattern tripPattern : tripPatterns) {
-            ApiHeadsign headsign = new ApiHeadsign(tripPattern);
+            ApiHeadsign headsign = new ApiHeadsign(tripPattern, formatLabel);
             headsignsData.add(headsign);
         }
 

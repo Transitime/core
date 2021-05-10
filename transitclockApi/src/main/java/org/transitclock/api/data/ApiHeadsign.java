@@ -16,6 +16,7 @@
  */
 
 package org.transitclock.api.data;
+import org.transitclock.gtfs.TitleFormatter;
 import org.transitclock.ipc.data.IpcTripPattern;
 import javax.xml.bind.annotation.XmlAttribute;
 import java.util.Objects;
@@ -47,11 +48,24 @@ public class ApiHeadsign implements Comparable<ApiHeadsign>{
 	protected ApiHeadsign() {
 	}
 
-	public ApiHeadsign(IpcTripPattern tripPattern) {
+	public ApiHeadsign(IpcTripPattern tripPattern, boolean formatLabel) {
 		this.headsign = tripPattern.getHeadsign();
-		this.direction = tripPattern.getDirectionId();
-		this.label = this.headsign + " (" + this.direction + ")";
+		this.direction = getDirection(tripPattern);
+		this.label = getFormattedLabel(headsign, direction, formatLabel);
 	}
+
+	private String getDirection(IpcTripPattern tripPattern){
+		return tripPattern.getDirectionName() != null ? tripPattern.getDirectionName() : tripPattern.getDirectionId();
+	}
+
+	private String getFormattedLabel(String headsign, String direction, boolean formatLabel) {
+		String label = headsign + " (" + direction + ")";
+		if(formatLabel){
+			return TitleFormatter.capitalize(label);
+		}
+		return label;
+	}
+
 
 	@Override
 	public boolean equals(Object o) {

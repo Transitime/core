@@ -1152,6 +1152,17 @@ public class DbConfig {
 		return Collections.unmodifiableList(agencies);
 	}
 
+	public String getDirectionName(String routeShortName, String directionId){
+		Map<String, RouteDirection> routeDirectionByDirectionId = routeDirectionsByRoute.get(routeShortName);
+		if(routeDirectionByDirectionId != null){
+			RouteDirection routeDirection = routeDirectionByDirectionId.get(directionId);
+			if(routeDirection != null){
+				return routeDirection.getDirectionName();
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Returns the database revision of the configuration data that was read in.
 	 * 

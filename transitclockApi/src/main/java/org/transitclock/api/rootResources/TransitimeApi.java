@@ -760,7 +760,9 @@ public class TransitimeApi {
 			tags={"base data","headsign"} )
 	public Response getHeadsigns(@BeanParam StandardParameters stdParameters,
 							  @Parameter(description="Specifies the routeId or routeShortName." ,required=true)
-							  @QueryParam(value = "r") String routeIdOrShortName)
+							  @QueryParam(value = "r") String routeIdOrShortName,
+							  @Parameter(description="Optional parameter to format headsigns text" ,required=false)
+							  @QueryParam(value = "formatLabel") @DefaultValue("false") boolean formatLabel)
 			throws WebApplicationException {
 
 		// Make sure request is valid
@@ -777,7 +779,7 @@ public class TransitimeApi {
 
 			// Get specified headsigns
 			List<IpcTripPattern> ipcTripPatterns = inter.getTripPatterns(routeIdOrShortName);
-			headsignsData = new ApiHeadsigns(ipcTripPatterns, agencies.get(0));
+			headsignsData = new ApiHeadsigns(ipcTripPatterns, agencies.get(0), formatLabel);
 
 
 			// Create and return response
