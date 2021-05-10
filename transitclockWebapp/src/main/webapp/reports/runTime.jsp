@@ -500,7 +500,8 @@
 
                 <div id="comparisonResults" class="individual-route" hidden="true"></div>
 
-                <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+                <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-chart-box-and-violin-plot/2.4.0/Chart.BoxPlot.js"></script>
 
                 <div class="individual-route trip-block " >
                     <div class="param" id="trips-container"></div>
@@ -528,6 +529,10 @@
 
             <div id="distribution">
                 Distribution Tab
+                <div id="distributionVisualization">
+
+                </div>
+
             </div>
 
         </div>
@@ -678,9 +683,9 @@
 
 
     function generatePercentileTable(stopsData, formattedScheduled, formattedRunTimeTrips){
-      
+
         var tableTD = "<tr><th>Trip</th><th>Schedule</th><th>Run Time</th></tr>";
-      
+
         var sumOfData = 0;
         stopsData.tripName.forEach(function (eachTrip, i) {
 
@@ -718,6 +723,52 @@
 
         return filteredRunTimeTrips;
     }
+    function distributionTabDetails(response){
+
+        $("#distributionVisualization").html('');
+
+        var distributedData = [];
+      //  var dummyTripRunTimes = range(1, response.data.trips.length,  {"runTimes": [309000, 360000, 525000]});
+        var dummyTripRunTimes = response.data.tripRunTimes;
+        dummyTripRunTimes.forEach(function(eachTrip){
+            var eachdata = msToMin(JSON.parse(JSON.stringify(eachTrip.runTimes)));
+            distributedData.push(eachdata);
+        });
+
+        var stopsData = getStopsData(response.data.trips);
+
+        var defaultHeight = (stopsData.tripName.length ) *80;
+        var defaultWidth = window.innerWidth;
+
+        if(defaultHeight < (window.innerHeight/2 - 100)) {
+            defaultHeight =  window.innerHeight;
+        }
+
+        $("#distributionVisualization").html(' <canvas id="distributionCanvas" class="custom-canvas"  height="'+defaultHeight+'" width="'+defaultWidth+'"></canvas>');
+        var color = Chart.helpers.color;
+        var rgbRED = "rgb(255,0,0)";
+        var boxplotData = {
+            labels: stopsData.tripVal,
+
+            datasets: [{
+                label: '',
+                backgroundColor: color(rgbRED).alpha(0.5).rgbString(),
+                borderColor: rgbRED,
+                borderWidth: 1,
+                data: distributedData
+            }]
+
+        };
+
+        var canvas = $("#distributionCanvas");
+        var barGraph = new Chart(canvas, {
+            type: 'horizontalBoxplot',
+            data: boxplotData,
+        });
+
+
+    }
+
     function percentageTabDetails(response){
 
         $("#percentile-select-container").html("");
@@ -934,7 +985,7 @@
         var highest = 0;
 
         for (var i = 0 in data) {
-            data[i] = (data[i] / 60000).toFixed(1);
+            data[i] = parseFloat((data[i] / 60000).toFixed(1));
             if (data[i] > highest) {
                 highest = data[i];
             }
@@ -1042,6 +1093,7 @@
                 if(response.data && ((response.data.trips && response.data.trips.length > 0) ||
                     (response.data.routes && response.data.routes.length > 0))){
 
+                    var cloneResponse =  JSON.parse(JSON.stringify(response));
 
                     if(response.data.trips && response.data.trips.length ){
 
@@ -1099,6 +1151,7 @@
                     } else{
                         generateIndividualRouteChart(response);
                         percentageTabDetails(response);
+                        distributionTabDetails(cloneResponse);
                     }
 
                     $("#comparisonResults").hide();
