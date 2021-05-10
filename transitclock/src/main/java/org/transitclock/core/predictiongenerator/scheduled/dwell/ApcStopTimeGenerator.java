@@ -2,6 +2,7 @@ package org.transitclock.core.predictiongenerator.scheduled.dwell;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.applications.Core;
 import org.transitclock.avl.ApcDataProcessor;
 import org.transitclock.avl.ApcModule;
 import org.transitclock.config.DoubleConfigValue;
@@ -13,6 +14,7 @@ import org.transitclock.core.predictiongenerator.HistoricalPredictionLibrary;
 import org.transitclock.core.predictiongenerator.kalman.KalmanPredictionResult;
 import org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman.KalmanPredictionGeneratorImpl;
 import org.transitclock.db.structs.AvlReport;
+import org.transitclock.db.structs.ScheduleTime;
 import org.transitclock.utils.Time;
 
 import java.util.ArrayList;
@@ -260,10 +262,11 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
   }
 
   private Long getScheduledArrivalTime(Indices indices, VehicleState vehicleState) {
-    Long tripStartTime = vehicleState.getTripStartTime(indices.getTripIndex());
-    if (tripStartTime == null) return null;
-    long serviceDay = Time.getStartOfDay(new Date(tripStartTime));
-    return serviceDay + indices.getScheduleTime().getTime() * Time.MS_PER_SEC;
+    ScheduleTime st = indices.getScheduleTime();
+    if (st == null) return null;
+    if (vehicleState == null) return null;
+    return Core.getInstance().getTime()
+            .getEpochTime(indices.getScheduleTime().getTime(), vehicleState.getAvlReport().getTime());
   }
 
   private double getPassengerBoardingTime(VehicleState vehicleState) {
