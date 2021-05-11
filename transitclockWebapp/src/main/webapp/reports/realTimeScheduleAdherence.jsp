@@ -69,6 +69,41 @@
             margin: 0px;
         }
 
+        #legend {
+            background: lightgrey;
+            position: absolute;
+            right: 10px;
+            bottom: 5%;
+            border-radius: 4px;
+            padding: 1%;
+            box-shadow: 0px 2px 10px #696969;
+        }
+
+        .schedule-legend-container{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .circular-element{
+            width: 10px;
+            height: 10px;
+            border: 2px solid #000;
+            margin-right: 5px;
+            margin-bottom: 2px;
+            border-radius: 10px;
+        }
+
+        .late{
+            background-color: #E6D83E;
+        }
+        .early{
+            background-color: #E34B71;
+        }
+        .onTime{
+            background-color: #37E627;
+        }
+
     </style>
     <%--        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>--%>
 
@@ -113,6 +148,24 @@
 
 <div id="mainPage" style="width: 79%; height: 100%; display: inline-block;">
     <div id="map"></div>
+</div>
+
+<div id="legend">
+    <div><b>Schedule Marker Legend</b></div>
+    <br/>
+    <div class="schedule-legend-container">
+        <div class="circular-element onTime" ></div>
+        <text> = On Time</text>
+    </div>
+    <div class="schedule-legend-container">
+        <div class="circular-element late" ></div>
+        <text> = Late</text>
+    </div>
+    <div class="schedule-legend-container">
+        <div class="circular-element early" ></div>
+        <text> = Early</text>
+    </div>
+
 </div>
 
 <script>
@@ -231,7 +284,7 @@
 
 
         var selectedRouteId = "";
-       // var selectedRouteValues = "";
+        // var selectedRouteValues = "";
         $(selectedDataList).each(function(index, eachList){
             selectedRouteId += "&r=" + eachList.id + ($(selectedDataList).length-1 === index ? "": "&");
         });
@@ -346,10 +399,10 @@
         if(routeFeatureGroup && map){
             map.removeLayer(routeFeatureGroup);
         }
-       routeFeatureGroup = L.featureGroup();
+        routeFeatureGroup = L.featureGroup();
         var locsToFit = [];
 
-var routeOptions2 = JSON.parse(JSON.stringify((routeOptions)));
+        var routeOptions2 = JSON.parse(JSON.stringify((routeOptions)));
         routeOptions2.weight = 6;
         routeOptions2.color = "#1887fc ";
         routeOptions2.fillOpacity = 0.6;
@@ -417,7 +470,7 @@ var routeOptions2 = JSON.parse(JSON.stringify((routeOptions)));
             });
 
         // Get route config data and draw all routes
-       // $.getJSON(apiUrlPrefix + "/command/routesDetails", routeConfigCallback);
+        // $.getJSON(apiUrlPrefix + "/command/routesDetails", routeConfigCallback);
 
         // Start showing schedule adherence data and update every 10 seconds.
         // Updating every is more than is truly useful since won't get significant
@@ -449,3 +502,6 @@ var routeOptions2 = JSON.parse(JSON.stringify((routeOptions)));
     });
 
 </script>
+
+</body>
+</html>
