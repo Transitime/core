@@ -315,15 +315,26 @@ public class TripStopPathStatisticsV2 {
 
     private StopPathStatisticsV2 getStatsMapResult(StopPathRunTimeKey key, RunTimesForStops runTimesForStops) {
         StopPathStatisticsV2 result = stopPathStatistics.get(key);
+
         if (result == null) {
             result = new StopPathStatisticsV2(runTimesForStops.getRunTimesForRoutes().getTripId(),
                                               runTimesForStops.getStopPathId(),
                                               runTimesForStops.getStopPathIndex(),
-                                              getStopNameForStopPath(runTimesForStops.getStopPathId(), runTimesForStops.getStopPathIndex()),
+                                              getStopNameForStopPath(runTimesForStops.getStopPathId(),
+                                                      runTimesForStops.getStopPathIndex()),
+                                              isTimePoint(runTimesForStops.getStopPathId()),
                                               runTimesForStops.getLastStop());
             stopPathStatistics.put(key, result);
         }
         return result;
+    }
+
+    private boolean isTimePoint(String stopPathId){
+        StopPath stopPath = stopPathsGroupedById.get(stopPathId);
+        if(stopPath != null && stopPath.isScheduleAdherenceStop()){
+            return true;
+        }
+        return false;
     }
 
     private String getStopNameForStopPath(String stopPathId, int stopPathIndex){

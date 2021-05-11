@@ -722,6 +722,7 @@ public class RunTimeService {
                             stopPathRunTimeKey.getStopPathIndex(),
                             null,
                             null,
+                            false,
                             avgRunTime,
                             fixedTime,
                             variableTime,

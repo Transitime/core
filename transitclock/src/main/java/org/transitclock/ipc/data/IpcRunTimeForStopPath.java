@@ -9,12 +9,14 @@ public class IpcRunTimeForStopPath extends IpcRunTime {
     private Integer prevStopSchDepartureTime;
     private Integer currentStopSchDepartureTime;
     private  Double scheduledCompletionTime;
+    private boolean isTimePoint;
 
     public IpcRunTimeForStopPath(String stopPathId,
                                  String stopName,
                                  Integer stopPathIndex,
                                  Integer prevStopSchDepartureTime,
                                  Integer currentStopSchDepartureTime,
+                                 boolean isTimePoint,
                                  Double avgRunTime,
                                  Double fixed,
                                  Double variable,
@@ -25,6 +27,7 @@ public class IpcRunTimeForStopPath extends IpcRunTime {
         this.stopPathIndex = stopPathIndex;
         this.prevStopSchDepartureTime = prevStopSchDepartureTime;
         this.currentStopSchDepartureTime = currentStopSchDepartureTime;
+        this.isTimePoint = isTimePoint;
 
         if(prevStopSchDepartureTime != null && currentStopSchDepartureTime != null) {
             double schTimeLengthMsec = (currentStopSchDepartureTime - prevStopSchDepartureTime) * 1000;
@@ -55,6 +58,10 @@ public class IpcRunTimeForStopPath extends IpcRunTime {
 
     public Double getScheduledCompletionTime() {
         return scheduledCompletionTime;
+    }
+
+    public boolean isTimePoint() {
+        return isTimePoint;
     }
 
     @Override

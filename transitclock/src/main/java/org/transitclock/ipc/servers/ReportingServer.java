@@ -142,7 +142,7 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                                           boolean readOnly) throws Exception {
 
         return runTimeServiceV2.getRunTimeForStopPaths(beginDate, endDate, beginTime, endTime, routeIdOrShortName,
-                tripId, serviceType, this.getAgencyId(), readOnly);
+                tripId, serviceType, timePointsOnly, this.getAgencyId(), readOnly);
     }
 
     // On Time Performance Reports

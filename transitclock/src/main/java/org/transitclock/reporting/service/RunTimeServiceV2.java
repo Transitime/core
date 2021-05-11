@@ -358,6 +358,7 @@ public class RunTimeServiceV2 {
                                                               String routeIdOrShortName,
                                                               String tripId,
                                                               ServiceType serviceType,
+                                                              boolean timePointsOnly,
                                                               String agencyId,
                                                               boolean readOnly) throws Exception {
 
@@ -383,7 +384,12 @@ public class RunTimeServiceV2 {
 
         Map<String, TripStopPathStatisticsV2> tripStatisticsByTripId = processTripStatsMap(runTimesForRoutes);
 
-        List<IpcRunTimeForStopPath> runTimeForStopPaths = getRunTimeStatsForStopPaths(tripStatisticsByTripId);
+        List<IpcRunTimeForStopPath> runTimeForStopPaths;
+        if(timePointsOnly){
+            runTimeForStopPaths = getRunTimeStatsForTimePoints(tripStatisticsByTripId);
+        } else {
+            runTimeForStopPaths = getRunTimeStatsForStopPaths(tripStatisticsByTripId);
+        }
 
         return runTimeForStopPaths;
     }
@@ -392,7 +398,6 @@ public class RunTimeServiceV2 {
     private List<IpcRunTimeForStopPath> getRunTimeStatsForStopPaths(Map<String, TripStopPathStatisticsV2> tripStatsByTripId){
 
         List<IpcRunTimeForStopPath> ipcRunTimeForStopPaths = new ArrayList<>();
-
 
         // Loop through each TripStats grouped by Trip Id
         for(Map.Entry<String, TripStopPathStatisticsV2> tripStatEntry : tripStatsByTripId.entrySet()){
@@ -410,7 +415,6 @@ public class RunTimeServiceV2 {
 
                 StopPathRunTimeKey stopPathRunTimeKey = stopPathEntry.getKey();
                 StopPathStatisticsV2 stopPathStatistics = stopPathEntry.getValue();
-                String stopName = stopPathStatistics.getStopName();
 
                 Double medianRunTime = stopPathStatistics.getMedianRunTime();
                 Double fixedTime = stopPathStatistics.getMinRunTime();
@@ -429,16 +433,92 @@ public class RunTimeServiceV2 {
                 ipcRunTimeForStopPaths.add(
                         new IpcRunTimeForStopPath(
                                 stopPathRunTimeKey.getStopPathId(),
-                                stopName,
+                                stopPathStatistics.getStopName(),
                                 stopPathRunTimeKey.getStopPathIndex(),
                                 null,
                                 null,
+                                stopPathStatistics.isTimePoint(),
                                 medianRunTime,
                                 fixedTime,
                                 variableTime,
                                 dwellTime
                         )
                 );
+            }
+        }
+
+        return ipcRunTimeForStopPaths;
+    }
+
+    private List<IpcRunTimeForStopPath> getRunTimeStatsForTimePoints(Map<String, TripStopPathStatisticsV2> tripStatsByTripId){
+
+        List<IpcRunTimeForStopPath> ipcRunTimeForStopPaths = new ArrayList<>();
+
+        // Loop through each TripStats grouped by Trip Id
+        for(Map.Entry<String, TripStopPathStatisticsV2> tripStatEntry : tripStatsByTripId.entrySet()){
+
+            TripStopPathStatisticsV2 tripStatistics = tripStatEntry.getValue();
+
+            //Validation -- Make sure trip is complete
+            if(invalidTripStatistics(tripStatistics)){
+                continue;
+            }
+
+            Map<StopPathRunTimeKey, StopPathStatisticsV2> stopPathStatsMap = tripStatistics.getAllStopPathStatistics();
+            Map<StopPathRunTimeKey, StopPathStatisticsV2> sortedStopPathsStatsMap = stopPathStatsMap.entrySet()
+                    .stream()
+                    .sorted(Map.Entry.comparingByKey())
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+
+            Double currentTimePointRunTime = 0d;
+            Double currentTimePointFixedTime = 0d;
+            Double currentTimePointDwellTime = 0d;
+            Double currentTimePointVariableTime = 0d;
+
+            for(Map.Entry<StopPathRunTimeKey, StopPathStatisticsV2> stopPathEntry : sortedStopPathsStatsMap.entrySet()) {
+
+                StopPathRunTimeKey stopPathRunTimeKey = stopPathEntry.getKey();
+                StopPathStatisticsV2 stopPathStatistics = stopPathEntry.getValue();
+
+                Double medianRunTime = stopPathStatistics.getMedianRunTime();
+                Double fixedTime = stopPathStatistics.getMinRunTime();
+                Double dwellTime = stopPathStatistics.getMedianDwellTime();
+                Double variableTime = 0d;
+
+                // At minimum need median runTime and dwellTime to have complete runTime
+                if (medianRunTime == null || dwellTime == null) {
+                    continue;
+                }
+
+                currentTimePointRunTime += medianRunTime;
+                currentTimePointFixedTime += fixedTime;
+                currentTimePointDwellTime += dwellTime;
+                currentTimePointVariableTime += variableTime;
+
+                if(stopPathStatistics.isTimePoint()) {
+                    ipcRunTimeForStopPaths.add(
+                            new IpcRunTimeForStopPath(
+                                    stopPathRunTimeKey.getStopPathId(),
+                                    stopPathStatistics.getStopName(),
+                                    stopPathRunTimeKey.getStopPathIndex(),
+                                    null,
+                                    null,
+                                    stopPathStatistics.isTimePoint(),
+                                    currentTimePointRunTime,
+                                    currentTimePointFixedTime,
+                                    currentTimePointVariableTime,
+                                    currentTimePointDwellTime
+                            )
+                    );
+
+                    currentTimePointRunTime = 0d;
+                    currentTimePointFixedTime = 0d;
+                    currentTimePointDwellTime = 0d;
+                    currentTimePointVariableTime = 0d;
+                }
             }
         }
 
