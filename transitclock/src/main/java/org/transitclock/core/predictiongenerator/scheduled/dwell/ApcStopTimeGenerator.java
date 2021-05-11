@@ -39,19 +39,19 @@ import java.util.List;
 public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
 
   private static final IntegerConfigValue minKalmanDays = new IntegerConfigValue(
-          "transitclock.prediction.data.kalman.mindays", new Integer(3),
+          "transitclock.prediction.data.kalman.apc.mindays", new Integer(3),
           "Min number of days trip data that needs to be available before Kalman prediction is used instead of default transitClock prediction.");
 
   private static final IntegerConfigValue maxKalmanDays = new IntegerConfigValue(
-          "transitclock.prediction.data.kalman.maxdays", new Integer(3),
+          "transitclock.prediction.data.kalman.apc.maxdays", new Integer(5),
           "Max number of historical days trips to include in Kalman prediction calculation.");
 
   private static final IntegerConfigValue maxKalmanDaysToSearch = new IntegerConfigValue(
-          "transitclock.prediction.data.kalman.maxdaystosearch", new Integer(21),
+          "transitclock.prediction.data.kalman.apc.maxdaystosearch", new Integer(21),
           "Max number of days to look back for data. This will also be effected by how old the data in the cache is.");
 
   private static final DoubleConfigValue initialErrorValue = new DoubleConfigValue(
-          "transitclock.prediction.data.kalman.initialerrorvalue", new Double(50),
+          "transitclock.prediction.data.kalman.apc.initialerrorvalue", new Double(50),
           "Initial Kalman error value to use to start filter.");
 
   private static final Logger logger = LoggerFactory.getLogger(ApcStopTimeGenerator.class);
@@ -204,10 +204,9 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     long currentArrivalTime = arrivalTime;
     String stopId = indices.getStopPath().getStopId();
     String routeId = indices.getTrip().getRouteId();
-    while (historicalDwells.size() < maxKalmanDays.getValue() && daysBack < maxKalmanDaysToSearch.getValue()) {
+    while (daysBack < maxKalmanDaysToSearch.getValue()) {
       daysBack++;
-      currentArrivalTime = currentArrivalTime - Time.MS_PER_DAY;
-      if (isSameCalendarType(arrivalTime, currentArrivalTime)) {
+      currentArrivalTime = currentArrivalTime - Time.MS_PER_DAY;if (isSameCalendarType(arrivalTime, currentArrivalTime)) {
         Double arrivalRate = ApcModule.getInstance()
                 .getBoardingsPerSecond(stopId,
                         new Date(currentArrivalTime));
@@ -229,6 +228,9 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
         logger.debug("historicalDwellTime {} = arrivalRate={} * headway={} * passengerBoardingTime={} ",
                 historicalDwellTime, arrivalRate, headway/Time.MS_PER_SEC, passengerBoardingTime);
         historicalDwells.add(historicalDwellTime);
+        if (historicalDwells.size() > maxKalmanDays.getValue()) {
+          return historicalDwells;
+        }
       }
 
     }
