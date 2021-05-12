@@ -18,6 +18,8 @@ package org.transitclock.db.structs;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.DynamicUpdate;
 
 import org.transitclock.db.hibernate.HibernateUtils;
@@ -77,6 +79,7 @@ public class ApcReport implements Serializable {
   // historically hibernate 1-1 mappings are not trusted to update
   // as this object is immutable we use it here safely
   @OneToOne(fetch = FetchType.EAGER)
+  @Cascade({CascadeType.SAVE_UPDATE})
   // hibernate link to the arrival departure the apc record corresponds to
   private final ArrivalDeparture arrivalDeparture;
 
