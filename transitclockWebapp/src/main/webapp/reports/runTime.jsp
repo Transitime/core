@@ -682,19 +682,18 @@
     }
 
 
-    function generatePercentileTable(stopsData, formattedScheduled, formattedRunTimeTrips){
+    function generatePercentileTable(tripsDisplayData, formattedScheduled, formattedRunTimeTrips){
 
         var tableTD = "<tr><th>Trip</th><th>Schedule</th><th>Run Time</th></tr>";
 
         var sumOfData = 0;
-        stopsData.tripName.forEach(function (eachTrip, i) {
+        tripsDisplayData.tripName.forEach(function (eachTrip, i) {
 
             var eachData = {
                 trip: eachTrip,
                 schedule: formattedScheduled[i]+" min",
                 percentile: formattedRunTimeTrips[i] +" min"
             };
-            // percentileData.push(eachData);
             sumOfData += parseFloat(formattedRunTimeTrips[i]);
             tableTD += "<tr>";
             tableTD += "<td>"+eachData.trip+"</td>";
@@ -703,7 +702,7 @@
             tableTD += "</tr>";
         });
 
-        var average = Math.round(sumOfData/stopsData.tripVal.length);
+        var average = Math.round(sumOfData/tripsDisplayData.tripVal.length);
         var percentileSummaryData = average +" min";
 
         $("#percentile-summary-content").html(percentileSummaryData);
@@ -728,16 +727,15 @@
         $("#distributionVisualization").html('');
 
         var distributedData = [];
-      //  var dummyTripRunTimes = range(1, response.data.trips.length,  {"runTimes": [309000, 360000, 525000]});
-        var dummyTripRunTimes = response.data.tripRunTimes;
-        dummyTripRunTimes.forEach(function(eachTrip){
+        var tripRunTimes = response.data.tripRunTimes;
+        tripRunTimes.forEach(function(eachTrip){
             var eachdata = msToMin(JSON.parse(JSON.stringify(eachTrip.runTimes)));
             distributedData.push(eachdata);
         });
 
-        var stopsData = getStopsData(response.data.trips);
+        var tripsDisplayData = getTripsDisplayData(response.data.trips);
 
-        var defaultHeight = (stopsData.tripName.length ) *80;
+        var defaultHeight = (tripsDisplayData.tripName.length ) *80;
         var defaultWidth = window.innerWidth;
 
         if(defaultHeight < (window.innerHeight/2 - 100)) {
@@ -748,14 +746,17 @@
         var color = Chart.helpers.color;
         var rgbRED = "rgb(255,0,0)";
         var boxplotData = {
-            labels: stopsData.tripVal,
-
+            labels: tripsDisplayData.tripName,
             datasets: [{
-                label: '',
+                label: 'Trip Run Times',
                 backgroundColor: color(rgbRED).alpha(0.5).rgbString(),
                 borderColor: rgbRED,
                 borderWidth: 1,
-                data: distributedData
+                data: distributedData,
+                padding: 10,
+                itemRadius: 2,
+                itemStyle: 'circle',
+                itemBackgroundColor: 'rgba(143,143,143,0.5)'
             }]
 
         };
@@ -764,6 +765,22 @@
         var barGraph = new Chart(canvas, {
             type: 'horizontalBoxplot',
             data: boxplotData,
+            options: {
+                responsive: true,
+                legend: {
+                    position: 'top',
+                },
+                scales: {
+                    xAxes: [
+                        {
+                            scaleLabel: {
+                                display: true,
+                                labelString: "Minutes"
+                            }
+                        }
+                    ]
+                }
+            }
         });
 
 
@@ -777,19 +794,14 @@
 
         var percentileSelectOptions = range(1, 20);
 
-        // var dummyTripRunTimes = range(1, response.data.trips.length,  {"runTimes": [2400499, 2430499, 2475499]});
-
         var tripRunTimes =  response.data.tripRunTimes;
 
         var formattedScheduled = convertToMins(response.data.scheduled);
 
         var formattedRunTimeTrips = generateRunTimes(tripRunTimes, 50);
-        var stopsData = getStopsData(response.data.trips);
+        var tripsDisplayData = getTripsDisplayData(response.data.trips);
 
-        var percentileData = [];
-
-
-        var tableTD = generatePercentileTable(stopsData, formattedScheduled.minsData, formattedRunTimeTrips);
+        var tableTD = generatePercentileTable(tripsDisplayData, formattedScheduled.minsData, formattedRunTimeTrips);
 
         var percentileSelect = $('<select id="percentile-select-box" name="percentileSelect"></select>');
         percentileSelectOptions[percentileSelectOptions.length-1] = {
@@ -813,28 +825,12 @@
             if ($("#percentile-select-box").val().trim() != "") {
 
                 var valuePercentage = $("#percentile-select-box").val().trim();
-                // if(valuePercentage == 100){
-                //     valuePercentage = 99;
-                // }
-                var formattedRunTimeTrips = generateRunTimes(tripRunTimes, valuePercentage );
-                // var formattedRunTimeTrips = generateRunTimes(dummyTripRunTimes, $("#percentile-select-box").val().trim());
-                // var nonSortedIndexValues = percentileCalculation(formattedRunTimeTrips.minsData, $("#percentile-select-box").val().trim());
+                TimeTrips = generateRunTimes(tripRunTimes, valuePercentage );
 
-                //  var filteredStopsData = [];
-                // var filteredScheduled = [];
-                // var filteredRunTimeTrips = [];
-
-
-                /* nonSortedIndexValues.forEach(function(eachValue){
-                    filteredStopsData.push(stopsData[eachValue]);
-                    filteredScheduled.push(formattedScheduled.minsData[eachValue]);
-                    filteredRunTimeTrips.push(formattedRunTimeTrips.minsData[eachValue]);
-                }); */
-
-                tableTD = generatePercentileTable(stopsData, formattedScheduled.minsData, formattedRunTimeTrips);
+                tableTD = generatePercentileTable(tripsDisplayData, formattedScheduled.minsData, formattedRunTimeTrips);
                 console.log($("#percentile-select-box").val().trim());
             } else {
-                tableTD = generatePercentileTable(stopsData, formattedScheduled.minsData, 0);
+                tableTD = generatePercentileTable(tripsDisplayData, formattedScheduled.minsData, 0);
                 console.log($("#percentile-select-box").val().trim());
             }
 
@@ -968,20 +964,20 @@
         return params;
     }
 
-    function getStopsData(trips){
-        var stopsData = {};
-        stopsData.tripName = [];
-        stopsData.tripVal = []
+    function getTripsDisplayData(trips){
+        var tripsData = {};
+        tripsData.tripName = [];
+        tripsData.tripVal = []
         trips.forEach(function (eachTrip, i) {
             var values = eachTrip.split("-");
             var optionValue = values[1].trim();
-            if(stopsData.tripVal.indexOf(optionValue) < 0){
-                stopsData.tripName.push(eachTrip);
-                stopsData.tripVal.push(optionValue);
+            if(tripsData.tripVal.indexOf(optionValue) < 0){
+                tripsData.tripName.push(eachTrip);
+                tripsData.tripVal.push(optionValue);
             }
 
         });
-        return stopsData;
+        return tripsData;
     }
 
     function msToMin(data) {
@@ -1101,15 +1097,13 @@
                     if(response.data.trips && response.data.trips.length ){
 
                         var tripSelectBox = $('<select id="trips-select-box" name="tripBoxType"><option value="">All Trips</option></select>');
-                        var stopsData = getStopsData(response.data.trips);
+                        var tripsDisplayData = getTripsDisplayData(response.data.trips);
 
-                        stopsData.tripVal.forEach(function (eachTrip, i) {
-
+                        tripsDisplayData.tripVal.forEach(function (eachTrip, i) {
                             var option = $('<option></option>');
-                            option.attr('value', stopsData.tripVal[i]);
-                            option.text(stopsData.tripName[i]);
+                            option.attr('value', tripsDisplayData.tripVal[i]);
+                            option.text(tripsDisplayData.tripName[i]);
                             tripSelectBox.append(option);
-
                         });
 
                         tripSelectBox.append( '<span class="select2-selection__arrow"><b role="presentation"></b></span>');
@@ -1137,7 +1131,6 @@
 
                         $("#runTimeVisualization").html(' <canvas id="visualizationCanvas" class="custom-canvas"  height="'+defaultHeight+'" width="'+defaultWidth+'"></canvas>');
 
-                        //  $("#runTimeVisualization").html(' <canvas id="visualizationCanvas" maintainAspectRatio="false" responsive="true"></canvas>');
                     } else{
                         var defaultHeight = (response.data.routes.length ) *100;
                         var defaultWidth = window.innerWidth;
@@ -1226,7 +1219,7 @@
                     }
                 },
                 animation: false
-            },
+            }
         });
         visualarGraphChart = barGraph;
         return barGraph;
