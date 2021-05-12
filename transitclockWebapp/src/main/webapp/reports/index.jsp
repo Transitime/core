@@ -124,6 +124,9 @@ finding specific issues with predictions.">
         <li><a href="runTime.jsp?a=<%=agencyId%>"
                title="Displays historic run time data for a given route and headsign.">
             Run Times</a></li>
+        <li><a href="comparision.jsp?a=<%=agencyId%>"
+               title="Compares historic run time data for a given route and headsign.">
+            Run Time Comparison</a></li>
     </ul>
 
     <div id="subtitle">Real Time Reports</div>
