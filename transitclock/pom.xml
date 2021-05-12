@@ -303,6 +303,22 @@
 						</configuration>
 					</execution>
 					<execution>
+						<id>shade-UpdateRunTimes</id>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>org.transitclock.applications.UpdateRunTimes</mainClass>
+								</transformer>
+							</transformers>
+							<shadedArtifactAttached>true</shadedArtifactAttached>
+							<shadedClassifierName>UpdateRunTimes</shadedClassifierName>
+						</configuration>
+					</execution>
+					<execution>
 						<id>shade-Core</id>
 						<phase>package</phase>
 						<goals>

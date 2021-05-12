@@ -3,6 +3,7 @@ package org.transitclock.db.structs;
 import com.google.common.base.Objects;
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitclock.db.hibernate.HibernateUtils;
+import org.transitclock.utils.Time;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -13,7 +14,6 @@ import java.util.Date;
 @Table(name="RunTimesForStops")
 
 public class RunTimesForStops implements Serializable {
-
     @Id
     @Column
     private int configRev;
@@ -22,6 +22,7 @@ public class RunTimesForStops implements Serializable {
     @Column(length=2*HibernateUtils.DEFAULT_ID_SIZE)
     private String stopPathId;
 
+    @Id
     @Column
     private int stopPathIndex;
 
@@ -216,7 +217,18 @@ public class RunTimesForStops implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hashCode(configRev, stopPathId, stopPathIndex, time, prevStopDepartureTime,
-                scheduledTime, scheduledPrevStopArrivalTime, dwellTime, speed, lastStop, timePoint,
-                runTimesForRoutes);
+                 scheduledTime, scheduledPrevStopArrivalTime, dwellTime, speed, lastStop, timePoint
+                );
     }
+
+    @Override
+    public String toString() {
+        return Time.dateTimeStr(time) + "-"
+                + stopPathId + "-"
+                + configRev + ":"
+                + "stopPathIndex=" + stopPathIndex + ", "
+                + "dwell=" + dwellTime + ", "
+                + "speed=" + speed;
+    }
+
 }
