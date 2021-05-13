@@ -383,7 +383,16 @@
                                 </span>
                     </select>
                 </div>
+                    <div class="param vertical route-settings">
+                        <span>Route Settings</span>
+
+                        <div id="radioButtons" class="custom-radioButtons">
+                            <input type="radio" name="stopType"  checked="checked"  id="timePointsOnly"><label for="timePointsOnly" id="timePointsOnlyLabel">Time Points</label>
+                            <input type="radio" name="stopType" id="allStops"><label for="allStops">All Stops</label>
+                        </div>
+                    </div>
             </div>
+
             <div class="submitDiv">
                 <input type="button" id="submit" class="submit" value="Submit">
             </div>
@@ -549,14 +558,16 @@
     $("#route").attr("style", "width: 200px");
     $(".individual-route-only").hide();
     $( "#run-time-tabs" ).tabs();
+    $(".route-settings").hide();
 
     $("#route").change(function () {
         if ($("#route").val().trim() != "") {
             $(".individual-route-only").show();
-
+            $(".route-settings").show();
             populateDirection();
         } else {
             $(".individual-route-only").hide();
+            $(".route-settings").hide();
             $("#direction").empty();
             $("#tripPattern").empty();
             $("#direction").attr("disabled", true);
@@ -1024,7 +1035,9 @@
     function showStopView(){
 
         highestPoints = [];
-        request = getParams(false)
+        request = getParams(false);
+
+        request.timePointsOnly = $("#timePointsOnly")[0].checked;
         request.tripId = $("#trips-select-box").val();
         /*Orginal URL*/
         var stopDataURL = apiUrlPrefix +  "/report/runTime/avgStopPathRunTimes";
