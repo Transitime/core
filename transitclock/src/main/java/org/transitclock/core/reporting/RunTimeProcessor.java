@@ -67,7 +67,9 @@ public class RunTimeProcessor {
 
       if(isSpatialMatchAndArrivalDepartureMatch(arrivalDeparture, trip.getId(), vehicleId))
       {
+        // list of arrival / departures is reversed
         // this is first entry / last arrival
+        // must find this before processing other arrival / departures
         if(state.getFinalStopArrivalTime() == null){
           if(arrivalDeparture.isArrival()){
             state.addArrival(arrivalDeparture, i);
@@ -91,7 +93,7 @@ public class RunTimeProcessor {
               state.resetTotalDwellTime();
             }
           }
-          // if we are the last stop on the trip, close off the routes
+          // if we are the first stop on the trip, close off the routes
          if (i == arrivalDeparturesForStop.size()-1) {
            state.setFirstStopPathIndex(arrivalDeparture.getStopPathIndex());
            // Confirm totalDwellTime count is valid
