@@ -103,7 +103,6 @@ public class RunTimeProcessorState {
             prevDeparture);
 
     setFirstStopDepartureTime(arrivalDeparture.getTime());
-    setFirstStopPathIndex(arrivalDeparture.getStopPathIndex());
 
     return runTimesForStop;
   }

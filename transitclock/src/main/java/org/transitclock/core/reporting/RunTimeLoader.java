@@ -1,23 +1,17 @@
 package org.transitclock.core.reporting;
 
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.core.ServiceUtils;
+import org.transitclock.core.travelTimes.DataFetcher;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.RunTimesForRoutes;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
-import org.transitclock.utils.Time;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static org.apache.commons.lang3.time.DateUtils.addDays;
-import static org.transitclock.core.dataCache.StopArrivalDepartureCacheInterface.createArrivalDeparturesReverseCriteria;
 
 /**
  * Bulk loader of RunTimes, called from UpdateRunTimes.
@@ -27,75 +21,56 @@ public class RunTimeLoader {
   private static final Logger logger =
           LoggerFactory.getLogger(RunTimeLoader.class);
 
-
-  private String agencyId;
-  private Date beginTime;
-  private Date endTime;
   private Double clampingSpeed;
   public RunTimeCache cache;
   public RunTimeWriter writer;
+  private ServiceUtils serviceUtils;
 
-  public RunTimeLoader(String agencyId, Date beginTime, Date endTime,
-                       Double clampingSpeed) {
-    this.agencyId = agencyId;
-    this.beginTime = new Date(Time.getStartOfDay(beginTime));
-    this.endTime = addDays(new Date(Time.getStartOfDay(endTime)), 1);
+  public RunTimeLoader(RunTimeWriter writer, RunTimeCache cache, Double clampingSpeed, ServiceUtils serviceUtils) {
+    this.writer = writer;
+    this.cache = cache;
     this.clampingSpeed = clampingSpeed;
-    this.writer = new RunTimeWriter();
-    this.cache = new RunTimeCache();
+    this.serviceUtils = serviceUtils;
   }
 
-  public void run(Session session) {
+  public void run(Session session, Map<DataFetcher.DbDataMapKey, List<ArrivalDeparture>> arrivalsDeparturesMap) {
     List<RunTimesForRoutes> results = new ArrayList<>();
     RunTimeProcessor processor = new RunTimeProcessor();
 
-    Date currentStartDate = beginTime;
-    Date currentEndDate = addDays(currentStartDate, 1);
+    for (Map.Entry<DataFetcher.DbDataMapKey,List<ArrivalDeparture>> arrivalDepartures : arrivalsDeparturesMap.entrySet()) {
+      List<ArrivalDeparture> arrivalDeparturesList = arrivalDepartures.getValue();
+      reverseArrivalsDepartures(arrivalDeparturesList);
 
-    while (currentEndDate.getTime() < endTime.getTime()) {
-      logger.info("running for {} to {} with endTime {}", currentStartDate, currentEndDate, endTime);
-      Criteria criteria = session.createCriteria(ArrivalDeparture.class);
-      List<ArrivalDeparture> allArrivalDepartures = createArrivalDeparturesReverseCriteria(criteria, currentStartDate, currentEndDate);
-      logger.info("retrieved {} A/Ds for {}", allArrivalDepartures.size(), currentStartDate);
-      Map<String, List<ArrivalDeparture>> arrivalDeparturesByVehicle = groupByVehicles(allArrivalDepartures);
-      int arrivalDeparturesByVehicleCount = 0;
+      if(arrivalDeparturesList.size() > 0){
+        ArrivalDeparture firstArrivalDeparture = arrivalDeparturesList.get(0);
+        Trip trip = Trip.getTrip(session, firstArrivalDeparture.getConfigRev(), firstArrivalDeparture.getTripId());
+        String vehicleId = firstArrivalDeparture.getVehicleId();
 
-      for (String vehicleId : arrivalDeparturesByVehicle.keySet()) {
-        arrivalDeparturesByVehicleCount++;
-        List<ArrivalDeparture> vehicleArrivalDepartures = arrivalDeparturesByVehicle.get(vehicleId);
-        Map<Trip, List<ArrivalDeparture>> vehicleArrivalDeparturesByTrip = groupByTrip(vehicleArrivalDepartures);
+        RunTimeProcessorResult runTimeProcessorResult = processor.processRunTimesForTrip(
+                this.cache,
+                vehicleId,
+                trip,
+                toIpcArrivalDepartures(arrivalDeparturesList),
+                null,
+                null,
+                getLastStopIndex(arrivalDeparturesList),
+                clampingSpeed,
+                serviceUtils,
+                false);
+        if (runTimeProcessorResult.success()) {
+          cache.update(runTimeProcessorResult);
 
-        for (Trip trip : vehicleArrivalDeparturesByTrip.keySet()) {
-          List<ArrivalDeparture> tripArrivalDepartures = vehicleArrivalDeparturesByTrip.get(trip);
-
-          RunTimeProcessorResult runTimeProcessorResult = processor.processRunTimesForTrip(this.cache,
-                  vehicleId,
-                  trip,
-                  toIpcArrivalDepartures(tripArrivalDepartures),
-                  null,
-                  null,
-                  getLastStopIndex(tripArrivalDepartures),
-                  clampingSpeed,
-                  false);
-          if (runTimeProcessorResult.success()) {
-            cache.update(runTimeProcessorResult);
-
-            logger.info("added {} to {} of {}/{} runTimesForStops for trip {} on {}",
-                    runTimeProcessorResult.getRunTimesForRoutes().getRunTimesForStops().size(),
-                    results.size(),
-                    arrivalDeparturesByVehicleCount,
-                    arrivalDeparturesByVehicle.size(),
-                    trip.getId(),
-                    currentStartDate);
-            results.add(runTimeProcessorResult.getRunTimesForRoutes());
-          } else {
-            logger.info("no runTimesForStops for {} for trip {}", currentStartDate, trip.getId());
-          }
+          logger.info("added {} run times stops to run time for route number {} with a/d size of {} for trip {} one {}",
+                  runTimeProcessorResult.getRunTimesForRoutes().getRunTimesForStops().size(),
+                  results.size(),
+                  arrivalDeparturesList.size(),
+                  trip.getId(),
+                  arrivalDepartures.getKey());
+          results.add(runTimeProcessorResult.getRunTimesForRoutes());
+        } else {
+          logger.info("no runTimesForStops for trip {} on {}", trip.getId(), arrivalDepartures.getKey());
         }
       }
-
-      currentStartDate = addDays(currentStartDate, 1);
-      currentEndDate = addDays(currentEndDate, 1);
     }
 
     logger.info("complete, writing to database");
@@ -104,10 +79,15 @@ public class RunTimeLoader {
 
   }
 
+  private void reverseArrivalsDepartures(List<ArrivalDeparture> arrivalDepartures) {
+    arrivalDepartures.sort(Comparator.comparing(ArrivalDeparture::getTime)
+            .thenComparing(ArrivalDeparture::getStopPathIndex)
+            .thenComparing(ArrivalDeparture::isDeparture).reversed());
+  }
+
   private Integer getLastStopIndex(List<ArrivalDeparture> tripArrivalDepartures) {
     if (tripArrivalDepartures == null || tripArrivalDepartures.isEmpty()) return null;
-    int lastIndex = tripArrivalDepartures.size()-1;
-    return tripArrivalDepartures.get(lastIndex).getStopPathIndex();
+    return tripArrivalDepartures.get(0).getStopPathIndex();
   }
 
   private List<IpcArrivalDeparture> toIpcArrivalDepartures(List<ArrivalDeparture> arrivalDepartures) {
@@ -121,36 +101,6 @@ public class RunTimeLoader {
       }
     }
     return ipcs;
-  }
-
-  private Map<Trip, List<ArrivalDeparture>> groupByTrip(List<ArrivalDeparture> vehicleArrivalDepartures) {
-    Map<Trip, List<ArrivalDeparture>> tripMap = new HashMap<>();
-    for (ArrivalDeparture ad : vehicleArrivalDepartures) {
-      Trip trip = ad.getTripFromDb();
-      if (tripMap.containsKey(trip)) {
-        tripMap.get(trip).add(ad);
-      } else {
-        List<ArrivalDeparture> tmp = new ArrayList<>();
-        tmp.add(ad);
-        tripMap.put(trip, tmp);
-      }
-    }
-    return tripMap;
-  }
-
-  private Map<String, List<ArrivalDeparture>> groupByVehicles(List<ArrivalDeparture> results) {
-    Map<String, List<ArrivalDeparture>> vehicleMap = new HashMap<>();
-    for (ArrivalDeparture ad: results) {
-      String vehicleId = ad.getVehicleId();
-      if (vehicleMap.containsKey(vehicleId)) {
-        vehicleMap.get(vehicleId).add(ad);
-      } else {
-        List<ArrivalDeparture> tmp = new ArrayList<>();
-        tmp.add(ad);
-        vehicleMap.put(vehicleId, tmp);
-      }
-    }
-    return vehicleMap;
   }
 
 }

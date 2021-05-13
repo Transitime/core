@@ -3,6 +3,7 @@ package org.transitclock.core.reporting;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.applications.Core;
 import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.core.*;
 import org.transitclock.core.VehicleState;
@@ -61,7 +62,9 @@ public class RunTimeGenerator {
 			int lastStopIndex = getLastStopIndex(prevMatch);
 			String vehicleId= vehicleState.getVehicleId();
 			Trip trip = prevMatch.getTrip();
-			return processor.processRunTimesForTrip(vehicleId, trip, arrivalDeparturesForStop, prevMatch, match, lastStopIndex);
+			ServiceUtils serviceUtils = Core.getInstance().getServiceUtils();
+			return processor.processRunTimesForTrip(vehicleId, trip, arrivalDeparturesForStop, prevMatch, match,
+					lastStopIndex, serviceUtils);
 
 		} catch (Exception e) {
 			logger.error("Exception when processing run times", e);

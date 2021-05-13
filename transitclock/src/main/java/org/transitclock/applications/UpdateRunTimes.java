@@ -6,16 +6,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.ConfigFileReader;
 import org.transitclock.configData.AgencyConfig;
-import org.transitclock.core.reporting.RunTimeLoader;
-import org.transitclock.core.reporting.RunTimeWriter;
+import org.transitclock.core.ServiceUtils;
+import org.transitclock.core.reporting.*;
+import org.transitclock.core.travelTimes.DataFetcher;
 import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.db.structs.ActiveRevisions;
 import org.transitclock.db.structs.Agency;
+import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 /**
@@ -45,11 +49,19 @@ public class UpdateRunTimes {
     this.beginTime = beginTime;
     this.endTime = endTime;
     this.clampingSpeed = clampingSpeed;
-    this.writer = new RunTimeWriter();
+    this.writer = new RunTimeWriterImpl();
   }
 
   public void run() {
     IntervalTimer timer = new IntervalTimer();
+
+    // Get list of a/d
+    DataFetcher dataFetcher = new DataFetcher(agencyId, null);
+    Map<DataFetcher.DbDataMapKey, List<ArrivalDeparture>> arrivalsDeparturesMap =
+            dataFetcher.readArrivalsDepartures(agencyId, beginTime, endTime);
+    ServiceUtils serviceUtils = Core.getInstance().getServiceUtils();
+    RunTimeCache cache = new RunTimeCacheImpl();
+
     // Get a database session
     Session session = HibernateUtils.getSession(agencyId);
     Transaction tx = null;
@@ -57,9 +69,9 @@ public class UpdateRunTimes {
       // Put db access into a transaction
       tx = session.beginTransaction();
       // do work
-      RunTimeLoader loader = new RunTimeLoader(agencyId, beginTime, endTime, clampingSpeed);
+      RunTimeLoader loader = new RunTimeLoader(writer, cache, clampingSpeed, serviceUtils);
       writer.cleanupFromPreviousRun(session, agencyId);
-      loader.run(session);
+      loader.run(session, arrivalsDeparturesMap);
       // commit on success
       tx.commit();
     } catch (Exception e) {
@@ -91,6 +103,7 @@ public class UpdateRunTimes {
     // Set the timezone for the application. Must be done before
     // determine begin and end time so that get the proper time of day.
     int configRev = ActiveRevisions.get(agencyId).getConfigRev();
+    List<Agency> agencies = Agency.getAgencies(agencyId, configRev);
     TimeZone timezone =
             Agency.getAgencies(agencyId, configRev).get(0).getTimeZone();
     TimeZone.setDefault(timezone);

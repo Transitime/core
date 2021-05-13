@@ -99,6 +99,10 @@ public class DataFetcher {
 		TimeZone timezone = agencies.get(0).getTimeZone();
 		calendar = new GregorianCalendar(timezone);		
 	}
+
+	public DataFetcher(TimeZone timezone){
+		calendar = new GregorianCalendar(timezone);
+	}
 	
 	/**
 	 * Takes the date and returns the day into the year. Useful for keeping

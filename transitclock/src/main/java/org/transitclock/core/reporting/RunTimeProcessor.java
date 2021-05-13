@@ -29,9 +29,11 @@ public class RunTimeProcessor {
                                         List<IpcArrivalDeparture> arrivalDeparturesForStop,
                                         TemporalMatch matchAtPreviousStop,
                                         TemporalMatch matchAtCurrentStop,
-                                        Integer lastStopIndex) {
-    RunTimeCache cache = new RunTimeCache();
-    return processRunTimesForTrip(cache,
+                                        Integer lastStopIndex,
+                                        ServiceUtils serviceUtils) {
+    RunTimeCache cache = new RunTimeCacheImpl();
+    return processRunTimesForTrip(
+            cache,
             vehicleId,
             trip,
             arrivalDeparturesForStop,
@@ -39,18 +41,20 @@ public class RunTimeProcessor {
             matchAtCurrentStop,
             lastStopIndex,
             null,
+            serviceUtils,
             true).success();
   }
 
   public RunTimeProcessorResult processRunTimesForTrip(RunTimeCache cache,
-                                        String vehicleId,
-                                        Trip trip,
-                                        List<IpcArrivalDeparture> arrivalDeparturesForStop,
-                                        TemporalMatch matchAtPreviousStop,
-                                        TemporalMatch matchAtCurrentStop,
-                                        Integer lastStopIndex,
-                                        Double clampingSpeed,
-                                        boolean writeToDb){
+                                                       String vehicleId,
+                                                       Trip trip,
+                                                       List<IpcArrivalDeparture> arrivalDeparturesForStop,
+                                                       TemporalMatch matchAtPreviousStop,
+                                                       TemporalMatch matchAtCurrentStop,
+                                                       Integer lastStopIndex,
+                                                       Double clampingSpeed,
+                                                       ServiceUtils serviceUtils,
+                                                       boolean writeToDb){
 
     RunTimeProcessorState state = new RunTimeProcessorState(cache, trip,
             arrivalDeparturesForStop);
@@ -89,6 +93,7 @@ public class RunTimeProcessor {
           }
           // if we are the last stop on the trip, close off the routes
          if (i == arrivalDeparturesForStop.size()-1) {
+           state.setFirstStopPathIndex(arrivalDeparture.getStopPathIndex());
            // Confirm totalDwellTime count is valid
            if (state.getDwellTimeCount() >= 0 && state.getDwellTimeCount() != arrivalDeparture.getStopPathIndex()) {
              state.resetTotalDwellTime();
@@ -103,6 +108,7 @@ public class RunTimeProcessor {
                    lastStopIndex,
                    timer,
                    clampingSpeed,
+                   serviceUtils,
                    writeToDb);
          }
         }
@@ -123,6 +129,7 @@ public class RunTimeProcessor {
             lastStopIndex,
             timer,
             clampingSpeed,
+            serviceUtils,
             writeToDb);
   }
 
@@ -135,9 +142,9 @@ public class RunTimeProcessor {
                                                Integer lastStopIndex,
                                                IntervalTimer timer,
                                                Double clampingSpeed,
+                                               ServiceUtils serviceUtils,
                                                boolean writeToDb) {
     // Process Run Times for Route
-    ServiceUtils serviceUtils = Core.getInstance().getServiceUtils();
     ServiceType serviceType = serviceUtils.getServiceTypeForTrip(arrivalDeparture.getTime(),
             trip.getStartTime(), trip.getServiceId());
 
