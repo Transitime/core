@@ -5,8 +5,6 @@ package org.transitclock.core.dataCache.ehcache;
 
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.IntegerConfigValue;
@@ -17,8 +15,9 @@ import org.transitclock.utils.Time;
 
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Sean Og Crudden This is a Cache to hold a sorted list of all arrival departure events
@@ -125,11 +124,47 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 		}
 	}
 
+	public StopArrivalDepartureCacheKey putArrivalDepartureInMemory(Map<StopArrivalDepartureCacheKey, StopEvents> map,
+																																	ArrivalDeparture arrivalDeparture) {
+
+		Calendar date = Calendar.getInstance();
+		date.setTime(arrivalDeparture.getDate());
+
+		date.set(Calendar.HOUR_OF_DAY, 0);
+		date.set(Calendar.MINUTE, 0);
+		date.set(Calendar.SECOND, 0);
+		date.set(Calendar.MILLISECOND, 0);
+		if(arrivalDeparture.getStop() == null) return null;
+		StopArrivalDepartureCacheKey key = new StopArrivalDepartureCacheKey(arrivalDeparture.getStop().getId(),
+						date.getTime());
+		IpcArrivalDeparture ipc;
+		StopEvents empty = new StopEvents();
+		try {
+			ipc = new IpcArrivalDeparture(arrivalDeparture);
+		} catch (Exception e) {
+			logger.error("Exception adding " + arrivalDeparture.toString() + " event to StopArrivalDepartureCache.", e);
+			return key;
+		}
+		empty.addEvent(ipc);
+
+
+		StopEvents element = map.get(key);
+		if (element == null) {
+			map.put(key, empty);
+		} else {
+			element.addEvent(ipc);
+			map.put(key, element);
+		}
+		return key;
+
+	}
+
 	private static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {
 		return iterable == null ? Collections.<T> emptyList() : iterable;
 	}
 
 	public void populateCacheFromDb(List<ArrivalDeparture> results) {
+		Map<StopArrivalDepartureCacheKey, StopEvents> map = new HashMap<>();
 		try {
 			int counter = 0;
 
@@ -137,11 +172,23 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 				if (counter % 1000 == 0) {
 					logger.info("{} out of {} Stop Arrival Departure Records ({}%)", counter, results.size(), (int) ((counter * 100.0f) / results.size()));
 				}
-				putArrivalDeparture(result);
+
+				putArrivalDepartureInMemory(map, result);
+
 				counter++;
 			}
 		} catch (Throwable t) {
 			logger.error("Exception in populateCacheFromDb {}", t, t);
+		}
+		synchronized (cache) {
+			cache.putAll(map);
+		}
+	}
+
+	@Override
+	protected void putAll(Map<StopArrivalDepartureCacheKey, StopEvents> map) {
+		synchronized (cache) {
+			cache.putAll(map);
 		}
 	}
 

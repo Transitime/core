@@ -820,6 +820,12 @@ public class DbConfig {
 
 		timer = new IntervalTimer();
 		blocks = Block.getBlocks(globalSession, configRev);
+		for (Block block : blocks) {
+			for (Trip trip : block.getTrips()) {
+				// build up internal cache now to avoid lazy-load lag
+				individualTripsMap.put(trip.getId(), trip);
+			}
+		}
 		configRevisions = ConfigRevision.getConfigRevisions(globalSession, configRev);
 		blocksByServiceMap = putBlocksIntoMap(blocks);
 		blocksByRouteMap = putBlocksIntoMapByRoute(blocks);

@@ -17,10 +17,13 @@ public class HistoricalAverage  implements Serializable{
 	public String toString() {
 		return "HistoricalAverage [count=" + count + ", average=" + average + "]";
 	}
-	public HistoricalAverage() {
-		super();
-		count=0;
-		average=0;	
+	public HistoricalAverage(double average) {
+		count = 1;
+		this.average = average;
+	}
+	public HistoricalAverage(int count, double average) {
+		this.count = count;
+		this.average = average;
 	}
 
 	private int count;
@@ -30,20 +33,20 @@ public class HistoricalAverage  implements Serializable{
 	public int getCount() {
 		return count;
 	}
-	public void setCount(int count) {
-		this.count = count;
-	}
 	public double getAverage() {
 		return average;
 	}
-	public void setAverage(double average) {
-		this.average = average;
-	}
-	
-	public void update(double element)
+
+	public void updateBad(double element)
 	{
 		average=((count*average)+element)/(count+1);		
 		count=count+1;		
+	}
+
+	public HistoricalAverage copyUpdate(double element) {
+		double average1=((count*average)+element)/(count+1);
+		return new HistoricalAverage(count+1, average1);
+
 	}
 
 	

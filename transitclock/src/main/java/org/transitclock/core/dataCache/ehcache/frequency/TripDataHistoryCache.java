@@ -172,22 +172,70 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 		return tripKey;
 	}
 
-	/* (non-Javadoc)
+	public TripKey putArrivalDepartureInMemory(Map<TripKey, TripEvents> map, ArrivalDeparture arrivalDeparture) {
+
+		/* just put todays time in for last three days to aid development. This means it will kick in in 1 days rather than 3. Perhaps be a good way to start rather than using default transiTime method but I doubt it. */
+		Date nearestDay = DateUtils.truncate(new Date(arrivalDeparture.getTime()), Calendar.DAY_OF_MONTH);
+
+		DbConfig dbConfig = Core.getInstance().getDbConfig();
+		TripKey tripKey = null;
+		Trip trip = dbConfig.getTrip(arrivalDeparture.getTripId());
+
+		// TODO need to set start time based on start of bucket
+		if (arrivalDeparture.getFreqStartTime() != null) {
+			Integer time = FrequencyBasedHistoricalAverageCache.secondsFromMidnight(arrivalDeparture.getFreqStartTime(), 2);
+
+			time = FrequencyBasedHistoricalAverageCache.round(time, FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
+
+			if (trip != null) {
+				tripKey = new TripKey(arrivalDeparture.getTripId(),
+								nearestDay,
+								time);
+
+				logger.debug("Putting :{} in TripDataHistoryCache cache using key {}.", arrivalDeparture, tripKey);
+				IpcArrivalDeparture ipcad = null;
+				try {
+					ipcad = new IpcArrivalDeparture(arrivalDeparture);
+				} catch (Exception e) {
+					logger.error("Exception creating IpcArrivalDeparture {}", e, e);
+					return tripKey;
+				}
+				TripEvents empty = new TripEvents(ipcad);
+
+				TripEvents element = map.get(tripKey);
+				if (element == null) {
+					map.put(tripKey, empty);
+				} else {
+					// immutable object for thread safety
+					element = element.copyAdd(ipcad);
+					map.put(tripKey, element);
+				}
+			}
+		} else {
+			logger.error("Cannot add event to TripDataHistoryCache as it has no freqStartTime set. {}", arrivalDeparture);
+		}
+		return tripKey;
+	}
+		/* (non-Javadoc)
 	 * @see org.transitclock.core.dataCache.TripDataHistoryCacheInterface#populateCacheFromDb(org.hibernate.Session, java.util.Date, java.util.Date)
 	 */
 	
 	@Override
 	public void populateCacheFromDb(List<ArrivalDeparture> results)
 	{
+		Map<TripKey, TripEvents> map = new HashMap<>(results.size());
 		try {
 			for (ArrivalDeparture result : results) {
 				// TODO this might be better done in the database.
 				if (GtfsData.routeNotFiltered(result.getRouteId())) {
-					putArrivalDeparture(result);
+					putArrivalDepartureInMemory(map, result);
 				}
 			}
 		} catch (Throwable t) {
 			logger.error("Exception in populateCacheFromDb {}", t, t);
+		}
+		synchronized (cache) {
+			cache.putAll(map);
 		}
 	}
 		
