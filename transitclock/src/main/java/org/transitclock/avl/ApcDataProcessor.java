@@ -128,11 +128,17 @@ public class ApcDataProcessor {
       return;
     }
 
-    TimeRange apcTimeRange = findRangeForArrivalRecords(arrivalDepartures);
+    TimeRange apcTimeRange = findRangeForArrivalRecordsDayRange(arrivalDepartures);
     logger.info("populateFromDb loading time range {}...", apcTimeRange);
     List<ApcParsedRecord> apcRecords = findApcRecords(apcTimeRange);
     logger.info("populateFromDb loading time range {} complete, processing", apcTimeRange);
-    internalProcess(apcRecords, arrivalDepartures);
+    List<ApcReport> matches = new ArrayList<>();
+    for (ApcParsedRecord apcParsedRecord : apcRecords) {
+      if (apcParsedRecord.getArrivalDeparture() != null) {
+        matches.add(apcParsedRecord.toApcReport());
+      }
+    }
+    analyze(matches);
   }
 
   private List<ApcMatch> internalProcess(List<ApcParsedRecord> apcRecords, List<ArrivalDeparture> arrivalDepartures) {
@@ -252,6 +258,14 @@ public class ApcDataProcessor {
      ArrivalDeparture lastRecord = arrivalDepartures.get(arrivalDepartures.size()-1);
     long window = getWindowMillis();
     return new TimeRange(firstRecord.getTime()-window, lastRecord.getTime()+window);
+  }
+  private TimeRange findRangeForArrivalRecordsDayRange(List<ArrivalDeparture> arrivalDepartures) {
+    if (arrivalDepartures == null || arrivalDepartures.isEmpty()) return  null;
+    ArrivalDeparture firstRecord = arrivalDepartures.get(0);
+
+    long startOfDay = Time.getStartOfDay(new Date(firstRecord.getTime()));
+    long endOfDay = startOfDay + Time.MS_PER_DAY;
+    return new TimeRange(startOfDay, endOfDay);
   }
 
 

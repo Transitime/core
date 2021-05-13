@@ -206,7 +206,8 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     String routeId = indices.getTrip().getRouteId();
     while (daysBack < maxKalmanDaysToSearch.getValue()) {
       daysBack++;
-      currentArrivalTime = currentArrivalTime - Time.MS_PER_DAY;if (isSameCalendarType(arrivalTime, currentArrivalTime)) {
+      currentArrivalTime = currentArrivalTime - Time.MS_PER_DAY;
+      if (isSameCalendarType(arrivalTime, currentArrivalTime)) {
         Double arrivalRate = ApcModule.getInstance()
                 .getBoardingsPerSecond(stopId,
                         new Date(currentArrivalTime));

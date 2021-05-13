@@ -16,7 +16,7 @@ public class ApcModule {
 
   public static IntegerConfigValue arrivalRateWindow
           = new IntegerConfigValue("transitclock.apc.arrivalRateWindowInMinutes",
-          7,
+          60,
           "Minutes to consider in arrival rate calculation");
   private static ApcModule instance = null;
   private ApcDataProcessor processor;

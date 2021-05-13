@@ -35,6 +35,7 @@ import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.monitoring.MonitoringService;
+import org.transitclock.utils.Time;
 
 import java.util.*;
 
@@ -48,6 +49,11 @@ public class HistoricalPredictionLibrary {
 	private static final IntegerConfigValue closestVehicleStopsAhead = new IntegerConfigValue(
 			"transitclock.prediction.closestvehiclestopsahead", new Integer(2),
 			"Num stops ahead a vehicle must be to be considers in the closest vehicle calculation");
+
+	private static final IntegerConfigValue maxHeadwayMinutes = new IntegerConfigValue(
+					"transitclock.prediction.dwell.maxHeadwayMinutes",
+					75,
+					"Max time between trips to be considered a valid headway");
 
 	private static final Logger logger = LoggerFactory.getLogger(HistoricalPredictionLibrary.class);
 
@@ -319,17 +325,26 @@ public class HistoricalPredictionLibrary {
 		}
 		for (int i = 0; i < currentStopList.size(); i++) {
 			IpcArrivalDeparture headwayStop = currentStopList.get(i);
-			if (headwayStop.isArrival()) {
+			if (headwayStop.isArrival()
+							&& isHeadwayCloseEnough(referenceTime, headwayStop.getTime().getTime())) {
 				// here we restrict to same route
 				Trip trip = Core.getInstance().getDbConfig().getTrip(headwayStop.getTripId());
 				if (routeId == null || trip.getRouteId().equals(routeId)) {
 					logger.debug("headway = {} - {} ", headwayStop.getTime(), new Date(referenceTime));
-					return headwayStop.getTime().getTime() - referenceTime;
+					return referenceTime - headwayStop.getTime().getTime();
 				}
 			}
 		}
 		return null;
 
+	}
+
+	private static boolean isHeadwayCloseEnough(long referenceTime, long headwayTime) {
+		int referenceSeconds = Core.getInstance().getTime()
+						.getSecondsIntoDay(referenceTime);
+		int headwaySeconds = Core.getInstance().getTime()
+						.getSecondsIntoDay(headwayTime);
+		return (referenceSeconds - headwaySeconds) > Time.SEC_PER_MIN * maxHeadwayMinutes.getValue();
 	}
 
 	public static Long getHeadway(VehicleState vehicleState, Indices indices) {
