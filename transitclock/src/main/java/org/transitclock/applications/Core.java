@@ -498,8 +498,8 @@ public class Core {
 					pp.enqueue(ct);
 				}
 
-				// Only need to populate two days worth of stop arrival departure cache
-				if(i < 2 && StopArrivalDepartureCacheFactory.getInstance()!=null)
+				// new: need stop arrivals history for kalman dwell time
+				if(StopArrivalDepartureCacheFactory.getInstance()!=null)
 				{
 					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.StopArrivalDepartureCacheFactory, defaultInput);
 					pp.enqueue(ct);

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import org.transitclock.config.StringConfigValue;
 import org.transitclock.core.dataCache.IpcArrivalDepartureComparator;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheInterface;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
+import org.transitclock.core.dataCache.StopEvents;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
@@ -40,6 +42,16 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 	public void populateCacheFromDb(List<ArrivalDeparture> results) {
 		// make it obvious we are using the base implementation
 		defaultPopulateCacheFromDb(results);
+	}
+
+	@Override
+	protected void putAll(Map<StopArrivalDepartureCacheKey, StopEvents> map) {
+		// do nothing
+	}
+
+	@Override
+	public StopArrivalDepartureCacheKey putArrivalDepartureInMemory(Map<StopArrivalDepartureCacheKey, StopEvents> map, ArrivalDeparture arrivalDeparture) {
+		return putArrivalDeparture(arrivalDeparture);
 	}
 
 	@SuppressWarnings("unchecked")

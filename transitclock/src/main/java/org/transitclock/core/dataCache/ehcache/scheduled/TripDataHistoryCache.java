@@ -25,7 +25,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Sean Og Crudden 
@@ -144,6 +146,35 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 		return tripKey;
 	}
 
+	public TripKey putArrivalDeparture(Map<TripKey, TripEvents> map, ArrivalDeparture arrivalDeparture,
+																		 DbConfig dbConfig, Date nearestDay)
+		throws Exception {
+
+		Trip trip = dbConfig.getTrip(arrivalDeparture.getTripId());
+		Integer tripStartTime = null;
+
+		if (trip != null) {
+			tripStartTime = trip.getStartTime();
+		}
+
+		TripKey tripKey = new TripKey(arrivalDeparture.getTripId(),
+						nearestDay,
+						tripStartTime);
+
+		IpcArrivalDeparture ipcad = new IpcArrivalDeparture(arrivalDeparture);
+
+		TripEvents result = map.get(tripKey);
+		if (result == null) {
+			map.put(tripKey, new TripEvents(ipcad));
+		} else {
+			// update TripEvents in a threadsafe way
+			// object needs to be immutable for ehcache to store
+			//map.put(tripKey, result.copyAdd(ipcad));
+			map.put(tripKey, result.addUnsafe(ipcad));
+		}
+		return tripKey;
+	}
+
 	/* (non-Javadoc)
 	 * @see org.transitclock.core.dataCache.TripDataHistoryCacheInterface#populateCacheFromDb(org.hibernate.Session, java.util.Date, java.util.Date)
 	 */
@@ -151,24 +182,36 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	@Override
 	public void populateCacheFromDb(List<ArrivalDeparture> results)
 	{
+		if (results == null || results.isEmpty()) return;
+
+		Map<TripKey, TripEvents> map = new HashMap<>(results.size());
+		Date nearestDay = DateUtils.truncate(new Date(results.get(0).getTime()), Calendar.DAY_OF_MONTH);
+		DbConfig dbConfig = Core.getInstance().getDbConfig();
+
 		try {
 			int counter = 0;
 			for (ArrivalDeparture result : results) {
 				if (counter % 1000 == 0) {
-					logger.info("{} out of {} Trip Data History Records ({}%)", counter, results.size(), (int) ((counter * 100.0f) / results.size()));
+					logger.info("{} out of {} scheduled Trip Data History Records ({}%)", counter, results.size(), (int) ((counter * 100.0f) / results.size()));
 				}
 				// TODO this might be better done in the database.
 				if (GtfsData.routeNotFiltered(result.getRouteId())) {
-					try {
-						putArrivalDeparture(result);
-					} catch (Throwable tt) {
-						logger.error("TripDataHistoryCache Excepiton buried");
-					}
+					putArrivalDeparture(map, result, dbConfig, nearestDay);
 				}
 				counter++;
 			}
 		} catch (Throwable t) {
 			logger.error("Exception in populateCacheFromDb {}", t, t);
+		}
+
+		logger.info("sorting Trip Data History Records of {}", map.size());
+		for (TripEvents value : map.values()) {
+			value.sort();
+		}
+		logger.info("sorted Trip Data History Records of {}", map.size());
+
+		synchronized (cache) {
+			cache.putAll(map);
 		}
 	}
 		

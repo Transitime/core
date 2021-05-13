@@ -2,7 +2,9 @@ package org.transitclock.core.dataCache;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,21 +25,27 @@ public abstract class StopArrivalDepartureCacheInterface {
 
 	private static final Logger logger = LoggerFactory.getLogger(StopArrivalDepartureCacheInterface.class);
 
-	abstract  public  List<IpcArrivalDeparture> getStopHistory(StopArrivalDepartureCacheKey key);
+	abstract public List<IpcArrivalDeparture> getStopHistory(StopArrivalDepartureCacheKey key);
 
-	abstract  public StopArrivalDepartureCacheKey putArrivalDeparture(ArrivalDeparture arrivalDeparture);
+	abstract public StopArrivalDepartureCacheKey putArrivalDeparture(ArrivalDeparture arrivalDeparture);
 
 	abstract public void populateCacheFromDb(List<ArrivalDeparture> results);
+	abstract protected void putAll(Map<StopArrivalDepartureCacheKey, StopEvents> map);
+	abstract public StopArrivalDepartureCacheKey putArrivalDepartureInMemory(Map<StopArrivalDepartureCacheKey, StopEvents> map,
+																																					 ArrivalDeparture arrivalDeparture);
+
 	public void defaultPopulateCacheFromDb(List<ArrivalDeparture> results) {
+		Map<StopArrivalDepartureCacheKey, StopEvents> map = new HashMap();
 		try {
 			for (ArrivalDeparture result : results) {
-				this.putArrivalDeparture(result);
+				putArrivalDepartureInMemory(map, result);
 				//TODO might be better with its own populateCacheFromdb
 				DwellTimeModelCacheFactory.getInstance().addSample(result);
 			}
 		} catch (Throwable t) {
 			logger.error("StopArrivalDepartureCacheInterface failed with {}", t, t);
 		}
+		this.putAll(map);
 	}
 
 	/**

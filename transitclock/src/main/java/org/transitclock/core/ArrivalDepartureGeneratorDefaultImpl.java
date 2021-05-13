@@ -16,14 +16,12 @@
  */
 package org.transitclock.core;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
-import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.LongConfigValue;
 import org.transitclock.configData.AgencyConfig;
@@ -41,7 +39,6 @@ import org.transitclock.core.predAccuracy.PredictionAccuracyModule;
 import org.transitclock.db.structs.*;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.logging.Markers;
-import org.transitclock.utils.Geo;
 import org.transitclock.utils.Time;
 
 /**

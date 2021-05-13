@@ -6,6 +6,7 @@ import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
+import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.dataCache.*;
 import org.transitclock.db.structs.ArrivalDeparture;
@@ -55,6 +56,11 @@ public class FrequencyBasedHistoricalAverageCache {
 					"transitclock.core.frequency.cacheIncrementsForFrequencyService",
 					180*60,
 					"This is the intervals size of the day that the average is applied to. ");
+	public static BooleanConfigValue enableHistoricalCaches =
+					new BooleanConfigValue(
+									"transitclock.core.cache.enableHistoricalCaches",
+									false,
+									"Enable experimental historical caches");
 	
 	public static int getCacheIncrementsForFrequencyService() {
 		return cacheIncrementsForFrequencyService.getValue();
@@ -69,7 +75,9 @@ public class FrequencyBasedHistoricalAverageCache {
 	 * @return
 	 */
 	public static FrequencyBasedHistoricalAverageCache getInstance() {
-		return singleton;
+		if (enableHistoricalCaches.getValue())
+			return singleton;
+		return null;
 	}
 	
 	
@@ -155,18 +163,16 @@ public class FrequencyBasedHistoricalAverageCache {
 				{							
 					StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), pathDuration.getArrival().getStopPathIndex(), true,new Long(time));
 
-					synchronized (m) {
-						HistoricalAverage average = FrequencyBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+					HistoricalAverage average = FrequencyBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
 
-						if (average == null)
-							average = new HistoricalAverage();
+					if (average == null)
+						average = new HistoricalAverage(0, 0);
 
-						average.update(pathDuration.getDuration());
+					average = average.copyUpdate(pathDuration.getDuration());
 
-						logger.debug("Putting : {} in FrequencyBasedHistoricalAverageCache cache for key : {} which results in : {}.", pathDuration, historicalAverageCacheKey, average);
+					logger.debug("Putting : {} in FrequencyBasedHistoricalAverageCache cache for key : {} which results in : {}.", pathDuration, historicalAverageCacheKey, average);
 
-						putAverage(historicalAverageCacheKey, average);
-					}
+					putAverage(historicalAverageCacheKey, average);
 				}
 			}				
 			DwellTimeResult stopDuration=getLastStopDuration(new IpcArrivalDeparture(arrivalDeparture), trip);
@@ -174,19 +180,17 @@ public class FrequencyBasedHistoricalAverageCache {
 			{
 				StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), stopDuration.getDeparture().getStopPathIndex(), false, new Long(time));
 
-				synchronized (m) {
-					HistoricalAverage average = getAverage(historicalAverageCacheKey);
+				HistoricalAverage average = getAverage(historicalAverageCacheKey);
 
-					if (average == null)
-						average = new HistoricalAverage();
+				if (average == null)
+					average = new HistoricalAverage(0, 0);
 
-					average.update(stopDuration.getDuration());
+				average = average.copyUpdate(stopDuration.getDuration());
 
-					logger.debug("Putting : {} in FrequencyBasedHistoricalAverageCache cache for key : {} which results in : {}.", stopDuration, historicalAverageCacheKey, average);
+				logger.debug("Putting : {} in FrequencyBasedHistoricalAverageCache cache for key : {} which results in : {}.", stopDuration, historicalAverageCacheKey, average);
 
-					putAverage(historicalAverageCacheKey, average);
-				}
-			}	
+				putAverage(historicalAverageCacheKey, average);
+			}
 			if(stopDuration==null && pathDuration==null)
 			{
 				logger.debug("Cannot add to FrequencyBasedHistoricalAverageCache as cannot calculate stopDuration or pathDuration. : {}", arrivalDeparture);
