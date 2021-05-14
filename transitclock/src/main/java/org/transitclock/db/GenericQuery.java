@@ -17,6 +17,7 @@
 
 package org.transitclock.db;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -29,8 +30,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.hibernate.cfg.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.config.StringConfigValue;
 import org.transitclock.db.webstructs.WebAgency;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
@@ -46,7 +49,16 @@ public class GenericQuery {
 
 	// Number of rows read in
 	private int rows;
-	
+
+	// re-use the same configuration property as core
+	private static StringConfigValue hibernateConfigFileName =
+					new StringConfigValue("transitclock.hibernate.configFile",
+									null,
+									"Specifies the database dependent hibernate.cfg.xml file "
+													+ "to use to configure hibernate. The system will look both "
+													+ "on the file system and in the classpath. Can specify "
+													+ "mysql_hibernate.cfg.xml or postgres_hibernate.cfg.xml");
+
 	// For caching db connection
 	private static Connection connection;
 
@@ -101,6 +113,54 @@ public class GenericQuery {
 	public static Connection getConnection(String dbType, String dbHost,
 			String dbName, String dbUserName, String dbPassword)
 			throws SQLException {
+
+		// try file configuration first!
+		Connection connection = getConnectionFromConfiguration();
+		if (connection == null)
+			connection = getConnectionFromDatabase(dbType, dbHost, dbName, dbUserName, dbPassword);
+
+		return connection;
+	}
+
+	private static Connection getConnectionFromConfiguration() throws SQLException {
+		// try to mimic the configuration from HibernateUtils for consistency
+		if (hibernateConfigFileName.getValue() == null)
+			return null;
+
+		File f = new File(hibernateConfigFileName.getValue());
+		if (!f.exists()) return null;
+		logger.info("loading Hibernate configuration from file {}", hibernateConfigFileName.getValue());
+		Configuration config = new Configuration();
+		config.configure(f);
+		// try read-only configuration first
+		String dbUrl = config.getProperty("hibernate.ro.connection.url");
+		if (dbUrl == null)
+			dbUrl = config.getProperty("hibernate.connection.url");
+		if (dbUrl == null) return null;
+		String dbUserName = config.getProperty("hibernate.connection.username");
+		String dbPassword = config.getProperty("hibernate.connection.password");
+		Properties properties = config.getProperties();
+		properties.setProperty("user", dbUserName);
+		properties.setProperty("password", dbPassword);
+		tryDriverLoad();
+		return DriverManager.getConnection(dbUrl, properties);
+
+	}
+
+	private static void tryDriverLoad() {
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			logger.error("Could not load in db driver for GenericQuery. {}",
+							e.getMessage());
+		}
+
+	}
+
+	private static Connection getConnectionFromDatabase(String dbType, String dbHost,
+																											String dbName, String dbUserName,
+																											String dbPassword) throws SQLException {
 		Connection conn = null;
 		Properties connectionProps = new Properties();
 		connectionProps.put("user", dbUserName);
@@ -114,14 +174,8 @@ public class GenericQuery {
 		// loaded. If the database for the agency happens to be different than
 		// that used for the web server then need to load in the driver for
 		// the agency database manually by using Class.forName().
-		try {
-			Class.forName("com.mysql.jdbc.Driver");
-			Class.forName("org.postgresql.Driver");
-		} catch (ClassNotFoundException e) {
-			logger.error("Could not load in db driver for GenericQuery. {}", 
-					e.getMessage());
-		}
-		
+		tryDriverLoad();
+
 		String url = "jdbc:" + dbType + "://" + dbHost + "/" + dbName;
 		conn = DriverManager.getConnection(url, connectionProps);
 		return conn;
