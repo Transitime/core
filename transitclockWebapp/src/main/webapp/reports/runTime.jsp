@@ -753,6 +753,7 @@
         $("#percentile-select-container").append('<label for="percentileSelect">Percentile</label>');
         $("#percentile-select-container").append(percentileSelect);
 
+        $("#percentile-select-box").val("50");
         $("#percentile-select-box").change(function () {
             var tableTD ;
 
@@ -1012,6 +1013,9 @@
 
         highestPoints = [];
         request = getParams(false)
+        /*DONT COMMIT URL*/
+        // var visualDataURL = "http://gtfsrt.dev3.dart.obaweb.org:8080/api/v1/key/5c348c1d/agency/1"+  "/report/runTime/avgTripRunTimes";
+
         var visualDataURL = apiUrlPrefix +  "/report/runTime/avgTripRunTimes";
         var isAllRoutes = false;
         if(visualarGraphChart && visualarGraphChart.destroy){
