@@ -122,6 +122,16 @@ public abstract class StopArrivalDepartureCacheInterface {
 		return smoothArrivalDepartures(results);
 	}
 
+	public static List<ArrivalDeparture> createArrivalDeparturesReverseCriteria(Criteria criteria, Date startDate, Date endDate) {
+		@SuppressWarnings("unchecked")
+		List<ArrivalDeparture> results = criteria.add(Restrictions.between("time", startDate, endDate))
+						.addOrder(Order.asc("tripId"))
+						.addOrder(Order.desc("stopPathIndex"))
+						.addOrder(Order.asc("isArrival"))
+						.list();
+		return results;
+	}
+
 	/**
 	 * Use the existing cache to ensure the departure is not before
 	 * the arrival

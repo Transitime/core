@@ -253,11 +253,11 @@ public class RunTimesForRoutes implements Serializable {
         this.runTimesForStops = runTimesForStops;
     }
 
-    public int getStartStopPathIndex() {
+    public Integer getStartStopPathIndex() {
         return startStopPathIndex;
     }
 
-    public void setStartStopPathIndex(int startStopIndex) {
+    public void setStartStopPathIndex(Integer startStopIndex) {
         this.startStopPathIndex = startStopIndex;
     }
 
@@ -342,4 +342,6 @@ public class RunTimesForRoutes implements Serializable {
                 ", expectedLastStopPathIndex=" + expectedLastStopPathIndex +
                 '}';
     }
+
+
 }

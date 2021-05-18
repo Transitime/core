@@ -99,6 +99,10 @@ public class DataFetcher {
 		TimeZone timezone = agencies.get(0).getTimeZone();
 		calendar = new GregorianCalendar(timezone);		
 	}
+
+	public DataFetcher(TimeZone timezone){
+		calendar = new GregorianCalendar(timezone);
+	}
 	
 	/**
 	 * Takes the date and returns the day into the year. Useful for keeping
@@ -176,10 +180,27 @@ public class DataFetcher {
 	 * associated maps in this class. 
 	 */
 	public static class DbDataMapKey extends MapKey {
-		private DbDataMapKey(String serviceId, Integer dayOfYear, String tripId,
-				String vehicleId) {
+
+		private DbDataMapKey(String serviceId, Integer dayOfYear, String tripId, String vehicleId) {
 			super(serviceId, dayOfYear, tripId, vehicleId);
 		}
+
+		public String getServiceId(){
+			return (String) this.o1;
+		}
+
+		public Integer getDayOfYear(){
+			return (Integer) this.o2;
+		}
+
+		public String getTripId(){
+			return (String) this.o3;
+		}
+
+		public String getVehicleId(){
+			return (String) this.o4;
+		}
+
 		
 		@Override
 		public String toString() {
@@ -219,7 +240,7 @@ public class DataFetcher {
 	 * @param map
 	 * @param arrDep
 	 */
-	private void addArrivalDepartureToMap(
+	public void addArrivalDepartureToMap(
 			Map<DbDataMapKey, List<ArrivalDeparture>> map,
 			ArrivalDeparture arrDep) {
 		DbDataMapKey key = getKey(arrDep.getServiceId(), arrDep.getDate(),

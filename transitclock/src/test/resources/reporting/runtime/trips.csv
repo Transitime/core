@@ -1,0 +1,4 @@
+configRev,tripId,serviceId,directionId,routeShortName,tripPatternId,headsign,startTime,endTime,
+6,6673089,21,1,TRE,shape_133438_28252_to_22748_dabd4fca,E - TRE - UNION STATION,44460,48120
+6,6673080,21,1,TRE,shape_133438_28252_to_22748_dabd4fca,E - TRE - UNION STATION,69660,73320
+
