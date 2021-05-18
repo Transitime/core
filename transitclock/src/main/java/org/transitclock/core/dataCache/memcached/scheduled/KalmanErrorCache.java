@@ -14,6 +14,7 @@ import org.transitclock.utils.Time;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.Random;
 
 public class KalmanErrorCache implements ErrorCache {
 
@@ -23,17 +24,29 @@ public class KalmanErrorCache implements ErrorCache {
 	private static IntegerConfigValue memcachedPort = new IntegerConfigValue("transitclock.cache.memcached.port", 11211,
 			"Specifies the port that memcache is running on.");
 
-	MemcachedClient memcachedClient = null;
+	private static IntegerConfigValue memcachedPoolSize = new IntegerConfigValue("transitclock.cache.memcached.poolSize",
+					5,
+					"The number of concurrent memcached clients to instantiate");
+
+	MemcachedClient[] memcachedClientArray = null;
 	private static String keystub = "KALMANERROR_";
 	private static String dwellKeystub = "DWELLERROR_";
+	private Random rng = new Random();
 	Integer expiryDuration=Time.SEC_PER_DAY*28;
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(KalmanErrorCache.class);
 	
 	public KalmanErrorCache() throws IOException {
-		memcachedClient = new MemcachedClient(
-				new InetSocketAddress(memcachedHost.getValue(), memcachedPort.getValue().intValue()));
+		memcachedClientArray = new MemcachedClient[memcachedPoolSize.getValue()];
+		for (int i = 0; i < memcachedPoolSize.getValue(); i++) {
+			memcachedClientArray[i] = new MemcachedClient(
+							new InetSocketAddress(memcachedHost.getValue(), memcachedPort.getValue().intValue()));
+		}
+	}
+
+	private MemcachedClient getMemcachedClient() {
+		return memcachedClientArray[rng.nextInt(memcachedPoolSize.getValue())];
 	}
 
 	@Override
@@ -50,7 +63,7 @@ public class KalmanErrorCache implements ErrorCache {
 
 	@Override
 	public KalmanError getErrorValue(KalmanErrorCacheKey key) {
-		Double errorValue = (Double) memcachedClient.get(createKey(key));
+		Double errorValue = (Double) getMemcachedClient().get(createKey(key));
 		if (errorValue == null || errorValue.isNaN()) {
 			return null;
 		}
@@ -59,7 +72,7 @@ public class KalmanErrorCache implements ErrorCache {
 
 	@Override
 	public KalmanError getDwellErrorValue(KalmanErrorCacheKey key) {
-		Double errorValue = (Double) memcachedClient.get(createDwellKey(key));
+		Double errorValue = (Double) getMemcachedClient().get(createDwellKey(key));
 		if (errorValue == null || errorValue.isNaN()) {
 			return null;
 		}
@@ -74,7 +87,7 @@ public class KalmanErrorCache implements ErrorCache {
 
 	@Override
 	public void putErrorValue(KalmanErrorCacheKey key, Double value) {
-		memcachedClient.set(createKey(key), expiryDuration, value);
+		getMemcachedClient().set(createKey(key), expiryDuration, value);
 	}
 
 	@Override
@@ -85,7 +98,7 @@ public class KalmanErrorCache implements ErrorCache {
 
 	@Override
 	public void putDwellErrorValue(KalmanErrorCacheKey key, Double value) {
-		memcachedClient.set(createDwellKey(key), expiryDuration, value);
+		getMemcachedClient().set(createDwellKey(key), expiryDuration, value);
 	}
 
 
