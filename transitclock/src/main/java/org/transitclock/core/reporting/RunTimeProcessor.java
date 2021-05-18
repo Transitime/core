@@ -7,6 +7,7 @@ import org.transitclock.core.RunTimeServiceUtils;
 import org.transitclock.core.ServiceType;
 import org.transitclock.core.ServiceUtilsImpl;
 import org.transitclock.core.TemporalMatch;
+import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.RunTimesForRoutes;
 import org.transitclock.db.structs.RunTimesForStops;
 import org.transitclock.db.structs.Trip;
@@ -27,6 +28,7 @@ public class RunTimeProcessor {
 
   public boolean processRunTimesForTrip(String vehicleId,
                                         Trip trip,
+                                        Block block,
                                         List<IpcArrivalDeparture> arrivalDeparturesForStop,
                                         TemporalMatch matchAtPreviousStop,
                                         TemporalMatch matchAtCurrentStop,
@@ -37,18 +39,19 @@ public class RunTimeProcessor {
             cache,
             vehicleId,
             trip,
+            block,
             arrivalDeparturesForStop,
             matchAtPreviousStop,
             matchAtCurrentStop,
             lastStopIndex,
             null,
-            serviceUtils,
-            true).success();
+            serviceUtils, true).success();
   }
 
   public RunTimeProcessorResult processRunTimesForTrip(RunTimeCache cache,
                                                        String vehicleId,
                                                        Trip trip,
+                                                       Block block,
                                                        List<IpcArrivalDeparture> arrivalDeparturesForStop,
                                                        TemporalMatch matchAtPreviousStop,
                                                        TemporalMatch matchAtCurrentStop,
@@ -57,8 +60,7 @@ public class RunTimeProcessor {
                                                        RunTimeServiceUtils serviceUtils,
                                                        boolean writeToDb){
 
-    RunTimeProcessorState state = new RunTimeProcessorState(cache, trip,
-            arrivalDeparturesForStop);
+    RunTimeProcessorState state = new RunTimeProcessorState(cache, trip, block, arrivalDeparturesForStop);
     state.setDwellTimeCount(lastStopIndex);
 
     IntervalTimer timer = new IntervalTimer();

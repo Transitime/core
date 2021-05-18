@@ -1,11 +1,7 @@
 package org.transitclock.core.reporting;
 
 import org.transitclock.core.ServiceType;
-import org.transitclock.db.structs.RunTimesForRoutes;
-import org.transitclock.db.structs.RunTimesForStops;
-import org.transitclock.db.structs.ScheduleTime;
-import org.transitclock.db.structs.StopPath;
-import org.transitclock.db.structs.Trip;
+import org.transitclock.db.structs.*;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.reporting.SpeedCalculator;
 
@@ -25,6 +21,7 @@ public class RunTimeProcessorState {
   private Integer firstStopPathIndex = null;
   private Integer finalStopPathIndex = null;
   private Trip trip;
+  private Block block;
   private List<IpcArrivalDeparture> arrivalDeparturesForStop;
   RunTimesForRoutes runTimesForRoutes = null;
   List<RunTimesForStops> runTimesForStops = new ArrayList<>();
@@ -33,9 +30,11 @@ public class RunTimeProcessorState {
 
   public RunTimeProcessorState(RunTimeCache cache,
                                Trip trip,
+                               Block block,
                                List<IpcArrivalDeparture> arrivalDeparturesForStop) {
     this.cache = cache;
     this.trip = trip;
+    this.block = block;
     this.arrivalDeparturesForStop = arrivalDeparturesForStop;
   }
 
@@ -198,7 +197,7 @@ public class RunTimeProcessorState {
     runTimesForRoutes.setEndTime(getFinalStopArrivalTime());
     runTimesForRoutes.setScheduledStartTime(trip.getStartTime());
     runTimesForRoutes.setScheduledEndTime(trip.getEndTime());
-    runTimesForRoutes.setNextTripStartTime(helper.getNextTripStartTime(trip));
+    runTimesForRoutes.setNextTripStartTime(helper.getNextTripStartTime(trip, block));
     runTimesForRoutes.setServiceType(serviceType);
     if (runTimesForRoutes.getDwellTime() == null) {
       runTimesForRoutes.setDwellTime(getTotalDwellTime());

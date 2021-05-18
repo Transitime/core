@@ -7,11 +7,13 @@ import org.transitclock.core.RunTimeServiceUtils;
 import org.transitclock.core.travelTimes.DataFetcher;
 import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.db.structs.ArrivalDeparture;
+import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.RunTimesForRoutes;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -26,6 +28,7 @@ public class RunTimeLoader {
   public RunTimeCache cache;
   public RunTimeWriter writer;
   private RunTimeServiceUtils serviceUtils;
+  private Map<Integer,Map<String, Block>> blocksForConfigRev = new HashMap<>();
 
   public RunTimeLoader(RunTimeWriter writer, RunTimeCache cache, Double clampingSpeed, RunTimeServiceUtils serviceUtils) {
     this.writer = writer;
@@ -48,20 +51,28 @@ public class RunTimeLoader {
 
         if (arrivalDeparturesList.size() > 0) {
           ArrivalDeparture firstArrivalDeparture = arrivalDeparturesList.get(0);
-          Trip trip = Trip.getTrip(session, firstArrivalDeparture.getConfigRev(), firstArrivalDeparture.getTripId());
+          String tripId = firstArrivalDeparture.getTripId();
+          int configRev = firstArrivalDeparture.getConfigRev();
+
+          Trip trip = Trip.getTrip(session, configRev, tripId);
+
+          String blockId = trip.getBlockId();
+          String serviceId = trip.getServiceId();
+          Block block = getBlock(session,configRev,serviceId,blockId);
+
           String vehicleId = firstArrivalDeparture.getVehicleId();
 
           RunTimeProcessorResult runTimeProcessorResult = processor.processRunTimesForTrip(
                   this.cache,
                   vehicleId,
                   trip,
+                  block,
                   toIpcArrivalDepartures(arrivalDeparturesList),
                   null,
                   null,
                   getLastStopIndex(arrivalDeparturesList),
                   clampingSpeed,
-                  serviceUtils,
-                  false);
+                  serviceUtils, false);
           if (runTimeProcessorResult.success()) {
             cache.update(runTimeProcessorResult, arrivalDeparturesList);
 
@@ -88,6 +99,26 @@ public class RunTimeLoader {
 
     writer.writeToDatabase(agencyId, cache);
 
+  }
+
+  private Block getBlock(Session session, int configRev, String serviceId, String blockId){
+    String key = hashBlock(serviceId, blockId);
+    Map<String, Block> blocksByServiceAndBlockId = blocksForConfigRev.get(configRev);
+    if(blocksByServiceAndBlockId == null){
+      logger.info("Loading blocks for configRev {} ...", configRev);
+      blocksByServiceAndBlockId = new HashMap<>();
+      List<Block> blocks = Block.getBlocks(session, configRev);
+      for(Block block : blocks){
+        blocksByServiceAndBlockId.put(hashBlock(block.getServiceId(), block.getId()), block);
+      }
+      blocksForConfigRev.put(configRev, blocksByServiceAndBlockId);
+      logger.info("Finished loading blocks. Loaded {} blocks.", blocks.size());
+    }
+    return blocksByServiceAndBlockId.get(key);
+  }
+
+  private String hashBlock(String serviceId, String blockId){
+    return serviceId + "_" + blockId;
   }
 
   private void reverseArrivalsDepartures(List<ArrivalDeparture> arrivalDepartures) {

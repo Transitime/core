@@ -62,9 +62,11 @@ public class RunTimeGenerator {
 			int lastStopIndex = getLastStopIndex(prevMatch);
 			String vehicleId= vehicleState.getVehicleId();
 			Trip trip = prevMatch.getTrip();
+			Block block = trip.getBlock();
+
 			ServiceUtilsImpl serviceUtils = Core.getInstance().getServiceUtils();
-			return processor.processRunTimesForTrip(vehicleId, trip, arrivalDeparturesForStop, prevMatch, match,
-					lastStopIndex, serviceUtils);
+			return processor.processRunTimesForTrip(vehicleId, trip, block, arrivalDeparturesForStop, prevMatch,
+					match, lastStopIndex, serviceUtils);
 
 		} catch (Exception e) {
 			logger.error("Exception when processing run times", e);

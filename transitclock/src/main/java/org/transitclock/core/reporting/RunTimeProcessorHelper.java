@@ -2,6 +2,7 @@ package org.transitclock.core.reporting;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.ScheduleTime;
 import org.transitclock.db.structs.StopPath;
 import org.transitclock.db.structs.Trip;
@@ -96,10 +97,11 @@ public class RunTimeProcessorHelper {
     return currentStopPathIndex == 0;
   }
 
-  public Integer getNextTripStartTime(Trip trip){
+  public Integer getNextTripStartTime(Trip trip, Block block){
     if (trip == null) return null;
-    if (trip.getBlock() == null) return null; // trip may not have a block
-    Trip nextTrip = trip.getBlock().getTrip(trip.getIndexInBlock() + 1);
+    if (block == null) return null; // trip may not have a block
+    int currentTripIndex = block.getTripIndex(trip);
+    Trip nextTrip = block.getTrip(currentTripIndex + 1);
     if (nextTrip != null) {
       return nextTrip.getStartTime();
     }
