@@ -1,12 +1,12 @@
 package org.transitclock.applications;
 
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.ConfigFileReader;
 import org.transitclock.configData.AgencyConfig;
-import org.transitclock.core.ServiceUtils;
+import org.transitclock.core.RunTimeServiceUtils;
+import org.transitclock.core.RunTimesServiceUtilsImpl;
 import org.transitclock.core.reporting.*;
 import org.transitclock.core.travelTimes.DataFetcher;
 import org.transitclock.db.hibernate.HibernateUtils;
@@ -59,24 +59,17 @@ public class UpdateRunTimes {
     DataFetcher dataFetcher = new DataFetcher(agencyId, null);
     Map<DataFetcher.DbDataMapKey, List<ArrivalDeparture>> arrivalsDeparturesMap =
             dataFetcher.readArrivalsDepartures(agencyId, beginTime, endTime);
-    ServiceUtils serviceUtils = Core.getInstance().getServiceUtils();
     RunTimeCache cache = new RunTimeCacheImpl();
 
     // Get a database session
     Session session = HibernateUtils.getSession(agencyId);
-    Transaction tx = null;
     try {
-      // Put db access into a transaction
-      tx = session.beginTransaction();
       // do work
+      RunTimeServiceUtils serviceUtils = new RunTimesServiceUtilsImpl(session);
       RunTimeLoader loader = new RunTimeLoader(writer, cache, clampingSpeed, serviceUtils);
-      writer.cleanupFromPreviousRun(session, agencyId);
-      loader.run(session, arrivalsDeparturesMap);
-      // commit on success
-      tx.commit();
+      writer.cleanupFromPreviousRun(agencyId, beginTime, endTime);
+      loader.run(agencyId, arrivalsDeparturesMap);
     } catch (Exception e) {
-      if (tx != null)
-        tx.rollback();
       logger.error("Unexpected exception occurred", e);
       throw e;
     } finally {
@@ -103,7 +96,6 @@ public class UpdateRunTimes {
     // Set the timezone for the application. Must be done before
     // determine begin and end time so that get the proper time of day.
     int configRev = ActiveRevisions.get(agencyId).getConfigRev();
-    List<Agency> agencies = Agency.getAgencies(agencyId, configRev);
     TimeZone timezone =
             Agency.getAgencies(agencyId, configRev).get(0).getTimeZone();
     TimeZone.setDefault(timezone);

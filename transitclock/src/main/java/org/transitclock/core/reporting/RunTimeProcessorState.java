@@ -168,7 +168,6 @@ public class RunTimeProcessorState {
     arrivalDeparture.setStopPathLength(helper.getStopPathLength(stopPath));
 
     RunTimesForStops runTimesForStop = new RunTimesForStops(
-            trip.getConfigRev(),
             helper.getStopPathId(stopPath),
             arrivalDeparture.getStopPathIndex(),
             arrivalDeparture.getTime(),
@@ -181,7 +180,6 @@ public class RunTimeProcessorState {
             helper.isTimePoint(stopPath)
     );
     runTimesForStops.add(runTimesForStop);
-    runTimesForStop.setRunTimesForRoutes(runTimesForRoutes);
 
     return runTimesForStop;
   }
@@ -217,6 +215,11 @@ public class RunTimeProcessorState {
     } else {
       runTimesForRoutes.setRunTimesForStops(runTimesForStops);
     }
+
+    for(RunTimesForStops runTimesForStop: runTimesForStops){
+      runTimesForStop.setRunTimesForRoutes(runTimesForRoutes);
+    }
+
     return runTimesForRoutes;
   }
 

@@ -1,6 +1,9 @@
 package org.transitclock.core.reporting;
 
-public class TestTrip {
+import org.apache.commons.csv.CSVRecord;
+import org.transitclock.utils.csv.CsvBase;
+
+public class TestTrip extends CsvBase {
 
     private int configRev;
     private String tripId;
@@ -12,7 +15,7 @@ public class TestTrip {
     private int startTime;
     private int endTime;
 
-    private TestTrip(TestTrip.Builder builder){
+    public TestTrip(TestTrip.Builder builder){
         this.configRev = builder.configRev;
         this.tripId = builder.tripId;
         this.serviceId = builder.serviceId;

@@ -2,6 +2,7 @@ package org.transitclock.core.reporting;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.RunTimesForRoutes;
 import org.transitclock.db.structs.RunTimesForStops;
 import org.transitclock.utils.Time;
@@ -33,10 +34,10 @@ public class RunTimeCacheImpl implements RunTimeCache{
   }
 
   @Override
-  public void update(RunTimeProcessorResult runTimeProcessorResult) {
+  public void update(RunTimeProcessorResult runTimeProcessorResult, List<ArrivalDeparture> arrivalDepartures) {
     routeMap.put(hash(runTimeProcessorResult.getRunTimesForRoutes()), runTimeProcessorResult.getRunTimesForRoutes());
     updateRoutesMap(routesMap, runTimeProcessorResult);
-    updateStopsMap(stopsMap, runTimeProcessorResult);
+    updateStopsMap(stopsMap, runTimeProcessorResult, arrivalDepartures);
   }
 
   private void updateRoutesMap(Map<String, List<RunTimesForRoutes>> routesMap,
@@ -54,19 +55,20 @@ public class RunTimeCacheImpl implements RunTimeCache{
   }
 
   private void updateStopsMap(Map<String, List<RunTimesForStops>> keyMap,
-                              RunTimeProcessorResult runTimeProcessorResult) {
+                              RunTimeProcessorResult runTimeProcessorResult,
+                              List<ArrivalDeparture> arrivalDepartures) {
 
-    for (RunTimesForStops rt : runTimeProcessorResult.getRunTimesForRoutes().getRunTimesForStops()) {
-      String keyHash = hash(rt);
+    RunTimesForRoutes runTimesForRoutes = runTimeProcessorResult.getRunTimesForRoutes();
+    for (RunTimesForStops runTimesForStops : runTimesForRoutes.getRunTimesForStops()) {
+      String keyHash = hash(runTimesForRoutes, runTimesForStops);
       if (keyMap.containsKey(keyHash)) {
         List<RunTimesForStops> list = keyMap.get(keyHash);
-        list.add(rt);
+        list.add(runTimesForStops);
         keyMap.put(keyHash, list);
-        logger.error("{} occurs {} times: {}",
-                keyHash, list.size(), list);
+        logger.error("{} occurs {} times: {}, ::: {}, ::: {} \n\n", keyHash, list.size(), list, runTimesForRoutes, arrivalDepartures);
       } else {
         List<RunTimesForStops> list = new ArrayList<>();
-        list.add(rt);
+        list.add(runTimesForStops);
         keyMap.put(keyHash, list);
       }
     }
@@ -76,32 +78,32 @@ public class RunTimeCacheImpl implements RunTimeCache{
    * Search the Array of RunTimesForStops for duplicates globally in the cache.
    */
   @Override
-  public boolean containsDuplicateStops(RunTimesForRoutes rt) {
-    for (RunTimesForStops stops: rt.getRunTimesForStops()) {
-      String hash = hash(stops);
+  public boolean containsDuplicateStops(RunTimesForRoutes runTimesForRoutes) {
+    for (RunTimesForStops runTimesForStops: runTimesForRoutes.getRunTimesForStops()) {
+      String hash = hash(runTimesForRoutes, runTimesForStops);
       int count = stopsMap.get(hash).size();
-      if (count > 1) return false;
+      if (count > 1) return true;
     }
 
-    return true;
+    return false;
   }
 
   /**
    * filter out any global duplicate RunTimesForStops.
    */
   @Override
-  public RunTimesForRoutes deduplicate(RunTimesForRoutes rt) {
+  public RunTimesForRoutes deduplicate(RunTimesForRoutes runTimesForRoutes) {
     List<RunTimesForStops> filtered = new ArrayList<>();
-    for (RunTimesForStops stops: rt.getRunTimesForStops()) {
-      String hash = hash(stops);
+    for (RunTimesForStops runTimesForStops: runTimesForRoutes.getRunTimesForStops()) {
+      String hash = hash(runTimesForRoutes, runTimesForStops);
       int count = stopsMap.get(hash).size();
       if (count == 1) {
-        filtered.add(stops);
+        filtered.add(runTimesForStops);
       }
     }
-    rt.setRunTimesForStops(filtered);
+    runTimesForRoutes.setRunTimesForStops(filtered);
 
-    return rt;
+    return runTimesForRoutes;
   }
 
   /**
@@ -126,8 +128,14 @@ public class RunTimeCacheImpl implements RunTimeCache{
    */
   @Override
   public boolean isValid(RunTimesForRoutes rt) {
-    if (rt.getStartTime() == null)
+    if (rt.getStartTime() == null) {
       return false;
+    }
+
+    List<RunTimesForRoutes> runTimesForRoutes = routesMap.get(hash(rt));
+    if(runTimesForRoutes !=null && runTimesForRoutes.size() > 1){
+      return false;
+    }
     return true;
   }
 
@@ -138,14 +146,22 @@ public class RunTimeCacheImpl implements RunTimeCache{
   private String hash(int configRev, String id, Date startTime, String vehicleId) {
     return configRev
             + "-" + id
-            + "-" + (startTime==null?"NuLl": Time.dateTimeStr(startTime))
+            + "-" + (startTime==null?"Null": Time.dateTimeStr(startTime))
             + "-" + vehicleId;
   }
 
-  private String hash(RunTimesForStops rt) {
-    return Time.dateTimeStr(rt.getTime()) + "-" + rt.getStopPathId()
-            + ":" + rt.getStopPathIndex()
-            + "-" + rt.getConfigRev();
+  private String hash(RunTimesForRoutes runTimesForRoutes, RunTimesForStops runTimesForStops) {
+    try {
+      return runTimesForRoutes.getConfigRev()
+              + "_" + (runTimesForRoutes.getStartTime() == null ? "null" : Time.dateTimeStr(runTimesForRoutes.getStartTime()))
+              + "_" + runTimesForRoutes.getTripId()
+              + "_" + runTimesForRoutes.getVehicleId()
+              + "_" + Time.dateTimeStr(runTimesForStops.getTime())
+              + "_" + runTimesForStops.getStopPathIndex();
+    }catch(NullPointerException e){
+      e.printStackTrace();
+      return null;
+    }
   }
 
 }

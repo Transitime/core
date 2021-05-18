@@ -29,7 +29,6 @@ import org.transitclock.core.SpatialMatcher.MatchingType;
 import org.transitclock.core.autoAssigner.AutoBlockAssigner;
 import org.transitclock.core.blockAssigner.BlockAssigner;
 import org.transitclock.core.dataCache.PredictionDataCache;
-import org.transitclock.core.dataCache.canceledTrip.CanceledTripAndVehicleCache;
 import org.transitclock.core.dataCache.VehicleDataCache;
 import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.core.dataCache.canceledTrip.CanceledTripCache;
@@ -674,7 +673,7 @@ public class AvlProcessor {
 		// Multiple services can be active on a given day. Therefore need
 		// to look at all the active ones to find out what blocks are active...
 		List<Block> allBlocksForRoute = new ArrayList<Block>();
-		ServiceUtils serviceUtils = Core.getInstance().getServiceUtils();
+		ServiceUtilsImpl serviceUtils = Core.getInstance().getServiceUtils();
 		Collection<String> serviceIds =
 				serviceUtils.getServiceIds(avlReport.getDate());
 		for (String serviceId : serviceIds) {

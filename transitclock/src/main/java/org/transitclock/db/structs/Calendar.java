@@ -20,10 +20,7 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -213,6 +210,27 @@ public class Calendar implements Serializable {
 	}
 
 	/**
+	 * Returns List of Calendar objects for the specified database revision.
+	 *
+	 * @param session
+	 * @param configRev
+	 * @return List of Calendar objects
+	 * @throws HibernateException
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<Calendar> getCalendar(Session session, int configRev, String serviceId)
+			throws HibernateException {
+
+		String hql = "FROM Calendar " +
+				"    WHERE configRev = :configRev " +
+				"    AND serviceId = :serviceId";
+		Query query = session.createQuery(hql);
+		query.setInteger("configRev", configRev);
+		query.setParameter("serviceId", serviceId);
+		return query.setMaxResults(1).list();
+	}
+
+	/**
 	 * Opens up a new db session and returns Map of Calendar objects for the
 	 * specified database revision. The map is keyed on the serviceId.
 	 * 
@@ -236,6 +254,7 @@ public class Calendar implements Serializable {
 			map.put(calendar.getServiceId(), calendar);
 		return map;
 	}
+
 	
 	/**
 	 * Returns true if the parameter zeroOrOne is set to "1". Otherwise

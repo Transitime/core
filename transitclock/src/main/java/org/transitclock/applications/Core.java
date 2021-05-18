@@ -28,7 +28,7 @@ import org.transitclock.config.ConfigFileReader;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.configData.AgencyConfig;
 import org.transitclock.configData.CoreConfig;
-import org.transitclock.core.ServiceUtils;
+import org.transitclock.core.ServiceUtilsImpl;
 import org.transitclock.core.TimeoutHandlerModule;
 import org.transitclock.core.dataCache.CacheTask;
 import org.transitclock.core.dataCache.DwellTimeModelCacheFactory;
@@ -85,7 +85,7 @@ public class Core {
 
 	private final TimeoutHandlerModule timeoutHandlerModule;
 
-	private final ServiceUtils service;
+	private final ServiceUtilsImpl service;
 	private Time time;
 
 	// So that can access the current time, even when in playback mode
@@ -188,7 +188,7 @@ public class Core {
 		timeoutHandlerModule = new TimeoutHandlerModule(AgencyConfig.getAgencyId());
 		timeoutHandlerModule.start();
 
-		service = new ServiceUtils(configData);
+		service = new ServiceUtilsImpl(configData);
 		time = new Time(configData);
 	}
 
@@ -279,7 +279,7 @@ public class Core {
 	 * Returns the ServiceUtils object that can be reused for efficiency.
 	 * @return
 	 */
-	public ServiceUtils getServiceUtils() {
+	public ServiceUtilsImpl getServiceUtils() {
 		return service;
 	}
 

@@ -1,9 +1,9 @@
 package org.transitclock.db.structs;
 
 import com.google.common.base.Objects;
+import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitclock.db.hibernate.HibernateUtils;
-import org.transitclock.utils.Time;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -12,24 +12,17 @@ import java.util.Date;
 @Entity
 @DynamicUpdate
 @Table(name="RunTimesForStops")
-
 public class RunTimesForStops implements Serializable {
-    @Id
-    @Column
-    private int configRev;
 
     @Id
-    @Column(length=2*HibernateUtils.DEFAULT_ID_SIZE)
-    private String stopPathId;
-
-    @Id
-    @Column
     private int stopPathIndex;
 
     @Id
-    @Column
     @Temporal(TemporalType.TIMESTAMP)
     private Date time;
+
+    @Column(length=2*HibernateUtils.DEFAULT_ID_SIZE)
+    private String stopPathId;
 
     @Column
     @Temporal(TemporalType.TIMESTAMP)
@@ -53,20 +46,21 @@ public class RunTimesForStops implements Serializable {
     @Column
     private Boolean timePoint;
 
+    @Id
     @ManyToOne(fetch = FetchType.LAZY)
+    @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.MERGE})
     @JoinColumns({
-        @JoinColumn(updatable=false,name="runTimesForRoutes_vehicleId", referencedColumnName="vehicleId"),
-        @JoinColumn(updatable=false,name="runTimesForRoutes_tripId", referencedColumnName="tripId"),
-        @JoinColumn(updatable=false,name="runTimesForRoutes_startTime", referencedColumnName="startTime"),
-        @JoinColumn(updatable=false,name="runTimesForRoutes_configRev", referencedColumnName="configRev")
+        @JoinColumn(insertable=false, updatable=false,name="vehicleId", referencedColumnName="vehicleId"),
+        @JoinColumn(insertable=false, updatable=false,name="tripId", referencedColumnName="tripId"),
+        @JoinColumn(insertable=false, updatable=false,name="startTime", referencedColumnName="startTime"),
+        @JoinColumn(insertable=false, updatable=false,name="configRev", referencedColumnName="configRev")
     })
     private RunTimesForRoutes runTimesForRoutes;
 
 
     public RunTimesForStops() { }
 
-    public RunTimesForStops(int configRev,
-                            String stopPathId,
+    public RunTimesForStops(String stopPathId,
                             int stopPathIndex,
                             Date time,
                             Date prevStopDepartureTime,
@@ -76,7 +70,6 @@ public class RunTimesForStops implements Serializable {
                             Double speed,
                             Boolean lastStop,
                             Boolean timePoint) {
-        this.configRev = configRev;
         this.stopPathId = stopPathId;
         this.stopPathIndex = stopPathIndex;
         this.time = time;
@@ -89,13 +82,6 @@ public class RunTimesForStops implements Serializable {
         this.timePoint = timePoint;
     }
 
-    public int getConfigRev() {
-        return configRev;
-    }
-
-    public void setConfigRev(int configRev) {
-        this.configRev = configRev;
-    }
 
     public String getStopPathId() {
         return stopPathId;
@@ -105,21 +91,7 @@ public class RunTimesForStops implements Serializable {
         this.stopPathId = stopPathId;
     }
 
-    public int getStopPathIndex() {
-        return stopPathIndex;
-    }
 
-    public void setStopPathIndex(int stopPathIndex) {
-        this.stopPathIndex = stopPathIndex;
-    }
-
-    public Date getTime() {
-        return time;
-    }
-
-    public void setTime(Date time) {
-        this.time = time;
-    }
 
     public Date getPrevStopDepartureTime() {
         return prevStopDepartureTime;
@@ -181,6 +153,23 @@ public class RunTimesForStops implements Serializable {
         return runTimesForRoutes;
     }
 
+    public int getStopPathIndex() {
+        return stopPathIndex;
+    }
+
+    public void setStopPathIndex(int stopPathIndex) {
+        this.stopPathIndex = stopPathIndex;
+    }
+
+    public Date getTime() {
+        return time;
+    }
+
+    public void setTime(Date time) {
+        this.time = time;
+    }
+
+
     public void setRunTimesForRoutes(RunTimesForRoutes runTimesForRoutes) {
         this.runTimesForRoutes = runTimesForRoutes;
     }
@@ -200,35 +189,21 @@ public class RunTimesForStops implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RunTimesForStops that = (RunTimesForStops) o;
-        return configRev == that.configRev &&
-                stopPathIndex == that.stopPathIndex &&
-                Objects.equal(stopPathId, that.stopPathId) &&
+        return stopPathIndex == that.stopPathIndex &&
                 Objects.equal(time, that.time) &&
+                Objects.equal(stopPathId, that.stopPathId) &&
                 Objects.equal(prevStopDepartureTime, that.prevStopDepartureTime) &&
                 Objects.equal(scheduledTime, that.scheduledTime) &&
                 Objects.equal(scheduledPrevStopArrivalTime, that.scheduledPrevStopArrivalTime) &&
                 Objects.equal(dwellTime, that.dwellTime) &&
                 Objects.equal(speed, that.speed) &&
                 Objects.equal(lastStop, that.lastStop) &&
-                Objects.equal(timePoint, that.timePoint) &&
-                Objects.equal(runTimesForRoutes, that.runTimesForRoutes);
+                Objects.equal(timePoint, that.timePoint);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(configRev, stopPathId, stopPathIndex, time, prevStopDepartureTime,
-                 scheduledTime, scheduledPrevStopArrivalTime, dwellTime, speed, lastStop, timePoint
-                );
+        return Objects.hashCode(stopPathIndex, time, stopPathId, prevStopDepartureTime, scheduledTime,
+                scheduledPrevStopArrivalTime, dwellTime, speed, lastStop, timePoint);
     }
-
-    @Override
-    public String toString() {
-        return Time.dateTimeStr(time) + "-"
-                + stopPathId + "-"
-                + configRev + ":"
-                + "stopPathIndex=" + stopPathIndex + ", "
-                + "dwell=" + dwellTime + ", "
-                + "speed=" + speed;
-    }
-
 }

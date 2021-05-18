@@ -11,7 +11,7 @@ public class RunTimeProcessorResult {
   private RunTimesForRoutes routes = null;
 
   public RunTimeProcessorResult(RunTimesForRoutes routes) {
-    if (routes != null) {
+    if (isValid(routes)) {
       success = true;
     } else {
       success = false;
@@ -20,6 +20,13 @@ public class RunTimeProcessorResult {
   }
   public RunTimeProcessorResult() {
     success = false;
+  }
+
+  private boolean isValid(RunTimesForRoutes routes){
+    if(routes != null && routes.getVehicleId() != null && routes.getTripId() != null && routes.getStartTime() != null){
+      return true;
+    }
+    return true;
   }
 
   public boolean success() {

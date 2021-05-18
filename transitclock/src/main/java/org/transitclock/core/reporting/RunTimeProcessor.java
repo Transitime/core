@@ -3,8 +3,9 @@ package org.transitclock.core.reporting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
+import org.transitclock.core.RunTimeServiceUtils;
 import org.transitclock.core.ServiceType;
-import org.transitclock.core.ServiceUtils;
+import org.transitclock.core.ServiceUtilsImpl;
 import org.transitclock.core.TemporalMatch;
 import org.transitclock.db.structs.RunTimesForRoutes;
 import org.transitclock.db.structs.RunTimesForStops;
@@ -30,7 +31,7 @@ public class RunTimeProcessor {
                                         TemporalMatch matchAtPreviousStop,
                                         TemporalMatch matchAtCurrentStop,
                                         Integer lastStopIndex,
-                                        ServiceUtils serviceUtils) {
+                                        ServiceUtilsImpl serviceUtils) {
     RunTimeCache cache = new RunTimeCacheImpl();
     return processRunTimesForTrip(
             cache,
@@ -53,7 +54,7 @@ public class RunTimeProcessor {
                                                        TemporalMatch matchAtCurrentStop,
                                                        Integer lastStopIndex,
                                                        Double clampingSpeed,
-                                                       ServiceUtils serviceUtils,
+                                                       RunTimeServiceUtils serviceUtils,
                                                        boolean writeToDb){
 
     RunTimeProcessorState state = new RunTimeProcessorState(cache, trip,
@@ -144,15 +145,14 @@ public class RunTimeProcessor {
                                                Integer lastStopIndex,
                                                IntervalTimer timer,
                                                Double clampingSpeed,
-                                               ServiceUtils serviceUtils,
+                                               RunTimeServiceUtils serviceUtils,
                                                boolean writeToDb) {
     // Process Run Times for Route
-    ServiceType serviceType = serviceUtils.getServiceTypeForTrip(arrivalDeparture.getTime(),
-            trip.getStartTime(), trip.getServiceId());
+    ServiceType serviceType = serviceUtils.getServiceTypeForTrip(arrivalDeparture.getTime(), trip);
 
-    RunTimesForRoutes runTimesForRoutes =
-            state.populateRuntimesForRoutes(vehicleId,
-                    serviceType, lastStopIndex);
+    RunTimesForRoutes runTimesForRoutes = state.populateRuntimesForRoutes(vehicleId, serviceType, lastStopIndex);
+
+    RunTimeProcessorResult result = new RunTimeProcessorResult(validateSpeed(state.getRunTimesForRoutes(), clampingSpeed));
 
     if (matchAtPreviousStop != null) {
       logger.debug("Previous Match {}", matchAtPreviousStop.toString());
@@ -161,32 +161,36 @@ public class RunTimeProcessor {
       logger.debug("Current Match {}", matchAtCurrentStop.toString());
     }
 
-    logger.debug("{} with {} stops", runTimesForRoutes.toString(), state.getRunTimesForStops().size());
+    if(result.success()) {
+      logger.debug("{} with {} stops", runTimesForRoutes.toString(), state.getRunTimesForStops().size());
 
-    if (writeToDb) {
-      Core.getInstance().getDbLogger().add(runTimesForRoutes);
+      if (writeToDb) {
+        Core.getInstance().getDbLogger().add(runTimesForRoutes);
+      }
     }
     logger.info("Processing Run Times for Route took {} msec", timer.elapsedMsecStr());
-    return new RunTimeProcessorResult(validate(state.getRunTimesForRoutes(), clampingSpeed));
+    return result;
 
   }
 
-  private RunTimesForRoutes validate(RunTimesForRoutes routes, Double clampingSpeed) {
-    List<RunTimesForStops> results = new ArrayList<>(routes.getRunTimesForStops().size());
-    for (RunTimesForStops rt : routes.getRunTimesForStops()) {
-      if (rt.getSpeed() != null && Double.isNaN(rt.getSpeed())) {
-        if (clampingSpeed != null) {
-          // correct the speed
-          rt.setSpeed(clampingSpeed);
-          results.add(rt);
+  private RunTimesForRoutes validateSpeed(RunTimesForRoutes routes, Double clampingSpeed) {
+    if(routes != null) {
+      List<RunTimesForStops> results = new ArrayList<>(routes.getRunTimesForStops().size());
+      for (RunTimesForStops rt : routes.getRunTimesForStops()) {
+        if (rt.getSpeed() != null && Double.isNaN(rt.getSpeed())) {
+          if (clampingSpeed != null) {
+            // correct the speed
+            rt.setSpeed(clampingSpeed);
+            results.add(rt);
+          } else {
+            logger.error("rejecting speed for rt {}", rt);
+          }
         } else {
-          logger.error("rejecting speed for rt {}", rt);
+          results.add(rt);
         }
-      } else {
-        results.add(rt);
       }
+      routes.setRunTimesForStops(results);
     }
-    routes.setRunTimesForStops(results);
     return routes;
   }
 

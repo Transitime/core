@@ -143,6 +143,26 @@ public class CalendarDate implements Serializable{
 		return query.list();
 	}
 
+	/**
+	 * Returns List of Agency objects for the specified database revision.
+	 *
+	 * @param session
+	 * @param configRev
+	 * @return
+	 * @throws HibernateException
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<CalendarDate> getCalendarDates(Session session, int configRev, Date date)
+			throws HibernateException {
+		String hql = "FROM CalendarDate " +
+				"    WHERE configRev = :configRev " +
+				"    AND date = :date";
+		Query query = session.createQuery(hql);
+		query.setInteger("configRev", configRev);
+		query.setDate("date", date);
+		return query.list();
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

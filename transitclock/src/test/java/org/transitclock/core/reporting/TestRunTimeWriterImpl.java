@@ -1,15 +1,15 @@
 package org.transitclock.core.reporting;
 
-import org.hibernate.Session;
+import java.util.Date;
 
 public class TestRunTimeWriterImpl implements RunTimeWriter{
     @Override
-    public void writeToDatabase(Session session, RunTimeCache cache) {
+    public void writeToDatabase(String agencyId, RunTimeCache cache) {
 
     }
 
     @Override
-    public int cleanupFromPreviousRun(Session session, String agencyId) {
+    public int cleanupFromPreviousRun(String agencyId, Date beginDate, Date endDate) {
         return 0;
     }
 }

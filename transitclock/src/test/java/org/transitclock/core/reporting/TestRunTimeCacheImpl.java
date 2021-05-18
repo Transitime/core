@@ -1,5 +1,6 @@
 package org.transitclock.core.reporting;
 
+import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.RunTimesForRoutes;
 
 import java.util.Collections;
@@ -13,7 +14,7 @@ public class TestRunTimeCacheImpl implements RunTimeCache{
     }
 
     @Override
-    public void update(RunTimeProcessorResult runTimeProcessorResult) {
+    public void update(RunTimeProcessorResult runTimeProcessorResult, List<ArrivalDeparture> arrivalDepartures) {
 
     }
 

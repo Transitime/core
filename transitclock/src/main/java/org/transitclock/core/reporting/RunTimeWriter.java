@@ -1,9 +1,8 @@
 package org.transitclock.core.reporting;
 
-import org.hibernate.Session;
+import java.util.Date;
 
 public interface RunTimeWriter {
-    void writeToDatabase(Session session, RunTimeCache cache);
-
-    int cleanupFromPreviousRun(Session session, String agencyId);
+    void writeToDatabase(String agencyId, RunTimeCache cache);
+    int cleanupFromPreviousRun(String agencyId, Date beginDate, Date endDate);
 }

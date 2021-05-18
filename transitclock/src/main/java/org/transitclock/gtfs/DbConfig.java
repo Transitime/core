@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.StringConfigValue;
-import org.transitclock.core.ServiceUtils;
+import org.transitclock.core.ServiceUtilsImpl;
 import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.db.structs.Calendar;
 import org.transitclock.db.structs.*;
@@ -1053,7 +1053,7 @@ public class DbConfig {
 	 */
 	public List<Calendar> getCurrentCalendars() {
 		// Get list of currently active calendars
-		ServiceUtils serviceUtils = Core.getInstance().getServiceUtils();
+		ServiceUtilsImpl serviceUtils = Core.getInstance().getServiceUtils();
 		List<Calendar> calendarList =
 				serviceUtils.getCurrentCalendars(Core.getInstance().getSystemTime());
 		return calendarList;
