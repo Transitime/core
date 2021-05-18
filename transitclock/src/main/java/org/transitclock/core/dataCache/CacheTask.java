@@ -14,6 +14,7 @@ import org.transitclock.db.structs.ArrivalDeparture;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Future;
 
 /**
  * A task populating the cache on startup.  Designed to be
@@ -40,13 +41,13 @@ public class CacheTask implements ParallelTask {
     private Date startDate;
     private Date endDate;
     private Type type;
-    private List<ArrivalDeparture> results;
+    private Future<?> futureResults;
 
-    public CacheTask(Date startDate, Date endDate, Type type, List<ArrivalDeparture> defaultInput) {
+    public CacheTask(Date startDate, Date endDate, Type type, Future<?> futureInput) {
         this.startDate = startDate;
         this.endDate = endDate;
         this.type = type;
-        this.results = defaultInput;
+        this.futureResults = futureInput;
     }
 
     @Override
@@ -57,9 +58,20 @@ public class CacheTask implements ParallelTask {
     @Override
     public void run() throws Exception {
         Session session = null;
+        List<ArrivalDeparture> results = null;
+        if (futureResults != null) {
+            // block here until we have input ready
+            logger.info("async retrieval of {} to {}", startDate, endDate);
+            results = (List<ArrivalDeparture>) futureResults.get();
+            if (results == null) {
+                logger.info("async retrieval of {} to {} failed!", startDate, endDate);
+            } else {
+                logger.info("async retrieval of {} to {} finished with {} results", startDate, endDate, results.size());
+            }
+        }
         try {
-            session = HibernateUtils.getSession();
-            if (this.results == null) {
+            if (this.futureResults == null) {
+                session = HibernateUtils.getSession();
                 Criteria criteria = session.createCriteria(ArrivalDeparture.class);
                 results = criteria.add(Restrictions.between("time", startDate, endDate)).list();
             }

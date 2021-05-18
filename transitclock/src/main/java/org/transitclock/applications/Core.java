@@ -60,6 +60,7 @@ import org.transitclock.utils.SettableSystemTime;
 import org.transitclock.utils.SystemCurrentTime;
 import org.transitclock.utils.SystemTime;
 import org.transitclock.utils.Time;
+import org.transitclock.utils.threading.NamedThreadFactory;
 
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
@@ -68,6 +69,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The main class for running a Transitime Core real-time data processing
@@ -504,52 +509,60 @@ public class Core {
 		{
 			ParallelProcessor pp = new ParallelProcessor();
 			pp.startup();
+
+
+			int threads = ParallelProcessor.parallelThreads.getValue();
+			// Create a cache loading thread pool for loading data
+			// concurrently from the database
+			NamedThreadFactory cacheLoaderThreadFactory = new NamedThreadFactory(
+							"CacheLoader");
+			ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads,
+							cacheLoaderThreadFactory);
+
 			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
 			{
 				Date startDate=DateUtils.addDays(endDate, -1);
-				logger.info("ParallelProcessor loading {} to {}", startDate, endDate);
-				session = HibernateUtils.getSession();
-				Criteria criteria = session.createCriteria(ArrivalDeparture.class);
-				List<ArrivalDeparture> defaultInput = StopArrivalDepartureCache.createArrivalDeparturesCriteria(criteria, startDate, endDate);
-				logger.info("ParallelProcessor loaded {} to {}", startDate, endDate);
+				logger.info("ParallelProcessor generating cache tasks for  {} to {}", startDate, endDate);
+
+				ScheduledFuture<?> futureInput = executor.schedule(pp.asyncQuery(startDate, endDate), 1, TimeUnit.SECONDS);
 
 				if(TripDataHistoryCacheFactory.getInstance()!=null)
 				{
-					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.TripDataHistoryCacheFactory, defaultInput);
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.TripDataHistoryCacheFactory, futureInput);
 					pp.enqueue(ct);
 				}
 
 				// new: need stop arrivals history for kalman dwell time
 				if(StopArrivalDepartureCacheFactory.getInstance()!=null)
 				{
-					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.StopArrivalDepartureCacheFactory, defaultInput);
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.StopArrivalDepartureCacheFactory, futureInput);
 					pp.enqueue(ct);
 				}
 
 				if(FrequencyBasedHistoricalAverageCache.getInstance()!=null)
 				{
-					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.FrequencyBasedHistoricalAverageCache, defaultInput);
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.FrequencyBasedHistoricalAverageCache, futureInput);
 					pp.enqueue(ct);
 				}
 
 				if(ScheduleBasedHistoricalAverageCache.getInstance()!=null)
 				{
-					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.ScheduleBasedHistoricalAverageCache, defaultInput);
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.ScheduleBasedHistoricalAverageCache, futureInput);
 					pp.enqueue(ct);
 				}
 
 				if(DwellTimeModelCacheFactory.getInstance() != null) {
-					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.DwellTimeModelCacheFactory, defaultInput);
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.DwellTimeModelCacheFactory, futureInput);
 					pp.enqueue(ct);
 				}
 
 				if (i < 5 && TrafficManager.getInstance() != null && TrafficManager.getInstance().isEnabled()) {
-					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.TrafficDataHistoryCache, defaultInput);
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.TrafficDataHistoryCache, futureInput);
 					pp.enqueue(ct);
 				}
 				if (ApcModule.getInstance() != null) {
 					logger.info("queuing apc for startDate {}", startDate);
-					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.ApcCache, defaultInput);
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.ApcCache, futureInput);
 					pp.enqueue(ct);
 				} else {
 					logger.info("skipping APC integration startDate {}, apcModule not configured", startDate);

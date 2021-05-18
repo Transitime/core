@@ -1,14 +1,21 @@
 package org.transitclock.core.dataCache;
 
 
+import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.core.dataCache.ehcache.StopArrivalDepartureCache;
+import org.transitclock.db.hibernate.HibernateUtils;
+import org.transitclock.db.structs.ArrivalDeparture;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Callable;
 
 /**
  * Processor for managing a thread queue of parallel active work.  Currently used for
@@ -106,6 +113,13 @@ public class ParallelProcessor {
         return "(none)";
     }
 
+    /**
+     * asynchronously retrieve list of ArrivalDepartures from database via a background thread.
+     */
+    public Callable<List<ArrivalDeparture>> asyncQuery(Date startDate, Date endDate) {
+        return new QueryThread(startDate, endDate);
+    }
+
 
     /**
      * add waiting jobs to the run queue, launching them in a new thread
@@ -182,6 +196,24 @@ public class ParallelProcessor {
                 done = true;
                 pp.remove(this);
             }
+        }
+    }
+
+    public static class QueryThread implements Callable<List<ArrivalDeparture>> {
+
+        private Date startDate;
+        private Date endDate;
+        public QueryThread(Date startDate, Date endDate) {
+            this.startDate = startDate;
+            this.endDate = endDate;
+        }
+
+        @Override
+        public List<ArrivalDeparture> call() throws Exception {
+            Session session = HibernateUtils.getSession();
+            Criteria criteria = session.createCriteria(ArrivalDeparture.class);
+            List<ArrivalDeparture> results = StopArrivalDepartureCache.createArrivalDeparturesCriteria(criteria, startDate, endDate);
+            return results;
         }
     }
 }
