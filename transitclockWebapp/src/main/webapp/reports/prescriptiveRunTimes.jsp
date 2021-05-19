@@ -267,6 +267,62 @@
             transform: translateY(3px);
             outline: none;
         }
+        .late{
+            background-color:#E6D83E;
+        }
+        .early{
+            background-color: #E34B71;
+        }
+        .ontime{
+            background-color:#37E627;
+        }
+        .perceptive-table-flex{
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            margin-top: 20px;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        .color-legend-block {
+            padding: 10px;
+            text-align: center;
+            width: 50px;
+            margin: 2.5px;
+        }
+
+        .legend-container {
+            display: flex;
+            margin: 2px;
+            width: 100%;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .otp-content {
+           //  background-color: #e5e5e5;
+            padding: 5px;
+            // border: 1px solid #e5e5e5;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .otp-primary {
+            background-color: #e5e5e5;
+            border: 1px solid #e5e5e5;
+        }
+        .gtfs-submit {
+            margin: 40px 24px;
+            background-color: #029932;
+            cursor: pointer;
+            width: 210px;
+            padding: 10px 20px;
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            box-shadow: 0 4px rgb(127 127 127 / 80%);
+        }
 
     </style>
 
@@ -338,8 +394,40 @@
             </div>
 
         </div>
-<%--        <div class="perceptive-table-container">Table</div>--%>
+        <div class="perceptive-table-container">
+            <div class="perceptive-table-flex">
+
+                <div class="adjustment-details inner-flex">
+
+                </div>
+
+                <div class=" inner-flex button-adjustment-details">
+                    <div class="otp-containers">
+                        <div class="otp-content otp-secondary">
+                            <span>OTP (current)</span>
+                            <span id="current_otp"></span>
+                        </div>
+                        <div class="otp-content otp-primary">
+                            <span>OTP (predicted)</span>
+                            <span id="expected_otp"></span>
+                        </div>
+                    </div>
+                    <div class="table-description-container">
+                        <h6>Actual Performance</h6>
+                        <div class="legend-container">
+                            <div class="color-legend-block early">Short</div>
+                            <div class="color-legend-block ontime">Good</div>
+                            <div class="color-legend-block late">Long</div>
+                        </div>
+                    </div>
+                </div>
+                <div class=" inner-flex export-container">
+                    <button class="gtfs-submit ">Export to GTFS</button>
+                </div>
+
+            </div>
         </div>
+    </div>
 </div>
 </body>
 </html>
@@ -347,6 +435,7 @@
 <script>
 
     var stops = {};
+
     function generateTimeBands(){
 
         var timebandOptions = [{
@@ -382,6 +471,64 @@
 
     }
 
+    function getScheduledType(timeReference){
+        var earlyTime = 30000;  // 30 seconds
+        var lateTime = -120000; // 2 minutes
+
+
+        if (timeReference < lateTime) {
+            return "late";
+        } else if (timeReference > earlyTime) {
+            return "early";
+        }
+
+        return "ontime";
+
+    }
+
+    function generateTable(){
+
+        var dummyData = {
+            "adjustments": [
+                {
+                    "stop": 5425,
+                    "schedule": 23000123,
+                    "adjustment": -90000
+                },
+                {
+                    "stop": 797,
+                    "schedule": 3842823,
+                    "adjustment": 0
+                }
+            ],
+            "current_otp": "84%",
+            "expected_otp": "95%"
+        };
+
+
+
+        var currentTable = '<table class="border-table">';
+        currentTable += '<tbody><tr><th>Stop</th><th>Scheduled</th><th>Adjustment</th></tr>';
+
+        dummyData.adjustments.forEach(function(eachAdjustment){
+
+            var scheduleMin  = parseFloat((eachAdjustment.schedule / 60000).toFixed(1));
+            var adjustment  = parseFloat((eachAdjustment.adjustment / 60000).toFixed(1));
+            var sheduledClassName = getScheduledType(eachAdjustment.schedule);
+
+            currentTable += "<tr><td>"+eachAdjustment.stop+"</td>";
+            currentTable += '<td class="'+sheduledClassName+'">'+scheduleMin+'</td>';
+            currentTable += "<td>"+adjustment+"</td>";
+            currentTable += "</tr>";
+
+        });
+
+        currentTable += '</tbody></table>';
+        $("#current_otp").html(dummyData.current_otp);
+        $("#expected_otp").html(dummyData.expected_otp);
+        $(".adjustment-details").html(currentTable);
+
+    }
 
     $("#route").attr("style", "width: 200px");
 
@@ -458,7 +605,7 @@
                 tableTD += "<td>"+avgDwell+"</td>";
 
                 $(".average-time-details").html(tableTD);
-
+                generateTable();
             }
 
 
@@ -521,7 +668,7 @@
          headsign: 704 PARKLAND HOSPITAL
          serviceType: */
 
-       //  params.timeBand = $("#timeband").val();
+            //  params.timeBand = $("#timeband").val();
 
         var firstDay = new Date(date.getFullYear(), date.getMonth()-1, 1);
         var lastDay = new Date(date.getFullYear(), date.getMonth(), 0);
