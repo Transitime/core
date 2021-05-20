@@ -98,6 +98,10 @@ public class DbConfig {
 	
 	// Keyed on routeId
 	private Map<String, List<TripPattern>> tripPatternsByRouteMap;
+
+	// Keyed on tripPatternId
+	private Map<String, TripPattern> tripPatternsByIdMap;
+
 	// For when reading in all trips from db. Keyed on tripId
 	private Map<String, Trip> tripsMap;
 	// For trips that have been read in individually. Keyed on tripId.
@@ -423,15 +427,22 @@ public class DbConfig {
 		// Return the created map
 		return map;
 	}
-	
+
+	private static Map<String, TripPattern> putTripPatternsIntoMap(List<TripPattern> tripPatterns){
+		Map<String, TripPattern> tripPatternMap = tripPatterns.stream()
+				.collect(Collectors.toMap(TripPattern::getId, tripPattern -> tripPattern));
+
+		return tripPatternMap;
+	}
+
+
 	/**
 	 * Converts trip patterns into map keyed on route ID
-	 * 
+	 *
 	 * @param tripPatterns
 	 * @return
 	 */
-	private static Map<String, List<TripPattern>> putTripPatternsIntoMap(
-			List<TripPattern> tripPatterns) {
+	private static Map<String, List<TripPattern>> putTripPatternsIntoRouteMap(List<TripPattern> tripPatterns) {
 		Map<String, List<TripPattern>> map =
 				new HashMap<String, List<TripPattern>>();
 		for (TripPattern tripPattern : tripPatterns) {
@@ -445,30 +456,6 @@ public class DbConfig {
 		}
 
 		return map;
-	}
-
-	/**
-	 * Reads in trips patterns from db and puts them into a map
-	 * 
-	 * @return trip patterns map, keyed by route ID
-	 */
-	private Map<String, List<TripPattern>> putTripPatternsInfoRouteMap() {
-			IntervalTimer timer = new IntervalTimer();
-			logger.debug("About to load trip patterns for all routes...");
-
-			// Use the global session so that don't need to read in any
-			// trip patterns that have already been read in as part of
-			// reading in block assignments. This makes reading of the
-			// trip pattern data much faster.
-			List<TripPattern> tripPatterns =
-					TripPattern.getTripPatterns(globalSession, configRev);
-			Map<String, List<TripPattern>> theTripPatternsByRouteMap = 
-					putTripPatternsIntoMap(tripPatterns);
-
-			logger.debug("Reading trip patterns for all routes took {} msec",
-					timer.elapsedMsec());
-			
-			return theTripPatternsByRouteMap;
 	}
 	
 	/**
@@ -491,6 +478,18 @@ public class DbConfig {
 
 		// Return cached trip pattern data
 		return tripPatternsByRouteMap.get(routeId);
+	}
+
+	public TripPattern getTripPatternForId(String tripPatternId) {
+		// If haven't read in the trip pattern data yet, do so now and cache it
+		if (tripPatternsByIdMap == null) {
+			logger.error("tripPatternsByIdMap not set when "
+					+ "getTripPatternForId() called. Exiting!");
+			System.exit(-1);
+		}
+
+		// Return cached trip pattern data
+		return tripPatternsByIdMap.get(tripPatternId);
 	}
 
 	/**
@@ -820,7 +819,11 @@ public class DbConfig {
 		routesByRouteShortNameMap = putRoutesIntoMapByRouteShortName(routes);
 		logger.debug("Reading routes took {} msec", timer.elapsedMsec());
 
-		tripPatternsByRouteMap = putTripPatternsInfoRouteMap();
+		timer = new IntervalTimer();
+		List<TripPattern> tripPatterns = TripPattern.getTripPatterns(globalSession, configRev);
+		tripPatternsByRouteMap = putTripPatternsIntoRouteMap(tripPatterns);
+		tripPatternsByIdMap = putTripPatternsIntoMap(tripPatterns);
+		logger.debug("Reading trip patterns took {} msec", timer.elapsedMsec());
 		
 		timer = new IntervalTimer();
 		List<Stop> stopsList = Stop.getStops(globalSession, configRev);

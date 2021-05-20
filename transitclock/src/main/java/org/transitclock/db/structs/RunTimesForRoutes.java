@@ -19,8 +19,8 @@ import java.util.List;
                         columnList="routeShortName" ),
                     @Index(name="RunTimesForRoutesServiceTypeIndex",
                         columnList="serviceType" ),
-                    @Index(name="RunTimesForRoutesStartStopPathIndex",
-                        columnList="startStopPathIndex" )
+                    @Index(name="RunTimesForRoutesTripPatternIndex",
+                        columnList="tripPatternId" )
                     } )
 
 public class RunTimesForRoutes implements Serializable {

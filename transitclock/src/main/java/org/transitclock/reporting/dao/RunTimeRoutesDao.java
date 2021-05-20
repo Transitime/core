@@ -154,10 +154,18 @@ public class RunTimeRoutesDao {
         String hql = "";
         String tripPatternId = rtQuery.getTripPatternId();
         if(StringUtils.isNotBlank(tripPatternId)) {
-            hql += " AND rt.tripPatternId = :tripPatternId ";
-            parameterNameAndValues.put("tripPatternId", tripPatternId);
+            hql += " AND rt.tripPatternId like :tripPatternId ";
+            parameterNameAndValues.put("tripPatternId", getTripPatternWildCard(tripPatternId));
         }
         return hql;
+    }
+
+    private String getTripPatternWildCard(String tripPatternId){
+        String splitTripPatternId [] = tripPatternId.split("_");
+        if(splitTripPatternId.length == 6){
+            return "%" + splitTripPatternId[2] + "_" + splitTripPatternId[3] + "_" + splitTripPatternId[4] + "%";
+        }
+        return tripPatternId;
     }
 
     private String getTripIdWhere(RunTimeForRouteQuery rtQuery, Map<String, Object> parameterNameAndValues) {
