@@ -348,6 +348,10 @@
                     <label for="direction">Direction:</label>
                     <select id="direction" name="direction" disabled="true"></select>
                 </div>
+                    <div class="param individual-route-only">
+                        <label for="tripPattern">Trip Pattern:</label>
+                        <select id="tripPattern" name="tripPattern" disabled="true"></select>
+                    </div>
 
                 <div class="param">
                     <label for="serviceDayType">Service Day:</label>
@@ -439,26 +443,24 @@
     function generateTimeBands(){
 
         var timebandOptions = [{
-            name: "Morning",
-            value:"morning"
+            name: "Early AM",
+            value: "00:00 - 06:30"
+
         },{
-            name: "Morning Rush",
-            value:"morning-rush"
+            name: "AM Rush",
+            value:"06:30 - 09:00"
         },{
-            name: "Mid-Day",
-            value:"mid-day"
+            name: "AM Midday",
+            value:"09:00 - 12:00"
         },{
-            name: "Afternoon",
-            value:"afternoon"
+            name: "PM Midday",
+            value:"12:00 - 15:30"
         },{
-            name: "Evening Rush",
-            value:"evening Rush"
+            name:  "PM Rush",
+            value:"15:30 - 18:30"
         },{
-            name: "Evening",
-            value:"evening"
-        },{
-            name: "Late Night",
-            value:"night"
+            name: "Late PM",
+            value:"18:30 - Empty"
         }];
 
 
@@ -540,10 +542,15 @@
         } else {
             $(".individual-route-only").hide();
             $("#direction").empty();
+            $("#tripPattern").empty();
             $("#direction").attr("disabled", true);
+            $("#tripPattern").attr("disabled", true);
         }
     })
 
+    $("#direction").change(function () {
+        populateTripPattern();
+    })
 
     var highestPoints = [];
 
@@ -590,7 +597,8 @@
                     "<p>" +
                     (request.r == "" ? "All routes" : "Route " + request.r) + " to " +
                     (request.headsign == "" ? "All directions" : request.headsign) + " | " +
-                    beginDateString + " to " + endDateString +
+                    (request.tripPattern == "" ? "All Trip Patterns" : request.tripPattern) + " | " +
+                    beginDateString + " to " + endDateString + " | " + request.beginTime + " to " + request.endTime + " | " + request.serviceType+
                     "</p>"
                 );
 
@@ -625,6 +633,7 @@
 
         $("#direction").removeAttr('disabled');
         $("#direction").empty();
+        $("#tripPattern").empty();
 
 
         $.ajax({
@@ -641,12 +650,58 @@
                 response.headsigns.forEach(function (headsign) {
                     $("#direction").append("<option value='" + headsign.headsign + "'>" + headsign.label + "</option>");
                 })
+                populateTripPattern();
             },
             error: function (response) {
                 alert("Error retrieving directions for route " + response.r);
                 // $("#submit").attr("disabled", false);
             }
         })
+    }
+
+
+    function populateTripPattern() {
+        $("#tripPattern").empty();
+
+        var request = {};
+
+        request.a = 1;
+        request.r = $("#route").val();
+        request.headsign = $("#direction").val();
+        request.includeStopPaths = 'false';
+
+        $.ajax({
+            // The page being requested
+            url: apiUrlPrefix + "/command/tripPatterns",
+            // Pass in query string parameters to page being requested
+            data: request,
+            // Needed so that parameters passed properly to page being requested
+            traditional: true,
+            dataType: "json",
+            async: true,
+            // When successful process JSON data
+            success: function (resp) {
+                if (resp.tripPatterns.length == 0) {
+                    alert("No trip pattern data for selected route and headsign.");
+                    $("#submit").attr("disabled", true);
+                } else {
+                    $("#tripPattern").removeAttr('disabled');
+                    $("#submit").removeAttr('disabled');
+
+                    $("#tripPattern").append("<option value=''>All</option>")
+                    resp.tripPatterns.forEach(function (tripPattern) {
+                        $("#tripPattern").append("<option value='" + tripPattern.id + "'>" + tripPattern.firstStopName + ' to ' + tripPattern.lastStopName + "</option>");
+                    })
+
+                }
+
+            },
+            // When there is an AJAX problem alert the user
+            error: function (request, status, error) {
+                alert(error + '. ' + request.responseText);
+                $("#submit").attr("disabled", false);
+            }
+        });
     }
 
 
@@ -668,9 +723,10 @@
          headsign: 704 PARKLAND HOSPITAL
          serviceType: */
 
-            //  params.timeBand = $("#timeband").val();
 
-        var firstDay = new Date(date.getFullYear(), date.getMonth()-1, 1);
+            var timeBand = $("#timeband").val() == null ? "00:00-06:30": $("#timeband").val();
+
+        var firstDay = new Date(date.getFullYear(), date.getMonth()-1, 1);0
         var lastDay = new Date(date.getFullYear(), date.getMonth(), 0);
 
         params.beginDate =  firstDay.getFullYear() + "-"
@@ -680,12 +736,13 @@
         params.endDate =  lastDay.getFullYear() + "-"
             + (lastDay.getMonth() <= 10 ? "0" + (lastDay.getMonth() + 1) : (lastDay.getMonth() + 1))
             + "-" + (lastDay.getDate() < 10 ? "0" + lastDay.getDate() : lastDay.getDate());
-        params.beginTime = "00:00:00";
-        params.endTime = "23:59:59";
+
+        params.beginTime = (timeBand.split("-")[0]).trim()+":00";
+        params.endTime = timeBand.split("-")[1] === "Empty"?"23:59:59": (timeBand.split("-")[1]).trim()+":00";
         params.r = routeName
         params.headsign = directionName;
         params.serviceType = $("#serviceDayType").val();
-        params.tripPattern = "";
+        params.tripPattern =  $("#tripPattern").val() == null ? "" : $("#tripPattern").val();
 
 
         return params;
