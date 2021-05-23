@@ -196,8 +196,9 @@ public class RunTimeWriterImpl implements RunTimeWriter{
       // delete run times for configRev
       logger.info("deleting RunTimesForStops....(be patient)");
       int numUpdates = 0;
-      String hql = "DELETE RunTimesForStops WHERE time >= :beginDate AND time < :endDate" ;
-      Query query = session.createQuery(hql);
+      String hql = "DELETE FROM RunTimesForStops WHERE startTime >= :beginDate AND startTime < :endDate" ;
+
+      Query query = session.createSQLQuery(hql);
       query.setTimestamp("beginDate", beginDate);
       query.setTimestamp("endDate", endDate);
       numUpdates = query.executeUpdate();
