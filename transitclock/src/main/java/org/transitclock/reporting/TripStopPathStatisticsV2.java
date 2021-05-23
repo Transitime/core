@@ -21,7 +21,7 @@ public class TripStopPathStatisticsV2 {
     private Map<StopPathRunTimeKey, StopPathStatisticsV2> stopPathStatistics = new HashMap<>();
     private Map<TripTimeVehicleKey, Long> runTimesForTrips = new HashMap<>();
 
-    public TripStopPathStatisticsV2(Trip primaryTrip, int nextTripTime) {
+    public TripStopPathStatisticsV2(Trip primaryTrip, Integer nextTripTime) {
         this.primaryTrip = primaryTrip;
         this.nextTripTime = nextTripTime;
         this.expectedStopPathCount = primaryTrip.getNumberStopPaths() - 1;

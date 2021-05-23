@@ -19,8 +19,8 @@ import java.util.List;
                         columnList="routeShortName" ),
                     @Index(name="RunTimesForRoutesServiceTypeIndex",
                         columnList="serviceType" ),
-                    @Index(name="RunTimesForRoutesStartStopPathIndex",
-                        columnList="startStopPathIndex" )
+                    @Index(name="RunTimesForRoutesTripPatternIndex",
+                        columnList="tripPatternId" )
                     } )
 
 public class RunTimesForRoutes implements Serializable {
@@ -253,11 +253,11 @@ public class RunTimesForRoutes implements Serializable {
         this.runTimesForStops = runTimesForStops;
     }
 
-    public int getStartStopPathIndex() {
+    public Integer getStartStopPathIndex() {
         return startStopPathIndex;
     }
 
-    public void setStartStopPathIndex(int startStopIndex) {
+    public void setStartStopPathIndex(Integer startStopIndex) {
         this.startStopPathIndex = startStopIndex;
     }
 
@@ -342,4 +342,6 @@ public class RunTimesForRoutes implements Serializable {
                 ", expectedLastStopPathIndex=" + expectedLastStopPathIndex +
                 '}';
     }
+
+
 }

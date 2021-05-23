@@ -203,7 +203,13 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>3.2.4</version>
+			<version>3.8.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-inline</artifactId>
+			<version>3.8.0</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- Used for reflection to find classes in package -->
@@ -300,6 +306,22 @@
 							</transformers>
 							<shadedArtifactAttached>true</shadedArtifactAttached>
 							<shadedClassifierName>UpdateTravelTimes</shadedClassifierName>
+						</configuration>
+					</execution>
+					<execution>
+						<id>shade-UpdateRunTimes</id>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>org.transitclock.applications.UpdateRunTimes</mainClass>
+								</transformer>
+							</transformers>
+							<shadedArtifactAttached>true</shadedArtifactAttached>
+							<shadedClassifierName>UpdateRunTimes</shadedClassifierName>
 						</configuration>
 					</execution>
 					<execution>

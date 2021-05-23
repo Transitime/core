@@ -837,7 +837,7 @@
             if ($("#percentile-select-box").val().trim() != "") {
 
                 var valuePercentage = $("#percentile-select-box").val().trim();
-                TimeTrips = generateRunTimes(tripRunTimes, valuePercentage );
+                var formattedRunTimeTrips = generateRunTimes(tripRunTimes, valuePercentage );
 
                 tableTD = generatePercentileTable(tripsDisplayData, formattedScheduled.minsData, formattedRunTimeTrips);
                 console.log($("#percentile-select-box").val().trim());

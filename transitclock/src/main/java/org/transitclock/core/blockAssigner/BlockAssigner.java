@@ -19,7 +19,7 @@ package org.transitclock.core.blockAssigner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
-import org.transitclock.core.ServiceUtils;
+import org.transitclock.core.ServiceUtilsImpl;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.Trip;
@@ -83,7 +83,7 @@ public class BlockAssigner {
 
             // If using block assignment...
             if (avlReport.isBlockIdAssignmentType()) {
-                ServiceUtils serviceUtis = Core.getInstance().getServiceUtils();
+                ServiceUtilsImpl serviceUtis = Core.getInstance().getServiceUtils();
                 Collection<String> serviceIds =
                         serviceUtis.getServiceIds(avlReport.getDate());
                 // Go through all current service IDs to find the block
