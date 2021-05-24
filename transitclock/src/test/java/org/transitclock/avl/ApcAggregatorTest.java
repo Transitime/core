@@ -71,25 +71,25 @@ public class ApcAggregatorTest {
     ...
      */
 
-    Integer count = aggregator.getBoardingsPerMinute("11861", SingletonSupport.toDate("2021-04-21", "20:28:01", "UTC"));
-    assertNotNull(count);
-    assertEquals("11861 failed", 0, count.intValue());
+    Double rate = aggregator.getBoardingsPerMinute("11861", SingletonSupport.toDate("2021-04-21", "20:28:01", "UTC"));
+    assertNotNull(rate);
+    assertEquals("11861 failed", 0, rate.intValue());
 
-    count = aggregator.getBoardingsPerMinute("17994", SingletonSupport.toDate("2021-04-21", "23:58:01", "UTC"));
-    assertNotNull(count);
-    assertEquals("17994 failed", 2, count.intValue());
+    rate = aggregator.getBoardingsPerMinute("17994", SingletonSupport.toDate("2021-04-21", "23:58:01", "UTC"));
+    assertNotNull(rate);
+    assertEquals("17994 failed", 2.0/*arrivals/*/ / 7/*records*/ / 15/*window*/, rate, 0.001);
 
-    count = aggregator.getBoardingsPerMinute("17976", SingletonSupport.toDate("2021-04-21", "16:59:00", "UTC"));
-    assertNotNull(count);
-    assertEquals("17976 failed", 1, count.intValue());
+    rate = aggregator.getBoardingsPerMinute("17976", SingletonSupport.toDate("2021-04-21", "16:59:00", "UTC"));
+    assertNotNull(rate);
+    assertEquals("17976 failed", 5.0/*arrivals/*/ / 6/*records*/ / 15/*window*/, rate, 0.001);
 
-    count = aggregator.getBoardingsPerMinute("11861", SingletonSupport.toDate("2021-04-21", "15:51:00", "UTC"));
-    assertNotNull(count);
-    assertEquals("11861 failed", 11, count.intValue());
+    rate = aggregator.getBoardingsPerMinute("11861", SingletonSupport.toDate("2021-04-21", "15:51:00", "UTC"));
+    assertNotNull(rate);
+    assertEquals("11861 failed", 14.0/*arrivals/*/ / 5/*records*/ / 15/*window*/, rate, 0.001);
 
-    count = aggregator.getBoardingsPerMinute("17990", SingletonSupport.toDate("2021-04-21", "21:45:00", "UTC"));
-    assertNotNull(count);
-    assertEquals("17990 failed", 4, count.intValue());
+    rate = aggregator.getBoardingsPerMinute("17990", SingletonSupport.toDate("2021-04-21", "21:45:00", "UTC"));
+    assertNotNull(rate);
+    assertEquals("17990 failed", 4.0/*arrivals/*/ / 7/*records*/ / 15/*window*/, rate, 0.001);
 
   }
 

@@ -269,7 +269,7 @@ public class ApcDataProcessor {
   }
 
 
-  public Integer getBoardingsPerMinute(String stopId, Date arrivalTime) {
+  public Double getBoardingsPerMinute(String stopId, Date arrivalTime) {
     return apcAggregator.getBoardingsPerMinute(stopId, arrivalTime);
   }
 

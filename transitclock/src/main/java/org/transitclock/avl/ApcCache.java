@@ -4,6 +4,7 @@ import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.dataCache.ehcache.CacheManagerFactory;
 import org.transitclock.db.structs.ApcReport;
 
@@ -23,6 +24,10 @@ public class ApcCache {
 
   private static final Logger logger =
           LoggerFactory.getLogger(ApcCache.class);
+  public static IntegerConfigValue WINDOW_IN_MINUTES =
+          new IntegerConfigValue("transitclock.apc.cacheBinMinutes",
+                  15,
+                  "Bin size in minutes to cache APC data");
 
   private String tz = null;
   private static final String cacheName = "apcCache";
@@ -34,10 +39,11 @@ public class ApcCache {
     cache = cm.getCache(cacheName, String.class, ApcEvents.class);
   }
 
-  public Integer getBoardingsPerMinute(String stopId, Date arrival) {
+  public Double getBoardingsPerMinute(String stopId, Date arrival) {
     String hash = hash(stopId, arrival);
     List<ApcReport> apcReports = get(hash);
-    return sum(apcReports);
+    if (apcReports == null || apcReports.isEmpty()) return 0.0;
+    return new Double(sum(apcReports)) / apcReports.size() / WINDOW_IN_MINUTES.getValue();
   }
 
   private List<ApcReport> get(String hash) {
@@ -98,9 +104,20 @@ public class ApcCache {
   }
 
   private String hash(String stopId, Date arrival) {
+    Date binArrival = dateBinning(arrival, Calendar.MINUTE, WINDOW_IN_MINUTES.getValue());
     SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
     if (tz != null) sdf.setTimeZone(TimeZone.getTimeZone(tz));
-    return stopId + "." + sdf.format(arrival);
+    return stopId + "." + sdf.format(binArrival);
+  }
+
+  private Date dateBinning(Date input, int field, int binWidth) {
+    Calendar cal = Calendar.getInstance(TimeZone.getTimeZone(tz));
+    cal.setTime(input);
+    int oldValue = cal.get(field);
+    int newValue = oldValue / binWidth;
+    cal.set(field, newValue*binWidth);
+    return cal.getTime();
+
   }
 
   private int sum(List<ApcReport> apcReports) {

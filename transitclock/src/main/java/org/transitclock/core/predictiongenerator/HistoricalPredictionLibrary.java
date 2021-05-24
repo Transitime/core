@@ -344,7 +344,7 @@ public class HistoricalPredictionLibrary {
 						.getSecondsIntoDay(referenceTime);
 		int headwaySeconds = Core.getInstance().getTime()
 						.getSecondsIntoDay(headwayTime);
-		return (referenceSeconds - headwaySeconds) > Time.SEC_PER_MIN * maxHeadwayMinutes.getValue();
+		return (referenceSeconds - headwaySeconds) < Time.SEC_PER_MIN * maxHeadwayMinutes.getValue();
 	}
 
 	public static Long getHeadway(VehicleState vehicleState, Indices indices) {
