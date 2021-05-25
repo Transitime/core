@@ -66,6 +66,13 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
       return super.getStopTimeForPath(indices, avlReport, vehicleState);
     }
 
+    Long cachedResult = ApcStopTimeCache.getInstance().get(indices, avlReport, vehicleState);
+    if (cachedResult != null) {
+      getMonitoring().rateMetric("PredictionDwellApcProcessingHit", true);
+      return cachedResult;
+    }
+    getMonitoring().rateMetric("PredictionDwellApcProcessingHit", false);
+
     IntervalTimer parTimer = new IntervalTimer();
     Double passengerArrivalRateInSeconds = getArrivalsPerSecond(indices, vehicleState);
     if (passengerArrivalRateInSeconds == null) {
@@ -115,6 +122,7 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     logHit();
     getMonitoring().averageMetric("PredictionApcProcessingTime", apcTimer.elapsedMsec());
     getMonitoring().averageMetric("PredictionApcPredictProcessingTime", predictTimer.elapsedMsec());
+    ApcStopTimeCache.getInstance().put(indices, avlReport, vehicleState, new Double(result.getResult()).longValue());
     return new Double(result.getResult()).longValue();
   }
 

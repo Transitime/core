@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 
+import static org.transitclock.utils.DateUtils.dateBinning;
+
 /**
  * Group APC data to generate counts per minute interval
  */
@@ -108,16 +110,6 @@ public class ApcCache {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
     if (tz != null) sdf.setTimeZone(TimeZone.getTimeZone(tz));
     return stopId + "." + sdf.format(binArrival);
-  }
-
-  private Date dateBinning(Date input, int field, int binWidth) {
-    Calendar cal = Calendar.getInstance(TimeZone.getTimeZone(tz));
-    cal.setTime(input);
-    int oldValue = cal.get(field);
-    int newValue = oldValue / binWidth;
-    cal.set(field, newValue*binWidth);
-    return cal.getTime();
-
   }
 
   private int sum(List<ApcReport> apcReports) {
