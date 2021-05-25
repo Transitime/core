@@ -39,10 +39,12 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 
+import com.google.common.collect.Lists;
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.JDBCException;
 import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
@@ -55,7 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.BooleanConfigValue;
-import org.transitclock.config.StringConfigValue;
+import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.configData.AgencyConfig;
 import org.transitclock.configData.CoreConfig;
 import org.transitclock.core.SpatialMatch;
@@ -144,6 +146,8 @@ public final class Block implements Serializable {
 	
 	private static BooleanConfigValue blockLoading =
       new BooleanConfigValue("transitclock.blockLoading.agressive", false, "Set true to eagerly fetch all blocks into memory on startup");
+	private static IntegerConfigValue blockConcurrencyCount =
+					new IntegerConfigValue("transitclock.blockLoading.count", 1, "number of concurrent calls for block loading");
 
 	private static final Logger logger = LoggerFactory.getLogger(Block.class);
 
@@ -204,16 +208,16 @@ public final class Block implements Serializable {
 	@SuppressWarnings("unchecked")
 	public static List<Block> getBlocks(Session session, int configRev) 
 			throws HibernateException {
+		IntervalTimer blockTimer = new IntervalTimer();
 	  try {
-
 	    if (Boolean.TRUE.equals(blockLoading.getValue())) {
 	      logger.warn("caching blocks aggressively....");
-	      return getBlocksAgressively(session, configRev);
+	      return getBlocksConcurrently(session, configRev);
 	    }
 	    logger.warn("caching blocks passively....");
 	    return getBlocksPassive(session, configRev);
 	  } finally {
-	    logger.warn("caching complete");
+	    logger.warn("caching complete in {}", blockTimer.elapsedMsecStr());
 	  }
 	}
 
@@ -226,20 +230,57 @@ public final class Block implements Serializable {
       return query.list();
 	  }
 
-	  private static List<Block> getBlocksAgressively(Session session, int configRev) 
-	      throws HibernateException {
-      String hql = "FROM Blocks as b "
-          + "join fetch b.trips t "
-          + "join fetch t.travelTimes tt "
-//		  + "join fetch tt.travelTimesForStopPaths tsp "
-          + "join fetch t.tripPattern tp "
-          + "join fetch tp.stopPaths sp "
-          /*+ "join fetch sp.locations "*/  //this makes the resultset REALLY big
-          + "WHERE b.configRev = :configRev";
-      Query query = session.createQuery(hql);
-      query.setInteger("configRev", configRev);
-      return query.list();
-	  }
+	private static List<Block> getBlocksConcurrently(Session session, int configRev) {
+			IntervalTimer blockTimer = new IntervalTimer();
+			logger.info("querying for block service ids");
+			String serviceIdsSql = "SELECT DISTINCT serviceId from Blocks where configRev = " + configRev;
+			logger.info("querying for serviceIds {}", serviceIdsSql);
+			SQLQuery sqlQuery = session.createSQLQuery(serviceIdsSql);
+			List serviceIds = sqlQuery.list();
+
+			if (serviceIds == null || serviceIds.isEmpty()) {
+				logger.error("no serviceIds present for configRev {}, exiting.", configRev);
+				return new ArrayList<>();
+			}
+			if (serviceIds.size() / blockConcurrencyCount.getValue() < 1) {
+				logger.error("only one bin requested, falling back on passive impl");
+				return getBlocksPassive(session, configRev);
+			}
+
+			logger.info("concurrently loading all blocks for configRev {} and serviceIds {}", configRev, serviceIds);
+			List partitions = Lists.partition(serviceIds,serviceIds.size() / blockConcurrencyCount.getValue());
+			List<BlockLoader> loaders = new ArrayList();
+
+			for (Object partition : partitions) {
+				List objects = (List) partition;
+				List<String> serviceIdSection = new ArrayList<>();
+				for (Object obj : objects) {
+					serviceIdSection.add((String) obj);
+				}
+				BlockLoader bl = new BlockLoader(serviceIdSection, configRev);
+				loaders.add(bl);
+				new Thread(bl).start();
+			}
+
+			Set<Block> allBlocks = new HashSet<>();
+			int i = 0;
+			for (BlockLoader bl : loaders) {
+				while (!bl.finished) {
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				if (bl.blocks != null) {
+					logger.info("BlockLoader {} of {} complete", i, loaders.size());
+					allBlocks.addAll(bl.blocks);
+				}
+				i++;
+			}
+			logger.info("getBlocksConcurrently executed in {} with {} blocks", blockTimer.elapsedMsecStr(), allBlocks.size());
+			return new ArrayList<>(allBlocks);
+		}
 
 	
 	/**
@@ -1334,7 +1375,43 @@ public final class Block implements Serializable {
 	public boolean shouldBeExclusive() {
 		return CoreConfig.exclusiveBlockAssignments();
 	}
-	
+
+	public static class BlockLoader implements Runnable {
+
+		private List<String> serviceIds;
+		private int configRev;
+		private boolean finished = false;
+		private List<Block> blocks;
+
+		public BlockLoader(List<String> serviceIds, int configRev) {
+			this.serviceIds = serviceIds;
+			this.configRev = configRev;
+		}
+
+		@Override
+		public void run() {
+			try {
+				// when in a seperate thread you need a distinct session
+				Session session = HibernateUtils.getSession();
+				String hql = "FROM Blocks b "
+								+ "WHERE b.configRev = :configRev and b.serviceId in (";
+				for (String s : serviceIds) {
+					hql += "'" + s + "', ";
+				}
+				// remove last trailing comma
+				hql = hql.substring(0, hql.length()-2);
+				hql += ")";
+				logger.info("executing {}", hql);
+				Query query = session.createQuery(hql);
+				query.setInteger("configRev", configRev);
+
+				blocks = query.list();
+
+			} finally {
+				finished = true;
+			}
+		}
+	}
 	/**
 	 * For debugging
 	 * 
