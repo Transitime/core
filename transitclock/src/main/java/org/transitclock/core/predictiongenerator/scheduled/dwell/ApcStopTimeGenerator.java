@@ -15,6 +15,7 @@ import org.transitclock.core.predictiongenerator.kalman.KalmanPredictionResult;
 import org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman.KalmanPredictionGeneratorImpl;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.ScheduleTime;
+import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
 
 import java.util.ArrayList;
@@ -58,11 +59,14 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
 
   @Override
   public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
+    IntervalTimer apcTimer = new IntervalTimer();
     if (!hasApcData()) {
       logger.debug("exiting apc dwell time, no apc data");
       logMiss();
       return super.getStopTimeForPath(indices, avlReport, vehicleState);
     }
+
+    IntervalTimer parTimer = new IntervalTimer();
     Double passengerArrivalRateInSeconds = getArrivalsPerSecond(indices, vehicleState);
     if (passengerArrivalRateInSeconds == null) {
       // we didn't have enough information, fall back on default impl
@@ -72,7 +76,10 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
       return super.getStopTimeForPath(indices, avlReport, vehicleState);
     } else {
       getMonitoring().rateMetric("PredictionDwellApcHit", true);
+      getMonitoring().averageMetric("PredictionApcPARProcessingTime", parTimer.elapsedMsec());
     }
+
+    IntervalTimer headwayTimer = new IntervalTimer();
     Long currentHeadwayInSeconds = getHeadwayInSeconds(vehicleState, indices);
     if (currentHeadwayInSeconds == null) {
       logMiss();
@@ -80,12 +87,17 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
       return super.getStopTimeForPath(indices, avlReport, vehicleState);
     } else {
       getMonitoring().rateMetric("PredictionDwellHeadwayHit", true);
+      getMonitoring().averageMetric("PredictionApcHeadwayProcessingTime", headwayTimer.elapsedMsec());
     }
+
+    IntervalTimer boardingTimer = new IntervalTimer();
     double passengerBoardingTime = getPassengerBoardingTime(vehicleState);
     long dwellTime = new Double(passengerArrivalRateInSeconds * currentHeadwayInSeconds * passengerBoardingTime).longValue();
     logger.debug("dwellTime={} = passengerArrivalRateInSeconds={} * currentHeadway={} * passengerBoardingTime={}",
             dwellTime, passengerArrivalRateInSeconds, currentHeadwayInSeconds, passengerBoardingTime);
+    getMonitoring().averageMetric("PredictionApcBoardingProcessingTime", boardingTimer.elapsedMsec());
 
+    IntervalTimer historyTimer = new IntervalTimer();
     List<Double> historicalDwellTime = getHistoricalDwellTime(indices, vehicleState, passengerBoardingTime);
     if (historicalDwellTime == null || historicalDwellTime.size() < 3) {
       logger.debug("exiting apc dwell time, no historical data");
@@ -94,11 +106,15 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
       return super.getStopTimeForPath(indices, avlReport, vehicleState);
     } else {
       getMonitoring().rateMetric("PredictionDwellHistoryHit", true);
+      getMonitoring().averageMetric("PredictionApcHistoryProcessingTime", historyTimer.elapsedMsec());
     }
 
+    IntervalTimer predictTimer = new IntervalTimer();
     KalmanPredictionResult result = predict(dwellTime, historicalDwellTime, getLastPredictionError(indices));
     getKalmanErrorCache().putDwellErrorValue(indices, result.getFilterError());
     logHit();
+    getMonitoring().averageMetric("PredictionApcProcessingTime", apcTimer.elapsedMsec());
+    getMonitoring().averageMetric("PredictionApcPredictProcessingTime", predictTimer.elapsedMsec());
     return new Double(result.getResult()).longValue();
   }
 

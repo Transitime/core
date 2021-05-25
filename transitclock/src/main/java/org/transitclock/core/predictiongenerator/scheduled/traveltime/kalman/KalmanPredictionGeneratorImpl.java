@@ -16,6 +16,7 @@ import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.PredictionEvent;
 import org.transitclock.db.structs.PredictionForStopPath;
 import org.transitclock.db.structs.TrafficSensorData;
+import org.transitclock.utils.IntervalTimer;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -82,6 +83,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
   @Override
   public long getTravelTimeForPath(Indices indices, AvlReport avlReport, VehicleState currentVehicleState) {
 
+    IntervalTimer kalmanTimer = new IntervalTimer();
     logger.debug("Calling Kalman prediction algorithm for : "+indices.toString());
     long alternatePrediction = super.getTravelTimeForPath(indices, avlReport, currentVehicleState);
 
@@ -136,6 +138,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 
             getMonitoring().rateMetric("PredictionKalmanHit", true);
             getMonitoring().sumMetric("PredictionGenerationKalman");
+            getMonitoring().averageMetric("PredictionKalmanProcessingTime", kalmanTimer.elapsedMsec());
             return predictionTime;
 
           } catch (Exception e) {
