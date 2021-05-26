@@ -36,7 +36,7 @@ public class ApcStopTimeEvent implements Serializable {
 
   @Override
   public boolean equals(Object obj) {
-    String s = (String) obj;
-    return s.equals(hash);
+    ApcStopTimeEvent s = (ApcStopTimeEvent) obj;
+    return s.hash.equals(hash);
   }
 }

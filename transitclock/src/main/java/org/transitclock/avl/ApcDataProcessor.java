@@ -138,6 +138,14 @@ public class ApcDataProcessor {
         matches.add(apcParsedRecord.toApcReport());
       }
     }
+
+    if (matches.size() == 0) {
+      // the arrivals didn't load, re-process
+      logger.error("re processing APC records for range {}", apcTimeRange);
+      internalProcess(apcRecords, arrivalDepartures);
+      return;
+    }
+
     analyze(matches);
   }
 

@@ -5,14 +5,17 @@ import org.slf4j.LoggerFactory;
 import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.db.structs.ArrivalDeparture;
-import org.transitclock.utils.Time;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.transitclock.avl.ApcCache.WINDOW_IN_MINUTES;
+import static org.transitclock.utils.DateUtils.dateBinning;
 
 
 /**
@@ -55,13 +58,13 @@ public class ApcMatcher {
     for (ApcParsedRecord apc : apcRecords) {
       List<ArrivalDeparture> results = new ArrayList<>();
       List<String> searchedKeys = new ArrayList<>();
-      for (int i = -APC_MATCH_WINDOW_MINUTES.getValue(); i <= APC_MATCH_WINDOW_MINUTES.getValue(); i++) {
-        String hash = hash(apc, i);
-        searchedKeys.add(hash);
-        List<ArrivalDeparture> result = cache.get(hash);
-        if (result != null)
-          results.addAll(result);
-      }
+
+      String hash = hash(apc);
+      searchedKeys.add(hash);
+      List<ArrivalDeparture> result = cache.get(hash);
+      if (result != null)
+        results.addAll(result);
+
       if (results.isEmpty() && debug) {
         List<String> actualKeys = new ArrayList<>();
         for (String key : cache.keySet()) {
@@ -113,17 +116,22 @@ public class ApcMatcher {
     }
   }
 
-  private String hash(ApcParsedRecord apc, int stepIndex) {
+  private String hash(ApcParsedRecord apc) {
     return apc.getVehicleId()
             +  "."
-            + new SimpleDateFormat("yyyyMMddHHmm").format(new Date(
-                    apc.getArrivalEpoch()
-                    + stepIndex * Time.MS_PER_MIN));
+            + new SimpleDateFormat("yyyyMMddHHmm").format(
+                    dateBinning(new Date(apc.getArrivalEpoch()),
+                            Calendar.MINUTE, WINDOW_IN_MINUTES.getValue()));
+
   }
 
 
   private String hash(ArrivalDeparture ad) {
-    return ad.getVehicleId() + "." + new SimpleDateFormat("yyyyMMddHHmm").format(new Date(ad.getTime()));
+    return ad.getVehicleId() + "."
+            + new SimpleDateFormat("yyyyMMddHHmm").format(
+                    dateBinning(new Date(ad.getTime()),
+                            Calendar.MINUTE,
+                            WINDOW_IN_MINUTES.getValue()));
   }
 
 

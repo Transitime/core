@@ -147,7 +147,7 @@ public final class Block implements Serializable {
 	private static BooleanConfigValue blockLoading =
       new BooleanConfigValue("transitclock.blockLoading.agressive", false, "Set true to eagerly fetch all blocks into memory on startup");
 	private static IntegerConfigValue blockConcurrencyCount =
-					new IntegerConfigValue("transitclock.blockLoading.count", 1, "number of concurrent calls for block loading");
+					new IntegerConfigValue("transitclock.blockLoading.count", 4, "number of concurrent calls for block loading");
 
 	private static final Logger logger = LoggerFactory.getLogger(Block.class);
 
