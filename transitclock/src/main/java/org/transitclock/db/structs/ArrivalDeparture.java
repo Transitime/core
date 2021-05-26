@@ -276,7 +276,13 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		if(block!=null)
 		{
 			Trip trip = block.getTrip(tripIndex);
+			if (trip == null) {
+				throw new IllegalArgumentException("No trip retrieved for tripIndex " + tripIndex + " on block " + block);
+			}
 			StopPath stopPath = trip.getStopPath(stopPathIndex);
+			if (stopPath == null) {
+				throw new IllegalArgumentException("No stopPath retrieved for stopPathIndex " + stopPathIndex + " on trip " + trip);
+			}
 			this.tripPatternId = stopPath.getTripPatternId();
 			String stopId = stopPath.getStopId();
 			// Determine and store stop order
