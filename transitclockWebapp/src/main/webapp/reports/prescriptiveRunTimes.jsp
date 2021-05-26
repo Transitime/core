@@ -267,6 +267,62 @@
             transform: translateY(3px);
             outline: none;
         }
+        .late{
+            background-color:#E6D83E;
+        }
+        .early{
+            background-color: #E34B71;
+        }
+        .ontime{
+            background-color:#37E627;
+        }
+        .perceptive-table-flex{
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            margin-top: 20px;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        .color-legend-block {
+            padding: 10px;
+            text-align: center;
+            width: 50px;
+            margin: 2.5px;
+        }
+
+        .legend-container {
+            display: flex;
+            margin: 2px;
+            width: 100%;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .otp-content {
+           //  background-color: #e5e5e5;
+            padding: 5px;
+            // border: 1px solid #e5e5e5;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .otp-primary {
+            background-color: #e5e5e5;
+            border: 1px solid #e5e5e5;
+        }
+        .gtfs-submit {
+            margin: 40px 24px;
+            background-color: #029932;
+            cursor: pointer;
+            width: 210px;
+            padding: 10px 20px;
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            box-shadow: 0 4px rgb(127 127 127 / 80%);
+        }
 
     </style>
 
@@ -292,6 +348,10 @@
                     <label for="direction">Direction:</label>
                     <select id="direction" name="direction" disabled="true"></select>
                 </div>
+                    <div class="param individual-route-only">
+                        <label for="tripPattern">Trip Pattern:</label>
+                        <select id="tripPattern" name="tripPattern" disabled="true"></select>
+                    </div>
 
                 <div class="param">
                     <label for="serviceDayType">Service Day:</label>
@@ -338,8 +398,40 @@
             </div>
 
         </div>
-<%--        <div class="perceptive-table-container">Table</div>--%>
+        <div class="perceptive-table-container">
+            <div class="perceptive-table-flex">
+
+                <div class="adjustment-details inner-flex">
+
+                </div>
+
+                <div class=" inner-flex button-adjustment-details">
+                    <div class="otp-containers">
+                        <div class="otp-content otp-secondary">
+                            <span>OTP (current)</span>
+                            <span id="current_otp"></span>
+                        </div>
+                        <div class="otp-content otp-primary">
+                            <span>OTP (predicted)</span>
+                            <span id="expected_otp"></span>
+                        </div>
+                    </div>
+                    <div class="table-description-container">
+                        <h6>Actual Performance</h6>
+                        <div class="legend-container">
+                            <div class="color-legend-block early">Short</div>
+                            <div class="color-legend-block ontime">Good</div>
+                            <div class="color-legend-block late">Long</div>
+                        </div>
+                    </div>
+                </div>
+                <div class=" inner-flex export-container">
+                    <button class="gtfs-submit ">Export to GTFS</button>
+                </div>
+
+            </div>
         </div>
+    </div>
 </div>
 </body>
 </html>
@@ -347,29 +439,28 @@
 <script>
 
     var stops = {};
+
     function generateTimeBands(){
 
         var timebandOptions = [{
-            name: "Morning",
-            value:"morning"
+            name: "Early AM",
+            value: "00:00 - 06:30"
+
         },{
-            name: "Morning Rush",
-            value:"morning-rush"
+            name: "AM Rush",
+            value:"06:30 - 09:00"
         },{
-            name: "Mid-Day",
-            value:"mid-day"
+            name: "AM Midday",
+            value:"09:00 - 12:00"
         },{
-            name: "Afternoon",
-            value:"afternoon"
+            name: "PM Midday",
+            value:"12:00 - 15:30"
         },{
-            name: "Evening Rush",
-            value:"evening Rush"
+            name:  "PM Rush",
+            value:"15:30 - 18:30"
         },{
-            name: "Evening",
-            value:"evening"
-        },{
-            name: "Late Night",
-            value:"night"
+            name: "Late PM",
+            value:"18:30 - Empty"
         }];
 
 
@@ -382,6 +473,64 @@
 
     }
 
+    function getScheduledType(timeReference){
+        var earlyTime = 30000;  // 30 seconds
+        var lateTime = -120000; // 2 minutes
+
+
+        if (timeReference < lateTime) {
+            return "late";
+        } else if (timeReference > earlyTime) {
+            return "early";
+        }
+
+        return "ontime";
+
+    }
+
+    function generateTable(){
+
+        var dummyData = {
+            "adjustments": [
+                {
+                    "stop": 5425,
+                    "schedule": 23000123,
+                    "adjustment": -90000
+                },
+                {
+                    "stop": 797,
+                    "schedule": 3842823,
+                    "adjustment": 0
+                }
+            ],
+            "current_otp": "84%",
+            "expected_otp": "95%"
+        };
+
+
+
+        var currentTable = '<table class="border-table">';
+        currentTable += '<tbody><tr><th>Stop</th><th>Scheduled</th><th>Adjustment</th></tr>';
+
+        dummyData.adjustments.forEach(function(eachAdjustment){
+
+            var scheduleMin  = parseFloat((eachAdjustment.schedule / 60000).toFixed(1));
+            var adjustment  = parseFloat((eachAdjustment.adjustment / 60000).toFixed(1));
+            var sheduledClassName = getScheduledType(eachAdjustment.schedule);
+
+            currentTable += "<tr><td>"+eachAdjustment.stop+"</td>";
+            currentTable += '<td class="'+sheduledClassName+'">'+scheduleMin+'</td>';
+            currentTable += "<td>"+adjustment+"</td>";
+            currentTable += "</tr>";
+
+        });
+
+        currentTable += '</tbody></table>';
+        $("#current_otp").html(dummyData.current_otp);
+        $("#expected_otp").html(dummyData.expected_otp);
+        $(".adjustment-details").html(currentTable);
+
+    }
 
     $("#route").attr("style", "width: 200px");
 
@@ -393,10 +542,15 @@
         } else {
             $(".individual-route-only").hide();
             $("#direction").empty();
+            $("#tripPattern").empty();
             $("#direction").attr("disabled", true);
+            $("#tripPattern").attr("disabled", true);
         }
     })
 
+    $("#direction").change(function () {
+        populateTripPattern();
+    })
 
     var highestPoints = [];
 
@@ -443,7 +597,8 @@
                     "<p>" +
                     (request.r == "" ? "All routes" : "Route " + request.r) + " to " +
                     (request.headsign == "" ? "All directions" : request.headsign) + " | " +
-                    beginDateString + " to " + endDateString +
+                    (request.tripPattern == "" ? "All Trip Patterns" : request.tripPattern) + " | " +
+                    beginDateString + " to " + endDateString + " | " + request.beginTime + " to " + request.endTime + " | " + request.serviceType+
                     "</p>"
                 );
 
@@ -458,7 +613,7 @@
                 tableTD += "<td>"+avgDwell+"</td>";
 
                 $(".average-time-details").html(tableTD);
-
+                generateTable();
             }
 
 
@@ -478,6 +633,7 @@
 
         $("#direction").removeAttr('disabled');
         $("#direction").empty();
+        $("#tripPattern").empty();
 
 
         $.ajax({
@@ -494,12 +650,58 @@
                 response.headsigns.forEach(function (headsign) {
                     $("#direction").append("<option value='" + headsign.headsign + "'>" + headsign.label + "</option>");
                 })
+                populateTripPattern();
             },
             error: function (response) {
                 alert("Error retrieving directions for route " + response.r);
                 // $("#submit").attr("disabled", false);
             }
         })
+    }
+
+
+    function populateTripPattern() {
+        $("#tripPattern").empty();
+
+        var request = {};
+
+        request.a = 1;
+        request.r = $("#route").val();
+        request.headsign = $("#direction").val();
+        request.includeStopPaths = 'false';
+
+        $.ajax({
+            // The page being requested
+            url: apiUrlPrefix + "/command/tripPatterns",
+            // Pass in query string parameters to page being requested
+            data: request,
+            // Needed so that parameters passed properly to page being requested
+            traditional: true,
+            dataType: "json",
+            async: true,
+            // When successful process JSON data
+            success: function (resp) {
+                if (resp.tripPatterns.length == 0) {
+                    alert("No trip pattern data for selected route and headsign.");
+                    $("#submit").attr("disabled", true);
+                } else {
+                    $("#tripPattern").removeAttr('disabled');
+                    $("#submit").removeAttr('disabled');
+
+                    $("#tripPattern").append("<option value=''>All</option>")
+                    resp.tripPatterns.forEach(function (tripPattern) {
+                        $("#tripPattern").append("<option value='" + tripPattern.id + "'>" + tripPattern.firstStopName + ' to ' + tripPattern.lastStopName + "</option>");
+                    })
+
+                }
+
+            },
+            // When there is an AJAX problem alert the user
+            error: function (request, status, error) {
+                alert(error + '. ' + request.responseText);
+                $("#submit").attr("disabled", false);
+            }
+        });
     }
 
 
@@ -521,9 +723,10 @@
          headsign: 704 PARKLAND HOSPITAL
          serviceType: */
 
-       //  params.timeBand = $("#timeband").val();
 
-        var firstDay = new Date(date.getFullYear(), date.getMonth()-1, 1);
+            var timeBand = $("#timeband").val() == null ? "00:00-06:30": $("#timeband").val();
+
+        var firstDay = new Date(date.getFullYear(), date.getMonth()-1, 1);0
         var lastDay = new Date(date.getFullYear(), date.getMonth(), 0);
 
         params.beginDate =  firstDay.getFullYear() + "-"
@@ -533,12 +736,13 @@
         params.endDate =  lastDay.getFullYear() + "-"
             + (lastDay.getMonth() <= 10 ? "0" + (lastDay.getMonth() + 1) : (lastDay.getMonth() + 1))
             + "-" + (lastDay.getDate() < 10 ? "0" + lastDay.getDate() : lastDay.getDate());
-        params.beginTime = "00:00:00";
-        params.endTime = "23:59:59";
+
+        params.beginTime = (timeBand.split("-")[0]).trim()+":00";
+        params.endTime = timeBand.split("-")[1] === "Empty"?"23:59:59": (timeBand.split("-")[1]).trim()+":00";
         params.r = routeName
         params.headsign = directionName;
         params.serviceType = $("#serviceDayType").val();
-        params.tripPattern = "";
+        params.tripPattern =  $("#tripPattern").val() == null ? "" : $("#tripPattern").val();
 
 
         return params;
