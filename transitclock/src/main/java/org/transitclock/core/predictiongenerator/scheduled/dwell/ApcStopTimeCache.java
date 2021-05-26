@@ -48,7 +48,8 @@ public class ApcStopTimeCache {
   }
 
   public void put(Indices indices, AvlReport avlReport, VehicleState vehicleState, Long result) {
-    cache.put(hash(indices, avlReport, vehicleState), result);
+    if (result != null)
+      cache.put(hash(indices, avlReport, vehicleState), result);
   }
 
 
