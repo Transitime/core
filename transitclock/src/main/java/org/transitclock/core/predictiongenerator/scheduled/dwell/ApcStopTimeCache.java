@@ -39,7 +39,7 @@ public class ApcStopTimeCache {
     return singleton;
   }
 
-  public Long get(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
+  public synchronized Long get(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
     return cache.get(hash(indices, avlReport, vehicleState));
   }
 
@@ -47,7 +47,7 @@ public class ApcStopTimeCache {
     return new ApcStopTimeEvent(indices, avlReport, vehicleState);
   }
 
-  public void put(Indices indices, AvlReport avlReport, VehicleState vehicleState, Long result) {
+  public synchronized void put(Indices indices, AvlReport avlReport, VehicleState vehicleState, Long result) {
     if (result != null)
       cache.put(hash(indices, avlReport, vehicleState), result);
   }
