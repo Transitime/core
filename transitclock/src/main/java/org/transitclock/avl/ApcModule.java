@@ -52,7 +52,7 @@ public class ApcModule {
       Double boardingsPerMinute = processor.getBoardingsPerMinute(stopId, arrivalTime);
     if (boardingsPerMinute != null && boardingsPerMinute != 0) {
       double boardingPerSecond = new Double(boardingsPerMinute) / Time.SEC_PER_MIN;
-      logger.info("boardingsPerMinute={} = totalArrivals={}",
+      logger.debug("boardingsPerMinute={} = totalArrivals={}",
               boardingPerSecond * Time.SEC_PER_MIN, boardingsPerMinute);
       return boardingPerSecond;
     }
