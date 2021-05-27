@@ -167,7 +167,7 @@ public class GtfsBasedDataGenerator {
 
   }
 
-  public ArrivalDeparture getHeadwayArrivalDeparture(long referenceTime, int tripIndex, int stopPathIndex, int scheduleDeviationSeconds,
+  public ArrivalDeparture getHeadwayArrivalDeparture(long referenceTime, String blockId, String tripId, int tripIndex, int stopPathIndex, int scheduleDeviationSeconds,
                                                      String headwayVehicle, String stopId) {
 
     ArrivalDeparture.Builder ad = new ArrivalDeparture.Builder(headwayVehicle,
@@ -181,8 +181,8 @@ public class GtfsBasedDataGenerator {
             true,
             -1,
             1,
-            BLOCK_ID,
-            HEADWAY_TRIP_ID,
+            blockId,
+            tripId,
             stopId,
             0,
             0.0f,

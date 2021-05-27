@@ -81,7 +81,7 @@ public class ApcAggregatorTest {
 
     rate = aggregator.getBoardingsPerMinute("17976", SingletonSupport.toDate("2021-04-21", "16:59:00", "UTC"));
     assertNotNull(rate);
-    assertEquals("17976 failed", 5.0/*arrivals/*/ / 6/*records*/ / 15/*window*/, rate, 0.001);
+    assertEquals("17976 failed", 5.0/*arrivals/*/ / 4/*records*/ / 15/*window*/, rate, 0.001);
 
     rate = aggregator.getBoardingsPerMinute("11861", SingletonSupport.toDate("2021-04-21", "15:51:00", "UTC"));
     assertNotNull(rate);
@@ -89,7 +89,7 @@ public class ApcAggregatorTest {
 
     rate = aggregator.getBoardingsPerMinute("17990", SingletonSupport.toDate("2021-04-21", "21:45:00", "UTC"));
     assertNotNull(rate);
-    assertEquals("17990 failed", 4.0/*arrivals/*/ / 7/*records*/ / 15/*window*/, rate, 0.001);
+    assertEquals("17990 failed", 5.0/*arrivals/*/ / 8/*records*/ / 15/*window*/, rate, 0.001);
 
   }
 
@@ -108,7 +108,7 @@ public class ApcAggregatorTest {
             records.size(), arrivalDepartureList.size(),
             mergeTimer.elapsedMsec());
     assertNotNull(matches);
-    assertEquals(54343, matches.size());
+    assertEquals(54454, matches.size());
     return matches;
   }
 

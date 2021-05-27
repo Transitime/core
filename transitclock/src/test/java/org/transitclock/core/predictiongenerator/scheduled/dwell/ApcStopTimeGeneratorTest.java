@@ -18,11 +18,18 @@ import static org.junit.Assert.*;
 
 public class ApcStopTimeGeneratorTest {
 
+  public static final String BLOCK_ID = "b1";
+  public static final String HEADWAY_BLOCK_ID = "b0";
+  public static final String TRIP_ID = "18369405-MAR21-MVS-BUS-Weekday-05";
+  public static final String HEADWAY_TRIP_ID = "18369406-MAR21-MVS-BUS-Weekday-05";
+
+
   private ApcStopTimeGenerator generator = new ApcStopTimeGenerator();
   private KalmanPredictionGeneratorImpl defaultGenerator = new KalmanPredictionGeneratorImpl();
   private GtfsBasedDataGenerator dataGenerator;
   private long referenceTime;
   private int tripIndex = 3;
+  private int headwayTripIndex = 2;
   private int stopPathIndex = 2;
   private String stopId;
   private int testScheduleDeviationSeconds = 60;
@@ -78,31 +85,53 @@ public class ApcStopTimeGeneratorTest {
     // setup a headway arrival departure
     StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(
             dataGenerator.getHeadwayArrivalDeparture(referenceTime - (testHeadwayMinutes * Time.MS_PER_MIN) /*30min headway*/,
-                    tripIndex, stopPathIndex, testScheduleDeviationSeconds, headwayVehicle, stopId));
+                    HEADWAY_BLOCK_ID, HEADWAY_TRIP_ID,
+                    headwayTripIndex, stopPathIndex, testScheduleDeviationSeconds, headwayVehicle, stopId));
 
     StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(
             dataGenerator.getHeadwayArrivalDeparture(referenceTime - (testHeadwayMinutes * Time.MS_PER_MIN) /*30min headway*/,
-                    tripIndex, stopPathIndex-1, testScheduleDeviationSeconds, headwayVehicle, previousStopId));
+                    HEADWAY_BLOCK_ID, HEADWAY_TRIP_ID,
+                    headwayTripIndex, stopPathIndex-1, testScheduleDeviationSeconds, headwayVehicle, previousStopId));
+
+    //yesterday A/D
+    StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(
+            dataGenerator.getHeadwayArrivalDeparture(yesterdayReferenceTime,
+                    BLOCK_ID, TRIP_ID,
+                    tripIndex, stopPathIndex, testScheduleDeviationSeconds, testVehicle, stopId));
+    StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(
+            dataGenerator.getHeadwayArrivalDeparture(referenceTimeN2,
+                    BLOCK_ID, TRIP_ID,
+                    tripIndex, stopPathIndex, testScheduleDeviationSeconds, testVehicle, stopId));
+    StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(
+            dataGenerator.getHeadwayArrivalDeparture(referenceTimeN3,
+                    BLOCK_ID, TRIP_ID,
+                    tripIndex, stopPathIndex, testScheduleDeviationSeconds, testVehicle, stopId));
 
     //yesterday headway
     StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(
             dataGenerator.getHeadwayArrivalDeparture(yesterdayReferenceTime - (testHeadwayMinutes1 * Time.MS_PER_MIN) /*30min headway*/,
-                    tripIndex, stopPathIndex, testScheduleDeviationSeconds, headwayVehicle, stopId));
+                    HEADWAY_BLOCK_ID, HEADWAY_TRIP_ID,
+                    headwayTripIndex, stopPathIndex, testScheduleDeviationSeconds, headwayVehicle, stopId));
     StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(
             dataGenerator.getHeadwayArrivalDeparture(yesterdayReferenceTime - (testHeadwayMinutes1 * Time.MS_PER_MIN) /*30min headway*/,
-                    tripIndex, stopPathIndex-1, testScheduleDeviationSeconds, headwayVehicle, previousStopId));
+                    HEADWAY_BLOCK_ID, HEADWAY_TRIP_ID,
+                    headwayTripIndex, stopPathIndex-1, testScheduleDeviationSeconds, headwayVehicle, previousStopId));
     StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(
             dataGenerator.getHeadwayArrivalDeparture(referenceTimeN2 - (testHeadwayMinutes2 * Time.MS_PER_MIN) /*30min headway*/,
-                    tripIndex, stopPathIndex, testScheduleDeviationSeconds, headwayVehicle, stopId));
+                    HEADWAY_BLOCK_ID, HEADWAY_TRIP_ID,
+                    headwayTripIndex, stopPathIndex, testScheduleDeviationSeconds, headwayVehicle, stopId));
     StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(
             dataGenerator.getHeadwayArrivalDeparture(referenceTimeN2 - (testHeadwayMinutes2 * Time.MS_PER_MIN) /*30min headway*/,
-                    tripIndex, stopPathIndex-1, testScheduleDeviationSeconds, headwayVehicle, previousStopId));
+                    HEADWAY_BLOCK_ID, HEADWAY_TRIP_ID,
+                    headwayTripIndex, stopPathIndex-1, testScheduleDeviationSeconds, headwayVehicle, previousStopId));
     StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(
             dataGenerator.getHeadwayArrivalDeparture(referenceTimeN3 - (testHeadwayMinutes3 * Time.MS_PER_MIN) /*30min headway*/,
-                    tripIndex, stopPathIndex, testScheduleDeviationSeconds, headwayVehicle, stopId));
+                    HEADWAY_BLOCK_ID, HEADWAY_TRIP_ID,
+                    headwayTripIndex, stopPathIndex, testScheduleDeviationSeconds, headwayVehicle, stopId));
     StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(
             dataGenerator.getHeadwayArrivalDeparture(referenceTimeN3 - (testHeadwayMinutes3 * Time.MS_PER_MIN) /*30min headway*/,
-                    tripIndex, stopPathIndex-1, testScheduleDeviationSeconds, headwayVehicle, previousStopId));
+                    HEADWAY_BLOCK_ID, HEADWAY_TRIP_ID,
+                    headwayTripIndex, stopPathIndex-1, testScheduleDeviationSeconds, headwayVehicle, previousStopId));
 
   }
 
@@ -115,7 +144,7 @@ public class ApcStopTimeGeneratorTest {
     VehicleState vehicleState = dataGenerator.getVehicleStateForApc(referenceTime, tripIndex, stopPathIndex, testScheduleDeviationSeconds);
     AvlReport avlReport = vehicleState.getAvlReport();
     long stopTimeForPath = generator.getStopTimeForPath(indices, avlReport, vehicleState);
-    assertEquals(10166, stopTimeForPath);
+    assertEquals(10499, stopTimeForPath);
 
     long alternate = defaultGenerator.getStopTimeForPath(indices, avlReport, vehicleState);
     assertEquals(10000, alternate);
@@ -125,7 +154,7 @@ public class ApcStopTimeGeneratorTest {
     // ensure test data for boardings
     assertNotNull(ApcModule.getInstance());
 
-    Double boardingsPerSecond = ApcModule.getInstance().getBoardingsPerSecond(stopId, new Date(referenceTime));
+    Double boardingsPerSecond = ApcModule.getInstance().getPassengerArrivalRate(stopId, new Date(referenceTime));
     assertNotNull(boardingsPerSecond);
     assertEquals(new Double(boardings).doubleValue() / 15 / Time.SEC_PER_MIN, boardingsPerSecond, 0.0001);
   }

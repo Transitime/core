@@ -40,4 +40,8 @@ public class DateUtils {
     return cal.getTime();
   }
 
+  public static Date truncate(Date input, int field) {
+    return org.apache.commons.lang3.time.DateUtils.truncate(input, field);
+  }
+
 }

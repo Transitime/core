@@ -41,18 +41,17 @@ public class ApcModule {
   }
 
   /**
-   * retrieve boardings (counts) over +/- arrivalRateWindow to smooth
-   * the average and then return as a rate per second.
+   * passenger arrival rate (PAR) in boardings per second.
    *
    * @param stopId
    * @param arrivalTime
    * @return
    */
-  public Double getBoardingsPerSecond(String stopId, Date arrivalTime) {
+  public Double getPassengerArrivalRate(String stopId, Date arrivalTime) {
       Double boardingsPerMinute = processor.getBoardingsPerMinute(stopId, arrivalTime);
     if (boardingsPerMinute != null && boardingsPerMinute != 0) {
       double boardingPerSecond = new Double(boardingsPerMinute) / Time.SEC_PER_MIN;
-      logger.debug("boardingsPerMinute={} = totalArrivals={}",
+      logger.debug("boardingsPerMinute={} = boardingsPerMinute={}",
               boardingPerSecond * Time.SEC_PER_MIN, boardingsPerMinute);
       return boardingPerSecond;
     }

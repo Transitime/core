@@ -1,5 +1,6 @@
 package org.transitclock.avl;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.slf4j.Logger;
@@ -34,6 +35,7 @@ public class ApcCache {
   private String tz = null;
   private static final String cacheName = "apcCache";
   private Cache<String, ApcEvents> cache = null;
+  private long cacheSize = 0;
 
   public ApcCache(String tz) {
     this.tz = tz;
@@ -60,7 +62,7 @@ public class ApcCache {
 
   public synchronized void analyze(List<ApcReport> matches ) {
 
-    if (matches == null) {
+    if (matches == null || matches.isEmpty()) {
       logger.info("no matches");
       return;
     }
@@ -74,6 +76,9 @@ public class ApcCache {
         create(hash, match);
       }
     }
+    logger.info("analyze after {} matches cache size is now {} for match date {}",
+            matches.size(), cacheSize(), DateUtils.truncate(matches.get(0).getTime(), Calendar.HOUR));
+
   }
 
   private boolean containsKey(String hash) {
@@ -95,6 +100,7 @@ public class ApcCache {
     ArrayList<ApcReport> empty = new ArrayList<>();
     empty.add(match);
     cache.put(hash, new ApcEvents(empty));
+    cacheSize++;
   }
 
   private String hash(ApcReport match) {
@@ -126,8 +132,8 @@ public class ApcCache {
     return sum;
   }
 
-  public int cacheSize() {
-    return -1;
+  public long cacheSize() {
+    return cacheSize;
   }
 
 }

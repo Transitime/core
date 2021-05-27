@@ -15,10 +15,12 @@ import org.transitclock.core.predictiongenerator.kalman.KalmanPredictionResult;
 import org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman.KalmanPredictionGeneratorImpl;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.ScheduleTime;
+import org.transitclock.utils.DateUtils;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -74,7 +76,7 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     getMonitoring().rateMetric("PredictionDwellApcProcessingHit", false);
 
     IntervalTimer parTimer = new IntervalTimer();
-    Double passengerArrivalRateInSeconds = getArrivalsPerSecond(indices, vehicleState);
+    Double passengerArrivalRateInSeconds = getPassengerArrivalRate(indices, vehicleState);
     if (passengerArrivalRateInSeconds == null) {
       // we didn't have enough information, fall back on default impl
       logger.debug("exiting apc dwell time, no passenger arrival rate");
@@ -87,7 +89,7 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     }
 
     IntervalTimer headwayTimer = new IntervalTimer();
-    Long currentHeadwayInSeconds = getHeadwayInSeconds(vehicleState, indices);
+    Long currentHeadwayInSeconds = getRealtimeHeadwayInSeconds(vehicleState, indices);
     if (currentHeadwayInSeconds == null) {
       logMiss();
       getMonitoring().rateMetric("PredictionDwellHeadwayHit", false);
@@ -105,8 +107,8 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     getMonitoring().averageMetric("PredictionApcBoardingProcessingTime", boardingTimer.elapsedMsec());
 
     IntervalTimer historyTimer = new IntervalTimer();
-    List<Double> historicalDwellTime = getHistoricalDwellTime(indices, vehicleState, passengerBoardingTime);
-    if (historicalDwellTime == null || historicalDwellTime.size() < 3) {
+    List<Double> historicalDwellTimes = getHistoricalDwellTimes(indices, vehicleState, passengerBoardingTime);
+    if (historicalDwellTimes == null || historicalDwellTimes.size() < 3) {
       logger.debug("exiting apc dwell time, no historical data");
       getMonitoring().rateMetric("PredictionDwellHistoryHit", false);
       logMiss();
@@ -117,7 +119,7 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     }
 
     IntervalTimer predictTimer = new IntervalTimer();
-    KalmanPredictionResult result = predict(dwellTime, historicalDwellTime, getLastPredictionError(indices));
+    KalmanPredictionResult result = predict(dwellTime, historicalDwellTimes, getLastPredictionError(indices));
     getKalmanErrorCache().putDwellErrorValue(indices, result.getFilterError());
     logHit();
     getMonitoring().averageMetric("PredictionApcProcessingTime", apcTimer.elapsedMsec());
@@ -151,9 +153,13 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     return ApcDataProcessor.getInstance().isEnabled();
   }
 
-  private Long getHeadwayInSeconds(VehicleState vehicleState, Indices indices) {
+  private Long getRealtimeHeadwayInSeconds(VehicleState vehicleState, Indices indices) {
     try {
-      Long headway = HistoricalPredictionLibrary.getHeadway(vehicleState, indices);
+      int scheduleDeviationMsecs = vehicleState.getMatch().getTemporalDifference().getTemporalDifference();
+      long stopArrivalTime = getScheduledArrivalTime(indices, vehicleState) + scheduleDeviationMsecs;
+      Long headway = HistoricalPredictionLibrary.getLastHeadway(
+              indices.getStopPath().getStopId(),
+              indices.getTrip().getRouteId(), new Date(stopArrivalTime));
       if (headway != null) return headway / Time.MS_PER_SEC;
     } catch (Exception e) {
       logger.error("travel time lookup threw exception {}", e, e);
@@ -221,67 +227,58 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     return total / historicalDwellTimes.size();
   }
 
-  private List<Double> getHistoricalDwellTime(Indices indices, VehicleState vehicleState, double passengerBoardingTime) {
+  private List<Double> getHistoricalDwellTimes(Indices indices, VehicleState vehicleState, double passengerBoardingTime) {
     ArrayList<Double> historicalDwells = new ArrayList<>();
     int daysBack = 0;
-    long arrivalTime = getScheduledArrivalTime(indices, vehicleState);
-    long currentArrivalTime = arrivalTime;
+    long currentArrivalTime = getScheduledArrivalTime(indices, vehicleState);
     String stopId = indices.getStopPath().getStopId();
-    String routeId = indices.getTrip().getRouteId();
     while (daysBack < maxKalmanDaysToSearch.getValue()) {
       daysBack++;
       currentArrivalTime = currentArrivalTime - Time.MS_PER_DAY;
-      if (isSameCalendarType(arrivalTime, currentArrivalTime)) {
-        Double arrivalRate = ApcModule.getInstance()
-                .getBoardingsPerSecond(stopId,
-                        new Date(currentArrivalTime));
-        if (arrivalRate == null) {
-          if (historicalDwells.size() < minKalmanDays.getValue()) {
-            logger.debug("no historical boardings found for {} on stop {}", new Date(currentArrivalTime), stopId);
-          }
-          continue;
+      Double arrivalRate = ApcModule.getInstance()
+              .getPassengerArrivalRate(stopId,
+                      new Date(currentArrivalTime));
+      if (arrivalRate == null) {
+        if (historicalDwells.size() < minKalmanDays.getValue()) {
+          logger.debug("no historical boardings found for {} on stop {}", new Date(currentArrivalTime), stopId);
         }
-        Long headway = getPreviousHeadway(stopId, currentArrivalTime, routeId);
-        if (headway == null) {
-          if (historicalDwells.size() < minKalmanDays.getValue()) {
-            logger.debug("no historical headway found for {} on stop {}", new Date(currentArrivalTime), stopId);
-          }
-          continue;
+        continue;
+      }
+
+      Long headway = HistoricalPredictionLibrary.getHistoricalHeadway(stopId, vehicleState.getTrip(), DateUtils.truncate(new Date(currentArrivalTime), Calendar.HOUR));
+      if (headway == null) {
+        if (historicalDwells.size() < minKalmanDays.getValue()) {
+          logger.debug("no historical headway found for {} on stop {}", new Date(currentArrivalTime), stopId);
         }
-        double historicalDwellTime =
-                arrivalRate * (headway / Time.MS_PER_SEC) * passengerBoardingTime;
-        logger.debug("historicalDwellTime {} = arrivalRate={} * headway={} * passengerBoardingTime={} ",
-                historicalDwellTime, arrivalRate, headway/Time.MS_PER_SEC, passengerBoardingTime);
-        historicalDwells.add(historicalDwellTime);
-        if (historicalDwells.size() > maxKalmanDays.getValue()) {
-          return historicalDwells;
-        }
+        continue;
+      }
+      double historicalDwellTime =
+              arrivalRate * (headway / Time.MS_PER_SEC) * passengerBoardingTime;
+      logger.debug("historicalDwellTime {} = arrivalRate={} * headway={} * passengerBoardingTime={} ",
+              historicalDwellTime, arrivalRate, headway/Time.MS_PER_SEC, passengerBoardingTime);
+      historicalDwells.add(historicalDwellTime);
+      if (historicalDwells.size() > maxKalmanDays.getValue()) {
+        return historicalDwells;
       }
 
     }
     return historicalDwells;
   }
 
-  private Long getPreviousHeadway(String stopId, long currentArrivalTime, String routeIdFilter) {
-    return HistoricalPredictionLibrary.getHeadway(stopId, currentArrivalTime, routeIdFilter);
-  }
-
-  private boolean isSameCalendarType(long arrivalTime, long currentArrivalTime) {
-    // TODO
-    return true;
-  }
 
   /**
-   * passengerArrivalRate = yesterday's boardings / actual previous headway
+   * passengerArrivalRate = boardings per second
    * @param indices
    * @return
    */
-  private Double getArrivalsPerSecond(Indices indices, VehicleState vehicleState) {
+  private Double getPassengerArrivalRate(Indices indices, VehicleState vehicleState) {
     String stopId = indices.getStopPath().getStopId();
 
-    Long arrivalTime = getScheduledArrivalTime(indices, vehicleState);
+    // add schedule deviation to scheduled arrival as a simple prediction
+    Long arrivalTime = getScheduledArrivalTime(indices, vehicleState)
+            + vehicleState.getMatch().getTemporalDifference().getTemporalDifference();
     if (arrivalTime == null) return null;
-    Double arrivalRate = ApcModule.getInstance().getBoardingsPerSecond(stopId, new Date(arrivalTime));
+    Double arrivalRate = ApcModule.getInstance().getPassengerArrivalRate(stopId, new Date(arrivalTime));
 
     if (arrivalRate != null)
       return arrivalRate;

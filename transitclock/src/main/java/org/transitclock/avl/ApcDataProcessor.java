@@ -241,7 +241,7 @@ public class ApcDataProcessor {
     apcAggregator.analyze(matches);
   }
 
-  public synchronized int cacheSize() {
+  public synchronized long cacheSize() {
      return apcAggregator.cacheSize();
   }
 
