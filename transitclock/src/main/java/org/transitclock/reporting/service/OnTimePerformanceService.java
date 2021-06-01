@@ -21,15 +21,6 @@ public class OnTimePerformanceService {
 
     public List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForOtp(
             LocalDate beginDate, LocalDate endDate, LocalTime beginTime, LocalTime endTime,
-            String routeIdOrShortName, ServiceType serviceType,
-            boolean timePointsOnly, String headsign) throws Exception{
-        return getArrivalsDeparturesForOtp(beginDate, endDate, beginTime, endTime, routeIdOrShortName, serviceType,
-                timePointsOnly, headsign, false);
-    }
-
-
-    public List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForOtp(
-            LocalDate beginDate, LocalDate endDate, LocalTime beginTime, LocalTime endTime,
             String routeIdOrShortName, ServiceType serviceType, boolean timePointsOnly,
             String headsign, boolean readOnly) throws Exception {
 
