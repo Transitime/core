@@ -281,7 +281,7 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
                     + vehicleState.getRealTimeSchedAdh().getTemporalDifference()/Time.MS_PER_SEC,
                     vehicleState.getAvlReport().getTime());
 
-    logger.info("arrivalTime={} compared to scheduleTime={} with schDev={}",
+    logger.debug("arrivalTime={} compared to scheduleTime={} with schDev={}",
             new Date(arrivalTime),
             indices.getScheduleTime(),
             vehicleState.getRealTimeSchedAdh());

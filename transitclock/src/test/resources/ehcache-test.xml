@@ -112,21 +112,6 @@
         </ehcache:resources>
     </ehcache:cache>
 
-    <ehcache:cache alias="apcCache">
-        <ehcache:key-type >java.lang.String</ehcache:key-type>
-        <ehcache:value-type>org.transitclock.avl.ApcEvents</ehcache:value-type>
-        <ehcache:expiry>
-            <ehcache:tti unit="days">7</ehcache:tti>
-        </ehcache:expiry>
-        <ehcache:resources>
-            <ehcache:heap unit="entries">2000</ehcache:heap>
-            <ehcache:offheap unit="MB">200</ehcache:offheap>
-            <ehcache:disk unit="GB">1</ehcache:disk>
-        </ehcache:resources>
-        <ehcache:disk-store-settings thread-pool="pool-disk"
-                                     writer-concurrency="1" />
-    </ehcache:cache>
-
     <ehcache:cache alias="apcStopTimeCache">
         <ehcache:key-type >org.transitclock.avl.ApcStopTimeEvent</ehcache:key-type>
         <ehcache:value-type>java.lang.Long</ehcache:value-type>

@@ -65,34 +65,24 @@ public class ApcAggregatorTest extends ApcTest {
     ...
      */
 
-    Double legacyRate = aggregator.getBoardingsPerMinuteLegacy("11861", SingletonSupport.toDate("2021-04-21", "20:28:01", "UTC"));
     Double rate = aggregator.getBoardingsPerMinute("63", "11861", SingletonSupport.toDate("2021-04-21", "20:28:01", "UTC"));
     assertNotNull(rate);
-    assertEquals("11861 failed", 0, legacyRate.intValue());
     assertEquals("11861 failed", 0, rate.intValue());
 
-    legacyRate = aggregator.getBoardingsPerMinuteLegacy( "17994", SingletonSupport.toDate("2021-04-21", "23:58:01", "UTC"));
     rate = aggregator.getBoardingsPerMinute("17", "17994", SingletonSupport.toDate("2021-04-21", "23:58:01", "UTC"));
     assertNotNull(rate);
-    assertEquals("17994 failed", 2.0/*arrivals/*/ / 7/*records*/ / 15/*window*/, legacyRate, 0.001);
     assertEquals("17994 failed", 0.08333, rate, 0.001);
 
-    legacyRate = aggregator.getBoardingsPerMinuteLegacy( "17976", SingletonSupport.toDate("2021-04-21", "16:59:00", "UTC"));
     rate = aggregator.getBoardingsPerMinute("18", "17976", SingletonSupport.toDate("2021-04-21", "16:59:00", "UTC"));
     assertNotNull(rate);
-    assertEquals("17976 failed", 5.0/*arrivals/*/ / 4/*records*/ / 15/*window*/, legacyRate, 0.001);
     assertEquals("17976 failed", 0.1333, rate, 0.001);
 
-    legacyRate = aggregator.getBoardingsPerMinuteLegacy( "11861", SingletonSupport.toDate("2021-04-21", "15:51:00", "UTC"));
     rate = aggregator.getBoardingsPerMinute("74", "11861", SingletonSupport.toDate("2021-04-21", "15:51:00", "UTC"));
     assertNotNull(rate);
-    assertEquals("11861 failed", 14.0/*arrivals/*/ / 5/*records*/ / 15/*window*/, legacyRate, 0.001);
     assertEquals("11861 failed", 0.38333, rate, 0.001);
 
-    legacyRate = aggregator.getBoardingsPerMinuteLegacy( "17990", SingletonSupport.toDate("2021-04-21", "21:45:00", "UTC"));
     rate = aggregator.getBoardingsPerMinute("10", "17990", SingletonSupport.toDate("2021-04-21", "21:45:00", "UTC"));
     assertNotNull(rate);
-    assertEquals("17990 failed", 5.0/*arrivals/*/ / 8/*records*/ / 15/*window*/, legacyRate, 0.001);
     assertEquals("17990 failed", 0.14666, rate, 0.001);
 
   }

@@ -53,14 +53,11 @@ public class ApcModule {
     boolean isHoliday = DateUtils.isHoliday(trip);
     Date previousDayArrivalTime = DateUtils.getPreviousDayForArrivalTime(arrivalTime, isHoliday);
     Double boardingsPerMinute = processor.getBoardingsPerMinute(routeId, stopId, previousDayArrivalTime);
-    if (boardingsPerMinute != null && boardingsPerMinute != 0) {
-      double boardingPerSecond = new Double(boardingsPerMinute) / Time.SEC_PER_MIN;
-      logger.debug("boardingsPerMinute={} = boardingsPerMinute={}",
-              boardingPerSecond * Time.SEC_PER_MIN, boardingsPerMinute);
-      return boardingPerSecond;
-    }
-
-    return null;
+    if (boardingsPerMinute == null || boardingsPerMinute == 0.0) return boardingsPerMinute;
+    double boardingPerSecond = new Double(boardingsPerMinute) / Time.SEC_PER_MIN;
+    logger.debug("boardingsPerMinute={} = boardingsPerMinute={}",
+            boardingPerSecond * Time.SEC_PER_MIN, boardingsPerMinute);
+    return boardingPerSecond;
   }
 
   public void populateFromDb(List<ArrivalDeparture> arrivalDepartures) {
