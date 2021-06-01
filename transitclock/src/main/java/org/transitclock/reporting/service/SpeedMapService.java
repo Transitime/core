@@ -5,18 +5,18 @@ import org.slf4j.LoggerFactory;
 import org.transitclock.core.ServiceType;
 import org.transitclock.core.TemporalDifference;
 import org.transitclock.db.query.ArrivalDepartureQuery;
-import org.transitclock.db.structs.Agency;
-import org.transitclock.db.structs.ArrivalDeparture;
-import org.transitclock.db.structs.Stop;
-import org.transitclock.db.structs.StopPath;
+import org.transitclock.db.structs.*;
+import org.transitclock.ipc.data.IpcDoubleSummaryStatistics;
 import org.transitclock.ipc.data.IpcStopPathWithSpeed;
 import org.transitclock.ipc.data.IpcStopWithDwellTime;
 import org.transitclock.reporting.keys.ArrivalDepartureTripKey;
+import org.transitclock.reporting.keys.TripDateKey;
 import org.transitclock.utils.Geo;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
 
 import javax.inject.Inject;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -287,5 +287,132 @@ public class SpeedMapService {
         }
 
         return stopsWithAvgDwellTime;
+    }
+
+    /**
+     * Get avg run time for all trips in a route for a specified period of time
+     *
+     * @param beginDate
+     * @param endDate
+     * @param beginTime
+     * @param endTime
+     * @param routeIdOrShortName
+     * @param serviceType
+     * @param timePointsOnly
+     * @param headsign
+     * @param readOnly
+     * @return
+     * @throws Exception
+     */
+    public IpcDoubleSummaryStatistics getAverageRunTime(LocalDate beginDate,
+                                                        LocalDate endDate,
+                                                        LocalTime beginTime,
+                                                        LocalTime endTime,
+                                                        String routeIdOrShortName,
+                                                        ServiceType serviceType,
+                                                        boolean timePointsOnly,
+                                                        String headsign,
+                                                        boolean readOnly) throws Exception {
+
+        String routeShortName = getRouteShortName(routeIdOrShortName);
+
+        ArrivalDepartureQuery.Builder adBuilder = new ArrivalDepartureQuery.Builder();
+        ArrivalDepartureQuery adQuery = adBuilder
+                .beginDate(beginDate)
+                .endDate(endDate)
+                .beginTime(beginTime)
+                .endTime(endTime)
+                .routeShortName(routeShortName)
+                .headsign(headsign)
+                .serviceType(serviceType)
+                .timePointsOnly(timePointsOnly)
+                .scheduledTimesOnly(true)
+                .includeTrip(true)
+                .readOnly(readOnly)
+                .build();
+
+        List<ArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesFromDb(adQuery);
+
+        Map<TripDateKey, Long> runTimeByTripId = getRunTimeByTripDateKey(arrivalDepartures);
+
+        return getAverageRunTimeForAllTrips(runTimeByTripId);
+    }
+
+    /*
+     * Calculate the trip run times from the list of arrival departures
+     * Currently only gets run times for trips with arrival/departure for first and last stops
+     * Trips that do not include first and last stop in the selected time range GET CUT OFF
+     *
+     * TODO - May want to refactor to be smarter about including the entire trip if
+     *  the trip is part of the selected time range
+     */
+    private Map<TripDateKey, Long> getRunTimeByTripDateKey(List<ArrivalDeparture> arrivalDepartures){
+
+        Map<TripDateKey, Long> runTimeByTripDate = new LinkedHashMap<>();
+
+        Map<TripDateKey, List<ArrivalDeparture>> arrivalDeparturesByTripDateKey = getArrivalDeparturesByTripDateKey(arrivalDepartures);
+
+        for(Map.Entry<TripDateKey, List<ArrivalDeparture>> arrivalDepartureByTripAndDate : arrivalDeparturesByTripDateKey.entrySet()){
+            TripDateKey key = arrivalDepartureByTripAndDate.getKey();
+            List<ArrivalDeparture> arrivalDeparturesForTrip  = arrivalDepartureByTripAndDate.getValue();
+
+            if(arrivalDeparturesForTrip != null && arrivalDeparturesForTrip.size() > 0){
+                Long firstStopDepartureTime = null;
+                Long lastStopArrivalTime = null;
+
+                Trip trip = arrivalDeparturesForTrip.get(0).getTripFromDb();
+                int lastStopPathIndex = trip.getNumberStopPaths() - 1;
+
+                ArrivalDeparture firstDeparture = arrivalDeparturesForTrip.get(0);
+                if(firstDeparture.getStopPathIndex() == 0 && firstDeparture.isDeparture()){
+                    firstStopDepartureTime = firstDeparture.getTime();
+                } else {
+                    continue;
+                }
+
+                for(int i=1; i< arrivalDeparturesForTrip.size(); i++){
+                    ArrivalDeparture ad = arrivalDeparturesForTrip.get(i);
+                    if(ad.getStopPathIndex() == lastStopPathIndex && ad.isArrival()){
+                        lastStopArrivalTime = ad.getTime();
+                        break;
+                    }
+                }
+
+                if(firstStopDepartureTime != null && lastStopArrivalTime != null){
+                    runTimeByTripDate.put(key,lastStopArrivalTime - firstStopDepartureTime);
+                }
+            }
+        }
+
+        return runTimeByTripDate;
+    }
+
+    /*
+     *  Groups Arrival Departures by Trip/Date key
+     *  Allows us to retrieve first and last arrival/departure per trip
+     */
+    private Map<TripDateKey, List<ArrivalDeparture>> getArrivalDeparturesByTripDateKey(List<ArrivalDeparture> arrivalDepartures){
+        Map<TripDateKey, List<ArrivalDeparture>> arrivalDeparturesByTripKey = new LinkedHashMap<>();
+
+        for(ArrivalDeparture ad : arrivalDepartures){
+            LocalDate localDate = Instant.ofEpochMilli(ad.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+            TripDateKey tripKey = new TripDateKey(ad.getTripId(), localDate);
+            if(arrivalDeparturesByTripKey.get(tripKey) == null){
+                arrivalDeparturesByTripKey.put(tripKey, new ArrayList<>());
+            }
+            arrivalDeparturesByTripKey.get(tripKey).add(ad);
+        }
+        return arrivalDeparturesByTripKey;
+    }
+
+    /*
+     * Get summary statistics for trip/date run times
+     */
+    private IpcDoubleSummaryStatistics getAverageRunTimeForAllTrips(Map<TripDateKey, Long> runTimeByTripId) {
+        DoubleSummaryStatistics summaryStatistics =  runTimeByTripId.entrySet().stream()
+                .mapToDouble(Map.Entry::getValue)
+                .summaryStatistics();
+
+        return new IpcDoubleSummaryStatistics(summaryStatistics);
     }
 }

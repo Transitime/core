@@ -2,6 +2,7 @@ package org.transitclock.api.data.reporting;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.api.data.ApiRunTimeSummary;
 import org.transitclock.api.data.reporting.chartjs.custom.TripAggregatedRunTimeData;
 import org.transitclock.api.data.reporting.chartjs.custom.TripIndividualRunTimeData;
 import org.transitclock.api.data.reporting.chartjs.custom.TripRunTimeMixedChart;
@@ -50,6 +51,7 @@ public class TripRunTimeOutput implements Serializable {
             if(tripRunTimes != null && tripRunTimes.containsKey(runTimeForTrip.getTripId())){
                 data.getTripRunTimes().add(new TripIndividualRunTimeData(tripRunTimes.get(runTimeForTrip.getTripId())));
             }
+            data.setSummary(runTimeForTripsAndDistribution.getRunTimeSummary());
         }
         return new TripRunTimeMixedChart(data);
     }

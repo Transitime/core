@@ -27,14 +27,13 @@ public class OnTimePerformanceService {
                 timePointsOnly, headsign, false);
     }
 
+
     public List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForOtp(
             LocalDate beginDate, LocalDate endDate, LocalTime beginTime, LocalTime endTime,
             String routeIdOrShortName, ServiceType serviceType, boolean timePointsOnly,
             String headsign, boolean readOnly) throws Exception {
 
         String routeShortName = getRouteShortName(routeIdOrShortName);
-
-        boolean  scheduledStopsOnly = true;
 
         ArrivalDepartureQuery.Builder adBuilder = new ArrivalDepartureQuery.Builder();
         ArrivalDepartureQuery adQuery = adBuilder
@@ -43,10 +42,9 @@ public class OnTimePerformanceService {
                                         .beginTime(beginTime)
                                         .endTime(endTime)
                                         .routeShortName(routeShortName)
-                                        .headsign(headsign)
                                         .serviceType(serviceType)
                                         .timePointsOnly(timePointsOnly)
-                                        .scheduledTimesOnly(scheduledStopsOnly)
+                                        .scheduledTimesOnly(true)
                                         .readOnly(readOnly)
                                         .build();
 

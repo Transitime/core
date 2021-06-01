@@ -3,6 +3,7 @@ package org.transitclock.db.structs;
 import com.google.common.base.Objects;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.DynamicUpdate;
+import org.transitclock.core.dwell.DwellTimeUtil;
 import org.transitclock.db.hibernate.HibernateUtils;
 
 import javax.persistence.*;
@@ -57,8 +58,11 @@ public class RunTimesForStops implements Serializable {
     })
     private RunTimesForRoutes runTimesForRoutes;
 
+    @Transient
+    boolean firstStopDwellSet = false;
 
-    public RunTimesForStops() { }
+
+    public RunTimesForStops() {}
 
     public RunTimesForStops(String stopPathId,
                             int stopPathIndex,
@@ -118,6 +122,10 @@ public class RunTimesForStops implements Serializable {
     }
 
     public Long getDwellTime() {
+        if(!firstStopDwellSet && stopPathIndex == 0 && dwellTime > 1000 && scheduledTime != null && time != null){
+            firstStopDwellSet = true;
+            dwellTime = DwellTimeUtil.calculateFirstStopDwellTime(scheduledTime, time.getTime());
+        }
         return dwellTime;
     }
 
@@ -139,6 +147,10 @@ public class RunTimesForStops implements Serializable {
 
     public void setLastStop(Boolean lastStop) {
         this.lastStop = lastStop;
+    }
+
+    public boolean getFirstStop(){
+        return stopPathIndex == 0;
     }
 
     public Boolean getTimePoint() {
@@ -180,6 +192,16 @@ public class RunTimesForStops implements Serializable {
         }
         else if (prevStopDepartureTime != null && time != null && dwellTime != null) {
             return (time.getTime() - dwellTime) - prevStopDepartureTime.getTime();
+        }
+        return null;
+    }
+
+    public Integer getScheduledRunTime() {
+        if(stopPathIndex == 0){
+            return 0;
+        }
+        else if (scheduledPrevStopArrivalTime != null && scheduledTime != null) {
+            return (scheduledTime - scheduledPrevStopArrivalTime);
         }
         return null;
     }

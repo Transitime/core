@@ -26,7 +26,7 @@ public class RunTimeProcessorResult {
     if(routes != null && routes.getVehicleId() != null && routes.getTripId() != null && routes.getStartTime() != null){
       return true;
     }
-    return true;
+    return false;
   }
 
   public boolean success() {

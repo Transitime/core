@@ -8,8 +8,8 @@ import org.transitclock.ipc.interfaces.ReportingInterface;
 import org.transitclock.ipc.rmi.AbstractServer;
 import org.transitclock.reporting.service.OnTimePerformanceService;
 import org.transitclock.reporting.service.RunTimeService;
-import org.transitclock.reporting.service.RunTimeServiceV2;
 import org.transitclock.reporting.service.SpeedMapService;
+import org.transitclock.reporting.service.runTime.*;
 
 import javax.inject.Inject;
 import java.time.*;
@@ -33,13 +33,22 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
     private RunTimeService runTimeService;
 
     @Inject
-    private RunTimeServiceV2 runTimeServiceV2;
-
-    @Inject
     private OnTimePerformanceService onTimePerformanceService;
 
-    private static final Logger logger =
-            LoggerFactory.getLogger(ReportingServer.class);
+    @Inject
+    private RouteRunTimesService routeRunTimesService;
+
+    @Inject
+    private StopRunTimesService stopRunTimesService;
+
+    @Inject
+    private TripRunTimesService tripRunTimesService;
+
+    @Inject
+    private PrescriptiveRunTimeService prescriptiveRunTimeService;
+
+
+    private static final Logger logger = LoggerFactory.getLogger(ReportingServer.class);
 
 
     public void start(String agencyId){
@@ -87,7 +96,7 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                                         String headsign,
                                                         boolean readOnly) throws Exception {
 
-        return runTimeService.getAverageRunTime(beginDate, endDate, beginTime, endTime, routeIdOrShortName,
+        return speedMapService.getAverageRunTime(beginDate, endDate, beginTime, endTime, routeIdOrShortName,
                 serviceType, timePointsOnly, headsign, readOnly);
     }
 
@@ -99,15 +108,12 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                         LocalTime endTime,
                                         String routeIdOrShortName,
                                         String headsign,
-                                        String startStop,
-                                        String endStop,
+                                        String tripPatternId,
                                         ServiceType serviceType,
-                                        boolean timePointsOnly,
-                                        boolean currentTripsOnly,
                                         boolean readOnly) throws Exception {
 
-        return runTimeService.getRunTimeSummary(beginDate, endDate, beginTime, endTime, routeIdOrShortName, headsign,
-                startStop, endStop, serviceType, timePointsOnly, currentTripsOnly, this.getAgencyId(), readOnly);
+        return runTimeService.getRunTimeSummary(beginDate, endDate, beginTime, endTime, routeIdOrShortName, headsign,null,
+                                    serviceType, readOnly);
     }
 
     @Override
@@ -123,10 +129,7 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                                                       boolean currentTripsOnly,
                                                                       boolean readOnly) throws Exception {
 
-        /*return runTimeService.getRunTimeForTrips(beginDate, endDate, beginTime, endTime, routeIdOrShortName, headsign,
-                tripPatternId, serviceType, timePointsOnly, currentTripsOnly, this.getAgencyId(), readOnly);*/
-
-        return runTimeServiceV2.getRunTimeForTripsByStopPath(beginDate, endDate, beginTime, endTime, routeIdOrShortName, headsign,
+        return tripRunTimesService.getRunTimeForTripsByStopPath(beginDate, endDate, beginTime, endTime, routeIdOrShortName, headsign,
                 tripPatternId, serviceType, readOnly);
     }
 
@@ -141,25 +144,24 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                                           boolean timePointsOnly,
                                                           boolean readOnly) throws Exception {
 
-        return runTimeServiceV2.getRunTimeForStopPaths(beginDate, endDate, beginTime, endTime, routeIdOrShortName,
+        return stopRunTimesService.getRunTimeForStopPaths(beginDate, endDate, beginTime, endTime, routeIdOrShortName,
                 tripId, serviceType, timePointsOnly, this.getAgencyId(), readOnly);
     }
 
-    // On Time Performance Reports
     @Override
-    public List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForOtp(LocalDate beginDate,
-                                                                                  LocalDate endDate,
-                                                                                  LocalTime beginTime,
-                                                                                  LocalTime endTime,
-                                                                                  String routeIdOrShortName,
-                                                                                  ServiceType serviceType,
-                                                                                  boolean timePointsOnly,
-                                                                                  String headsign) throws Exception{
+    public IpcPrescriptiveRunTimes getPrescriptiveRunTimes(LocalTime beginTime,
+                                                           LocalTime endTime,
+                                                           String routeIdOrShortName,
+                                                           String headsign,
+                                                           String tripPatternId,
+                                                           ServiceType serviceType,
+                                                           boolean readOnly) throws Exception {
 
-        return onTimePerformanceService.getArrivalsDeparturesForOtp(beginDate, endDate, beginTime, endTime,
-                routeIdOrShortName, serviceType, timePointsOnly, headsign, false);
+        return prescriptiveRunTimeService.getPrescriptiveRunTimes(beginTime, endTime, routeIdOrShortName, headsign,
+                tripPatternId, serviceType, readOnly);
     }
 
+    // On Time Performance Reports
     @Override
     public List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForOtp(LocalDate beginDate,
                                                                                   LocalDate endDate,
@@ -180,7 +182,7 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                                         LocalTime beginTime, LocalTime endTime, ServiceType serviceType,
                                                         Integer earlyThreshold, Integer lateThreshold,
                                                         boolean readOnly) throws Exception{
-        return runTimeService.getRunTimeForRoutes(beginDate, endDate, beginTime, endTime, serviceType,
+        return routeRunTimesService.getRunTimeForRoutes(beginDate, endDate, beginTime, endTime, serviceType,
                 earlyThreshold, lateThreshold, readOnly);
     }
 

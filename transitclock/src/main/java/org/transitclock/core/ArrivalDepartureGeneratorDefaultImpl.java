@@ -33,6 +33,7 @@ import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
+import org.transitclock.core.dwell.DwellTimeUtil;
 import org.transitclock.core.holdingmethod.HoldingTimeGeneratorFactory;
 
 import org.transitclock.core.predAccuracy.PredictionAccuracyModule;
@@ -137,31 +138,6 @@ public class ArrivalDepartureGeneratorDefaultImpl
 					+ "different from the AVL time then something must be "
 					+ "wrong and the situation will be logged.");
 
-	/**
-	 * Specify minimum allowable time in msec when calculating dwell time for departures.
-	 * @return
-	 */
-	private static long getMinAllowableDwellTime() {
-		return minAllowableDwellTime.getValue();
-	}
-	private static LongConfigValue minAllowableDwellTime =
-			new LongConfigValue(
-					"transitclock.arrivalsDepartures.minAllowableDwellTimeMsec",
-					1l * Time.MS_PER_SEC,
-					"Specify minimum allowable time in msec when calculating dwell time for departures.");
-
-	/**
-	 * Specifying the Max allowable time when calculating dwell time for departures.
-	 * @return
-	 */
-	private static long getMaxAllowableDwellTime() {
-		return maxAllowableDwellTime.getValue();
-	}
-	private static LongConfigValue maxAllowableDwellTime =
-			new LongConfigValue(
-					"transitclock.arrivalsDepartures.maxAllowableDwellTimeMsec",
-					60l * Time.MS_PER_MIN,
-					"Specify maximum allowable time in msec when calculating dwell time for departures.");
 
 	/**
 	 * Specifying the Max allowable time when calculating dwell time for departures.
@@ -715,7 +691,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			// Create departure time for first stop of trip if it has left that
 			// stop
 			if (!newMatch.isAtStop(tripIndex, stopPathIndex)) {
-				Long firstStopDwellTime = getDwellTime(null, departureTime, block, tripIndex, stopPathIndex, null);
+				Long firstStopDwellTime = DwellTimeUtil.getDwellTime(null, departureTime, block, tripIndex, stopPathIndex, null);
 				storeInDbAndLog(createDepartureTime(vehicleState, departureTime,
 						block, tripIndex, stopPathIndex, firstStopDwellTime));
 			}
@@ -737,7 +713,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				if (!newMatch.isAtStop(tripIndex, stopPathIndex)) {
 					int stopTime = block.getPathStopTime(tripIndex, stopPathIndex);
 					departureTime = arrivalTime + stopTime;
-					Long dwellTime = getDwellTime(arrivalTime, departureTime, block, tripIndex, stopPathIndex, stopPathIndex);
+					Long dwellTime = DwellTimeUtil.getDwellTime(arrivalTime, departureTime, block, tripIndex, stopPathIndex, stopPathIndex);
 					storeInDbAndLog(createDepartureTime(vehicleState, departureTime,
 							block, tripIndex, stopPathIndex, dwellTime));
 				}
@@ -877,7 +853,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			}
 		}
 
-		Long dwellTime = getDwellTime(arrivalTime, departureTime, block, tripIndex, stopPathIndex, arrivalStopPathIndex);
+		Long dwellTime = DwellTimeUtil.getDwellTime(arrivalTime, departureTime, block, tripIndex, stopPathIndex, arrivalStopPathIndex);
 		Departure verifiedDeparture = createDepartureTime(vehicleState, departureTime, block, tripIndex, stopPathIndex, dwellTime);
 		// remember this departure time to ensure subsequent arrivals are in order
 		if (verifiedDeparture.getTime() > vehicleState.getLastDepartureTime()) {
@@ -1321,7 +1297,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			timeWithoutSpeedRatio += stopTime;
 			long departureTime =
 					beginTime + Math.round(timeWithoutSpeedRatio * speedRatio);
-			Long dwellTime = getDwellTime(arrivalTime, departureTime, block, indices.getTripIndex(),
+			Long dwellTime = DwellTimeUtil.getDwellTime(arrivalTime, departureTime, block, indices.getTripIndex(),
 					indices.getStopPathIndex(), indices.getStopPathIndex());
 			ArrivalDeparture departure = createDepartureTime(vehicleState,
 					departureTime,
@@ -1347,53 +1323,6 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		logger.debug("For vehicleId={} done determining if it traversed " +
 				"stops in between the new and the old AVL report.",
 				vehicleId);
-	}
-
-	private Long getDwellTime(Long arrivalTime, Long departureTime,Block block,int tripIndex,
-							  int departureStopPathIndex, Integer arrivalStopPathIndex){
-
-		if (departureStopPathIndex == 0 && departureTime != null) {
-			Trip trip = block.getTrip(tripIndex);
-			if (trip != null) {
-				long tripStartTimeMsecs = trip.getStartTime() * 1000;
-				long msecsIntoDay =
-						Core.getInstance().getTime().getMsecsIntoDay(new Date(departureTime), tripStartTimeMsecs);
-				if (msecsIntoDay < tripStartTimeMsecs) {
-					return 0l;
-				} else {
-					return recalculateDwellTimeUsingThresholds(msecsIntoDay - tripStartTimeMsecs);
-				}
-			}
-		} else if (departureStopPathIndex != block.numStopPaths(tripIndex) - 1) {
-			if (arrivalTime != null && departureTime != null &&
-					arrivalStopPathIndex != null && departureStopPathIndex == arrivalStopPathIndex) {
-				return recalculateDwellTimeUsingThresholds(departureTime - arrivalTime);
-			}
-		} else {
-			return 0l;
-		}
-
-		return null;
-	}
-
-	/**
-	 * Recalculate dwellTime using the Min and Max Allowable Dwell Time values.
-	 * If DwellTime is below Min value, then Min value is returned.
-	 * If DwellTime is above Max value, then NULL is returned since the value is likely an error.
-	 *
-	 * @param dwellTime
-	 *            Originally calculated dwellTime
-	 */
-	private Long recalculateDwellTimeUsingThresholds(Long dwellTime){
-		if(dwellTime != null){
-			if(dwellTime < getMinAllowableDwellTime()){
-				return getMinAllowableDwellTime();
-			}
-			else if(dwellTime <= getMaxAllowableDwellTime()){
-				return dwellTime;
-			}
-		}
-		return null;
 	}
 
 	/**

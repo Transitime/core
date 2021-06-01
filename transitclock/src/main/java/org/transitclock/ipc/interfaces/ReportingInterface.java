@@ -15,10 +15,14 @@ import java.util.List;
  *
  */
 public interface ReportingInterface extends Remote {
-    List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForOtp(LocalDate beginDate, LocalDate endDate,
-                                                                             LocalTime beginTime, LocalTime endTime,
-                                                                             String routeIdOrShortName, ServiceType serviceType,
-                                                                             boolean timePointsOnly, String headsign) throws Exception;
+    IpcPrescriptiveRunTimes getPrescriptiveRunTimes(LocalTime beginTime,
+                                                    LocalTime endTime,
+                                                    String routeIdOrShortName,
+                                                    String headsign,
+                                                    String tripPatternId,
+                                                    ServiceType serviceType,
+                                                    boolean readOnly) throws Exception;
+
 
     List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForOtp(LocalDate beginDate, LocalDate endDate,
                                                                              LocalTime beginTime, LocalTime endTime,
@@ -44,9 +48,7 @@ public interface ReportingInterface extends Remote {
     IpcRunTime getRunTimeSummary(LocalDate beginDate, LocalDate endDate,
                            LocalTime beginTime, LocalTime endTime,
                            String routeIdOrShortName, String headsign,
-                           String startStop, String endStop,
-                           ServiceType serviceType, boolean timePointsOnly,
-                           boolean currentTripsOnly, boolean readOnly) throws Exception;
+                           String tripPatternId, ServiceType serviceType, boolean readOnly) throws Exception;
 
     IpcRunTimeForTripsAndDistribution getRunTimeForTrips(LocalDate beginDate, LocalDate endDate,
                                   LocalTime beginTime, LocalTime endTime,

@@ -530,6 +530,18 @@
         generateComparisonChart(response);
     }
 
+    function calculateMaxMins(points) {
+        maxMins = Math.round(points[0]) + Math.round(points[1]) + Math.round(points[2]);
+        if (Math.round(points[3]) > maxMins) {
+            maxMins = Math.round(points[3]);
+        }
+        if (Math.round(points[4]) > maxMins) {
+            maxMins = Math.round(points[4]);
+        }
+
+        return Math.ceil(maxMins / 5) * 5;
+    }
+
     function generateComparisonChart(response){
         var barGraph = getDefaultChartOptions({
             yAxis:{

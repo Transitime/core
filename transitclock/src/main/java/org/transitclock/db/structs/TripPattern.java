@@ -17,21 +17,9 @@
 package org.transitclock.db.structs;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinTable;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderColumn;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 import org.hibernate.CallbackException;
 import org.hibernate.HibernateException;
@@ -701,6 +689,20 @@ public class TripPattern implements Serializable, Lifecycle {
 	 */
 	public int getNumberStopPaths() {
 		return stopPaths.size();
+	}
+
+	/**
+	 * Returns list of stopPaths that are also schedule adherence stops.
+	 * @return
+	 */
+	public List<StopPath> getScheduleAdhStopPaths() {
+		List<StopPath> scheduleAdhStopPaths = new ArrayList<>();
+		for(StopPath stopPath: stopPaths){
+			if(stopPath.isScheduleAdherenceStop()){
+				scheduleAdhStopPaths.add(stopPath);
+			}
+		}
+		return scheduleAdhStopPaths;
 	}
 	
 	/**
