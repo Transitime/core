@@ -1376,6 +1376,19 @@ public final class Block implements Serializable {
 		return CoreConfig.exclusiveBlockAssignments();
 	}
 
+	private transient boolean initialized = false;
+	/**
+	 * force any lazy loaded objects to load now before moving to another thread
+	 */
+	public void initialize() {
+		if (!initialized) {
+			for (Trip unloadedTrip : getTrips()) {
+				unloadedTrip.initialize();
+			}
+			initialized = true;
+		}
+	}
+
 	public static class BlockLoader implements Runnable {
 
 		private List<String> serviceIds;
