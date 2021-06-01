@@ -9,6 +9,7 @@ import org.transitclock.api.data.reporting.chartjs.ChartType;
 import org.transitclock.api.data.ApiDispatcher;
 import org.transitclock.api.utils.StandardParameters;
 import org.transitclock.api.utils.WebUtils;
+import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.core.ServiceType;
 import org.transitclock.ipc.data.*;
 import org.transitclock.ipc.interfaces.ReportingInterface;
@@ -32,6 +33,14 @@ import java.util.List;
  */
 @Path("/key/{key}/agency/{agency}")
 public class ReportingApi {
+
+    private static BooleanConfigValue reportingReadOnlyDb =
+            new BooleanConfigValue("transitclock.api.reportingReadOnlyDb", true,
+                    "Use readOnly database for reporting rmi requests.");
+
+    private boolean useReadOnlyDb(){
+        return reportingReadOnlyDb.getValue();
+    }
 
     @Path("/report/chartjs/onTimePerformanceByRoute")
     @GET
@@ -82,7 +91,7 @@ public class ReportingApi {
 
             List<IpcArrivalDepartureScheduleAdherence> arrivalDepartures = reportingInterface.getArrivalsDeparturesForOtp(
                     beginDate.getDate(), endDate.getDate(), beginTime.getTime(), endTime.getTime(), route,
-                    serviceTypeEnum, timePointsOnly, headsign,false);
+                    serviceTypeEnum, timePointsOnly, headsign,useReadOnlyDb());
 
             Object response = null;
 
@@ -143,7 +152,7 @@ public class ReportingApi {
 
             List<IpcStopWithDwellTime> stopsWithDwellTime = reportingInterface.getStopsWithAvgDwellTimes(
                     beginDate.getDate(), endDate.getDate(), beginTime.getTime(), endTime.getTime(), route,
-                    serviceTypeEnum, timePointsOnly, headsign, false);
+                    serviceTypeEnum, timePointsOnly, headsign, useReadOnlyDb());
 
             Object response = null;
 
@@ -199,7 +208,7 @@ public class ReportingApi {
 
             List<IpcStopPathWithSpeed> stopPaths = reportingInterface.getStopPathsWithSpeed(
                     beginDate.getDate(), endDate.getDate(), beginTime.getTime(), endTime.getTime(),
-                    route, serviceTypeEnum, headsign, false);
+                    route, serviceTypeEnum, headsign, useReadOnlyDb());
 
             Object response = null;
 
@@ -255,7 +264,7 @@ public class ReportingApi {
 
             IpcDoubleSummaryStatistics summaryStatistics = reportingInterface.getAverageRunTime(
                     beginDate.getDate(), endDate.getDate(), beginTime.getTime(), endTime.getTime(),
-                    route, serviceTypeEnum, false, headsign, false);
+                    route, serviceTypeEnum, false, headsign, useReadOnlyDb());
 
             Object response = null;
 
@@ -313,7 +322,7 @@ public class ReportingApi {
 
             IpcRunTime ipcRunTime = reportingInterface.getRunTimeSummary(beginDate.getDate(), endDate.getDate(),
                     beginTime.getTime(), endTime.getTime(), route, headsign, tripPatternId,
-                    serviceTypeEnum, false);
+                    serviceTypeEnum, useReadOnlyDb());
 
             Object response = null;
 
@@ -380,7 +389,7 @@ public class ReportingApi {
                                                                                             serviceTypeEnum,
                                                                                             timePointsOnly,
                                                                              false,
-                                                                                   true);
+                    useReadOnlyDb());
 
             Object response = TripRunTimeOutput.getRunTimes(ipcRunTimeForTripsAndDistribution);
 
@@ -441,7 +450,7 @@ public class ReportingApi {
                                                                                                 tripId,
                                                                                                 serviceTypeEnum,
                                                                                                 timePointsOnly,
-                                                                                                true);
+                                                                                                useReadOnlyDb());
 
             Object response = StopPathRunTimeOutput.getRunTimes(ipcRunTimeForStopPaths);
 
@@ -498,7 +507,7 @@ public class ReportingApi {
                     serviceTypeEnum,
                     minEarlySec,
                     minLateSec,
-                    true);
+                    useReadOnlyDb());
 
             Object response = RouteRunTimeOutput.getRunTimes(ipcRunTimeForRoutes);
 
@@ -553,7 +562,7 @@ public class ReportingApi {
                     headsign,
                     tripPatternId,
                     serviceTypeEnum,
-                    true);
+                    useReadOnlyDb());
 
             Object response = PrescriptiveRunTimeOutput.getRunTimes(ipcPrescriptiveRunTimes);
 
