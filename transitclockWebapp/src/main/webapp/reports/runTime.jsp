@@ -643,8 +643,8 @@
         var valuesPert = [];
 
         if(flooredValue){
-            var u = data[valueOfPercentile- 1];
-            var a = data[valueOfPercentile];
+            var u = valueOfPercentile- 1;
+            var a = valueOfPercentile;
             sortedIndexValues.push(u);
             sortedIndexValues.push(a);
 
