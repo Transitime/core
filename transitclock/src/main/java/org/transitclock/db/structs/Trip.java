@@ -1210,6 +1210,8 @@ public class Trip implements Lifecycle, Serializable {
 		// Get the database session. This is supposed to be pretty light weight
 		Session session = HibernateUtils.getSession(tripQuery.isReadOnly());
 
+		Map<String, Object> parameterNameAndValues = new HashMap<>();
+
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.
 
@@ -1219,14 +1221,18 @@ public class Trip implements Lifecycle, Serializable {
 				"Trip t " +
 				"WHERE t.routeShortName = :routeShortName " +
 				"AND t.configRev IN (:configRevs) " +
-				getHeadsignWhere(tripQuery) +
-				getDirectionWhere(tripQuery) +
-				getStartTimeWhere(tripQuery) +
+				getHeadsignWhere(tripQuery, parameterNameAndValues) +
+				getDirectionWhere(tripQuery, parameterNameAndValues) +
+				getStartTimeWhere(tripQuery, parameterNameAndValues) +
 				"ORDER BY t.startTime";
 		try {
+			parameterNameAndValues.put("routeShortName", tripQuery.getRouteShortName());
+			parameterNameAndValues.put("configRevs", tripQuery.getConfigRevs());
+
 			Query query = session.createQuery(hql);
-			query.setString("routeShortName", tripQuery.getRouteShortName());
-			query.setParameterList("configRevs", tripQuery.getConfigRevs());
+			for (Map.Entry<String, Object> e : parameterNameAndValues.entrySet()) {
+				query.setParameter(e.getKey(), e.getValue());
+			}
 
 			List<Trip> results = query.list();
 
@@ -1248,29 +1254,33 @@ public class Trip implements Lifecycle, Serializable {
 
 
 
-	private static String getHeadsignWhere(TripQuery tripQuery){
+	private static String getHeadsignWhere(TripQuery tripQuery, Map<String, Object> parameterNameAndValues){
 		if(StringUtils.isNotBlank(tripQuery.getHeadsign())){
-			return  String.format("AND t.headsign = '%s' ", tripQuery.getHeadsign());
+			parameterNameAndValues.put("headsign", tripQuery.getHeadsign());
+			return  "AND t.headsign = :headsign ";
 		}
 		return "";
 	}
 
-	private static String getDirectionWhere(TripQuery tripQuery){
+	private static String getDirectionWhere(TripQuery tripQuery, Map<String, Object> parameterNameAndValues){
 		if(StringUtils.isNotBlank(tripQuery.getDirection())){
-			return String.format("AND t.directionId = '%s' ", tripQuery.getDirection());
+			parameterNameAndValues.put("directionId", tripQuery.getDirection());
+			return "AND t.directionId = :directionId ";
 		}
 		return "";
 	}
 
-	private static String getStartTimeWhere(TripQuery tripQuery){
+	private static String getStartTimeWhere(TripQuery tripQuery, Map<String, Object> parameterNameAndValues){
   		String startTime = "";
   		if(tripQuery.getFirstStartTime() != null
 				&& (tripQuery.getLastStartTime() == null || tripQuery.getFirstStartTime() < tripQuery.getLastStartTime())){
-			startTime += String.format("AND t.startTime >= %s ", tripQuery.getFirstStartTime());
+			parameterNameAndValues.put("firstStartTime", tripQuery.getFirstStartTime());
+			startTime += "AND t.startTime >= :firstStartTime ";
 		}
 		if(tripQuery.getLastStartTime() != null
 				&& (tripQuery.getFirstStartTime() == null || tripQuery.getFirstStartTime() < tripQuery.getLastStartTime())){
-			startTime += String.format("AND t.startTime <= %s ", tripQuery.getLastStartTime());
+			parameterNameAndValues.put("lastStartTime", tripQuery.getLastStartTime());
+			startTime += "AND t.startTime <= :lastStartTime ";
 		}
 		return startTime;
 	}
