@@ -474,61 +474,13 @@
     }
 
     function getScheduledType(timeReference){
-        var earlyTime = 30000;  // 30 seconds
-        var lateTime = -120000; // 2 minutes
-
-
-        if (timeReference < lateTime) {
+        if (timeReference < 0) {
             return "late";
-        } else if (timeReference > earlyTime) {
+        } else if (timeReference > 0) {
             return "early";
         }
 
         return "ontime";
-
-    }
-
-    function generateTable(){
-
-        var dummyData = {
-            "adjustments": [
-                {
-                    "stop": 5425,
-                    "schedule": 23000123,
-                    "adjustment": -90000
-                },
-                {
-                    "stop": 797,
-                    "schedule": 3842823,
-                    "adjustment": 0
-                }
-            ],
-            "current_otp": "84%",
-            "expected_otp": "95%"
-        };
-
-
-
-        var currentTable = '<table class="border-table">';
-        currentTable += '<tbody><tr><th>Stop</th><th>Scheduled</th><th>Adjustment</th></tr>';
-
-        dummyData.adjustments.forEach(function(eachAdjustment){
-
-            var scheduleMin  = parseFloat((eachAdjustment.schedule / 60000).toFixed(1));
-            var adjustment  = parseFloat((eachAdjustment.adjustment / 60000).toFixed(1));
-            var sheduledClassName = getScheduledType(eachAdjustment.schedule);
-
-            currentTable += "<tr><td>"+eachAdjustment.stop+"</td>";
-            currentTable += '<td class="'+sheduledClassName+'">'+scheduleMin+'</td>';
-            currentTable += "<td>"+adjustment+"</td>";
-            currentTable += "</tr>";
-
-        });
-
-        currentTable += '</tbody></table>';
-        $("#current_otp").html(dummyData.current_otp);
-        $("#expected_otp").html(dummyData.expected_otp);
-        $(".adjustment-details").html(currentTable);
 
     }
 
@@ -578,8 +530,6 @@
 
         var callBack = function(response){
 
-            console.log(response);
-
             if (jQuery.isEmptyObject(response)) {
                 alert("No run time information available for selected parameters.");
             } else {
@@ -625,6 +575,82 @@
 
     });
 
+    function generateTable(){
+        var dataUrl = apiUrlPrefix +  "/report/runTime/prescriptiveRunTimes";
+        request = getParams(false)
+
+        $.ajax({
+            url: dataUrl,
+            // Pass in query string parameters to page being requested
+            data: request,
+            // Needed so that parameters passed properly to page being requested
+            traditional: true,
+            dataType: "json",
+            success: function (response) {
+
+                $("#submit").attr("disabled", false);
+                if(response.adjustments && response.adjustments.length > 0){
+                    generateTableDetails(response);
+                } else{
+                    alert("No Prescriptive RunTimes available for selected criteria.");
+                }
+
+            },
+            error: function (e) {
+                alert("Error retrieving Prescriptive RunTimes.");
+                $("#submit").attr("disabled", false);
+            }
+        })
+
+
+
+    }
+
+    function generateTableDetails(response){
+        var dummyData = {
+            "adjustments": [
+                {
+                    "stop": 5425,
+                    "schedule": 23000123,
+                    "adjustment": -90000
+                },
+                {
+                    "stop": 797,
+                    "schedule": 3842823,
+                    "adjustment": 0
+                }
+            ],
+            "current_otp": "84%",
+            "expected_otp": "95%"
+        };
+
+
+
+        var currentTable = '<table class="border-table">';
+        currentTable += '<tbody><tr><th>Stop</th><th>Scheduled</th><th>Adjustment</th></tr>';
+
+        response.adjustments.forEach(function(eachAdjustment){
+
+            var scheduleMin  = parseFloat((eachAdjustment.schedule / 60000).toFixed(1));
+            var adjustment  = parseFloat((eachAdjustment.adjustment / 60000).toFixed(1));
+            var sheduledClassName = getScheduledType(eachAdjustment.adjustment);
+
+            if(adjustment > 0){
+                var adjustment = "+" + adjustment;
+            }
+
+            currentTable += "<tr><td>"+eachAdjustment.stop+"</td>";
+            currentTable += '<td class="'+sheduledClassName+'">'+scheduleMin+'</td>';
+            currentTable += "<td>"+adjustment+"</td>";
+            currentTable += "</tr>";
+
+        });
+
+        currentTable += '</tbody></table>';
+        $("#current_otp").html(response.current_otp);
+        $("#expected_otp").html(response.expected_otp);
+        $(".adjustment-details").html(currentTable);
+    }
 
     function populateDirection() {
 
@@ -711,23 +737,17 @@
         var routeName = $("#route").val().trim() == "" ? "" : $("#route").val();
         var directionName = $("#direction").val() == null ? "" : $("#direction").val();
 
-        var date = new Date();
-
         params = {};
 
-        /** beginDate: 2021-05-03
-         endDate: 2021-05-17
-         beginTime: 00:00:00
-         endTime: 23:59:59
-         r: 22759
-         headsign: 704 PARKLAND HOSPITAL
-         serviceType: */
+
+        var timeBand = $("#timeband").val() == null ? "00:00-06:30": $("#timeband").val();
 
 
-            var timeBand = $("#timeband").val() == null ? "00:00-06:30": $("#timeband").val();
+        var firstDay = new Date();
+        firstDay.setDate(firstDay.getDate() - 30);
 
-        var firstDay = new Date(date.getFullYear(), date.getMonth()-1, 1);0
-        var lastDay = new Date(date.getFullYear(), date.getMonth(), 0);
+        var lastDay = new Date();
+
 
         params.beginDate =  firstDay.getFullYear() + "-"
             + (firstDay.getMonth() <= 10 ? "0" + (firstDay.getMonth() + 1) : (firstDay.getMonth() + 1))
@@ -737,13 +757,13 @@
             + (lastDay.getMonth() <= 10 ? "0" + (lastDay.getMonth() + 1) : (lastDay.getMonth() + 1))
             + "-" + (lastDay.getDate() < 10 ? "0" + lastDay.getDate() : lastDay.getDate());
 
+
         params.beginTime = (timeBand.split("-")[0]).trim()+":00";
         params.endTime = timeBand.split("-")[1] === "Empty"?"23:59:59": (timeBand.split("-")[1]).trim()+":00";
         params.r = routeName
         params.headsign = directionName;
         params.serviceType = $("#serviceDayType").val();
         params.tripPattern =  $("#tripPattern").val() == null ? "" : $("#tripPattern").val();
-
 
         return params;
     }

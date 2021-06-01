@@ -3,21 +3,17 @@ package org.transitclock.reporting.keys;
 import org.transitclock.utils.MapKey;
 
 public class StopPathRunTimeKey extends MapKey implements Comparable<StopPathRunTimeKey> {
-    public StopPathRunTimeKey(String stopId, String stopPathId, Integer stopPathIndex){
-        super(stopId, stopPathId, stopPathIndex);
-    }
-
-    public String getStopId(){
-        return (String) o1;
+    public StopPathRunTimeKey(String stopPathId, Integer stopPathIndex){
+        super(stopPathId, stopPathIndex);
     }
 
     public String getStopPathId(){
-        return (String) o2;
+        return (String) o1;
     }
 
     public Integer getStopPathIndex(){
-        if(o3 != null) {
-            return (Integer) o3;
+        if(o2 != null) {
+            return (Integer) o2;
         }
         return null;
     }
@@ -25,9 +21,8 @@ public class StopPathRunTimeKey extends MapKey implements Comparable<StopPathRun
     @Override
     public String toString() {
         return "StopPathRunTimeKey ["
-                + "stopId=" + o1
-                + ", stopPathId=" + o2
-                + ", stopPathIndex=" + o3
+                + "stopPathId=" + o1
+                + ", stopPathIndex=" + o2
                 + "]";
     }
 

@@ -4,6 +4,7 @@ import com.google.common.base.Objects;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitclock.core.ServiceType;
+import org.transitclock.core.dwell.DwellTimeUtil;
 import org.transitclock.db.hibernate.HibernateUtils;
 
 import javax.persistence.*;
@@ -265,11 +266,36 @@ public class RunTimesForRoutes implements Serializable {
         return startStopPathIndex != null && startStopPathIndex == 0;
     }
 
+    public boolean hasLastStop() {
+        return actualLastStopPathIndex != null && expectedLastStopPathIndex != null &&
+            actualLastStopPathIndex == expectedLastStopPathIndex;
+    }
+
+
     public Long getRunTime(){
-        if(endTime == null || startTime == null){
-            return null;
+        Long runTime = null;
+        if(endTime != null && startTime != null){
+            runTime = endTime.getTime() - startTime.getTime();
+            if(startStopPathIndex == 0){
+                Long firstStopDwellTime = DwellTimeUtil.calculateFirstStopDwellTime(scheduledStartTime, startTime.getTime());
+                if(firstStopDwellTime != null){
+                    runTime += firstStopDwellTime;
+                }
+            }
         }
-        return endTime.getTime() - startTime.getTime();
+        return runTime;
+    }
+
+    public boolean hasCompleteRunTime(){
+        return hasFirstStop() && hasLastStop();
+    }
+
+    public boolean hasAllScheduledAndActualTimes(){
+        if(getRouteShortName() != null && getEndTime() != null && getStartTime() == null &&
+                getScheduledStartTime() == null && getScheduledEndTime() == null){
+            return true;
+        }
+        return false;
     }
 
     public Integer getActualLastStopPathIndex() {

@@ -1,5 +1,8 @@
 package org.transitclock.api.data.reporting.chartjs.custom;
 
+import org.transitclock.api.data.ApiRunTimeSummary;
+import org.transitclock.ipc.data.IpcRunTime;
+
 import javax.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +32,9 @@ public class TripAggregatedRunTimeData {
     @XmlElement(name = "tripRunTimes")
     private List<TripIndividualRunTimeData> tripRunTimes = new ArrayList<>();
 
+    @XmlElement(name = "summary")
+    private ApiRunTimeSummary summary;
+
     public List<String> getTripsList() {
         return tripsList;
     }
@@ -55,5 +61,13 @@ public class TripAggregatedRunTimeData {
 
     public List<TripIndividualRunTimeData> getTripRunTimes() {
         return tripRunTimes;
+    }
+
+    public ApiRunTimeSummary getSummary() {
+        return summary;
+    }
+
+    public void setSummary(IpcRunTime summary) {
+        this.summary = new ApiRunTimeSummary(summary);
     }
 }

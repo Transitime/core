@@ -58,7 +58,7 @@ public class RunTimesForStops implements Serializable {
     private RunTimesForRoutes runTimesForRoutes;
 
 
-    public RunTimesForStops() { }
+    public RunTimesForStops() {}
 
     public RunTimesForStops(String stopPathId,
                             int stopPathIndex,
@@ -141,6 +141,10 @@ public class RunTimesForStops implements Serializable {
         this.lastStop = lastStop;
     }
 
+    public boolean getFirstStop(){
+        return stopPathIndex == 0;
+    }
+
     public Boolean getTimePoint() {
         return timePoint;
     }
@@ -180,6 +184,16 @@ public class RunTimesForStops implements Serializable {
         }
         else if (prevStopDepartureTime != null && time != null && dwellTime != null) {
             return (time.getTime() - dwellTime) - prevStopDepartureTime.getTime();
+        }
+        return null;
+    }
+
+    public Integer getScheduledRunTime() {
+        if(stopPathIndex == 0){
+            return 0;
+        }
+        else if (scheduledPrevStopArrivalTime != null && scheduledTime != null) {
+            return (scheduledTime - scheduledPrevStopArrivalTime);
         }
         return null;
     }

@@ -1,27 +1,23 @@
 package org.transitclock.reporting;
 
+import org.transitclock.db.structs.RunTimesForStops;
+
 import java.util.List;
 
-public class StopPathStatistics {
-    private final String tripId;
+public class TimePointStatistics {
     private final String stopPathId;
+    private final Integer stopPathIndex;
     private final String stopName;
-    private final int stopPathIndex;
-    private final boolean isTimePoint;
     private final boolean isLastStop;
     private final boolean isFirstStop;
 
     DoubleStatistics dwellTimeStats = new DoubleStatistics();
     DoubleStatistics runTimeStats = new DoubleStatistics();
-    DoubleStatistics scheduledRunTimeStats = new DoubleStatistics();
 
-    public StopPathStatistics(String tripId, String stopPathId, int stopPathIndex, String stopName,
-                              boolean isTimePoint, boolean isLastStop) {
-        this.tripId = tripId;
+    public TimePointStatistics(String stopPathId, int stopPathIndex, String stopName,boolean isLastStop) {
         this.stopPathId = stopPathId;
         this.stopPathIndex = stopPathIndex;
         this.stopName =  stopName;
-        this.isTimePoint = isTimePoint;
         this.isLastStop = isLastStop;
         this.isFirstStop = stopPathIndex == 0;
     }
@@ -32,10 +28,6 @@ public class StopPathStatistics {
 
     public DoubleStatistics getRunTimeStats() {
         return runTimeStats;
-    }
-
-    public DoubleStatistics getScheduledRunTimeStats() {
-        return scheduledRunTimeStats;
     }
 
     public Double getAverageRunTime() {
@@ -61,12 +53,6 @@ public class StopPathStatistics {
         return dwellTimeStats.getMedian();
     }
 
-    public Double getAverageScheduledRunTime() { return scheduledRunTimeStats.getAverage(); }
-
-    public Double getMedianScheduledRunTime() {
-        return scheduledRunTimeStats.getMedian();
-    }
-
     public List<Double> getAllRunTimes(){
         return runTimeStats.getAllValues();
     }
@@ -75,11 +61,7 @@ public class StopPathStatistics {
         return dwellTimeStats.getAllValues();
     }
 
-    public List<Double> getAllScheduledRunTimes() { return scheduledRunTimeStats.getAllValues(); }
-
     public long getCount() { return runTimeStats.getCount(); }
-
-    public boolean isTimePoint() { return isTimePoint; }
 
     public boolean isLastStop() {
         return isLastStop;
@@ -91,5 +73,34 @@ public class StopPathStatistics {
 
     public String getStopName() {
         return stopName;
+    }
+
+    public String getStopPathId() {
+        return stopPathId;
+    }
+
+    public Integer getStopPathIndex() {
+        return stopPathIndex;
+    }
+
+    public Double getRunTimePercentile(double percentile){
+        return runTimeStats.getPercentileValue(percentile);
+    }
+
+    public Double getDwellTimePercentile(double percentile){
+        return dwellTimeStats.getPercentileValue(percentile);
+    }
+
+    @Override
+    public String toString() {
+        return "TimePointStatistics{" +
+                "stopPathId='" + stopPathId + '\'' +
+                ", stopPathIndex=" + stopPathIndex +
+                ", stopName='" + stopName + '\'' +
+                ", isLastStop=" + isLastStop +
+                ", isFirstStop=" + isFirstStop +
+                ", dwellTimeStats=" + dwellTimeStats +
+                ", runTimeStats=" + runTimeStats +
+                '}';
     }
 }

@@ -7,7 +7,7 @@ public class MedianTest {
 
     @Test
     public void testMedian(){
-        DoubleMedianStatistics medianStatistics = new DoubleMedianStatistics();
+        DoubleStatistics medianStatistics = new DoubleStatistics();
         medianStatistics.add(1);
         medianStatistics.add(7);
         medianStatistics.add(5);

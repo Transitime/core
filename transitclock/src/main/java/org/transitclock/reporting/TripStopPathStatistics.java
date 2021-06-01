@@ -1,32 +1,38 @@
 package org.transitclock.reporting;
 
-import org.transitclock.core.travelTimes.DataFetcher;
 import org.transitclock.db.structs.*;
 import org.transitclock.gtfs.TitleFormatter;
 import org.transitclock.reporting.keys.StopPathRunTimeKey;
 import org.transitclock.reporting.keys.TripTimeVehicleKey;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-public class TripStopPathStatisticsV2 {
+public class TripStopPathStatistics {
 
     private Trip primaryTrip;
     private Integer nextTripTime;
     private int expectedStopPathCount;
-    private Map<String, StopPath> stopPathsGroupedById;
+    private Map<StopPathRunTimeKey, StopPath> stopPathsGroupedById;
 
-    private Set<StopPathRunTimeKey> uniqueStopPathRunTimes = new LinkedHashSet<>();
-    private Set<StopPathRunTimeKey> uniqueStopPathDwellTimes = new LinkedHashSet<>();
-    private Map<StopPathRunTimeKey, StopPathStatisticsV2> stopPathStatistics = new HashMap<>();
+    private Set<StopPathRunTimeKey> matchedStopPathRunTimes = new LinkedHashSet<>();
+    private Set<StopPathRunTimeKey> matchedStopPathDwellTimes = new LinkedHashSet<>();
+    private Map<StopPathRunTimeKey, StopPathStatistics> stopPathStatistics = new HashMap<>();
     private Map<TripTimeVehicleKey, Long> runTimesForTrips = new HashMap<>();
 
-    public TripStopPathStatisticsV2(Trip primaryTrip, Integer nextTripTime) {
+    public TripStopPathStatistics(Trip primaryTrip, Integer nextTripTime) {
         this.primaryTrip = primaryTrip;
         this.nextTripTime = nextTripTime;
         this.expectedStopPathCount = primaryTrip.getNumberStopPaths() - 1;
-        stopPathsGroupedById = primaryTrip.getStopPaths().stream()
-                .collect(Collectors.toMap(StopPath::getId, stopPath -> stopPath));
+        List<StopPath> stopPaths = primaryTrip.getStopPaths();
+        stopPathsGroupedById = new LinkedHashMap();
+        for(int i=0; i< stopPaths.size(); i++){
+            StopPathRunTimeKey key = getKey(stopPaths.get(i).getId(), i);
+            stopPathsGroupedById.put(key, stopPaths.get(i));
+        }
+    }
+
+    private StopPathRunTimeKey getKey(String stopPathId, Integer stopPathIndex){
+        return new StopPathRunTimeKey(stopPathId, stopPathIndex);
     }
 
     /**
@@ -36,18 +42,20 @@ public class TripStopPathStatisticsV2 {
      */
     public void addStopPathRunTime(RunTimesForStops runTimesForStops) {
         if (runTimesForStops.getRunTimesForRoutes().getTripId().equals(primaryTrip.getId())
-                && stopPathsGroupedById.get(runTimesForStops.getStopPathId()) != null) {
+                && stopPathsGroupedById.get(getKey(runTimesForStops.getStopPathId(),runTimesForStops.getStopPathIndex())) != null) {
 
             addRunTimeForTrip(runTimesForStops.getRunTimesForRoutes());
 
             Double runTime = getRunTimeForStopPath(runTimesForStops);
             if (runTime != null) {
-                StopPathRunTimeKey stopPathkey = new StopPathRunTimeKey(null, runTimesForStops.getStopPathId(),
+                StopPathRunTimeKey stopPathkey = new StopPathRunTimeKey(runTimesForStops.getStopPathId(),
                         runTimesForStops.getStopPathIndex());
 
-                StopPathStatisticsV2 result = getStatsMapResult(stopPathkey, runTimesForStops);
+                StopPathStatistics result = getStatsMapResult(stopPathkey, runTimesForStops);
                 result.getRunTimeStats().add(runTime);
-                uniqueStopPathRunTimes.add(stopPathkey);
+                if(!matchedStopPathRunTimes.contains(stopPathkey)){
+                    matchedStopPathRunTimes.add(stopPathkey);
+                }
             }
         }
     }
@@ -56,33 +64,10 @@ public class TripStopPathStatisticsV2 {
         TripTimeVehicleKey tripTimeVehicleKey = new TripTimeVehicleKey(runTimeForRoute.getTripId(),
                 runTimeForRoute.getStartTime().getTime(), runTimeForRoute.getVehicleId());
 
-        if(!runTimesForTrips.containsKey(tripTimeVehicleKey)){
+        if(!runTimesForTrips.containsKey(tripTimeVehicleKey) && runTimeForRoute.hasCompleteRunTime()){
             runTimesForTrips.put(tripTimeVehicleKey, runTimeForRoute.getRunTime());
         }
     }
-
-    /*private void addStopPathRunTimeForTrip(StopPathRunTimeKey stopPathRunTimeKey,
-                                           RunTimesForRoutes runTimeForRoute,
-                                           RunTimesForStops runTimesForStop){
-        TripTimeVehicleKey tripTimeVehicleKey = new TripTimeVehicleKey(runTimeForRoute.getTripId(),
-                runTimeForRoute.getStartTime().getTime(), runTimeForRoute.getVehicleId());
-
-        Map<StopPathRunTimeKey, StopPathRunTime> stopPathRunTimes = stopPathRunTimesPerUniqueTrip.get(tripTimeVehicleKey);
-        if(stopPathRunTimes == null){
-            stopPathRunTimes = new HashMap<>();
-            stopPathRunTimesPerUniqueTrip.put(tripTimeVehicleKey, stopPathRunTimes);
-        }
-
-        stopPathRunTimes.put(stopPathRunTimeKey, );
-        if(stopPathRunTime == null){
-
-        }
-    }
-
-    private StopPathRunTime getStopPathRunTime(RunTimesForStops runTimesForStop){
-        return new StopPathRunTime(runTimesForStop);
-    }
-    */
 
     private Double getRunTimeForStopPath(RunTimesForStops runTimesForStops) {
             Long runTimeForStopPath = runTimesForStops.getRunTime();
@@ -99,15 +84,17 @@ public class TripStopPathStatisticsV2 {
     public void addStopPathDwellTime(RunTimesForStops runTimesForStops) {
         if (runTimesForStops.getRunTimesForRoutes().getTripId().equals(primaryTrip.getId())
                 && runTimesForStops.getStopPathIndex() < expectedStopPathCount
-                && stopPathsGroupedById.get(runTimesForStops.getStopPathId()) != null) {
+                && stopPathsGroupedById.get(getKey(runTimesForStops.getStopPathId(),runTimesForStops.getStopPathIndex())) != null) {
 
             Double dwellTime = getDwellTimeForStopPath(runTimesForStops);
             if (dwellTime != null) {
-                StopPathRunTimeKey stopPathkey = new StopPathRunTimeKey(null, runTimesForStops.getStopPathId(),
+                StopPathRunTimeKey stopPathkey = new StopPathRunTimeKey(runTimesForStops.getStopPathId(),
                         runTimesForStops.getStopPathIndex());
-                StopPathStatisticsV2 result = getStatsMapResult(stopPathkey, runTimesForStops);
+                StopPathStatistics result = getStatsMapResult(stopPathkey, runTimesForStops);
                 result.getDwellTimeStats().add(dwellTime);
-                uniqueStopPathDwellTimes.add(stopPathkey);
+                if(!matchedStopPathDwellTimes.contains(stopPathkey)){
+                    matchedStopPathDwellTimes.add(stopPathkey);
+                }
             }
         }
     }
@@ -119,12 +106,12 @@ public class TripStopPathStatisticsV2 {
         return null;
     }
 
-    public Map<StopPathRunTimeKey, StopPathStatisticsV2> getAllStopPathStatistics() {
+    public Map<StopPathRunTimeKey, StopPathStatistics> getAllStopPathStatistics() {
         return stopPathStatistics;
     }
 
-    public StopPathStatisticsV2 getStopPathStatistics(String stopId, String stopPathId, Integer stopPathIndex) {
-        return stopPathStatistics.get(new StopPathRunTimeKey(stopId, stopPathId, stopPathIndex));
+    public StopPathStatistics getStopPathStatistics(String stopId, String stopPathId, Integer stopPathIndex) {
+        return stopPathStatistics.get(new StopPathRunTimeKey(stopPathId, stopPathIndex));
     }
 
     public Trip getTrip() {
@@ -135,8 +122,8 @@ public class TripStopPathStatisticsV2 {
     public Double getTripAverageRunTime() {
         double tripRunTime = 0;
         if (hasAllStopPathsForRunTimes()) {
-            for (Map.Entry<StopPathRunTimeKey, StopPathStatisticsV2> entry : stopPathStatistics.entrySet()) {
-                StopPathStatisticsV2 sps = entry.getValue();
+            for (Map.Entry<StopPathRunTimeKey, StopPathStatistics> entry : stopPathStatistics.entrySet()) {
+                StopPathStatistics sps = entry.getValue();
                 Double avgRunTime = sps.getAverageRunTime();
                 if (avgRunTime == null) {
                     return null;
@@ -151,8 +138,8 @@ public class TripStopPathStatisticsV2 {
     public Double getTripMedianRunTime() {
         double tripRunTime = 0;
         if (hasAllStopPathsForRunTimes()) {
-            for (Map.Entry<StopPathRunTimeKey, StopPathStatisticsV2> entry : stopPathStatistics.entrySet()) {
-                StopPathStatisticsV2 sps = entry.getValue();
+            for (Map.Entry<StopPathRunTimeKey, StopPathStatistics> entry : stopPathStatistics.entrySet()) {
+                StopPathStatistics sps = entry.getValue();
                 if(sps.isFirstStop()){
                     continue;
                 }
@@ -170,8 +157,8 @@ public class TripStopPathStatisticsV2 {
     public Double getTripFixedRunTime() {
         double tripFixedRunTime = 0;
         if (hasAllStopPathsForRunTimes()) {
-            for (Map.Entry<StopPathRunTimeKey, StopPathStatisticsV2> entry : stopPathStatistics.entrySet()) {
-                StopPathStatisticsV2 sps = entry.getValue();
+            for (Map.Entry<StopPathRunTimeKey, StopPathStatistics> entry : stopPathStatistics.entrySet()) {
+                StopPathStatistics sps = entry.getValue();
                 if (sps.isFirstStop()) {
                     continue;
                 }
@@ -189,8 +176,8 @@ public class TripStopPathStatisticsV2 {
     public Double getTripAvgDwellTime() {
         double tripDwellTime = 0;
         if (hasAllStopPathsForDwellTimes()) {
-            for (Map.Entry<StopPathRunTimeKey, StopPathStatisticsV2> entry : stopPathStatistics.entrySet()) {
-                StopPathStatisticsV2 sps = entry.getValue();
+            for (Map.Entry<StopPathRunTimeKey, StopPathStatistics> entry : stopPathStatistics.entrySet()) {
+                StopPathStatistics sps = entry.getValue();
                 if (sps.isLastStop()) {
                     continue;
                 }
@@ -208,8 +195,8 @@ public class TripStopPathStatisticsV2 {
     public Double getTripMedianDwellTime() {
         double tripRunTime = 0;
         if (hasAllStopPathsForDwellTimes()) {
-            for (Map.Entry<StopPathRunTimeKey, StopPathStatisticsV2> entry : stopPathStatistics.entrySet()) {
-                StopPathStatisticsV2 sps = entry.getValue();
+            for (Map.Entry<StopPathRunTimeKey, StopPathStatistics> entry : stopPathStatistics.entrySet()) {
+                StopPathStatistics sps = entry.getValue();
                 if (sps.isLastStop()) {
                     continue;
                 }
@@ -227,8 +214,8 @@ public class TripStopPathStatisticsV2 {
     public Map<StopPathRunTimeKey, Double> getStopPathAverageRunTime() {
         if (hasAllStopPathsForRunTimes()) {
             Map<StopPathRunTimeKey, Double> stopPathAverageRunTime = new LinkedHashMap<>();
-            for (Map.Entry<StopPathRunTimeKey, StopPathStatisticsV2> entry : stopPathStatistics.entrySet()) {
-                StopPathStatisticsV2 sps = entry.getValue();
+            for (Map.Entry<StopPathRunTimeKey, StopPathStatistics> entry : stopPathStatistics.entrySet()) {
+                StopPathStatistics sps = entry.getValue();
                 Double avgRunTime = sps.getAverageRunTime();
                 if (avgRunTime == null) {
                     return null;
@@ -243,8 +230,8 @@ public class TripStopPathStatisticsV2 {
     public Map<StopPathRunTimeKey, Double> getStopPathAvgDwellTime() {
         if (hasAllStopPathsForDwellTimes()) {
             Map<StopPathRunTimeKey, Double> stopPathAvgDwellTime = new LinkedHashMap<>();
-            for (Map.Entry<StopPathRunTimeKey, StopPathStatisticsV2> entry : stopPathStatistics.entrySet()) {
-                StopPathStatisticsV2 sps = entry.getValue();
+            for (Map.Entry<StopPathRunTimeKey, StopPathStatistics> entry : stopPathStatistics.entrySet()) {
+                StopPathStatistics sps = entry.getValue();
                 Double avgDwellTime = sps.getAverageDwellTime();
                 if (sps.isLastStop()) {
                     continue;
@@ -261,8 +248,8 @@ public class TripStopPathStatisticsV2 {
     public Map<StopPathRunTimeKey, Double> getStopPathFixedRunTime() {
         if (hasAllStopPathsForRunTimes()) {
             Map<StopPathRunTimeKey, Double> stopPathFixedRunTime = new LinkedHashMap<>();
-            for (Map.Entry<StopPathRunTimeKey, StopPathStatisticsV2> entry : stopPathStatistics.entrySet()) {
-                StopPathStatisticsV2 sps = entry.getValue();
+            for (Map.Entry<StopPathRunTimeKey, StopPathStatistics> entry : stopPathStatistics.entrySet()) {
+                StopPathStatistics sps = entry.getValue();
                 if (sps.isFirstStop()) {
                     continue;
                 }
@@ -275,20 +262,6 @@ public class TripStopPathStatisticsV2 {
             return stopPathFixedRunTime;
         }
         return null;
-    }
-
-    public long getTotalTrips() {
-        if (hasAllStopPathsForRunTimes()) {
-            long count = 0;
-            for (Map.Entry<StopPathRunTimeKey, StopPathStatisticsV2> entry : stopPathStatistics.entrySet()) {
-                StopPathStatisticsV2 sps = entry.getValue();
-                if (sps.getCount() > count) {
-                    count = sps.getCount();
-                }
-            }
-            return count;
-        }
-        return 0;
     }
 
 
@@ -305,32 +278,32 @@ public class TripStopPathStatisticsV2 {
     }
 
     public boolean hasAllStopPathsForRunTimes() {
-        return uniqueStopPathRunTimes.size() == expectedStopPathCount + 1;
+        return matchedStopPathRunTimes.size() == expectedStopPathCount + 1;
     }
 
     public boolean hasAllStopPathsForDwellTimes() {
-        return uniqueStopPathDwellTimes.size() == expectedStopPathCount;
+        return matchedStopPathDwellTimes.size() == expectedStopPathCount;
     }
 
 
-    private StopPathStatisticsV2 getStatsMapResult(StopPathRunTimeKey key, RunTimesForStops runTimesForStops) {
-        StopPathStatisticsV2 result = stopPathStatistics.get(key);
+    private StopPathStatistics getStatsMapResult(StopPathRunTimeKey key, RunTimesForStops runTimesForStops) {
+        StopPathStatistics result = stopPathStatistics.get(key);
 
         if (result == null) {
-            result = new StopPathStatisticsV2(runTimesForStops.getRunTimesForRoutes().getTripId(),
+            result = new StopPathStatistics(runTimesForStops.getRunTimesForRoutes().getTripId(),
                                               runTimesForStops.getStopPathId(),
                                               runTimesForStops.getStopPathIndex(),
                                               getStopNameForStopPath(runTimesForStops.getStopPathId(),
                                                       runTimesForStops.getStopPathIndex()),
-                                              isTimePoint(runTimesForStops.getStopPathId()),
+                                              isTimePoint(runTimesForStops.getStopPathId(), runTimesForStops.getStopPathIndex()),
                                               runTimesForStops.getLastStop());
             stopPathStatistics.put(key, result);
         }
         return result;
     }
 
-    private boolean isTimePoint(String stopPathId){
-        StopPath stopPath = stopPathsGroupedById.get(stopPathId);
+    private boolean isTimePoint(String stopPathId, Integer stopPathIndex){
+        StopPath stopPath = stopPathsGroupedById.get(getKey(stopPathId,stopPathIndex));
         if(stopPath != null && stopPath.isScheduleAdherenceStop()){
             return true;
         }
@@ -338,7 +311,7 @@ public class TripStopPathStatisticsV2 {
     }
 
     private String getStopNameForStopPath(String stopPathId, int stopPathIndex){
-        StopPath stopPath = stopPathsGroupedById.get(stopPathId);
+        StopPath stopPath = stopPathsGroupedById.get(getKey(stopPathId,stopPathIndex));
         if(stopPath != null && stopPath.getStopName() != null){
             return getStopNamePrefix(stopPathIndex) + TitleFormatter.capitalize(stopPath.getStopName());
         }

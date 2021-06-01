@@ -102,6 +102,8 @@ public class DbConfig {
 	// Keyed on tripPatternId
 	private Map<String, TripPattern> tripPatternsByIdMap;
 
+	private Map<String, List<String>> tripIdsByTripPatternMap;
+
 	// For when reading in all trips from db. Keyed on tripId
 	private Map<String, Trip> tripsMap;
 	// For trips that have been read in individually. Keyed on tripId.
@@ -516,6 +518,13 @@ public class DbConfig {
 				.collect(Collectors.toList());
 	}
 
+	public List<String> getTripIdsForTripPattern(String tripPatternId){
+		if(tripIdsByTripPatternMap == null){
+			getTrips();
+		}
+		return tripIdsByTripPatternMap.get(tripPatternId);
+	}
+
 	/**
 	 * Returns cached map of all Trips. Can be slow first time accessed because
 	 * it can take a while to read in all trips including all sub-data.
@@ -538,6 +547,15 @@ public class DbConfig {
 				// reading in block assignments. This makes reading of the
 				// trip pattern data much faster.
 				tripsMap = Trip.getTrips(globalSession, configRev);
+				tripIdsByTripPatternMap = new HashMap<>();
+				for(Map.Entry<String, Trip> tripEntry: tripsMap.entrySet()){
+					List<String> tripIdsForTripPattern = tripIdsByTripPatternMap.get(tripEntry.getKey());
+					if(tripIdsForTripPattern == null) {
+						tripIdsForTripPattern = new ArrayList<>();
+						tripIdsByTripPatternMap.put(tripEntry.getValue().getTripPattern().getId(), tripIdsForTripPattern);
+					}
+					tripIdsForTripPattern.add(tripEntry.getKey());
+				}
 			}
 			logger.debug("Reading trips took {} msec", timer.elapsedMsec());
 		}

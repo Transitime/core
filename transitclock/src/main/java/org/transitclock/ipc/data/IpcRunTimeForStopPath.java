@@ -6,16 +6,16 @@ public class IpcRunTimeForStopPath extends IpcRunTime {
     private String stopPathId;
     private String stopName;
     private Integer stopPathIndex;
-    private Integer prevStopSchDepartureTime;
-    private Integer currentStopSchDepartureTime;
+    private Double prevStopSchDepartureTime;
+    private Double currentStopSchDepartureTime;
     private  Double scheduledCompletionTime;
     private boolean isTimePoint;
 
     public IpcRunTimeForStopPath(String stopPathId,
                                  String stopName,
                                  Integer stopPathIndex,
-                                 Integer prevStopSchDepartureTime,
-                                 Integer currentStopSchDepartureTime,
+                                 Double prevStopSchDepartureTime,
+                                 Double currentStopSchDepartureTime,
                                  boolean isTimePoint,
                                  Double avgRunTime,
                                  Double fixed,
@@ -48,11 +48,11 @@ public class IpcRunTimeForStopPath extends IpcRunTime {
         return stopPathIndex;
     }
 
-    public Integer getPrevStopSchDepartureTime() {
+    public Double getPrevStopSchDepartureTime() {
         return prevStopSchDepartureTime;
     }
 
-    public Integer getCurrentStopSchDepartureTime() {
+    public Double getCurrentStopSchDepartureTime() {
         return currentStopSchDepartureTime;
     }
 
