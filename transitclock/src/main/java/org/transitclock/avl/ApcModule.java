@@ -4,7 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.db.structs.ArrivalDeparture;
-import org.transitclock.modules.Module;
+import org.transitclock.db.structs.Trip;
+import org.transitclock.utils.DateUtils;
 import org.transitclock.utils.Time;
 
 import java.util.Date;
@@ -47,8 +48,11 @@ public class ApcModule {
    * @param arrivalTime
    * @return
    */
-  public Double getPassengerArrivalRate(String stopId, Date arrivalTime) {
-      Double boardingsPerMinute = processor.getBoardingsPerMinute(stopId, arrivalTime);
+  public Double getPassengerArrivalRate(Trip trip, String stopId, Date arrivalTime) {
+    String routeId = trip.getRouteId();
+    boolean isHoliday = DateUtils.isHoliday(trip);
+    Date previousDayArrivalTime = DateUtils.getPreviousDayForArrivalTime(arrivalTime, isHoliday);
+    Double boardingsPerMinute = processor.getBoardingsPerMinute(routeId, stopId, previousDayArrivalTime);
     if (boardingsPerMinute != null && boardingsPerMinute != 0) {
       double boardingPerSecond = new Double(boardingsPerMinute) / Time.SEC_PER_MIN;
       logger.debug("boardingsPerMinute={} = boardingsPerMinute={}",
@@ -68,12 +72,12 @@ public class ApcModule {
     }
   }
 
-  private Date addTime(Date arrivalTime, long millis) {
-    return new Date(arrivalTime.getTime() + millis);
-  }
-
   private void init() {
     processor = ApcDataProcessor.getInstance();
     processor.enable();
+  }
+
+  public Long getDwellTime(String routeId, String stopId, Date arrivalTime) {
+    return processor.getDwellTime(routeId, stopId, arrivalTime);
   }
 }

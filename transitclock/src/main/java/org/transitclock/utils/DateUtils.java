@@ -1,5 +1,8 @@
 package org.transitclock.utils;
 
+import org.transitclock.config.StringConfigValue;
+import org.transitclock.db.structs.Trip;
+
 import java.util.Calendar;
 import java.util.Date;
 
@@ -7,6 +10,16 @@ import java.util.Date;
  * collection of helpful Date conversions.
  */
 public class DateUtils {
+
+  public static StringConfigValue HOLIDAY_REGEX
+          = new StringConfigValue("transitclock.apc.holidayRegex",
+          "Holiday",
+          "tripid regex to determine if holiday");
+
+  // similar ot ServiceType, but needs to consider holidays
+  public enum CalendarType {
+    WEEKDAY, SATURDAY, SUNDAY, HOLIDAY;
+  }
 
   /**
    * Round the given date down to a given bucket precision.  useful for
@@ -42,6 +55,41 @@ public class DateUtils {
 
   public static Date truncate(Date input, int field) {
     return org.apache.commons.lang3.time.DateUtils.truncate(input, field);
+  }
+
+  public static long dateBinning(long time, int binWidthInMillis) {
+    return new Double(Math.floor(new Double(time).doubleValue()/binWidthInMillis) * binWidthInMillis).longValue();
+  }
+
+  public static Date addDays(Date time, int days) {
+    return org.apache.commons.lang3.time.DateUtils.addDays(time, days);
+  }
+
+  public static Date getPreviousDayForArrivalTime(Date arrivalTime, boolean isHoliday) {
+    CalendarType currentType = getTypeForDate(arrivalTime);
+
+    Date previousDay = addDays(arrivalTime, -1);
+    while (!getTypeForDate(previousDay).equals(currentType)
+        || (isHoliday && !CalendarType.SUNDAY.equals(currentType))) {
+      previousDay = org.apache.commons.lang3.time.DateUtils.addDays(previousDay, -1);
+    }
+    return previousDay;
+  }
+
+  public static boolean isHoliday(Trip trip) {
+    return trip.getId().contains(HOLIDAY_REGEX.getValue());
+  }
+
+  public static CalendarType getTypeForDate(Date instanceTime) {
+    Calendar instance = Calendar.getInstance();
+    instance.setTime(instanceTime);
+    if (Calendar.SUNDAY == (instance.get(Calendar.DAY_OF_WEEK))) {
+      return CalendarType.SUNDAY;
+    }
+    if (Calendar.SATURDAY == (instance.get(Calendar.DAY_OF_WEEK))) {
+      return CalendarType.SATURDAY;
+    }
+    return CalendarType.WEEKDAY;
   }
 
 }

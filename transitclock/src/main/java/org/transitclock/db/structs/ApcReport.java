@@ -223,10 +223,15 @@ public class ApcReport implements Serializable {
 
   @Override
   public String toString() {
+    String adInfo = "";
+    if (arrivalDeparture != null) {
+      adInfo = ",routeId=" + arrivalDeparture.getRouteId()
+              + ", stopId=" + arrivalDeparture.getStopId();
+    }
   return "apc["
           + "vehicleId=" + vehicleId
           + ",time=" + time
-          + ",id=" + this.messageId
+          + adInfo
           + ",ons=" + getBoardings()
           + ",offs=" + getAlightings()
   + "]";

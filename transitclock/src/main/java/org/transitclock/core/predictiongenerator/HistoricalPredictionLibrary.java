@@ -17,7 +17,6 @@
 
 package org.transitclock.core.predictiongenerator;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
@@ -35,7 +34,7 @@ import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.monitoring.MonitoringService;
-import org.transitclock.utils.Time;
+import org.transitclock.utils.DateUtils;
 
 import java.util.*;
 
@@ -335,54 +334,6 @@ public class HistoricalPredictionLibrary {
 		return null;
 	}
 
-	public static Long getHistoricalHeadway(String referenceStopId, Trip referenceTrip, Date serviceDate) {
-		StopArrivalDepartureCacheKey currentStopKey = new StopArrivalDepartureCacheKey(referenceStopId,
-						serviceDate);
-		List<IpcArrivalDeparture> currentStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(currentStopKey);
-		if (currentStopList == null || currentStopList.isEmpty()) {
-			logger.info("no headway stopList for {}:{}", referenceStopId, serviceDate);
-			return null;
-		}
-
-		String referenceRouteId = referenceTrip.getRouteId();
-		IpcArrivalDeparture referenceArrivalDeparture = null;
-
-
-		for (int i = 0; i < currentStopList.size(); i++) {
-			IpcArrivalDeparture ipcArrivalDeparture = currentStopList.get(i);
-
-			if (referenceArrivalDeparture != null) {
-				// we found our reference trip, the very next trip is our headway (if route matches)
-				Trip headwayTrip = Core.getInstance().getDbConfig().getTrip(ipcArrivalDeparture.getTripId());
-				if (headwayTrip.getRouteId().equals(referenceRouteId)) {
-					// we found our headway
-					return referenceArrivalDeparture.getTime().getTime() - ipcArrivalDeparture.getTime().getTime();
-				}
-			}
-
-			// index off our current trip
-			if (ipcArrivalDeparture.getTripId().equals(referenceTrip.getId())) {
-				referenceArrivalDeparture = ipcArrivalDeparture;
-			}
-		}
-		return null;
-
-	}
-
-	private static boolean isHeadwayCloseEnough(long referenceTime, long headwayTime) {
-		int referenceSeconds = Core.getInstance().getTime()
-						.getSecondsIntoDay(referenceTime);
-		int headwaySeconds = Core.getInstance().getTime()
-						.getSecondsIntoDay(headwayTime);
-		return (referenceSeconds - headwaySeconds) < Time.SEC_PER_MIN * maxHeadwayMinutes.getValue()
-						&& referenceSeconds - headwaySeconds > 0;
-	}
-
-	public static Long getHistoricalHeadway(VehicleState vehicleState, Indices indices) {
-		return getHistoricalHeadway(indices.getStopPath().getStopId(),
-						indices.getTrip(),
-						DateUtils.truncate(vehicleState.getMatch().getAvlTime(), Calendar.HOUR));
-	}
 
 	private static IpcArrivalDeparture getArrival(int stopPathIndex, List<IpcArrivalDeparture> results)
 	{

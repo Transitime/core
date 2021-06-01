@@ -15,12 +15,10 @@ import org.transitclock.core.predictiongenerator.kalman.KalmanPredictionResult;
 import org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman.KalmanPredictionGeneratorImpl;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.ScheduleTime;
-import org.transitclock.utils.DateUtils;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -107,7 +105,7 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     getMonitoring().averageMetric("PredictionApcBoardingProcessingTime", boardingTimer.elapsedMsec());
 
     IntervalTimer historyTimer = new IntervalTimer();
-    List<Double> historicalDwellTimes = getHistoricalDwellTimes(indices, vehicleState, passengerBoardingTime);
+    List<Long> historicalDwellTimes = getHistoricalDwellTimes(indices, vehicleState, passengerBoardingTime);
     if (historicalDwellTimes == null || historicalDwellTimes.size() < 3) {
       logger.debug("exiting apc dwell time, no historical data");
       getMonitoring().rateMetric("PredictionDwellHistoryHit", false);
@@ -155,8 +153,7 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
 
   private Long getRealtimeHeadwayInSeconds(VehicleState vehicleState, Indices indices) {
     try {
-      int scheduleDeviationMsecs = vehicleState.getMatch().getTemporalDifference().getTemporalDifference();
-      long stopArrivalTime = getScheduledArrivalTime(indices, vehicleState) + scheduleDeviationMsecs;
+      long stopArrivalTime = getScheduledArrivalTimeIncludingSchedAdh(indices, vehicleState);
       Long headway = HistoricalPredictionLibrary.getLastHeadway(
               indices.getStopPath().getStopId(),
               indices.getTrip().getRouteId(), new Date(stopArrivalTime));
@@ -167,7 +164,7 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     return null;
   }
 
-  private KalmanPredictionResult predict(long dwellTime, List<Double> historicalDwellTimes,
+  private KalmanPredictionResult predict(long dwellTime, List<Long> historicalDwellTimes,
                        double lastPredictionError) {
 
     double average = historicalAverage(historicalDwellTimes);
@@ -187,7 +184,7 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     return result;
   }
 
-  private double prediction(double gain, double loopGain, List<Double> historicalDwellTimes, long dwellTime, double average) {
+  private double prediction(double gain, double loopGain, List<Long> historicalDwellTimes, long dwellTime, double average) {
     double averageHistoricalDuration = historicalAverage(historicalDwellTimes);
     double prediction = ((loopGain * dwellTime) + (gain * averageHistoricalDuration));
     logger.debug("(loopGain={} * dwellTime={}) + (gain={} * averageHistoricalDuration={}{}) = ({}) + ({}) = {}",
@@ -209,54 +206,41 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     return gain;
   }
 
-  private double historicalVariance(List<Double> historicalDwellTimes, double average) {
+  private double historicalVariance(List<Long> historicalDwellTimes, double average) {
     double total = 0.0;
-    for (double d : historicalDwellTimes) {
-      double diff = d - average;
+    for (long l : historicalDwellTimes) {
+      double diff = l - average;
       double longDiffSquared = diff * diff;
       total = total + longDiffSquared;
     }
     return total/historicalDwellTimes.size();
   }
 
-  private double historicalAverage(List<Double> historicalDwellTimes) {
+  private double historicalAverage(List<Long> historicalDwellTimes) {
     double total = 0.0;
-    for (double d : historicalDwellTimes) {
-      total = total + d;
+    for (long l : historicalDwellTimes) {
+      total = total + l;
     }
     return total / historicalDwellTimes.size();
   }
 
-  private List<Double> getHistoricalDwellTimes(Indices indices, VehicleState vehicleState, double passengerBoardingTime) {
-    ArrayList<Double> historicalDwells = new ArrayList<>();
+  private List<Long> getHistoricalDwellTimes(Indices indices, VehicleState vehicleState, double passengerBoardingTime) {
+    ArrayList<Long> historicalDwells = new ArrayList<>();
     int daysBack = 0;
-    long currentArrivalTime = getScheduledArrivalTime(indices, vehicleState);
+    long currentArrivalTime = getScheduledArrivalTimeIncludingSchedAdh(indices, vehicleState);
     String stopId = indices.getStopPath().getStopId();
     while (daysBack < maxKalmanDaysToSearch.getValue()) {
       daysBack++;
       currentArrivalTime = currentArrivalTime - Time.MS_PER_DAY;
-      Double arrivalRate = ApcModule.getInstance()
-              .getPassengerArrivalRate(stopId,
+      Long historicalDwellTime = ApcModule.getInstance()
+              .getDwellTime(indices.getTrip().getRouteId(),
+                      stopId,
                       new Date(currentArrivalTime));
-      if (arrivalRate == null) {
-        if (historicalDwells.size() < minKalmanDays.getValue()) {
-          logger.debug("no historical boardings found for {} on stop {}", new Date(currentArrivalTime), stopId);
-        }
-        continue;
+      if (historicalDwellTime != null) {
+        logger.debug("historicalDwellTime {} for stop {} ",
+                historicalDwellTime, stopId);
+        historicalDwells.add(historicalDwellTime);
       }
-
-      Long headway = HistoricalPredictionLibrary.getHistoricalHeadway(stopId, vehicleState.getTrip(), DateUtils.truncate(new Date(currentArrivalTime), Calendar.HOUR));
-      if (headway == null) {
-        if (historicalDwells.size() < minKalmanDays.getValue()) {
-          logger.debug("no historical headway found for {} on stop {}", new Date(currentArrivalTime), stopId);
-        }
-        continue;
-      }
-      double historicalDwellTime =
-              arrivalRate * (headway / Time.MS_PER_SEC) * passengerBoardingTime;
-      logger.debug("historicalDwellTime {} = arrivalRate={} * headway={} * passengerBoardingTime={} ",
-              historicalDwellTime, arrivalRate, headway/Time.MS_PER_SEC, passengerBoardingTime);
-      historicalDwells.add(historicalDwellTime);
       if (historicalDwells.size() > maxKalmanDays.getValue()) {
         return historicalDwells;
       }
@@ -275,10 +259,11 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     String stopId = indices.getStopPath().getStopId();
 
     // add schedule deviation to scheduled arrival as a simple prediction
-    Long arrivalTime = getScheduledArrivalTime(indices, vehicleState)
-            + vehicleState.getMatch().getTemporalDifference().getTemporalDifference();
+    Long arrivalTime = getScheduledArrivalTimeIncludingSchedAdh(indices, vehicleState);
+
     if (arrivalTime == null) return null;
-    Double arrivalRate = ApcModule.getInstance().getPassengerArrivalRate(stopId, new Date(arrivalTime));
+    // we ask for arrival time of current time, under the covers it looks for yesterday
+    Double arrivalRate = ApcModule.getInstance().getPassengerArrivalRate(indices.getTrip(), stopId, new Date(arrivalTime));
 
     if (arrivalRate != null)
       return arrivalRate;
@@ -286,14 +271,22 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     return 0.0;
   }
 
-  private Long getScheduledArrivalTime(Indices indices, VehicleState vehicleState) {
+  private Long getScheduledArrivalTimeIncludingSchedAdh(Indices indices, VehicleState vehicleState) {
     ScheduleTime st = indices.getScheduleTime();
     if (st == null) return null;
     if (vehicleState == null) return null;
-    return Core.getInstance().getTime()
-            .getEpochTime(indices.getScheduleTime().getTime(), vehicleState.getAvlReport().getTime());
-  }
 
+    Long arrivalTime = Core.getInstance().getTime()
+            .getEpochTime(indices.getScheduleTime().getTime()
+                    + vehicleState.getRealTimeSchedAdh().getTemporalDifference()/Time.MS_PER_SEC,
+                    vehicleState.getAvlReport().getTime());
+
+    logger.info("arrivalTime={} compared to scheduleTime={} with schDev={}",
+            new Date(arrivalTime),
+            indices.getScheduleTime(),
+            vehicleState.getRealTimeSchedAdh());
+    return arrivalTime;
+  }
   private double getPassengerBoardingTime(VehicleState vehicleState) {
     // TODO - this will be heuristic derived from vehicleType
     return 2.5 * Time.MS_PER_SEC; // seconds per passenger

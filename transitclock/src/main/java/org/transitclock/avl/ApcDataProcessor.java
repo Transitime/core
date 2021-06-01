@@ -260,13 +260,6 @@ public class ApcDataProcessor {
     return new TimeRange(firstRecord.getTime()-window, lastRecord.getTime()+window);
   }
 
-  private TimeRange findRangeForArrivalRecords(List<ArrivalDeparture> arrivalDepartures) {
-     if (arrivalDepartures == null || arrivalDepartures.isEmpty()) return  null;
-     ArrivalDeparture firstRecord = arrivalDepartures.get(0);
-     ArrivalDeparture lastRecord = arrivalDepartures.get(arrivalDepartures.size()-1);
-    long window = getWindowMillis();
-    return new TimeRange(firstRecord.getTime()-window, lastRecord.getTime()+window);
-  }
   private TimeRange findRangeForArrivalRecordsDayRange(List<ArrivalDeparture> arrivalDepartures) {
     if (arrivalDepartures == null || arrivalDepartures.isEmpty()) return  null;
     ArrivalDeparture firstRecord = arrivalDepartures.get(0);
@@ -277,8 +270,12 @@ public class ApcDataProcessor {
   }
 
 
-  public Double getBoardingsPerMinute(String stopId, Date arrivalTime) {
-    return apcAggregator.getBoardingsPerMinute(stopId, arrivalTime);
+  public Double getBoardingsPerMinute(String routeId, String stopId, Date arrivalTime) {
+    return apcAggregator.getBoardingsPerMinute(routeId, stopId, arrivalTime);
+  }
+
+  public Long getDwellTime(String routeId, String stopId, Date arrivalTime) {
+    return apcAggregator.getDwellTime(routeId, stopId, arrivalTime);
   }
 
   public static class TimeRange {

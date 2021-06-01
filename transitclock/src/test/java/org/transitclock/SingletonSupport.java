@@ -54,8 +54,7 @@ public class SingletonSupport {
       return sdf.parse(date);
     }
     sdf = new SimpleDateFormat("yyyy-MM-ddHH:mm:ss");
-    TimeZone timeZone = TimeZone.getTimeZone(tz);
-    if (tz != null) sdf.setTimeZone(timeZone);
+    if (tz != null) sdf.setTimeZone(TimeZone.getTimeZone(tz));
     return sdf.parse(date+time);
   }
 

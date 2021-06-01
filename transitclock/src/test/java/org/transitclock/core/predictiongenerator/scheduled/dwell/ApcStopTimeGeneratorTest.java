@@ -41,6 +41,7 @@ public class ApcStopTimeGeneratorTest {
   private String headwayVehicle = "1235";
   private int boardings = 2;
   private int boardingWindow = 15;
+  private int dwellSeconds = 9;
 
   @Before
   public void setUp() throws Exception {
@@ -70,15 +71,15 @@ public class ApcStopTimeGeneratorTest {
     assertEquals("17976", previousStopId);
 
     // add apc for future stop
-    module.getProcessor().analyze(dataGenerator.getApcReports(referenceTime, tripIndex, stopPathIndex, stopId, testVehicle, boardings));
-    module.getProcessor().analyze(dataGenerator.getApcReports(yesterdayReferenceTime, tripIndex, stopPathIndex, stopId, testVehicle, boardings));
-    module.getProcessor().analyze(dataGenerator.getApcReports(referenceTimeN2, tripIndex, stopPathIndex, stopId, testVehicle, boardings));
-    module.getProcessor().analyze(dataGenerator.getApcReports(referenceTimeN3, tripIndex, stopPathIndex, stopId, testVehicle, boardings));
+    module.getProcessor().analyze(dataGenerator.getApcReports(referenceTime, tripIndex, stopPathIndex, stopId, testVehicle, boardings, dwellSeconds));
+    module.getProcessor().analyze(dataGenerator.getApcReports(yesterdayReferenceTime, tripIndex, stopPathIndex, stopId, testVehicle, boardings, dwellSeconds));
+    module.getProcessor().analyze(dataGenerator.getApcReports(referenceTimeN2, tripIndex, stopPathIndex, stopId, testVehicle, boardings, dwellSeconds));
+    module.getProcessor().analyze(dataGenerator.getApcReports(referenceTimeN3, tripIndex, stopPathIndex, stopId, testVehicle, boardings, dwellSeconds));
 
 
     // add apc for previous stop
-    module.getProcessor().analyze(dataGenerator.getApcReports(referenceTime, tripIndex, stopPathIndex-1, previousStopId, testVehicle, boardings));
-    module.getProcessor().analyze(dataGenerator.getApcReports(yesterdayReferenceTime, tripIndex, stopPathIndex-1, previousStopId, testVehicle, boardings));
+    module.getProcessor().analyze(dataGenerator.getApcReports(referenceTime, tripIndex, stopPathIndex-1, previousStopId, testVehicle, boardings, dwellSeconds));
+    module.getProcessor().analyze(dataGenerator.getApcReports(yesterdayReferenceTime, tripIndex, stopPathIndex-1, previousStopId, testVehicle, boardings, dwellSeconds));
 
 
     // add stop cache history
@@ -144,7 +145,7 @@ public class ApcStopTimeGeneratorTest {
     VehicleState vehicleState = dataGenerator.getVehicleStateForApc(referenceTime, tripIndex, stopPathIndex, testScheduleDeviationSeconds);
     AvlReport avlReport = vehicleState.getAvlReport();
     long stopTimeForPath = generator.getStopTimeForPath(indices, avlReport, vehicleState);
-    assertEquals(10499, stopTimeForPath);
+    assertEquals(8000, stopTimeForPath);
 
     long alternate = defaultGenerator.getStopTimeForPath(indices, avlReport, vehicleState);
     assertEquals(10000, alternate);
@@ -154,7 +155,7 @@ public class ApcStopTimeGeneratorTest {
     // ensure test data for boardings
     assertNotNull(ApcModule.getInstance());
 
-    Double boardingsPerSecond = ApcModule.getInstance().getPassengerArrivalRate(stopId, new Date(referenceTime));
+    Double boardingsPerSecond = ApcModule.getInstance().getPassengerArrivalRate(dataGenerator.getBlock().getTrip(tripIndex), stopId, new Date(referenceTime));
     assertNotNull(boardingsPerSecond);
     assertEquals(new Double(boardings).doubleValue() / 15 / Time.SEC_PER_MIN, boardingsPerSecond, 0.0001);
   }

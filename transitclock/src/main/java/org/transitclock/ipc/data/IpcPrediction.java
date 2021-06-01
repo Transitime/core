@@ -47,7 +47,7 @@ public class IpcPrediction implements Serializable {
 	// stopId so they are stored here as well.
 	private final String routeId;
 	private final String stopId;
-	
+	private final int stopPathIndex;
 	private final int gtfsStopSeq;
 	private final String tripId;
 	private final String tripPatternId;
@@ -93,6 +93,10 @@ public class IpcPrediction implements Serializable {
 
 	private static final long serialVersionUID = 7264507678733060173L;
 
+	public int getStopPathIndex() {
+		return stopPathIndex;
+	}
+
 	public enum ArrivalOrDeparture {ARRIVAL, DEPARTURE};
 
 
@@ -121,7 +125,6 @@ public class IpcPrediction implements Serializable {
 	 * @param atEndOfTrip
 	 *            True if prediction for last stop of trip, which means likely
 	 *            not useful to user
-	 * @param predictionAffectedByWaitStop
 	 * @param isDelayed
 	 * @param lateAndSubsequentTripSoMarkAsUncertain
 	 * @param arrivalOrDeparture
@@ -130,7 +133,7 @@ public class IpcPrediction implements Serializable {
 	 * @param tripCounter
 	 * 
 	 */
-	public IpcPrediction(AvlReport avlReport, String stopId, int gtfsStopSeq,
+	public IpcPrediction(AvlReport avlReport, String stopId, int stopPathIndex, int gtfsStopSeq,
 		      Trip trip, long predictionTime, long actualPredictionTime,
 		      boolean atEndOfTrip, boolean affectedByWaitStop,
 		      boolean isDelayed, boolean lateAndSubsequentTripSoMarkAsUncertain,
@@ -139,6 +142,7 @@ public class IpcPrediction implements Serializable {
 		this.vehicleId = avlReport.getVehicleId();
 	    this.routeId = trip.getRouteId();
 	    this.stopId = stopId;
+	    this.stopPathIndex = stopPathIndex;
 	    this.gtfsStopSeq = gtfsStopSeq;
 	    this.trip = trip;
 	    // For when trip is null use "" instead of null for the tripId
@@ -178,7 +182,7 @@ public class IpcPrediction implements Serializable {
 	 * Constructor used for when deserializing a proxy object. Declared private
 	 * because only used internally by the proxy class.
 	 */
-	private IpcPrediction(String vehicleId, String routeId, String stopId,
+	private IpcPrediction(String vehicleId, String routeId, String stopId, int stopPathIndex,
 			int gtfsStopSeq, String tripId, String tripPatternId, boolean isTripUnscheduled,
 			String blockId, long predictionTime, long actualPredictionTime,
 			boolean atEndOfTrip, boolean schedBasedPred, long avlTime,
@@ -191,6 +195,7 @@ public class IpcPrediction implements Serializable {
 		this.vehicleId = vehicleId;
 		this.routeId = routeId;
 		this.stopId = stopId;
+		this.stopPathIndex = stopPathIndex;
 		this.gtfsStopSeq = gtfsStopSeq;
 		// trip is only for client side
 		this.trip = null;
@@ -231,6 +236,7 @@ public class IpcPrediction implements Serializable {
 		private String vehicleId;
 		private String routeId;
 		private String stopId;
+		private int stopPathIndex;
 		private int gtfsStopSeq;
 		private String tripId;
 		private String tripPatternId;
@@ -266,6 +272,7 @@ public class IpcPrediction implements Serializable {
 			this.vehicleId = p.vehicleId;
 			this.routeId = p.routeId;
 			this.stopId = p.stopId;
+			this.stopPathIndex = p.stopPathIndex;
 			this.gtfsStopSeq = p.gtfsStopSeq;
 			this.tripId = p.tripId;
 			this.tripPatternId = p.tripPatternId;
@@ -306,6 +313,7 @@ public class IpcPrediction implements Serializable {
 			stream.writeObject(vehicleId);
 			stream.writeObject(routeId);
 			stream.writeObject(stopId);
+			stream.writeInt(stopPathIndex);
 			stream.writeInt(gtfsStopSeq);
 			stream.writeObject(tripId);
 			stream.writeObject(tripPatternId);
@@ -352,6 +360,7 @@ public class IpcPrediction implements Serializable {
 			vehicleId = (String) stream.readObject();
 			routeId = (String) stream.readObject();
 			stopId = (String) stream.readObject();
+			stopPathIndex = stream.readInt();
 			gtfsStopSeq = stream.readInt();
 			tripId = (String) stream.readObject();
 			tripPatternId = (String) stream.readObject();
@@ -385,7 +394,7 @@ public class IpcPrediction implements Serializable {
 		 * object is converted to an enclosing class object.
 		 */
 		private Object readResolve() {
-			return new IpcPrediction(vehicleId, routeId, stopId, gtfsStopSeq,
+			return new IpcPrediction(vehicleId, routeId, stopId, stopPathIndex, gtfsStopSeq,
 					tripId, tripPatternId, isTripUnscheduled, blockId, predictionTime, 0,
 					atEndOfTrip, schedBasedPred, avlTime, creationTime,
 					tripStartEpochTime, affectedByWaitStop, driverId,

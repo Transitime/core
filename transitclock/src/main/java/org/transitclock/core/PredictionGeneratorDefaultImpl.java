@@ -206,7 +206,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 		if ((indices.atEndOfTrip() || useArrivalTimes) && !indices.isWaitStop()) {
 			getMonitoring().sumMetric("PredictionGenerationStop");
 			// Create and return arrival time for this stop
-			return new IpcPrediction(avlReport, stopId, gtfsStopSeq, trip,
+			return new IpcPrediction(avlReport, stopId, indices.getStopPathIndex(), gtfsStopSeq, trip,
 					predictionTime,	predictionTime, indices.atEndOfTrip(),
 					affectedByWaitStop, isDelayed, lateSoMarkAsUncertain, ArrivalOrDeparture.ARRIVAL,
 					scheduleDeviation, freqStartTime, tripCounter,vehicleState.isCanceled());
@@ -321,7 +321,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 					long predictionForNextStopCalculation = expectedDepartureTime;
 					long predictionForUser = expectedDepartureTimeWithoutStopWaitTime;
 					getMonitoring().sumMetric("PredictionGenerationStop");
-					return new IpcPrediction(avlReport, stopId, gtfsStopSeq,
+					return new IpcPrediction(avlReport, stopId, indices.getStopPathIndex(), gtfsStopSeq,
 							trip, predictionForUser,
 							predictionForNextStopCalculation,
 							indices.atEndOfTrip(), affectedByWaitStop,
@@ -332,7 +332,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 					getMonitoring().sumMetric("PredictionGenerationStop");
 					// Use the expected departure times, possibly adjusted for 
 					// stop wait times
-					return new IpcPrediction(avlReport, stopId, gtfsStopSeq,
+					return new IpcPrediction(avlReport, stopId, indices.getStopPathIndex(), gtfsStopSeq,
 							trip, expectedDepartureTime, expectedDepartureTime,
 							indices.atEndOfTrip(), affectedByWaitStop,
 							isDelayed, lateSoMarkAsUncertain, ArrivalOrDeparture.DEPARTURE,
@@ -343,7 +343,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 				getMonitoring().sumMetric("PredictionGenerationStop");
 				// Create and return the departure prediction for this 
 				// non-wait-stop stop
-				return new IpcPrediction(avlReport, stopId, gtfsStopSeq, trip,
+				return new IpcPrediction(avlReport, stopId, indices.getStopPathIndex(), gtfsStopSeq, trip,
 						predictionTime + expectedStopTimeMsec, 
 						predictionTime + expectedStopTimeMsec, 
 						indices.atEndOfTrip(), affectedByWaitStop, isDelayed, lateSoMarkAsUncertain,
@@ -658,7 +658,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 		long tripStartTime = prediction.getTripStartEpochTime();
 		long serviceDay = Time.getStartOfDay(new Date(tripStartTime));
 
-		int index = prediction.getGtfsStopSeq();
+		int index = prediction.getStopPathIndex();
 		if (index < prediction.getTrip().getScheduleTimes().size()) {
 			try {
 				long epochInMillis = serviceDay

@@ -3,11 +3,8 @@
  */
 package org.transitclock.core.dataCache.ehcache.scheduled;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
@@ -19,6 +16,7 @@ import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.gtfs.GtfsData;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
+import org.transitclock.utils.DateUtils;
 import org.transitclock.utils.Time;
 
 import java.util.ArrayList;

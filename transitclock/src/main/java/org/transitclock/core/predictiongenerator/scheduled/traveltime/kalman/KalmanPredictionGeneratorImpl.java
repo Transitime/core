@@ -1,6 +1,5 @@
 package org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
@@ -16,6 +15,7 @@ import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.PredictionEvent;
 import org.transitclock.db.structs.PredictionForStopPath;
 import org.transitclock.db.structs.TrafficSensorData;
+import org.transitclock.utils.DateUtils;
 import org.transitclock.utils.IntervalTimer;
 
 import java.util.Calendar;

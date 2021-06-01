@@ -1,6 +1,5 @@
 package org.transitclock.avl;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -9,10 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.transitclock.SingletonSupport;
 import org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman.KalmanDataGenerator;
 import org.transitclock.db.structs.ApcReport;
-import org.transitclock.db.structs.ApcRecordSupport;
-import org.transitclock.db.structs.ArrivalDeparture;
-import org.transitclock.db.structs.ArrivalDepartureSupport;
-import org.transitclock.utils.IntervalTimer;
+import org.transitclock.utils.DateUtils;
 import org.transitclock.utils.Time;
 
 import java.util.ArrayList;
@@ -22,13 +18,11 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class ApcAggregatorTest {
+public class ApcAggregatorTest extends ApcTest {
 
   private static final Logger logger =
           LoggerFactory.getLogger(ApcAggregatorTest.class);
 
-  private ArrivalDepartureSupport arrivalDepartureSupport = new ArrivalDepartureSupport();
-  private ApcRecordSupport apcRecordSupport = new ApcRecordSupport();
   private ApcMatcher matcher = null;
   private KalmanDataGenerator generator;
 
@@ -71,63 +65,36 @@ public class ApcAggregatorTest {
     ...
      */
 
-    Double rate = aggregator.getBoardingsPerMinute("11861", SingletonSupport.toDate("2021-04-21", "20:28:01", "UTC"));
+    Double legacyRate = aggregator.getBoardingsPerMinuteLegacy("11861", SingletonSupport.toDate("2021-04-21", "20:28:01", "UTC"));
+    Double rate = aggregator.getBoardingsPerMinute("63", "11861", SingletonSupport.toDate("2021-04-21", "20:28:01", "UTC"));
     assertNotNull(rate);
+    assertEquals("11861 failed", 0, legacyRate.intValue());
     assertEquals("11861 failed", 0, rate.intValue());
 
-    rate = aggregator.getBoardingsPerMinute("17994", SingletonSupport.toDate("2021-04-21", "23:58:01", "UTC"));
+    legacyRate = aggregator.getBoardingsPerMinuteLegacy( "17994", SingletonSupport.toDate("2021-04-21", "23:58:01", "UTC"));
+    rate = aggregator.getBoardingsPerMinute("17", "17994", SingletonSupport.toDate("2021-04-21", "23:58:01", "UTC"));
     assertNotNull(rate);
-    assertEquals("17994 failed", 2.0/*arrivals/*/ / 7/*records*/ / 15/*window*/, rate, 0.001);
+    assertEquals("17994 failed", 2.0/*arrivals/*/ / 7/*records*/ / 15/*window*/, legacyRate, 0.001);
+    assertEquals("17994 failed", 0.08333, rate, 0.001);
 
-    rate = aggregator.getBoardingsPerMinute("17976", SingletonSupport.toDate("2021-04-21", "16:59:00", "UTC"));
+    legacyRate = aggregator.getBoardingsPerMinuteLegacy( "17976", SingletonSupport.toDate("2021-04-21", "16:59:00", "UTC"));
+    rate = aggregator.getBoardingsPerMinute("18", "17976", SingletonSupport.toDate("2021-04-21", "16:59:00", "UTC"));
     assertNotNull(rate);
-    assertEquals("17976 failed", 5.0/*arrivals/*/ / 4/*records*/ / 15/*window*/, rate, 0.001);
+    assertEquals("17976 failed", 5.0/*arrivals/*/ / 4/*records*/ / 15/*window*/, legacyRate, 0.001);
+    assertEquals("17976 failed", 0.1333, rate, 0.001);
 
-    rate = aggregator.getBoardingsPerMinute("11861", SingletonSupport.toDate("2021-04-21", "15:51:00", "UTC"));
+    legacyRate = aggregator.getBoardingsPerMinuteLegacy( "11861", SingletonSupport.toDate("2021-04-21", "15:51:00", "UTC"));
+    rate = aggregator.getBoardingsPerMinute("74", "11861", SingletonSupport.toDate("2021-04-21", "15:51:00", "UTC"));
     assertNotNull(rate);
-    assertEquals("11861 failed", 14.0/*arrivals/*/ / 5/*records*/ / 15/*window*/, rate, 0.001);
+    assertEquals("11861 failed", 14.0/*arrivals/*/ / 5/*records*/ / 15/*window*/, legacyRate, 0.001);
+    assertEquals("11861 failed", 0.38333, rate, 0.001);
 
-    rate = aggregator.getBoardingsPerMinute("17990", SingletonSupport.toDate("2021-04-21", "21:45:00", "UTC"));
+    legacyRate = aggregator.getBoardingsPerMinuteLegacy( "17990", SingletonSupport.toDate("2021-04-21", "21:45:00", "UTC"));
+    rate = aggregator.getBoardingsPerMinute("10", "17990", SingletonSupport.toDate("2021-04-21", "21:45:00", "UTC"));
     assertNotNull(rate);
-    assertEquals("17990 failed", 5.0/*arrivals/*/ / 8/*records*/ / 15/*window*/, rate, 0.001);
+    assertEquals("17990 failed", 5.0/*arrivals/*/ / 8/*records*/ / 15/*window*/, legacyRate, 0.001);
+    assertEquals("17990 failed", 0.14666, rate, 0.001);
 
-  }
-
-  private List<ApcReport> loadMatches() throws Exception {
-    //2021-04-21T13:27:28.94 to 2021-04-22T10:33:31.017
-    List<ArrivalDeparture> arrivalDepartureList
-            = arrivalDepartureSupport.loadArrivalDepartureList("arrivalDepartures4.csv.zip");
-    assertNotNull(arrivalDepartureList);
-    assertEquals(590510, arrivalDepartureList.size());
-    List<ApcParsedRecord> records = apcRecordSupport.loadApcRecords("apcMessages4.json.zip");
-    assertNotNull(records);
-    assertEquals(56968, records.size());
-    IntervalTimer mergeTimer = new IntervalTimer();
-    List<ApcReport> matches = merge(arrivalDepartureList, records);
-    logger.info("merged {} apc into {} ad records in {} ms",
-            records.size(), arrivalDepartureList.size(),
-            mergeTimer.elapsedMsec());
-    assertNotNull(matches);
-    assertEquals(54454, matches.size());
-    return matches;
-  }
-
-  private List<ApcReport> merge(List<ArrivalDeparture> arrivalDepartureList, List<ApcParsedRecord> records) {
-    List<ApcReport> reports = new ArrayList<>();
-    int total = 0;
-    int matched = 0;
-    ApcMatcher matcher = new ApcMatcher(arrivalDepartureList);
-    List<ApcMatch> matches = matcher.match(records);
-    for (ApcMatch match : matches) {
-      ApcReport report = match.getApc().toApcReport();
-      reports.add(report);
-      if (report.getArrivalDeparture() != null)
-        matched++;
-      total++;
-    }
-    System.out.println("matched " + matched + " out of " + total
-        + " (" + (matched/total) + ")");
-    return reports;
   }
 
 

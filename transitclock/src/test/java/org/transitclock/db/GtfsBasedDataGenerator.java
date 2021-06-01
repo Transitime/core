@@ -4,6 +4,7 @@ import org.apache.commons.io.IOUtils;
 import org.transitclock.applications.Core;
 import org.transitclock.applications.GtfsFileProcessor;
 import org.transitclock.avl.ApcParsedRecord;
+import org.transitclock.core.BlockAssignmentMethod;
 import org.transitclock.core.Indices;
 import org.transitclock.core.SpatialMatch;
 import org.transitclock.core.TemporalDifference;
@@ -77,16 +78,16 @@ public class GtfsBasedDataGenerator {
   }
 
   public List<ApcReport> getApcReports(long referenceTime, int tripIndex, int stopPathIndex,
-                                       String stopId, String vehicleId, int boardings) {
+                                       String stopId, String vehicleId, int boardings, int dwellSeconds) {
     List<ApcReport> reports = new ArrayList<>();
-    for (ApcParsedRecord apc : getApcParsedRecords(referenceTime, tripIndex, stopPathIndex, stopId, vehicleId, boardings)) {
+    for (ApcParsedRecord apc : getApcParsedRecords(referenceTime, tripIndex, stopPathIndex, stopId, vehicleId, boardings, dwellSeconds)) {
       reports.add(apc.toApcReport());
     }
     return reports;
   }
 
   public List<ApcParsedRecord> getApcParsedRecords(long referenceTime, int tripIndex, int stopPathIndex,
-                                                   String stopId, String vehicleId, int boardings) {
+                                                   String stopId, String vehicleId, int boardings, int dwellSeconds) {
     List<ApcParsedRecord> records = new ArrayList<>();
     long startOfDay = Time.getStartOfDay(new Date(referenceTime));
     ApcParsedRecord apc = new ApcParsedRecord(
@@ -100,8 +101,8 @@ public class GtfsBasedDataGenerator {
             1,
             0,
             0,
-            new Long((referenceTime - startOfDay)/Time.MS_PER_SEC).intValue(),
-            new Long((referenceTime - startOfDay + Time.SEC_PER_MIN)/Time.MS_PER_SEC).intValue(),
+            new Long((referenceTime - startOfDay)/Time.MS_PER_SEC).intValue() - (dwellSeconds/2),
+            new Long((referenceTime - startOfDay)/Time.MS_PER_SEC).intValue() + (dwellSeconds/2),
             0.01,
             0.01);
     ArrivalDeparture.Builder ad = new ArrivalDeparture.Builder(VEHICLE,
@@ -157,12 +158,18 @@ public class GtfsBasedDataGenerator {
             0.0, 0.0);
     TemporalMatch match = new TemporalMatch(spatialMatch, new TemporalDifference(scheduleDeviationSeconds*Time.MS_PER_SEC));
     vs.setMatch(match);
+    vs.setRealTimeSchedAdh(match.getTemporalDifference());
+
     int tripStartSeconds = spatialMatch.getTrip().getScheduleTime(0).getTime();
     long tripStartEpoch = Time.getStartOfDay(new Date(avlTime)) + tripStartSeconds * Time.MS_PER_SEC;
     vs.putTripStartTime(tripIndex, tripStartEpoch);
     vs.setLastArrivalTime(avlTime + (scheduleDeviationSeconds * Time.MS_PER_SEC));
     vs.setAvlReport(new AvlReport(VEHICLE, vs.getLastArrivalTime(), 0.001, 0.0001,
     0.0f, 0.0f, "test"));
+
+    // this sets predictable as a side effect
+    vs.setBlock(getBlock(), BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, spatialMatch.getTrip().getId(), true);
+
     return vs;
 
   }
