@@ -36,8 +36,7 @@ public class RunTimeService {
 
     private static FloatConfigValue runTimeScaleOfElimination = new FloatConfigValue(
             "transitclock.reporting.runTime.scaleOfElimination", 1.5f,
-            "Configurable value for scale of elimination when filtering run time outliers. " +
-            "Defaults to 1.5 standard deviation.");
+            "Configurable value for scale of elimination when filtering run time outliers.");
 
     private static Float getRunTimeScaleOfElimination(){
         return runTimeScaleOfElimination.getValue();
