@@ -291,8 +291,8 @@ public class RunTimesForRoutes implements Serializable {
     }
 
     public boolean hasAllScheduledAndActualTimes(){
-        if(getRouteShortName() != null && getEndTime() != null && getStartTime() == null &&
-                getScheduledStartTime() == null && getScheduledEndTime() == null){
+        if(getRouteShortName() != null && getEndTime() != null && getStartTime() != null &&
+                getScheduledStartTime() != null && getScheduledEndTime() != null){
             return true;
         }
         return false;
