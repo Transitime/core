@@ -3,6 +3,7 @@ package org.transitclock.db.structs;
 import com.google.common.base.Objects;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.DynamicUpdate;
+import org.transitclock.core.dwell.DwellTimeUtil;
 import org.transitclock.db.hibernate.HibernateUtils;
 
 import javax.persistence.*;
@@ -56,6 +57,9 @@ public class RunTimesForStops implements Serializable {
         @JoinColumn(insertable=false, updatable=false,name="configRev", referencedColumnName="configRev")
     })
     private RunTimesForRoutes runTimesForRoutes;
+
+    @Transient
+    boolean firstStopDwellSet = false;
 
 
     public RunTimesForStops() {}
@@ -118,6 +122,10 @@ public class RunTimesForStops implements Serializable {
     }
 
     public Long getDwellTime() {
+        if(!firstStopDwellSet && stopPathIndex == 0 && dwellTime > 1000 && scheduledTime != null && time != null){
+            firstStopDwellSet = true;
+            dwellTime = DwellTimeUtil.calculateFirstStopDwellTime(scheduledTime, time.getTime());
+        }
         return dwellTime;
     }
 
