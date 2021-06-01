@@ -70,7 +70,9 @@ import java.util.*;
                    @Index(name="ArrivalsDeparturesRouteTimeIndex", 
                       columnList="routeShortName, time" ),
 			       @Index(name="ArrivalsDeparturesTripPatternIdIndex",
-					   columnList="tripPatternId" )} )
+					   columnList="tripPatternId" ),
+			       @Index(name="ArrivalsDeparturesScheduledTimeIndex",
+					   columnList="scheduledTime" )} )
 public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartureSpeed {
 	
 	@Id 
