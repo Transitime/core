@@ -170,20 +170,6 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                                                                   String routeIdOrShortName,
                                                                                   ServiceType serviceType,
                                                                                   boolean timePointsOnly,
-                                                                                  String headsign) throws Exception{
-
-        return onTimePerformanceService.getArrivalsDeparturesForOtp(beginDate, endDate, beginTime, endTime,
-                routeIdOrShortName, serviceType, timePointsOnly, headsign, true);
-    }
-
-    @Override
-    public List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForOtp(LocalDate beginDate,
-                                                                                  LocalDate endDate,
-                                                                                  LocalTime beginTime,
-                                                                                  LocalTime endTime,
-                                                                                  String routeIdOrShortName,
-                                                                                  ServiceType serviceType,
-                                                                                  boolean timePointsOnly,
                                                                                   String headsign,
                                                                                   boolean readOnly) throws Exception{
 
