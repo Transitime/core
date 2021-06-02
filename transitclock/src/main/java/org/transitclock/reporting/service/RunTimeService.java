@@ -159,13 +159,17 @@ public class RunTimeService {
         Map<String, TripStopPathStatistics> tripStatsByTripId = new HashMap<>();
         Map<TripConfigRevKey, Trip> cachedTrips = new HashMap<>();
 
-        for(RunTimesForRoutes rt : runTimesForRoutes){
-            for(RunTimesForStops runTimesForStops : rt.getRunTimesForStops()){
-                TripStopPathStatistics tripStats = getOrCreateTripStats(tripStatsByTripId, cachedTrips,
-                        rt.getConfigRev(), runTimesForStops);
-                tripStats.addStopPathRunTime(runTimesForStops);
-                tripStats.addStopPathDwellTime(runTimesForStops);
+        try {
+            for (RunTimesForRoutes rt : runTimesForRoutes) {
+                for (RunTimesForStops runTimesForStops : rt.getRunTimesForStops()) {
+                    TripStopPathStatistics tripStats = getOrCreateTripStats(tripStatsByTripId, cachedTrips,
+                                rt.getConfigRev(), runTimesForStops);
+                    tripStats.addStopPathRunTime(runTimesForStops);
+                    tripStats.addStopPathDwellTime(runTimesForStops);
+                }
             }
+        } catch (Exception e){
+            logger.error("Problem processing trip stats for RunTimesForRoutes", e);
         }
 
         return tripStatsByTripId;

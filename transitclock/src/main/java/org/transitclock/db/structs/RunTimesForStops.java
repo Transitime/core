@@ -122,7 +122,8 @@ public class RunTimesForStops implements Serializable {
     }
 
     public Long getDwellTime() {
-        if(!firstStopDwellSet && stopPathIndex == 0 && dwellTime > 1000 && scheduledTime != null && time != null){
+        if(!firstStopDwellSet && stopPathIndex == 0 && (dwellTime == null || dwellTime > 1000)
+                && scheduledTime != null && time != null){
             firstStopDwellSet = true;
             dwellTime = DwellTimeUtil.calculateFirstStopDwellTime(scheduledTime, time.getTime());
         }
