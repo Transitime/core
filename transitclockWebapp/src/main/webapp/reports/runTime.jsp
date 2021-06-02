@@ -1553,7 +1553,7 @@
                     tableTD += "<td>"+avgDwell+"</td>";
                     $(".average-time-details").html(tableTD);
                     $("#mainResults").show();
-                    visualizeData(response, isAllRoutes);
+                    // visualizeData(response, isAllRoutes);
                 } else {
                     $("#submit").removeAttr("disabled");
                     alert("Unable to find any valid results. Please try a different search. ");
