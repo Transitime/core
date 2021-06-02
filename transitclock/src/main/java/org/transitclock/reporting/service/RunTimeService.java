@@ -132,7 +132,7 @@ public class RunTimeService {
 
         }
 
-        Double fixedTime = fixedTimeStats.getCount() > 0 ? fixedTimeStats.getMin() : null;
+        Double fixedTime = fixedTimeStats.getCount() > 0 ? fixedTimeStats.getAverage() : null;
         Double dwellTime = avgDwellTimeStats.getCount() > 0 ? avgDwellTimeStats.getAverage() : null;
         Double avgRunTime = avgRunTimeStats.getCount() > 0 ? avgRunTimeStats.getAverage() : null;
         Double variableTime = null;
