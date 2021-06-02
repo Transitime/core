@@ -629,22 +629,37 @@
         var currentTable = '<table class="border-table">';
         currentTable += '<tbody><tr><th>Stop</th><th>Scheduled</th><th>Adjustment</th></tr>';
 
+        var totalScheduleMin = 0;
+        var totalAdjustmentMin = 0;
+
         response.adjustments.forEach(function(eachAdjustment){
 
             var scheduleMin  = parseFloat((eachAdjustment.schedule / 60000).toFixed(1));
             var adjustment  = parseFloat((eachAdjustment.adjustment / 60000).toFixed(1));
             var sheduledClassName = getScheduledType(eachAdjustment.adjustment);
 
+            totalScheduleMin += scheduleMin;
+            totalAdjustmentMin += adjustment;
+
             if(adjustment > 0){
                 var adjustment = "+" + adjustment;
             }
 
             currentTable += "<tr><td>"+eachAdjustment.stop+"</td>";
-            currentTable += '<td class="'+sheduledClassName+'">'+scheduleMin+'</td>';
-            currentTable += "<td>"+adjustment+"</td>";
+            currentTable += '<td class="'+sheduledClassName+'">'+scheduleMin+' min</td>';
+            currentTable += "<td>"+adjustment+" min</td>";
             currentTable += "</tr>";
 
         });
+
+        if(totalAdjustmentMin > 0){
+            var totalAdjustmentMin = "+" + totalAdjustmentMin.toFixed(1);
+        }
+
+        currentTable += "<tr><td>Total For All Stops</td>";
+        currentTable += "<td>"+totalScheduleMin+" min</td>";
+        currentTable += "<td>"+totalAdjustmentMin+" min</td>";
+        currentTable += "</tr>";
 
         currentTable += '</tbody></table>';
         $("#current_otp").html(response.current_otp);
