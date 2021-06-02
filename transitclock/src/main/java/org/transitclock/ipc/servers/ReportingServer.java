@@ -124,13 +124,13 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                                                       String routeIdOrShortName,
                                                                       String headsign,
                                                                       String tripPatternId,
+                                                                      String directionId,
                                                                       ServiceType serviceType,
                                                                       boolean timePointsOnly,
-                                                                      boolean currentTripsOnly,
                                                                       boolean readOnly) throws Exception {
 
-        return tripRunTimesService.getRunTimeForTripsByStopPath(beginDate, endDate, beginTime, endTime, routeIdOrShortName, headsign,
-                tripPatternId, serviceType, readOnly);
+        return tripRunTimesService.getRunTimeForTripsByStopPath(beginDate, endDate, beginTime, endTime,
+                routeIdOrShortName, headsign, tripPatternId, directionId, serviceType, readOnly);
     }
 
     @Override

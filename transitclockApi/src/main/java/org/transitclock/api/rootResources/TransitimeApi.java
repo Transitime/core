@@ -1556,6 +1556,7 @@ public class TransitimeApi {
 	public Response getTripPatterns(@BeanParam StandardParameters stdParameters,
 			@Parameter(description="Specifies the routeId or routeShortName.",required=true) @QueryParam(value = "r") String routesIdOrShortNames,
 			@Parameter(description="Specifies the headsign",required=false) @QueryParam(value = "headsign") String headsign,
+			@Parameter(description="Specifies the directionId",required=false) @QueryParam(value = "directionId") String directionId,
 			@Parameter(description="Specifies whether to show StopPaths",required=false) @DefaultValue("true") @QueryParam(value = "includeStopPaths") boolean includeStopPaths) throws WebApplicationException {
 
 		// Make sure request is valid
@@ -1568,7 +1569,7 @@ public class TransitimeApi {
 			if(StringUtils.isBlank(headsign)){
 				ipcTripPatterns = inter.getTripPatterns(routesIdOrShortNames);
 			} else{
-				ipcTripPatterns = inter.getTripPatterns(routesIdOrShortNames, headsign);
+				ipcTripPatterns = inter.getTripPatterns(routesIdOrShortNames, headsign, directionId);
 			}
 
 			// If the trip doesn't exist then throw exception such that

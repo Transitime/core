@@ -50,6 +50,7 @@ public class RunTimeRoutesDao {
                 getTimeRange(rtQuery, parameterNameAndValues) +
                 getServiceTypeWhere(rtQuery, parameterNameAndValues) +
                 getHeadSignWhere(rtQuery, parameterNameAndValues) +
+                getDirectionIdWhere(rtQuery, parameterNameAndValues) +
                 getTripPatternWhere(rtQuery, parameterNameAndValues) +
                 getTripIdWhere(rtQuery, parameterNameAndValues) +
                 "ORDER BY rt.routeShortName, rt.startTime DESC";
@@ -146,6 +147,16 @@ public class RunTimeRoutesDao {
         if(StringUtils.isNotBlank(headsign)) {
             hql += " AND rt.headsign = :headsign ";
             parameterNameAndValues.put("headsign", headsign);
+        }
+        return hql;
+    }
+
+    private String getDirectionIdWhere(RunTimeForRouteQuery rtQuery, Map<String, Object> parameterNameAndValues) {
+        String hql = "";
+        String directionId = rtQuery.getDirectionId();
+        if(StringUtils.isNotBlank(directionId)) {
+            hql += " AND rt.directionId = :directionId ";
+            parameterNameAndValues.put("directionId", directionId);
         }
         return hql;
     }

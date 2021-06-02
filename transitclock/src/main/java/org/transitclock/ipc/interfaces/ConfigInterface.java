@@ -157,7 +157,7 @@ public interface ConfigInterface extends Remote {
 	public List<IpcSchedule> getSchedules(String routeIdOrShortName)
 			throws RemoteException;
 
-    List<IpcTripPattern> getTripPatterns(String routeIdOrShortName, String headSign)
+    public List<IpcTripPattern> getTripPatterns(String routeIdOrShortName, String headSign, String directionId)
             throws RemoteException;
 
     /**

@@ -359,6 +359,8 @@ public class ReportingApi {
             @QueryParam(value = "headsign") String headsign,
             @Parameter(description="Specifies the tripPatternId to filter by.")
             @QueryParam(value = "tripPattern") String tripPatternId,
+            @Parameter(description="Specifies the directionId to filter by.")
+            @QueryParam(value = "directionId") String directionId,
             @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday)")
             @QueryParam(value = "serviceType") String serviceType,
             @Parameter(description="if set, retrives only arrivalDepartures with stops that are timePoints")
@@ -386,10 +388,10 @@ public class ReportingApi {
                                                                                             route,
                                                                                             headsign,
                                                                                             tripPatternId,
+                                                                                            directionId,
                                                                                             serviceTypeEnum,
                                                                                             timePointsOnly,
-                                                                             false,
-                    useReadOnlyDb());
+                                                                                            useReadOnlyDb());
 
             Object response = TripRunTimeOutput.getRunTimes(ipcRunTimeForTripsAndDistribution);
 

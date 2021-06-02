@@ -21,7 +21,9 @@ import java.util.List;
                     @Index(name="RunTimesForRoutesServiceTypeIndex",
                         columnList="serviceType" ),
                     @Index(name="RunTimesForRoutesTripPatternIndex",
-                        columnList="tripPatternId" )
+                        columnList="tripPatternId" ),
+                    @Index(name="RunTimesForRoutesDirectionIdIndex",
+                        columnList="directionId" )
                     } )
 
 public class RunTimesForRoutes implements Serializable {

@@ -337,10 +337,9 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	}
 
 	@Override
-	public List<IpcTripPattern> getTripPatterns(String routeIdOrShortName, String headSign)
+	public List<IpcTripPattern> getTripPatterns(String routeIdOrShortName, String headSign, String directionId)
 			throws RemoteException {
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
-
 		Route dbRoute = getRoute(routeIdOrShortName);
 		if (dbRoute == null)
 			return null;
@@ -351,8 +350,16 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 			return null;
 
 		List<IpcTripPattern> tripPatterns = new ArrayList<IpcTripPattern>();
-		for (TripPattern dbTripPattern : dbTripPatterns) {
-			tripPatterns.add(new IpcTripPattern(dbTripPattern));
+		if(directionId != null){
+			for (TripPattern dbTripPattern : dbTripPatterns) {
+				if(dbTripPattern.getDirectionId().equals(directionId)){
+					tripPatterns.add(new IpcTripPattern(dbTripPattern));
+				}
+			}
+		} else {
+			for (TripPattern dbTripPattern : dbTripPatterns) {
+				tripPatterns.add(new IpcTripPattern(dbTripPattern));
+			}
 		}
 		return tripPatterns;
 	}

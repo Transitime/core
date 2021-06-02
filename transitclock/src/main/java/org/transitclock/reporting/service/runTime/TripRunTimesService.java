@@ -38,6 +38,7 @@ public class TripRunTimesService {
                                                                           String routeIdOrShortName,
                                                                           String headsign,
                                                                           String tripPatternId,
+                                                                          String directionId,
                                                                           ServiceType serviceType,
                                                                           boolean readOnly) throws Exception {
 
@@ -55,6 +56,7 @@ public class TripRunTimesService {
                 .serviceType(serviceType)
                 .routeShortName(routeShortName)
                 .headsign(headsign)
+                .directionId(directionId)
                 .tripPatternId(tripPatternId)
                 .includeRunTimesForStops(true)
                 .readOnly(readOnly)
