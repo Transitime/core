@@ -1436,7 +1436,7 @@
                     visualizeData(response, isAllRoutes);
                 } else {
                     $("#submit").removeAttr("disabled");
-                    alert("Error parsing average trip run time information.");
+                    alert("Unable to find any valid results. Please try a different search. ");
                 }
 
             },
