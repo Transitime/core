@@ -107,7 +107,7 @@ public class RunTimeService {
         return runTimesForRoutes;
     }
 
-    private IpcRunTime getRunTimeStats(Map<String, TripStopPathStatistics> tripStatsByRunTimeKey){
+    public IpcRunTime getRunTimeStats(Map<String, TripStopPathStatistics> tripStatsByRunTimeKey){
 
         DoubleStatistics avgRunTimeStats =  new DoubleStatistics();
         DoubleStatistics fixedTimeStats =  new DoubleStatistics();

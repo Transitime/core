@@ -70,7 +70,7 @@ public class TripRunTimesService {
 
         Map<String, List<Long>> runTimesByTripId = getRunTimesByTripId(runTimesForRoutes);
 
-        IpcRunTime runTimeSummary = getRunTimeStats(tripStatisticsByTripId);
+        IpcRunTime runTimeSummary = runTimeService.getRunTimeStats(tripStatisticsByTripId);
 
         IpcRunTimeForTripsAndDistribution ipcRunTimeForTripsAndDistribution = new IpcRunTimeForTripsAndDistribution(
                 ipcRunTimeForTripList, runTimesByTripId, runTimeSummary);
@@ -143,46 +143,5 @@ public class TripRunTimesService {
             }
         }
         return runTimesByTripId;
-    }
-
-    private IpcRunTime getRunTimeStats(Map<String, TripStopPathStatistics> tripStatsByRunTimeKey){
-        DoubleSummaryStatistics avgRunTimeStats = new DoubleSummaryStatistics();
-        DoubleSummaryStatistics fixedTimeStats = new DoubleSummaryStatistics();
-        DoubleSummaryStatistics avgDwellTimeStats = new DoubleSummaryStatistics();
-
-        for(Map.Entry<String, TripStopPathStatistics> entry : tripStatsByRunTimeKey.entrySet()){
-
-            Double avgTripRunTime = entry.getValue().getTripAverageRunTime();
-            if(avgTripRunTime != null && avgTripRunTime > 0){
-                avgRunTimeStats.accept(avgTripRunTime);
-            }
-
-            Double tripFixedTime = entry.getValue().getTripFixedRunTime();
-            if(tripFixedTime != null && tripFixedTime > 0){
-                fixedTimeStats.accept(tripFixedTime);
-            }
-
-            Double tripDwellTime = entry.getValue().getTripAvgDwellTime();
-            if(tripDwellTime != null && tripDwellTime > 0){
-                avgDwellTimeStats.accept(tripDwellTime);
-            }
-
-        }
-
-        Double fixedTime = fixedTimeStats.getCount() > 0 ? fixedTimeStats.getAverage() : null;
-        Double dwellTime = avgDwellTimeStats.getCount() > 0 ? avgDwellTimeStats.getAverage() : null;
-        Double avgRunTime = avgRunTimeStats.getCount() > 0 ? avgRunTimeStats.getAverage() : null;
-        Double variableTime = null;
-
-
-        if(avgRunTime != null && fixedTime != null) {
-            variableTime = avgRunTime - fixedTime;
-        }
-
-        if(avgRunTime != null && dwellTime != null){
-            avgRunTime += dwellTime;
-        }
-
-        return new IpcRunTime(avgRunTime, fixedTime, variableTime, dwellTime);
     }
 }
