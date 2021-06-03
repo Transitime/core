@@ -10,6 +10,10 @@
     <!-- Load in Select2 files so can create fancy route selector -->
     <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet"/>
     <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-chart-box-and-violin-plot/2.4.0/Chart.BoxPlot.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" type="text/css" href="../jquery.datepick.package-5.1.0/css/jquery.datepick.css">
@@ -420,10 +424,6 @@
 
             <div id="component">
                 <div id="mainResults">
-
-
-
-
                     <div class="individual-route">
                         <h3>Trip Run Time Summary</h3>
                         <table class="border-table">
@@ -437,93 +437,15 @@
                             </tr>
                         </table>
                     </div>
-
-
                 </div>
-
-                <div id="comparisonModal"  class="individual-route" hidden="true">
-                    <div id="modalContents" style="margin-right: 30px; margin-left: 30px; margin-top: 10px;">
-                        <div id="modalHeader" style="text-align: left; vertical-align: middle; font-size: medium">
-                            Trip Run Time Comparison
-                            <button id='closeModal' type='button' style='float:right; margin-right: -10px;'>&times;</button>
-                        </div>
-                        <div id="paramDetailsModal" class="paramDetails" style="margin-top: 20px; margin-bottom: 20px;"></div>
-
-                        <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
-                        <link rel="stylesheet" type="text/css"
-                              href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
-
-                        <script>
-                            $(function () {
-                                var calendarIconTooltip = "Popup calendar to select date";
-
-                                $("#modalDatepicker").datepick({
-                                    dateFormat: "yy-mm-dd",
-                                    showOtherMonths: true,
-                                    selectOtherMonths: true,
-                                    // Show button for calendar
-                                    buttonImage: "img/calendar.gif",
-                                    buttonImageOnly: true,
-                                    showOn: "both",
-                                    // Don't allow going past current date
-                                    maxDate: 0,
-                                    // onClose is for restricting end date to be after start date,
-                                    // though it is potentially confusing to user
-                                    rangeSelect: true,
-                                    showTrigger: '<button type="button" class="trigger">' +
-                                        '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
-                                    onClose: function (selectedDate) {
-                                        // Strangely need to set the title attribute for the icon again
-                                        // so that don't revert back to a "..." tooltip
-                                        // FIXME $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
-                                    }
-                                });
-
-                                // Use a better tooltip than the default "..." for the calendar icon
-                                $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
-                            })
-                        </script>
-
-                        <div style='font-size: medium; margin-bottom: 2px;'>Select Comparison Range:</div>
-
-                        <div class="param-modal">
-                            <label for="modalDatepicker">Date:</label>
-                            <input type="text" id="modalDatepicker" name="modalDatepicker"
-                                   title="The range of dates that you want to examine data for.
-                                               <br><br> Begin date must be before the end date."
-                                   size="14"
-                                   value="Date range"/>
-                        </div>
-
-                        <div class="param-modal">
-                            <label for="serviceDayType">Service Day:</label>
-                            <select id="modalServiceDayType" name="modalServiceDayType">
-                                <option value="">All</option>
-                                <option value="weekday">Weekday</option>
-                                <option value="saturday">Saturday</option>
-                                <option value="sunday">Sunday</option>
-                            </select>
-                        </div>
-                        <div style="width:100%; display: flex; justify-content: center;">
-                            <input type="button" id="modalSubmit" class="submit" value="Submit">
-                        </div>
-                    </div>
-                </div>
-
-                <div id="comparisonResults" class="individual-route" hidden="true"></div>
-
-                <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-chart-box-and-violin-plot/2.4.0/Chart.BoxPlot.js"></script>
-
                 <div class="individual-route trip-block " >
                     <div class="param" id="trips-container"></div>
-
+                </div>
+                <div class="all-routes" >
+                    <h3 id="visualization-container-header">Route RunTime Performance</h3>
                 </div>
                 <div class="visualization-container">
-                    <%--  <h3 id="visualization-container-header"> Route Breakdown</h3>--%>
-                    <div id="runTimeVisualization" hidden="true">
-
-                    </div>
+                    <div id="runTimeVisualization" hidden="true"></div>
                 </div>
                 <br>
                 <br>
@@ -940,15 +862,11 @@
     }
 
 
-    function getParams(modal) {
+    function getParams() {
         var datepicker, serviceTypeSelector;
-        if (modal) {
-            datepicker = "modalDatepicker";
-            serviceTypeSelector = "modalServiceDayType";
-        } else {
-            datepicker = "datepicker";
-            serviceTypeSelector = "serviceDayType";
-        }
+
+        datepicker = "datepicker";
+        serviceTypeSelector = "serviceDayType";
 
         if ($("#" + datepicker).val() == "Date range") {
             var today = new Date();
@@ -1045,16 +963,13 @@
         return Math.ceil(maxMins / 5) * 5;
     }
 
-
-
     var highestPoints = [];
     var visualarGraphChart;
-
 
     function showStopView(){
 
         highestPoints = [];
-        request = getParams(false);
+        request = getParams();
 
         request.timePointsOnly = $("#timePointsOnly")[0].checked;
         request.tripId = $("#trips-select-box").val();
@@ -1092,7 +1007,237 @@
 
     }
 
-    function visualizeData() {
+    $("#submit").click(function () {
+        $("#submit").attr("disabled", "disabled");
+        $(".wrapper").addClass("split");
+        $("#mainResults").hide();
+        $("#runTimeVisualization").hide();
+        $("#modalDatepicker").val("Date range")
+        $("#comparisonModal").hide();
+        $("#comparisonResults").hide();
+        $("#comparisonResults").html(
+            '<hr>' +
+
+            '<div id="comparisonParams" class="paramDetails" style="float: left;">' +
+            '<p style="font-size: 0.8em;"></p>' +
+            '</div>' +
+
+            '<div id="comparisonAvgRunTime" style="display: inline-block; margin-left: 20px; width: 90%; vertical-align: middle;">' +
+            '<p style="font-size: 0.8em;display: inline-block;"></p>' +
+            '<p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>' +
+            '<p style="font-size: 0.8em;display: inline-block;"></p>' +
+            '<p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>' +
+            '<p style="font-size: 0.8em;display: inline-block;"></p>' +
+            '<p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>' +
+            '<p style="font-size: 0.8em;display: inline-block;"></p>' +
+            '<p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>' +
+            '</div>'
+        );
+
+        request = getParams();
+
+        var beginDateArray = request.beginDate.split("-");
+        var endDateArray = request.endDate.split("-");
+        [beginDateArray[0], beginDateArray[1], beginDateArray[2]] = [beginDateArray[1], beginDateArray[2], beginDateArray[0]];
+        [endDateArray[0], endDateArray[1], endDateArray[2]] = [endDateArray[1], endDateArray[2], endDateArray[0]];
+
+        var beginDateString = beginDateArray.join("/");
+        var endDateString = endDateArray.join("/");
+
+        var timeRange = request.beginTime + " to " + request.endTime;
+
+        if (beginTime == "00:00:00" && endTime == "23:59:59") {
+            timeRange = "All times";
+        }
+
+        var serviceDayString = request.serviceType;
+
+        if (serviceDayString == "") {
+            serviceDayString = "All days";
+        }
+
+        var visualDataURL = apiUrlPrefix +  "/report/runTime/avgTripRunTimes";
+        var isAllRoutes = false;
+
+        if(!request.r){
+            delete request.r;
+            delete request.tripPattern;
+            delete request.serviceType
+            delete  request.headsign;
+            isAllRoutes = true;
+            visualDataURL =  apiUrlPrefix + "/report/runTime/routeRunTimes";
+        }
+
+        $.ajax({
+            url: visualDataURL,
+            // Pass in query string parameters to page being requested
+            data: request,
+            // Needed so that parameters passed properly to page being requested
+            traditional: true,
+            dataType: "json",
+            success: function (response) {
+                if (jQuery.isEmptyObject(response)) {
+                    $("#component").hide();
+                    $("#submit").removeAttr("disabled");
+                    alert("No run time information available for selected parameters.");
+                } else if(response.data && response.data.summary && response.data.summary) {
+                    $(".all-routes").hide();
+                    updateParamDetails(request.r, request.headsign, request.tripPattern, beginDateString, endDateString,
+                                        timeRange, serviceDayString);
+                    updateSummaryTable(response.data.summary);
+
+                    $("#component").show();
+                    $(".individual-route").show();
+
+                    visualizeData(response, visualDataURL, isAllRoutes);
+
+                    $("#mainResults").show();
+                    $("#submit").removeAttr("disabled");
+                }
+                else if(response.data && response.data.routes){
+                    $(".individual-route").hide();
+
+                    updateParamDetails(request.r, request.headsign, request.tripPattern, beginDateString, endDateString,
+                        timeRange, serviceDayString);
+
+                    $("#component").show();
+                    $(".all-routes").show();
+
+                    visualizeData(response, visualDataURL, isAllRoutes);
+
+                    $("#mainResults").show();
+                    $("#submit").removeAttr("disabled");
+                }
+                else {
+                    $("#submit").removeAttr("disabled");
+                    $("#component").hide();
+                    alert("Unable to find any valid results. Please try a different search.");
+                }
+
+            },
+            error: function () {
+                $("#submit").removeAttr("disabled");
+                alert("Error processing average trip run time.");
+            }
+        })
+    })
+
+    function updateParamDetails(route, headsign, tripPattern, beginDateString, endDateString, timeRange, serviceDayString){
+        $("#paramDetails").html("<p style='font-size: 0.8em;'>" +
+            (!route || route == "" ? "All routes" : "Route " + route) + " to " +
+            (!headsign || headsign == "" ? "All directions" : headsign) + " | " +
+            (!tripPattern || tripPattern == "" ? "All Trip Patterns" : tripPattern) + " | " +
+            beginDateString + " to " + endDateString + " | " +
+            timeRange + " | " +
+            serviceDayString +
+            "</p>");
+    }
+
+    function updateSummaryTable(summary){
+        var avgRunTime = typeof (summary.avgRunTime) == 'undefined' ? "N/A" : (summary.avgRunTime / 60000).toFixed(1) + " min";
+        var avgFixed = typeof (summary.fixed) == 'undefined' ? "N/A" : (summary.fixed / 60000).toFixed(1) + " min";
+        var avgVar = typeof (summary.variable) == 'undefined' ? "N/A" : (summary.variable / 60000).toFixed(1) + " min";
+        var avgDwell = typeof (summary.dwell) == 'undefined' ? "N/A" : (summary.dwell / 60000).toFixed(1) + " min";
+
+        var tableTD = "<td>"+avgRunTime+"</td>";
+        tableTD += "<td>"+avgFixed+"</td>";
+        tableTD += "<td>"+avgVar+"</td>";
+        tableTD += "<td>"+avgDwell+"</td>";
+        $(".average-time-details").html(tableTD);
+    }
+
+    function visualizeData(response, visualDataURL, isAllRoutes) {
+        highestPoints = [];
+
+        if(visualarGraphChart && visualarGraphChart.destroy){
+            visualarGraphChart.destroy();
+        }
+
+        if(response.data && ((response.data.trips && response.data.trips.length > 0) ||
+            (response.data.routes && response.data.routes.length > 0))){
+
+            var cloneResponse =  JSON.parse(JSON.stringify(response));
+
+            if(response.data.trips && response.data.trips.length ){
+
+                var tripSelectBox = $('<select id="trips-select-box" name="tripBoxType"><option value="">All Trips</option></select>');
+                var tripsDisplayData = getTripsDisplayData(response.data.trips);
+
+                tripsDisplayData.tripVal.forEach(function (eachTrip, i) {
+                    var option = $('<option></option>');
+                    option.attr('value', tripsDisplayData.tripVal[i]);
+                    option.text(tripsDisplayData.tripName[i]);
+                    tripSelectBox.append(option);
+                });
+
+                tripSelectBox.append( '<span class="select2-selection__arrow"><b role="presentation"></b></span>');
+
+                $("#trips-container").html("");
+                $("#trips-container").append('<h3 for="tripBoxType" id="visualization-container-header">Trip Run Times</h3>');
+                $("#trips-container").append(tripSelectBox);
+
+                $("#trips-select-box").change(function () {
+
+                    if ($("#trips-select-box").val().trim() != "") {
+                        showStopView();
+                        $("#visualization-container-header").html("Stop Run Times");
+                    } else {
+                        $.ajax({
+                            url: visualDataURL,
+                            // Pass in query string parameters to page being requested
+                            data: request,
+                            // Needed so that parameters passed properly to page being requested
+                            traditional: true,
+                            dataType: "json",
+                            success: function (response) {
+                                visualizeData(response, visualDataURL, false);
+                            },
+                            error: function () {
+                                $("#submit").removeAttr("disabled");
+                                alert("Error retreiving trip run times.");
+                            }
+                        });
+                        $("#visualization-container-header").html(" Trip Run Times");
+                    }
+                });
+                var defaultHeight = (response.data.trips.length ) *100;
+                var defaultWidth = window.innerWidth;
+
+                if(defaultHeight < (window.innerHeight/2 - 100)) {
+                    defaultHeight =  window.innerHeight;
+                }
+
+                $("#runTimeVisualization").html(' <canvas id="visualizationCanvas" class="custom-canvas"  height="'+defaultHeight+'" width="'+defaultWidth+'"></canvas>');
+
+            } else{
+                var defaultHeight = (response.data.routes.length ) *100;
+                var defaultWidth = window.innerWidth;
+
+                if(defaultHeight < (window.innerHeight/2 - 100)) {
+                    defaultHeight =  window.innerHeight;
+                }
+                $("#runTimeVisualization").html(' <canvas id="visualizationCanvas" class="custom-canvas"  height="'+defaultHeight+'" width="'+defaultWidth+'"></canvas>');
+
+            }
+
+            if(isAllRoutes){
+                generateAllRouteChart(response);
+            } else{
+                generateIndividualRouteChart(response);
+                percentageTabDetails(response);
+                distributionTabDetails(cloneResponse);
+            }
+
+            $("#comparisonResults").hide();
+            $("#runTimeVisualization").show();
+
+        } else{
+            alert("No trip breakdown available for selected run time data.");
+
+        }
+    }
+
+    /*function visualizeData() {
         $("#submit").attr("disabled", true);
 
         highestPoints = [];
@@ -1114,8 +1259,10 @@
         if(isAllRoutes){
             $("#run-time-tabs" ).tabs().tabs('destroy');
             $(".only-individual-route").addClass("hide-routes");
+            $(".all-routes").show();
         } else{
             $(".only-individual-route").removeClass("hide-routes");
+            $(".all-routes").hide();
             $("#run-time-tabs" ).tabs();
         }
 
@@ -1205,7 +1352,7 @@
                 $("#submit").attr("disabled", false);
             }
         })
-    }
+    }*/
     function getDefaultChartOptions(options){
 
         var canvas = $("#visualizationCanvas");
@@ -1437,217 +1584,6 @@
         }
 
         barGraph.update();
-
-
     }
-
-    $("#submit").click(function () {
-        $("#submit").attr("disabled", "disabled");
-        $(".wrapper").addClass("split");
-        $("#mainResults").hide();
-        $("#runTimeVisualization").hide();
-        $("#modalDatepicker").val("Date range")
-        $("#comparisonModal").hide();
-        $("#comparisonResults").hide();
-        $("#comparisonResults").html(
-            '<hr>' +
-
-            '<div id="comparisonParams" class="paramDetails" style="float: left;">' +
-            '<p style="font-size: 0.8em;"></p>' +
-            '</div>' +
-
-            '<div id="comparisonAvgRunTime" style="display: inline-block; margin-left: 20px; width: 90%; vertical-align: middle;">' +
-            '<p style="font-size: 0.8em;display: inline-block;"></p>' +
-            '<p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>' +
-            '<p style="font-size: 0.8em;display: inline-block;"></p>' +
-            '<p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>' +
-            '<p style="font-size: 0.8em;display: inline-block;"></p>' +
-            '<p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>' +
-            '<p style="font-size: 0.8em;display: inline-block;"></p>' +
-            '<p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>' +
-            '</div>'
-        );
-
-        request = getParams(false);
-
-        var beginDateArray = request.beginDate.split("-");
-        var endDateArray = request.endDate.split("-");
-        [beginDateArray[0], beginDateArray[1], beginDateArray[2]] = [beginDateArray[1], beginDateArray[2], beginDateArray[0]];
-        [endDateArray[0], endDateArray[1], endDateArray[2]] = [endDateArray[1], endDateArray[2], endDateArray[0]];
-        var beginDateString = beginDateArray.join("/");
-        var endDateString = endDateArray.join("/");
-
-        var timeRange = request.beginTime + " to " + request.endTime;
-
-        if (beginTime == "00:00:00" && endTime == "23:59:59") {
-            timeRange = "All times";
-        }
-
-        var serviceDayString = request.serviceType;
-
-        if (serviceDayString == "") {
-            serviceDayString = "All days";
-        }
-
-        if(!request.r){
-            $("#paramDetails").html("<p style='font-size: 0.8em;'>" +
-                (request.r == "" ? "All routes" : "Route " + request.r) + " to " +
-                (request.headsign == "" ? "All directions" : request.headsign) + " | " +
-                (request.tripPattern == "" ? "All Trip Patterns" : request.tripPattern) + " | " +
-                beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString
-                + "</p>");
-            $("#component").show();
-            $("#mainResults").show();
-
-            visualizeData();
-            $(".individual-route").hide();
-            return true;
-        } else{
-            $("#component").show();
-            $(".individual-route").show();
-            $("#comparisonModal").hide();
-        }
-
-
-        var visualDataURL = apiUrlPrefix +  "/report/runTime/avgTripRunTimes";
-        var isAllRoutes = false;
-
-        if(!request.r){
-            delete request.r;
-            delete  request.tripPattern;
-            delete request.serviceType
-            delete  request.headsign;
-            isAllRoutes = true;
-            visualDataURL =  apiUrlPrefix + "/report/runTime/routeRunTimes";
-        }
-
-        $.ajax({
-            //url: apiUrlPrefix + "/report/runTime/avgRunTime",
-            url: visualDataURL,
-            // Pass in query string parameters to page being requested
-            data: request,
-            // Needed so that parameters passed properly to page being requested
-            traditional: true,
-            dataType: "json",
-            success: function (response) {
-                if (jQuery.isEmptyObject(response)) {
-                    $("#submit").removeAttr("disabled");
-                    alert("No run time information available for selected parameters.");
-                } else if(response.data && response.data.summary && response.data.summary) {
-                    $("#submit").removeAttr("disabled");
-
-
-                    $("#paramDetails").html("<p style='font-size: 0.8em;'>" + (request.r == "" ? "All routes" : "Route " + request.r) + " to " + (request.headsign == "" ? "All directions" : request.headsign) + " | " + (request.tripPattern == "" ? "All Trip Patterns" : request.tripPattern) + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "</p>");
-                    $("#paramDetailsModal").html("<p style='font-size: 0.7em;'>" + (request.r == "" ? "All routes" : "Route " + request.r) + " to " + (request.headsign == "" ? "All directions" : request.headsign) + " | " + (request.tripPattern == "" ? "All Trip Patterns" : request.tripPattern) + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "</p>");
-
-                    var summary = response.data.summary;
-
-                    var avgRunTime = typeof (summary.avgRunTime) == 'undefined' ? "N/A" : (summary.avgRunTime / 60000).toFixed(1) + " min";
-                    var avgFixed = typeof (summary.fixed) == 'undefined' ? "N/A" : (summary.fixed / 60000).toFixed(1) + " min";
-                    var avgVar = typeof (summary.variable) == 'undefined' ? "N/A" : (summary.variable / 60000).toFixed(1) + " min";
-                    var avgDwell = typeof (summary.dwell) == 'undefined' ? "N/A" : (summary.dwell / 60000).toFixed(1) + " min";
-
-                    var tableTD = "<td>"+avgRunTime+"</td>";
-                    tableTD += "<td>"+avgFixed+"</td>";
-                    tableTD += "<td>"+avgVar+"</td>";
-                    tableTD += "<td>"+avgDwell+"</td>";
-                    $(".average-time-details").html(tableTD);
-                    $("#mainResults").show();
-                    // visualizeData(response, isAllRoutes);
-                } else {
-                    $("#submit").removeAttr("disabled");
-                    alert("Unable to find any valid results. Please try a different search. ");
-                }
-
-            },
-            error: function () {
-                $("#submit").removeAttr("disabled");
-                alert("Error processing average trip run time.");
-            }
-        })
-    })
-
-   
-
-    $("#modalSubmit").click(function () {
-        $(".submit").attr("disabled", "disabled");
-        $("#comparisonResults").hide();
-        $("#runTimeVisualization").hide();
-
-        request = getParams(true);
-
-        $.ajax({
-            url: apiUrlPrefix + "/report/runTime/avgRunTime",
-            // Pass in query string parameters to page being requested
-            data: request,
-            // Needed so that parameters passed properly to page being requested
-            traditional: true,
-            dataType: "json",
-            success: function (response) {
-                if (jQuery.isEmptyObject(response)) {
-                    $(".submit").removeAttr("disabled");
-                    alert("No run time information available for selected parameters.");
-                } else {
-                    $(".submit").removeAttr("disabled");
-                    $("#comparisonModal").hide();
-
-                    var beginDateArray = request.beginDate.split("-");
-                    var endDateArray = request.endDate.split("-");
-                    [beginDateArray[0], beginDateArray[1], beginDateArray[2]] = [beginDateArray[1], beginDateArray[2], beginDateArray[0]];
-                    [endDateArray[0], endDateArray[1], endDateArray[2]] = [endDateArray[1], endDateArray[2], endDateArray[0]];
-                    var beginDateString = beginDateArray.join("/");
-                    var endDateString = endDateArray.join("/");
-
-                    var timeRange = request.beginTime + " to " + request.endTime;
-
-                    if (beginTime == "00:00:00" && endTime == "23:59:59") {
-                        timeRange = "All times";
-                    }
-
-                    var serviceDayString = request.serviceType;
-
-                    if (serviceDayString == "") {
-                        serviceDayString = "All days";
-                    }
-
-                    $("#comparisonParams").html("<p style='font-size: 0.8em;'>" + (request.r == "" ? "All routes" : "Route " + request.r) + " to " + (request.headsign == "" ? "All directions" : request.headsign) + " | " + (request.tripPattern == "" ? "All Trip Patterns" : request.tripPattern) + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "<a id='clearLink' style='font-size: 0.8em; margin-bottom: 1em; margin-left: 4em; color: blue; text-decoration: underline; cursor: pointer' onclick='clearComparison()'>Clear</a></p>");
-
-                    var avgRunTime = typeof (response.avgRunTime) == 'undefined' ? "N/A" : (response.avgRunTime / 60000).toFixed(1);
-                    var avgFixed = typeof (response.fixed) == 'undefined' ? "N/A" : (response.fixed / 60000).toFixed(1);
-                    var avgVar = typeof (response.variable) == 'undefined' ? "N/A" : (response.variable / 60000).toFixed(1);
-                    var avgDwell = typeof (response.dwell) == 'undefined' ? "N/A" : (response.dwell / 60000).toFixed(1);
-
-                    $("#comparisonAvgRunTime").html(
-                        "<p style='font-size: 0.8em;display: inline-block; vertical-align: middle;'>Average run time</p>" +
-                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 50px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle;'>" + avgRunTime + "</p>" +
-                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 50px;'>Fixed</p>" +
-                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 50px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle;'>" + avgFixed + "</p>" +
-                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; vertical-align: middle;'>Variable</p>" +
-                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle;'>" + avgVar + "</p>" +
-                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; vertical-align: middle;'>Dwell</p>" +
-                        "<p style='font-size: 0.8em;display: inline-block; margin-left: 40px; width: 60px; height: 1.5em; background-color: lightgray; vertical-align: middle;'>" + avgDwell + "</p>"
-                    );
-
-                    $("#comparisonResults").show();
-                }
-            },
-            error: function () {
-                $(".submit").removeAttr("disabled");
-                alert("Error processing average trip run time.");
-            }
-        })
-    })
-
-    function openModal() {
-        $("#comparisonModal").show();
-    }
-
-    function clearComparison() {
-        $("#comparisonResults").hide();
-    }
-
-    $("#closeModal").click(function () {
-        $("#comparisonModal").hide();
-    })
 
 </script>
