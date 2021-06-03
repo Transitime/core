@@ -19,6 +19,7 @@ public interface ReportingInterface extends Remote {
                                                     LocalTime endTime,
                                                     String routeIdOrShortName,
                                                     String headsign,
+                                                    String directionId,
                                                     String tripPatternId,
                                                     ServiceType serviceType,
                                                     boolean readOnly) throws Exception;
@@ -47,7 +48,7 @@ public interface ReportingInterface extends Remote {
 
     IpcRunTime getRunTimeSummary(LocalDate beginDate, LocalDate endDate,
                            LocalTime beginTime, LocalTime endTime,
-                           String routeIdOrShortName, String headsign,
+                           String routeIdOrShortName, String headsign, String directionId,
                            String tripPatternId, ServiceType serviceType, boolean readOnly) throws Exception;
 
     IpcRunTimeForTripsAndDistribution getRunTimeForTrips(LocalDate beginDate, LocalDate endDate,

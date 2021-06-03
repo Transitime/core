@@ -300,6 +300,8 @@ public class ReportingApi {
             @QueryParam(value = "r") String route,
             @Parameter(description="Retrives only arrivalDepartures belonging to the headsign specified.",required=true)
             @QueryParam(value = "headsign") String headsign,
+            @Parameter(description="Retrives only arrivalDepartures belonging to the headsign specified.",required=true)
+            @QueryParam(value = "directionId") String directionId,
             @Parameter(description="Specifies the tripPatternId to filter by.",required=false)
             @QueryParam(value = "tripPattern") String tripPatternId,
             @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday)",required=false)
@@ -321,7 +323,7 @@ public class ReportingApi {
             }
 
             IpcRunTime ipcRunTime = reportingInterface.getRunTimeSummary(beginDate.getDate(), endDate.getDate(),
-                    beginTime.getTime(), endTime.getTime(), route, headsign, tripPatternId,
+                    beginTime.getTime(), endTime.getTime(), route, headsign, directionId, tripPatternId,
                     serviceTypeEnum, useReadOnlyDb());
 
             Object response = null;
@@ -541,7 +543,9 @@ public class ReportingApi {
             @Parameter(description="Specifies the tripPatternId to filter by.")
             @QueryParam(value = "tripPattern") String tripPatternId,
             @Parameter(description="Retrives only runTimes belonging to the headsign specified.",required=true)
-            @QueryParam(value = "headsign") String headsign
+            @QueryParam(value = "headsign") String headsign,
+            @Parameter(description="Retrives only runTimes belonging to the directionId specified.",required=true)
+            @QueryParam(value = "directionId") String directionId
         )
             throws WebApplicationException {
 
@@ -562,6 +566,7 @@ public class ReportingApi {
                     endTime.getTime(),
                     route,
                     headsign,
+                    directionId,
                     tripPatternId,
                     serviceTypeEnum,
                     useReadOnlyDb());

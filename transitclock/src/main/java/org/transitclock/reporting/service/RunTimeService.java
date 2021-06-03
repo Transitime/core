@@ -66,6 +66,7 @@ public class RunTimeService {
                                         LocalTime endTime,
                                         String routeIdOrShortName,
                                         String headsign,
+                                        String directionId,
                                         String tripPatternId,
                                         ServiceType serviceType,
                                         boolean readOnly) throws Exception {
@@ -84,6 +85,7 @@ public class RunTimeService {
                 .serviceType(serviceType)
                 .routeShortName(routeShortName)
                 .headsign(headsign)
+                .directionId(directionId)
                 .tripPatternId(tripPatternId)
                 .includeRunTimesForStops(true)
                 .readOnly(readOnly)

@@ -694,7 +694,12 @@
             dataType: "json",
             success: function (response) {
                 response.headsigns.forEach(function (headsign) {
-                    $("#direction").append("<option value='" + headsign.headsign + "'>" + headsign.label + "</option>");
+                    var headsignDirection = new Object();
+                    headsignDirection.headsign = headsign.headsign;
+                    headsignDirection.directionId = headsign.directionId;
+                    var headSignDirectionVal = JSON.stringify(headsignDirection);
+
+                    $("#direction").append('<option value=\'' + headSignDirectionVal + '\'>' + headsign.label + '</option>');
                 })
                 populateTripPattern();
             },
@@ -709,11 +714,14 @@
 
         $("#tripPattern").empty();
 
+        var direction = JSON.parse($("#direction").val());
+
         var request = {};
 
         request.a = 1;
         request.r = $("#route").val();
-        request.headsign = $("#direction").val();
+        request.headsign = direction.headsign;
+        request.directionId = direction.directionId;
         request.includeStopPaths = 'false';
 
         $.ajax({
@@ -782,8 +790,9 @@
         var endTime = $("#"+endTime).val() == "" ? "23:59:59" : $("#"+endTime).val() + ":00";
 
         var routeName = $("#route").val().trim() == "" ? "" : $("#route").val();
-        var directionName = $("#direction").val() == null ? "" : $("#direction").val();
         var tripPatternName = $("#tripPattern").val() == null ? "" : $("#tripPattern").val();
+        var directionName = $("#direction").val();
+
 
         params = {};
 
@@ -795,6 +804,15 @@
         params.headsign = directionName;
         params.serviceType = $("#" + serviceTypeSelector).val();
         params.tripPattern = tripPatternName;
+
+        if(directionName == null){
+            params.headsign = "";
+            params.directionId= "";
+        } else {
+            var directionJson = JSON.parse($("#direction").val());
+            params.headsign = directionJson.headsign;
+            params.directionId = directionJson.directionId;
+        }
 
         return params;
     }

@@ -108,12 +108,13 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                         LocalTime endTime,
                                         String routeIdOrShortName,
                                         String headsign,
+                                        String directionId,
                                         String tripPatternId,
                                         ServiceType serviceType,
                                         boolean readOnly) throws Exception {
 
-        return runTimeService.getRunTimeSummary(beginDate, endDate, beginTime, endTime, routeIdOrShortName, headsign,null,
-                                    serviceType, readOnly);
+        return runTimeService.getRunTimeSummary(beginDate, endDate, beginTime, endTime, routeIdOrShortName, headsign,
+                                                directionId, tripPatternId, serviceType, readOnly);
     }
 
     @Override
@@ -153,12 +154,13 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                                            LocalTime endTime,
                                                            String routeIdOrShortName,
                                                            String headsign,
+                                                           String directionId,
                                                            String tripPatternId,
                                                            ServiceType serviceType,
                                                            boolean readOnly) throws Exception {
 
         return prescriptiveRunTimeService.getPrescriptiveRunTimes(beginTime, endTime, routeIdOrShortName, headsign,
-                tripPatternId, serviceType, readOnly);
+                directionId, tripPatternId, serviceType, readOnly);
     }
 
     // On Time Performance Reports
