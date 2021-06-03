@@ -986,7 +986,7 @@
             success: function (response) {
                 if(response.data.stopPaths && response.data.stopPaths.length ){
 
-                    var defaultHeight = (response.data.stopPaths.length ) *80;
+                    var defaultHeight = (response.data.stopPaths.length ) *100;
                     var defaultWidth = window.innerWidth;
 
                     if(defaultHeight < (window.innerHeight/2 - 100)) {
@@ -1153,6 +1153,16 @@
             visualarGraphChart.destroy();
         }
 
+        if(isAllRoutes){
+            $("#run-time-tabs" ).tabs().tabs('destroy');
+            $(".only-individual-route").addClass("hide-routes");
+            $(".all-routes").show();
+        } else{
+            $(".only-individual-route").removeClass("hide-routes");
+            $(".all-routes").hide();
+            $("#run-time-tabs" ).tabs();
+        }
+
         if(response.data && ((response.data.trips && response.data.trips.length > 0) ||
             (response.data.routes && response.data.routes.length > 0))){
 
@@ -1237,122 +1247,6 @@
         }
     }
 
-    /*function visualizeData() {
-        $("#submit").attr("disabled", true);
-
-        highestPoints = [];
-        request = getParams(false)
-
-        var visualDataURL = apiUrlPrefix +  "/report/runTime/avgTripRunTimes";
-        var isAllRoutes = false;
-        if(visualarGraphChart && visualarGraphChart.destroy){
-            visualarGraphChart.destroy();
-        }
-        if(!request.r){
-            delete request.r;
-            delete  request.tripPattern;
-            delete request.serviceType
-            delete  request.headsign;
-            isAllRoutes = true;
-            visualDataURL =  apiUrlPrefix + "/report/runTime/routeRunTimes";
-        }
-        if(isAllRoutes){
-            $("#run-time-tabs" ).tabs().tabs('destroy');
-            $(".only-individual-route").addClass("hide-routes");
-            $(".all-routes").show();
-        } else{
-            $(".only-individual-route").removeClass("hide-routes");
-            $(".all-routes").hide();
-            $("#run-time-tabs" ).tabs();
-        }
-
-        $.ajax({
-            url: visualDataURL,
-            // Pass in query string parameters to page being requested
-            data: request,
-            // Needed so that parameters passed properly to page being requested
-            traditional: true,
-            dataType: "json",
-            success: function (response) {
-
-                $("#submit").attr("disabled", false);
-                if(response.data && ((response.data.trips && response.data.trips.length > 0) ||
-                    (response.data.routes && response.data.routes.length > 0))){
-
-                    var cloneResponse =  JSON.parse(JSON.stringify(response));
-
-                    if(response.data.trips && response.data.trips.length ){
-
-                        var tripSelectBox = $('<select id="trips-select-box" name="tripBoxType"><option value="">All Trips</option></select>');
-                        var tripsDisplayData = getTripsDisplayData(response.data.trips);
-
-                        tripsDisplayData.tripVal.forEach(function (eachTrip, i) {
-                            var option = $('<option></option>');
-                            option.attr('value', tripsDisplayData.tripVal[i]);
-                            option.text(tripsDisplayData.tripName[i]);
-                            tripSelectBox.append(option);
-                        });
-
-                        tripSelectBox.append( '<span class="select2-selection__arrow"><b role="presentation"></b></span>');
-
-                        $("#trips-container").html("");
-                        $("#trips-container").append('<h3 for="tripBoxType" id="visualization-container-header">Trip Run Times</h3>');
-                        $("#trips-container").append(tripSelectBox);
-
-                        $("#trips-select-box").change(function () {
-
-                            if ($("#trips-select-box").val().trim() != "") {
-                                showStopView();
-                                $("#visualization-container-header").html("Stop Run Times");
-                            } else {
-                                visualizeData();
-                                $("#visualization-container-header").html(" Trip Run Times");
-                            }
-                        });
-                        var defaultHeight = (response.data.trips.length ) *100;
-                        var defaultWidth = window.innerWidth;
-
-                        if(defaultHeight < (window.innerHeight/2 - 100)) {
-                            defaultHeight =  window.innerHeight;
-                        }
-
-                        $("#runTimeVisualization").html(' <canvas id="visualizationCanvas" class="custom-canvas"  height="'+defaultHeight+'" width="'+defaultWidth+'"></canvas>');
-
-                    } else{
-                        var defaultHeight = (response.data.routes.length ) *100;
-                        var defaultWidth = window.innerWidth;
-
-                        if(defaultHeight < (window.innerHeight/2 - 100)) {
-                            defaultHeight =  window.innerHeight;
-                        }
-                        $("#runTimeVisualization").html(' <canvas id="visualizationCanvas" class="custom-canvas"  height="'+defaultHeight+'" width="'+defaultWidth+'"></canvas>');
-
-                    }
-
-                    if(isAllRoutes){
-                        generateAllRouteChart(response);
-                    } else{
-                        generateIndividualRouteChart(response);
-                        percentageTabDetails(response);
-                        distributionTabDetails(cloneResponse);
-                    }
-
-                    $("#comparisonResults").hide();
-                    $("#runTimeVisualization").show();
-
-                } else{
-                    alert("No trip breakdown available for selected run time data.");
-
-                }
-
-            },
-            error: function (e) {
-                alert("Error retrieving trip-by-trip summary.");
-
-                $("#submit").attr("disabled", false);
-            }
-        })
-    }*/
     function getDefaultChartOptions(options){
 
         var canvas = $("#visualizationCanvas");
