@@ -473,7 +473,7 @@ public class PredictionAccuracyModule extends Module {
 											pred.isArrival(),
 											pred.isAffectedByWaitStop(),
 											"TransitClock",
-													pred.getTravelTime().ordinal(), pred.getDwelLTime().ordinal(),
+													pred.getTravelTime().getValue(), pred.getDwelLTime().getValue(),
 													null);
 							storePrediction(accuracyPred);
 							predictionsFound = true;

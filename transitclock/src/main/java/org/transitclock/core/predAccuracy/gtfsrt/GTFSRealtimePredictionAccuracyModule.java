@@ -346,7 +346,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 																		gtfsTrip.getRouteId(), direction, stopId,
 																		tripId, update.getVehicle().getId(),
 																		eventTime, eventReadTime, true, new Boolean(false),
-																		"GTFS-rt", Algorithm.EXTERNAL.ordinal(), Algorithm.EXTERNAL.ordinal(), scheduledTime.toString());
+																		"GTFS-rt", Algorithm.EXTERNAL.getValue(), Algorithm.EXTERNAL.getValue(), scheduledTime.toString());
 
 																storePrediction(pred);
 															} else {
@@ -444,7 +444,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 																		gtfsTrip.getRouteId(), direction, stopId,
 																		tripId, update.getVehicle().getId(),
 																		eventTime, eventReadTime, false, new Boolean(false),
-																		"GTFS-rt", Algorithm.EXTERNAL.ordinal(), Algorithm.EXTERNAL.ordinal(), scheduledTime.toString());
+																		"GTFS-rt", Algorithm.EXTERNAL.getValue(), Algorithm.EXTERNAL.getValue(), scheduledTime.toString());
 
 																storePrediction(pred);
 															} else {

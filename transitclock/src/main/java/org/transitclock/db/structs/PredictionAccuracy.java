@@ -169,8 +169,8 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 		this.predictionSource = predictionSource;
 		this.vehicleId = vehicleId;
 		this.affectedByWaitStop = affectedByWaitStop;
-		this.travelTimeAlgorithm=travelTime.ordinal();
-		this.dwellTimeAlgorithm=dwellTime.ordinal();
+		this.travelTimeAlgorithm=travelTime.getValue();
+		this.dwellTimeAlgorithm=dwellTime.getValue();
 	}
 
 	/**
@@ -191,8 +191,8 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 		this.predictionSource = null;
 		this.vehicleId = null;
 		this.affectedByWaitStop = null;
-		this.travelTimeAlgorithm = Algorithm.UNKNOWN.ordinal();
-		this.dwellTimeAlgorithm = Algorithm.UNKNOWN.ordinal();
+		this.travelTimeAlgorithm = Algorithm.UNKNOWN.getValue();
+		this.dwellTimeAlgorithm = Algorithm.UNKNOWN.getValue();
 	}
 
 	@Override

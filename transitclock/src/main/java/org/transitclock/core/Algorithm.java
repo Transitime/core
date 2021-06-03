@@ -18,6 +18,9 @@ public enum Algorithm {
   LEGACY_DWELL(18),
   HISTORICAL_DWELL(19);
   private int value;
+  public int getValue() {
+    return value;
+  }
   private Algorithm(int value) { this.value = value; }
 
   public static Algorithm fromValue(int algorithm) {

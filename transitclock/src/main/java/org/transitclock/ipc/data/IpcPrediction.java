@@ -179,8 +179,8 @@ public class IpcPrediction implements Serializable {
 	    this.freqStartTime = freqStartTime;
 		this.tripCounter =  tripCounter;
 		this.isCanceled=isCanceled;
-		this.travelTimeAlgorithm = travelTime.ordinal();
-		this.dwellTimeAlgorithm = dwellTime.ordinal();
+		this.travelTimeAlgorithm = travelTime.getValue();
+		this.dwellTimeAlgorithm = dwellTime.getValue();
 	}
 
 	/**
@@ -229,8 +229,8 @@ public class IpcPrediction implements Serializable {
 
 		this.delay = delay;
 		this.isCanceled=isCanceled;
-		this.travelTimeAlgorithm = travelTime.ordinal();
-		this.dwellTimeAlgorithm = dwelLTime.ordinal();
+		this.travelTimeAlgorithm = travelTime.getValue();
+		this.dwellTimeAlgorithm = dwelLTime.getValue();
 	}
 
 	
