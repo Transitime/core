@@ -39,6 +39,7 @@ public class PrescriptiveRunTimeService {
      * @param endTime
      * @param routeIdOrShortName
      * @param headsign
+     * @param directionId
      * @param tripPatternId
      * @param serviceType
      * @param readOnly
@@ -49,6 +50,7 @@ public class PrescriptiveRunTimeService {
                                                            LocalTime endTime,
                                                            String routeIdOrShortName,
                                                            String headsign,
+                                                           String directionId,
                                                            String tripPatternId,
                                                            ServiceType serviceType,
                                                            boolean readOnly) throws Exception {
@@ -71,6 +73,7 @@ public class PrescriptiveRunTimeService {
                 .serviceType(serviceType)
                 .routeShortName(routeShortName)
                 .headsign(headsign)
+                .directionId(directionId)
                 .tripPatternId(tripPatternId)
                 .includeRunTimesForStops(true)
                 .readOnly(readOnly)
