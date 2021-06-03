@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.transitclock.SingletonSupport;
+import org.transitclock.core.PredictionResult;
 
 import java.util.Date;
 
@@ -48,12 +49,12 @@ public class KalmanPredictionGeneratorImplTest {
   @Test
   public void getTravelTimeForPath() {
 
-    long prediction = generator.getTravelTimeForPath(
+    PredictionResult prediction = generator.getTravelTimeForPath(
             dataGenerator.getIndicies(),
             dataGenerator.getAvlReport(),
             dataGenerator.getVehicleState());
 
-    assertEquals(355, prediction);
+    assertEquals(355, prediction.getPrediction());
 
   }
 

@@ -36,6 +36,7 @@ import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.classic.Lifecycle;
 import org.transitclock.applications.Core;
+import org.transitclock.core.Algorithm;
 import org.transitclock.db.hibernate.HibernateUtils;
 
 /**
@@ -115,19 +116,21 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private String predictionSource;
-	
-	/* TODO */
-	//@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	@Transient
-	private String predictionAlgorithm;
-	
+
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private String vehicleId;
 
 	@Column
 	private final Boolean affectedByWaitStop;
-	
-	private static final long serialVersionUID = -6900411351649946446L;
+
+	@Column
+	private final int travelTimeAlgorithm;
+
+	@Column
+	private final int dwellTimeAlgorithm;
+
+
+	private static final long serialVersionUID = -6900411351649946447L;
 
 	/********************** Member Functions **************************/
 
@@ -143,14 +146,13 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 	 *            The time the vehicle was predicted to arrive at the stop
 	 * @param predictionReadTime
 	 * @param predictionSource
-	 * @param predictionAlgorithm
 	 * @param vehicleId
 	 */
 	public PredictionAccuracy(String routeId, String directionId,
-			String stopId, String tripId, Date arrivalDepartureTime,
-			Date predictedTime, Date predictionReadTime,
-			String predictionSource,String predictionAlgorithm, String vehicleId, 
-			Boolean affectedByWaitStop) {
+														String stopId, String tripId, Date arrivalDepartureTime,
+														Date predictedTime, Date predictionReadTime,
+														String predictionSource, String vehicleId,
+														Boolean affectedByWaitStop, Algorithm travelTime, Algorithm dwellTime) {
 		super();
 		this.routeId = routeId;
 		
@@ -167,11 +169,8 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 		this.predictionSource = predictionSource;
 		this.vehicleId = vehicleId;
 		this.affectedByWaitStop = affectedByWaitStop;
-		this.predictionAlgorithm=predictionAlgorithm;
-	}
-
-	public String getPredictionAlgorithm() {
-		return predictionAlgorithm;
+		this.travelTimeAlgorithm=travelTime.ordinal();
+		this.dwellTimeAlgorithm=dwellTime.ordinal();
 	}
 
 	/**
@@ -192,7 +191,8 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 		this.predictionSource = null;
 		this.vehicleId = null;
 		this.affectedByWaitStop = null;
-		this.predictionAlgorithm = null;
+		this.travelTimeAlgorithm = Algorithm.UNKNOWN.ordinal();
+		this.dwellTimeAlgorithm = Algorithm.UNKNOWN.ordinal();
 	}
 
 	@Override
@@ -286,11 +286,6 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 				return false;
 		} else if (!predictionSource.equals(other.predictionSource))
 			return false;
-		if (predictionAlgorithm == null) {
-			if (other.predictionAlgorithm != null)
-				return false;
-		} else if (!predictionAlgorithm.equals(other.predictionAlgorithm))
-			return false;
 		if (routeId == null) {
 			if (other.routeId != null)
 				return false;
@@ -333,8 +328,7 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 				+ ", predictionLengthMsecs=" + getPredictionLengthMsecs()
 				+ ", predictionAccuracyMsecs=" + predictionAccuracyMsecs
 				+ ", predictionSource=" + predictionSource 
-				+ ", predictionAlgorithm=" + predictionAlgorithm				
-				+ ", vehicleId=" + vehicleId 
+				+ ", vehicleId=" + vehicleId
 				+ ", affectedByWaitStop=" + affectedByWaitStop
 				+ "]";
 	}
@@ -387,6 +381,10 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 		return vehicleId;
 	}
 
+	public Algorithm getTravelTime() { return Algorithm.fromValue(travelTimeAlgorithm); }
+
+	public Algorithm getDwellTime() { return Algorithm.fromValue(dwellTimeAlgorithm); }
+
 	/**
 	 * True if the prediction is based on scheduled departure time, false if
 	 * not. Null if feed of predictions doesn't provide that information.
@@ -415,8 +413,6 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 			tripId = tripId.intern();
 		if (predictionSource != null)
 			predictionSource = predictionSource.intern();
-		if (predictionAlgorithm != null)
-			predictionAlgorithm = predictionAlgorithm.intern();
 		if (vehicleId != null)
 			vehicleId = vehicleId.intern();
 	}

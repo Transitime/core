@@ -7,7 +7,9 @@ import org.transitclock.avl.ApcDataProcessor;
 import org.transitclock.avl.ApcModule;
 import org.transitclock.config.DoubleConfigValue;
 import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.core.Algorithm;
 import org.transitclock.core.Indices;
+import org.transitclock.core.PredictionResult;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.KalmanError;
 import org.transitclock.core.predictiongenerator.HistoricalPredictionLibrary;
@@ -58,7 +60,7 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
   private static final Logger logger = LoggerFactory.getLogger(ApcStopTimeGenerator.class);
 
   @Override
-  public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
+  public PredictionResult getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
     IntervalTimer apcTimer = new IntervalTimer();
     if (!hasApcData()) {
       logger.debug("exiting apc dwell time, no apc data");
@@ -69,7 +71,7 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     Long cachedResult = ApcStopTimeCache.getInstance().get(indices, avlReport, vehicleState);
     if (cachedResult != null) {
       getMonitoring().rateMetric("PredictionDwellApcProcessingHit", true);
-      return cachedResult;
+      return new PredictionResult(cachedResult, Algorithm.KALMAN);
     }
     getMonitoring().rateMetric("PredictionDwellApcProcessingHit", false);
 
@@ -123,7 +125,7 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     getMonitoring().averageMetric("PredictionApcProcessingTime", apcTimer.elapsedMsec());
     getMonitoring().averageMetric("PredictionApcPredictProcessingTime", predictTimer.elapsedMsec());
     ApcStopTimeCache.getInstance().put(indices, avlReport, vehicleState, new Double(result.getResult()).longValue());
-    return new Double(result.getResult()).longValue();
+    return new PredictionResult(new Double(result.getResult()).longValue(), Algorithm.APC_DWELL);
   }
 
   private void logHit() {

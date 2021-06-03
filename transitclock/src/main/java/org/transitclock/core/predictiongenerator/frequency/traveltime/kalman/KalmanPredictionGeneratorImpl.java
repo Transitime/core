@@ -6,7 +6,9 @@ import org.transitclock.applications.Core;
 import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.DoubleConfigValue;
 import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.core.Algorithm;
 import org.transitclock.core.Indices;
+import org.transitclock.core.PredictionResult;
 import org.transitclock.core.SpatialMatch;
 import org.transitclock.core.TravelTimeDetails;
 import org.transitclock.core.VehicleState;
@@ -81,10 +83,10 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
    * (org.transitclock.core.Indices, org.transitclock.db.structs.AvlReport)
    */
   @Override
-  public long getTravelTimeForPath(Indices indices, AvlReport avlReport, VehicleState currentVehicleState) {
+  public PredictionResult getTravelTimeForPath(Indices indices, AvlReport avlReport, VehicleState currentVehicleState) {
 
     logger.debug("Calling frequency based Kalman prediction algorithm for : "+indices.toString());
-    long alternatePrediction = super.getTravelTimeForPath(indices, avlReport, currentVehicleState);
+    PredictionResult alternatePrediction = super.getTravelTimeForPath(indices, avlReport, currentVehicleState);
 
     Integer time = FrequencyBasedHistoricalAverageCache.secondsFromMidnight(avlReport.getDate(),2);
 
@@ -129,19 +131,19 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
             long predictionTime = (long) kalmanPredictionResult.getResult();
             logger.debug("Setting Kalman error value: " + kalmanPredictionResult.getFilterError() + " for : "+ new KalmanErrorCacheKey(indices).toString());
             getKalmanErrorCache().putErrorValue(indices, kalmanPredictionResult.getFilterError());
-            logPredictionEvent(avlReport, headwayTravelTimes, currentVehicleState, predictionTime, alternatePrediction);
+            logPredictionEvent(avlReport, headwayTravelTimes, currentVehicleState, predictionTime, alternatePrediction.getPrediction());
 
             logger.debug("Using Kalman prediction: " + predictionTime + " instead of "+alternative+" prediction: "
                     + alternatePrediction +" for : " + indices.toString());
 
-            double percentageDifferecence = 100 * ((predictionTime - alternatePrediction) / (double)alternatePrediction);
+            double percentageDifferecence = 100 * ((predictionTime - alternatePrediction.getPrediction()) / (double)alternatePrediction.getPrediction());
 
             storePrediction(currentVehicleState, indices, predictionTime);
 
             // instrument kalman hit
             getMonitoring().rateMetric("PredictionKalmanHit", true);
             getMonitoring().sumMetric("PredictionGenerationKalman");
-            return predictionTime;
+            return new PredictionResult(predictionTime, Algorithm.KALMAN);
 
           } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -173,14 +175,14 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 
       VehicleState currentVehicleState = vehicleStateManager.getVehicleState(avlReport.getVehicleId());
 
-      long fulltime = this.getTravelTimeForPath(match.getIndices(), avlReport, currentVehicleState);
+      PredictionResult fulltime = this.getTravelTimeForPath(match.getIndices(), avlReport, currentVehicleState);
 
       double distanceAlongStopPath = match.getDistanceAlongStopPath();
 
       double stopPathLength =
               match.getStopPath().getLength();
 
-      long remainingtime = (long) (fulltime * ((stopPathLength-distanceAlongStopPath)/stopPathLength));
+      long remainingtime = (long) (fulltime.getPrediction() * ((stopPathLength-distanceAlongStopPath)/stopPathLength));
 
       logger.debug("Using Kalman for first stop path {} with value {} instead of {}.", match.getIndices(), remainingtime, super.expectedTravelTimeFromMatchToEndOfStopPath(avlReport, match));
 
@@ -205,11 +207,8 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
   }
 
   @Override
-  public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
-    long result=super.getStopTimeForPath(indices, avlReport, vehicleState);
-
-    return result;
-
+  public PredictionResult getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
+    return super.getStopTimeForPath(indices, avlReport, vehicleState);
   }
 
   /**

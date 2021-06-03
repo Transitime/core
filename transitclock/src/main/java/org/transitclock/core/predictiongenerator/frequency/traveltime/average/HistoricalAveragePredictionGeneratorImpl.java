@@ -4,7 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.core.Algorithm;
 import org.transitclock.core.Indices;
+import org.transitclock.core.PredictionResult;
 import org.transitclock.core.SpatialMatch;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.HistoricalAverage;
@@ -41,7 +43,7 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 	 * @see org.transitclock.core.predictiongenerator.KalmanPredictionGeneratorImpl#getTravelTimeForPath(org.transitclock.core.Indices, org.transitclock.db.structs.AvlReport)
 	 */
 	@Override
-	public long getTravelTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
+	public PredictionResult getTravelTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
 					
 		/*
 		 * if we have enough data start using historical average otherwise
@@ -71,7 +73,7 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 				
 				logger.debug("Using historical average algorithm for prediction : " +average.toString() + " for : " + indices.toString());
 				//logger.debug("Instead of transitclock value : " + super.getTravelTimeForPath(indices, avlReport));
-				return (long)average.getAverage();
+				return new PredictionResult((long)average.getAverage(), Algorithm.HISTORICAL_AVERAGE);
 			}
 		}
 		//logger.debug("No historical average found, generating prediction using lastvehicle algorithm: " + historicalAverageCacheKey.toString());
@@ -110,7 +112,7 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 	}
 
 	@Override
-	public long getStopTimeForPath(Indices indices,  AvlReport avlReport, VehicleState vehicleState) {
+	public PredictionResult getStopTimeForPath(Indices indices,  AvlReport avlReport, VehicleState vehicleState) {
 		
 		if(vehicleState.getTripStartTime(vehicleState.getTripCounter())!=null)
 		{			
@@ -133,7 +135,7 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 				}
 				
 				logger.debug("Using historical average alogrithm for dwell time : "+average.toString() + " for : " + indices.toString());
-				return (long)average.getAverage();
+				return new PredictionResult((long)average.getAverage(), Algorithm.HISTORICAL_DWELL);
 			}
 		}			
 		return super.getStopTimeForPath(indices,  avlReport, vehicleState);

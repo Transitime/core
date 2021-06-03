@@ -20,6 +20,7 @@ package org.transitclock.core.predictiongenerator;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.core.Indices;
 import org.transitclock.core.PredictionGeneratorDefaultImpl;
+import org.transitclock.core.PredictionResult;
 import org.transitclock.core.VehicleState;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.utils.ClassInstantiator;
@@ -49,7 +50,7 @@ public class CascadingPredictionGenerator extends PredictionGeneratorDefaultImpl
 	}
 	
 	@Override
-	public long getTravelTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
+	public PredictionResult getTravelTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
 		for (PredictionComponentElementsGenerator generator : generators) {
 			if (generator.hasDataForPath(indices, avlReport)) {
 				return generator.getTravelTimeForPath(indices, avlReport, vehicleState);
@@ -59,7 +60,7 @@ public class CascadingPredictionGenerator extends PredictionGeneratorDefaultImpl
 	}	
 
 	@Override
-	public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
+	public PredictionResult getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
 		for (PredictionComponentElementsGenerator generator : generators) {
 			if (generator.hasDataForPath(indices, avlReport)) {
 				return generator.getStopTimeForPath(indices, avlReport, vehicleState);

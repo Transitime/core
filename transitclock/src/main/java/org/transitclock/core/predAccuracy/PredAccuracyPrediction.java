@@ -17,6 +17,8 @@
 
 package org.transitclock.core.predAccuracy;
 
+import org.transitclock.core.Algorithm;
+
 import java.util.Date;
 
 /**
@@ -44,7 +46,8 @@ public class PredAccuracyPrediction {
 	// affectedByWaitStop is a Boolean so that null can represent "don't know"
 	private final Boolean affectedByWaitStop;
 	private final String source;
-	private final String algorithm;
+	private final int travelTimeAlgorithm;
+	private final int dwellTimeAlgorithm;
 
 	/********************** Member Functions **************************/
 
@@ -68,13 +71,13 @@ public class PredAccuracyPrediction {
 	 * @param source
 	 *            Description of the feed, especially useful if have couple of
 	 *            sources. Can be a value such as "MBTA_epoch" or "NextBus".
-	 * @param algorithm 
+	 * @param travelTimeAlgorithm
 	 * 			  This is the algorithm used to generate prediction.
 	 */
 	public PredAccuracyPrediction(String routeId, String directionId,
-			String stopId, String tripId, String vehicleId, Date predictedTime,
-			Date predictionReadTime, boolean isArrival,
-			Boolean affectedByWaitStop, String source, String algorithm, String scheduledTime) {
+																String stopId, String tripId, String vehicleId, Date predictedTime,
+																Date predictionReadTime, boolean isArrival,
+																Boolean affectedByWaitStop, String source, int travelTimeAlgorithm, int dwellTimeAlgorithm, String scheduledTime) {
 		super();
 		this.routeId = routeId;
 		this.directionId = directionId;
@@ -87,11 +90,12 @@ public class PredAccuracyPrediction {
 		this.affectedByWaitStop = affectedByWaitStop;
 		this.source = source;
 		this.scheduledTime = scheduledTime;
-		this.algorithm = algorithm;
+		this.travelTimeAlgorithm = travelTimeAlgorithm;
+		this.dwellTimeAlgorithm = dwellTimeAlgorithm;
 	}
 	
-	public String getAlgorithm() {
-		return algorithm;
+	public int getAlgorithm() {
+		return travelTimeAlgorithm;
 	}
 
 	public String getRouteId() {
@@ -154,7 +158,7 @@ public class PredAccuracyPrediction {
 				+ ", isArrival=" + isArrival
 				+ ", affectedByWaitStop=" + affectedByWaitStop
 				+ ", source=" + source
-				+ ", algorithm=" + algorithm
+				+ ", algorithm=" + travelTimeAlgorithm
 				+ ", scheduleTime=" + scheduledTime
 				+ "]";
 	}
@@ -163,5 +167,12 @@ public class PredAccuracyPrediction {
 		return scheduledTime;
 	}
 
-	
+
+  public Algorithm getTravelTime() {
+		return Algorithm.fromValue(travelTimeAlgorithm);
+  }
+
+	public Algorithm getDwellTime() {
+		return Algorithm.fromValue(dwellTimeAlgorithm);
+	}
 }

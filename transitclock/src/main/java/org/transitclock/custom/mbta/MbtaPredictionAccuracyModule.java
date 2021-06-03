@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.StringConfigValue;
+import org.transitclock.core.Algorithm;
 import org.transitclock.core.predAccuracy.PredAccuracyPrediction;
 import org.transitclock.core.predAccuracy.PredictionAccuracyModule;
 import org.transitclock.db.structs.StopPath;
@@ -275,7 +276,7 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 					PredAccuracyPrediction pred = new PredAccuracyPrediction(
 							routeId, directionId, stopId, tripId, vehicleId,
 							predictedTime, predictionsReadTime, isArrival, 
-							null, "MBTA_epoch",null, null);
+							null, "MBTA_epoch", Algorithm.EXTERNAL.ordinal(), Algorithm.EXTERNAL.ordinal(), null);
 					storePrediction(pred);
 				}
 			}
