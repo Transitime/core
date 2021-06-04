@@ -335,7 +335,7 @@
     <div class="paramsWrapper">
         <div id="paramsSidebar">
             <div id="title">
-                Run Time Analysis
+                Prescriptive Run Times
             </div>
 
             <div id="paramsFields">
@@ -714,7 +714,6 @@
                     $("#tripPattern").removeAttr('disabled');
                     $("#submit").removeAttr('disabled');
 
-                    $("#tripPattern").append("<option value=''>All</option>")
                     resp.tripPatterns.forEach(function (tripPattern) {
                         $("#tripPattern").append("<option value='" + tripPattern.id + "'>" + tripPattern.firstStopName + ' to ' + tripPattern.lastStopName + "</option>");
                     })
