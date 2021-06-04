@@ -441,7 +441,7 @@
                 <div class="individual-route trip-block " >
                     <div class="param" id="trips-container"></div>
                 </div>
-                <div class="all-routes" >
+                <div class="all-routes" hidden="true">
                     <h3 id="visualization-container-header">Route RunTime Performance</h3>
                 </div>
                 <div class="visualization-container">
