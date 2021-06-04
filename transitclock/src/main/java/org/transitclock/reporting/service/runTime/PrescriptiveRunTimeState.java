@@ -2,17 +2,29 @@ package org.transitclock.reporting.service.runTime;
 
 import org.transitclock.db.structs.ScheduleTime;
 import org.transitclock.ipc.data.IpcPrescriptiveRunTime;
-import org.transitclock.ipc.data.IpcPrescriptiveRunTimes;
+import org.transitclock.ipc.data.IpcRunTime;
 import org.transitclock.reporting.TimePointStatistics;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import static org.transitclock.reporting.service.runTime.PrescriptiveRunTimeHelper.*;
 
 public class PrescriptiveRunTimeState {
     private List<IpcPrescriptiveRunTime> ipcPrescriptiveRunTimes = new ArrayList<>();
-    Map<Integer, ScheduleTime> scheduleTimesByStopPathIndexMap = new HashMap<>();
+    Map<Integer, ScheduleTime> scheduleTimesByStopPathIndexMap;
+
+    // Avg RunTime Values
+    private double avgFixed;
+    private double avgVariable;
+    private double avgDwell;
+
+    // OtpStates
+    private double currentOnTime;
+    private double expectedOnTime;
+    private double totalRunTimes;
 
     private TimePointStatistics timePointStatistics;
 
@@ -44,8 +56,29 @@ public class PrescriptiveRunTimeState {
         return currentTimePointIndex;
     }
 
-    public void updateTimePointStats(TimePointStatistics timePointStatistics) {
+    public void updateScheduleAdjustments(TimePointStatistics timePointStatistics) {
         this.timePointStatistics = timePointStatistics;
+
+        boolean isFirstStop = timePointStatistics.isFirstStop();
+        boolean isLastStop = timePointStatistics.isLastStop();
+
+        if(!isFirstStop) {
+            List<Double> allDwellTimes = timePointStatistics.getAllDwellTimes();
+            List<Double> allRunTimes = timePointStatistics.getAllRunTimes();
+            Double fixedTime = timePointStatistics.getMinRunTime();
+
+            avgFixed += fixedTime;
+            avgVariable += timePointStatistics.getAverageRunTime() - fixedTime;
+            avgDwell += timePointStatistics.getAverageDwellTime();
+
+            addFixedTime(fixedTime);
+            addDwellTime(getDwellPercentileValue(allDwellTimes, isLastStop));
+            addVariableTime(getVariablePercentileValue(fixedTime, allRunTimes, getCurrentTimePointIndex(), isLastStop));
+            addRemainder(getRemainderPercentileValue(fixedTime, allRunTimes, getCurrentTimePointIndex(), isLastStop));
+        } else {
+            avgDwell += timePointStatistics.getAverageDwellTime();
+        }
+
     }
 
     public void addFixedTime(Double fixedTime) {
@@ -65,9 +98,10 @@ public class PrescriptiveRunTimeState {
     }
 
 
-    public void createRunTimeForTimePoint() {
+    public void createPrescriptiveRunTimeForTimePoint() {
         Double scheduleRunTime = getScheduledRunTime();
         Double runTimeAdjustment = getRunTimeAdjustment(scheduleRunTime);
+        updateOnTimeCounts(scheduleRunTime, runTimeAdjustment);
         ipcPrescriptiveRunTimes.add(
                 new IpcPrescriptiveRunTime(
                         timePointStatistics.getStopPathId(),
@@ -78,6 +112,18 @@ public class PrescriptiveRunTimeState {
                 )
         );
         resetForNewTimePoint();
+    }
+
+    private void updateOnTimeCounts(Double scheduleRunTime, Double adjustment){
+        for(Double runTime : timePointStatistics.getTotalRunTimes()){
+            if(Math.abs(runTime - scheduleRunTime) <= TimeUnit.MINUTES.toMillis(1)){
+                currentOnTime++;
+            }
+            if(Math.abs(runTime - (scheduleRunTime + adjustment)) <= TimeUnit.MINUTES.toMillis(1)){
+                expectedOnTime++;
+            }
+            totalRunTimes++;
+        }
     }
 
 
@@ -118,4 +164,17 @@ public class PrescriptiveRunTimeState {
     public List<IpcPrescriptiveRunTime> getPrescriptiveRunTimes() {
         return ipcPrescriptiveRunTimes;
     }
+
+    public double getCurrentOnTimeFraction() {
+        return currentOnTime/totalRunTimes;
+    }
+
+    public double getExpectedOnTimeFraction() {
+        return expectedOnTime/totalRunTimes;
+    }
+
+    public IpcRunTime getAvgRunTimes(){
+        return new IpcRunTime(avgFixed, avgVariable, avgDwell);
+    }
+
 }

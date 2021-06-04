@@ -382,7 +382,7 @@
 
     <div id="mainPage" class="scrollable-element inner-spacing">
 
-        <div class="perceptive-header-container"> </div>
+        <div id="perceptive-header-container"> </div>
         <div class="perceptive-summary-container">
             <div class="individual-route">
                 <h3>Trip Run Time Summary</h3>
@@ -460,7 +460,7 @@
             value:"15:30 - 18:30"
         },{
             name: "Late PM",
-            value:"18:30 - Empty"
+            value:"18:30 - "
         }];
 
 
@@ -474,14 +474,12 @@
     }
 
     function getScheduledType(timeReference){
-        if (timeReference < 0) {
+        if (timeReference <= -6000) {
             return "late";
-        } else if (timeReference > 0) {
+        } else if (timeReference >= 6000) {
             return "early";
         }
-
         return "ontime";
-
     }
 
     $("#route").attr("style", "width: 200px");
@@ -521,63 +519,12 @@
     }
     $("#submit").click(function () {
 
-        // $("#submit").attr("disabled", "disabled");
+        $("#submit").attr("disabled", "disabled");
         $(".wrapper").addClass("split");
         $("#mainResults").hide();
 
-
-        var request = getParams(true);
-
-        var callBack = function(response){
-
-            if (jQuery.isEmptyObject(response)) {
-                alert("No run time information available for selected parameters.");
-            } else {
-
-                var beginDateArray = request.beginDate.split("-");
-                var endDateArray = request.endDate.split("-");
-
-                [beginDateArray[0], beginDateArray[1], beginDateArray[2]] = [beginDateArray[1], beginDateArray[2], beginDateArray[0]];
-                [endDateArray[0], endDateArray[1], endDateArray[2]] = [endDateArray[1], endDateArray[2], endDateArray[0]];
-
-                var beginDateString = beginDateArray.join("/");
-                var endDateString = endDateArray.join("/");
-
-                $(".perceptive-header-container").html(
-                    "<p>" +
-                    (request.r == "" ? "All routes" : "Route " + request.r) + " to " +
-                    (request.headsign == "" ? "All directions" : request.headsign) + " | " +
-                    (request.tripPattern == "" ? "All Trip Patterns" : request.tripPattern) + " | " +
-                    beginDateString + " to " + endDateString + " | " + request.beginTime + " to " + request.endTime + " | " + request.serviceType+
-                    "</p>"
-                );
-
-                var avgRunTime = typeof (response.avgRunTime) == 'undefined' ? "N/A" : (response.avgRunTime / 60000).toFixed(1) + " min";
-                var avgFixed = typeof (response.fixed) == 'undefined' ? "N/A" : (response.fixed / 60000).toFixed(1) + " min";
-                var avgVar = typeof (response.variable) == 'undefined' ? "N/A" : (response.variable / 60000).toFixed(1) + " min";
-                var avgDwell = typeof (response.dwell) == 'undefined' ? "N/A" : (response.dwell / 60000).toFixed(1) + " min";
-
-                var tableTD = "<td>"+avgRunTime+"</td>";
-                tableTD += "<td>"+avgFixed+"</td>";
-                tableTD += "<td>"+avgVar+"</td>";
-                tableTD += "<td>"+avgDwell+"</td>";
-
-                $(".average-time-details").html(tableTD);
-                generateTable();
-            }
-
-
-        };
-
-        serviceCall(request,  callBack);
-
-
-
-    });
-
-    function generateTable(){
+        var request = getParams();
         var dataUrl = apiUrlPrefix +  "/report/runTime/prescriptiveRunTimes";
-        request = getParams(false)
 
         $.ajax({
             url: dataUrl,
@@ -587,46 +534,79 @@
             traditional: true,
             dataType: "json",
             success: function (response) {
-
                 $("#submit").attr("disabled", false);
-                if(response.adjustments && response.adjustments.length > 0){
-                    generateTableDetails(response);
-                } else{
-                    alert("No Prescriptive RunTimes available for selected criteria.");
-                }
+                if (jQuery.isEmptyObject(response)) {
+                    alert("No run time information available for selected parameters.");
+                } else {
+                    var adjustmentsSuccess = response.adjustments && response.adjustments.length > 0;
+                    var summarySuccess = response.summary && response.summary.avgRunTime;
 
+                    if(adjustmentsSuccess && summarySuccess){
+                        generateAverageRunTimesTable(request, response);
+                        generatePrescriptiveRunTimesTable(response);
+                    }
+                    else if(!adjustmentsSuccess) {
+                        alert("No Prescriptive RunTimes available for selected criteria.");
+                    } else if(!summarySuccess) {
+                        alert("Unable to retreive Average RunTime information for selected criteria.");
+                    }
+                }
             },
             error: function (e) {
-                alert("Error retrieving Prescriptive RunTimes.");
                 $("#submit").attr("disabled", false);
+                alert("No Prescriptive RunTimes available for selected criteria.");
             }
         })
 
 
+    });
 
+    function generateAverageRunTimesTable(request, response){
+        var beginDateArray = request.beginDate.split("-");
+        var endDateArray = request.endDate.split("-");
+
+        [beginDateArray[0], beginDateArray[1], beginDateArray[2]] = [beginDateArray[1], beginDateArray[2], beginDateArray[0]];
+        [endDateArray[0], endDateArray[1], endDateArray[2]] = [endDateArray[1], endDateArray[2], endDateArray[0]];
+
+        var beginDateString = beginDateArray.join("/");
+        var endDateString = endDateArray.join("/");
+
+        var serviceDayString = request.serviceType;
+
+        if (serviceDayString == "") {
+            serviceDayString = "All days";
+        }
+
+        updateParamDetails(request.r, request.headsign, request.tripPattern, beginDateString, endDateString,
+            request.beginTime, request.endTime, serviceDayString);
+
+        var avgRunTime = typeof (response.summary.avgRunTime) == 'undefined' ? "N/A" : (response.summary.avgRunTime / 60000).toFixed(1) + " min";
+        var avgFixed = typeof (response.summary.fixed) == 'undefined' ? "N/A" : (response.summary.fixed / 60000).toFixed(1) + " min";
+        var avgVar = typeof (response.summary.variable) == 'undefined' ? "N/A" : (response.summary.variable / 60000).toFixed(1) + " min";
+        var avgDwell = typeof (response.summary.dwell) == 'undefined' ? "N/A" : (response.summary.dwell / 60000).toFixed(1) + " min";
+
+        var tableTD = "<td>"+avgRunTime+"</td>";
+        tableTD += "<td>"+avgFixed+"</td>";
+        tableTD += "<td>"+avgVar+"</td>";
+        tableTD += "<td>"+avgDwell+"</td>";
+
+        $(".average-time-details").html(tableTD);
     }
 
-    function generateTableDetails(response){
-        var dummyData = {
-            "adjustments": [
-                {
-                    "stop": 5425,
-                    "schedule": 23000123,
-                    "adjustment": -90000
-                },
-                {
-                    "stop": 797,
-                    "schedule": 3842823,
-                    "adjustment": 0
-                }
-            ],
-            "current_otp": "84%",
-            "expected_otp": "95%"
-        };
+    function updateParamDetails(route, headsign, tripPattern, beginDateString, endDateString, beginTime,
+                                endTime, serviceDayString){
+        $("#perceptive-header-container").html("<p style='font-size: 0.8em;'>" +
+            (!route || route == "" ? "All routes" : "Route " + route) + " to " +
+            (!headsign || headsign == "" ? "All directions" : headsign) + " | " +
+            //(!tripPattern || tripPattern == "" ? "All Trip Patterns" : tripPattern) + " | " +
+            beginDateString + " to " + endDateString +  " | " +
+            beginTime + " - " + endTime +
+            (!serviceDayString || serviceDayString == "" ? "" : " | " + serviceDayString) +
+            "</p>");
+    }
 
-
-
-        var currentTable = '<table class="border-table">';
+    function generatePrescriptiveRunTimesTable(response){
+         var currentTable = '<table class="border-table">';
         currentTable += '<tbody><tr><th>Stop</th><th>Scheduled</th><th>Adjustment</th></tr>';
 
         var totalScheduleMin = 0;
@@ -652,8 +632,9 @@
 
         });
 
+        totalAdjustmentMin = totalAdjustmentMin.toFixed(1);
         if(totalAdjustmentMin > 0){
-            var totalAdjustmentMin = "+" + totalAdjustmentMin.toFixed(1);
+            var totalAdjustmentMin = "+" + totalAdjustmentMin;
         }
 
         currentTable += "<tr><td>Total For All Stops</td>";
@@ -668,9 +649,6 @@
     }
 
     function populateDirection() {
-
-        // $("#submit").attr("disabled", true);
-
 
         $("#direction").removeAttr('disabled');
         $("#direction").empty();
@@ -700,7 +678,6 @@
             },
             error: function (response) {
                 alert("Error retrieving directions for route " + response.r);
-                // $("#submit").attr("disabled", false);
             }
         })
     }
@@ -754,7 +731,7 @@
     }
 
 
-    function getParams(flag) {
+    function getParams() {
 
 
         var routeName = $("#route").val().trim() == "" ? "" : $("#route").val();
@@ -781,7 +758,8 @@
 
 
         params.beginTime = (timeBand.split("-")[0]).trim()+":00";
-        params.endTime = timeBand.split("-")[1] === "Empty"?"23:59:59": (timeBand.split("-")[1]).trim()+":00";
+        console.log(timeBand.split("-")[1].length);
+        params.endTime = timeBand.split("-")[1] == " " ? "": (timeBand.split("-")[1]).trim()+":00";
         params.r = routeName
         params.headsign = directionName;
         params.serviceType = $("#serviceDayType").val();
@@ -799,28 +777,6 @@
         return params;
     }
 
-    function serviceCall(request, callBack){
-
-        $.ajax({
-            url: apiUrlPrefix + "/report/runTime/avgRunTime",
-            // Pass in query string parameters to page being requested
-            data: request,
-            // Needed so that parameters passed properly to page being requested
-            traditional: true,
-            dataType: "json",
-            success: function (response) {
-
-
-                callBack(response);
-
-            },
-            error: function () {
-                // $("#submit").removeAttr("disabled");
-                alert("Error processing average trip run time.");
-            }
-        })
-
-    }
     generateTimeBands();
 
 </script>

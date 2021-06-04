@@ -2,6 +2,7 @@ package org.transitclock.reporting;
 
 import org.transitclock.db.structs.RunTimesForStops;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TimePointStatistics {
@@ -13,6 +14,7 @@ public class TimePointStatistics {
 
     DoubleStatistics dwellTimeStats = new DoubleStatistics();
     DoubleStatistics runTimeStats = new DoubleStatistics();
+    List<Double> totalRunTime = new ArrayList<>();
 
     public TimePointStatistics(String stopPathId, int stopPathIndex, String stopName,boolean isLastStop) {
         this.stopPathId = stopPathId;
@@ -89,6 +91,10 @@ public class TimePointStatistics {
 
     public Double getDwellTimePercentile(double percentile){
         return dwellTimeStats.getPercentileValue(percentile);
+    }
+
+    public List<Double> getTotalRunTimes() {
+        return totalRunTime;
     }
 
     @Override

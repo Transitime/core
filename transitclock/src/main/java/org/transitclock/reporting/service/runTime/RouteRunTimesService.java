@@ -40,16 +40,12 @@ public class RouteRunTimesService {
                                                         Integer lateThreshold,
                                                         boolean readOnly) throws Exception {
 
-
-        Integer beginTimeSeconds = beginTime != null ? beginTime.toSecondOfDay() : null;
-        Integer endTimeSeconds = endTime != null ? endTime.toSecondOfDay(): null;
-
         RunTimeForRouteQuery.Builder rtBuilder = new RunTimeForRouteQuery.Builder();
         RunTimeForRouteQuery rtQuery = rtBuilder
                 .beginDate(beginDate)
                 .endDate(endDate)
-                .beginTime(beginTimeSeconds)
-                .endTime(endTimeSeconds)
+                .beginTime(beginTime)
+                .endTime(endTime)
                 .serviceType(serviceType)
                 .includeRunTimesForStops(false)
                 .readOnly(readOnly)

@@ -44,15 +44,12 @@ public class TripRunTimesService {
 
         String routeShortName = getRouteShortName(routeIdOrShortName);
 
-        Integer beginTimeSeconds = runTimeService.getTimeAsSecondOfDay(beginTime);
-        Integer endTimeSeconds = runTimeService.getTimeAsSecondOfDay(endTime);
-
         RunTimeForRouteQuery.Builder rtBuilder = new RunTimeForRouteQuery.Builder();
         RunTimeForRouteQuery rtQuery = rtBuilder
                 .beginDate(beginDate)
                 .endDate(endDate)
-                .beginTime(beginTimeSeconds)
-                .endTime(endTimeSeconds)
+                .beginTime(beginTime)
+                .endTime(endTime)
                 .serviceType(serviceType)
                 .routeShortName(routeShortName)
                 .headsign(headsign)

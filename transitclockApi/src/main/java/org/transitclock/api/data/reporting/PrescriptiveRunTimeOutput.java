@@ -1,5 +1,6 @@
 package org.transitclock.api.data.reporting;
 
+import org.transitclock.api.data.ApiRunTimeSummary;
 import org.transitclock.ipc.data.IpcPrescriptiveRunTime;
 import org.transitclock.ipc.data.IpcPrescriptiveRunTimes;
 
@@ -18,6 +19,7 @@ public class PrescriptiveRunTimeOutput implements Serializable {
         for(IpcPrescriptiveRunTime prescriptiveRunTime : sortRunTimes(prescriptiveRunTimes.getPrescriptiveRunTimes())){
             data.getAdjustments().add(getScheduleAdjustment(prescriptiveRunTime));
         }
+        data.setSummary(new ApiRunTimeSummary(prescriptiveRunTimes.getRunTimeSummary()));
         data.setCurrentOtp(getFormattedPercent(prescriptiveRunTimes.getCurrentOtp()));
         data.setExpectedOtp(getFormattedPercent(prescriptiveRunTimes.getExpectedOtp()));
         return data;

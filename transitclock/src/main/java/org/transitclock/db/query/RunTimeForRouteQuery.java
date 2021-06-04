@@ -124,13 +124,13 @@ public class RunTimeForRouteQuery {
             return this;
         }
 
-        public Builder beginTime(Integer beginTime) {
-            this.beginTime = beginTime;
+        public Builder beginTime(LocalTime beginTime) {
+            this.beginTime = getTimeAsSecondOfDay(beginTime);
             return this;
         }
 
-        public Builder endTime(Integer endTime) {
-            this.endTime = endTime;
+        public Builder endTime(LocalTime endTime) {
+            this.endTime = getTimeAsSecondOfDay(endTime);
             return this;
         }
 
@@ -187,6 +187,10 @@ public class RunTimeForRouteQuery {
         public RunTimeForRouteQuery build(){
             RunTimeForRouteQuery query = new RunTimeForRouteQuery(this);
             return query;
+        }
+
+        private Integer getTimeAsSecondOfDay(LocalTime time){
+            return time != null ? time.toSecondOfDay() : null;
         }
     }
 }

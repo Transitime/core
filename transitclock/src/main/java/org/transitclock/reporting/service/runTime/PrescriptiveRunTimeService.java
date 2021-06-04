@@ -3,16 +3,15 @@ package org.transitclock.reporting.service.runTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
+import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.ServiceType;
 import org.transitclock.db.query.RunTimeForRouteQuery;
 import org.transitclock.db.structs.*;
 import org.transitclock.ipc.data.IpcPrescriptiveRunTime;
 import org.transitclock.ipc.data.IpcPrescriptiveRunTimes;
 import org.transitclock.reporting.TimePointStatistics;
-import org.transitclock.reporting.dao.RunTimeRoutesDao;
 import org.transitclock.reporting.keys.StopPathRunTimeKey;
-import org.transitclock.statistics.Statistics;
-import org.transitclock.statistics.StatisticsV2;
+import org.transitclock.reporting.service.RunTimeService;
 
 import javax.inject.Inject;
 import java.time.LocalDate;
@@ -24,12 +23,20 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.transitclock.ipc.util.GtfsDbDataUtil.getRouteShortName;
-import static org.transitclock.reporting.service.runTime.PrescriptiveRunTimeHelper.*;
 
 public class PrescriptiveRunTimeService {
 
     @Inject
-    private RunTimeRoutesDao dao;
+    private RunTimeService runTimeService;
+
+    private static final IntegerConfigValue prescriptiveHistoricalSearchDays = new IntegerConfigValue(
+            "transitclock.runTime.prescriptiveHistoricalSearchDays",
+            30,
+            "The number of days in the past that prescriptive runtimes looks back.");
+
+    private Integer historicalSearchDays(){
+        return prescriptiveHistoricalSearchDays.getValue();
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(PrescriptiveRunTimeService.class);
 
@@ -56,20 +63,16 @@ public class PrescriptiveRunTimeService {
                                                            boolean readOnly) throws Exception {
 
         String routeShortName = getRouteShortName(routeIdOrShortName);
-
-        Integer beginTimeSeconds = beginTime != null ? beginTime.toSecondOfDay() : null;
-        Integer endTimeSeconds = endTime != null ? endTime.toSecondOfDay(): null;
-
-        Period days_30 = Period.ofDays(30);
+        Period daysToLookBack = Period.ofDays(historicalSearchDays());
         LocalDate endDate = LocalDate.now();
-        LocalDate beginDate = endDate.minus(days_30);
+        LocalDate beginDate = endDate.minus(daysToLookBack);
 
         RunTimeForRouteQuery.Builder rtBuilder = new RunTimeForRouteQuery.Builder();
         RunTimeForRouteQuery rtQuery = rtBuilder
                 .beginDate(beginDate)
                 .endDate(endDate)
-                .beginTime(beginTimeSeconds)
-                .endTime(endTimeSeconds)
+                .beginTime(beginTime)
+                .endTime(endTime)
                 .serviceType(serviceType)
                 .routeShortName(routeShortName)
                 .headsign(headsign)
@@ -79,33 +82,34 @@ public class PrescriptiveRunTimeService {
                 .readOnly(readOnly)
                 .build();
 
-        List<RunTimesForRoutes> runTimesForRoutes = dao.getRunTimesForRoutes(rtQuery);
+        List<RunTimesForRoutes> runTimesForRoutes = runTimeService.getRunTimesForRoutes(rtQuery);
 
-        TimePointRunTimeProcessor timePointRunTimeProcessor = processTripPatternStats(runTimesForRoutes, tripPatternId);
+        TimePointRunTimeProcessor timePointRunTimeProcessor = processTimePointStatsForRunTimes(runTimesForRoutes, tripPatternId);
 
         Map<StopPathRunTimeKey, TimePointStatistics> timePointsStatistics =
                 timePointRunTimeProcessor.getSortedTimePointsStatistics();
 
         Map<StopPathRunTimeKey, StopPath> timePointStopPaths = timePointRunTimeProcessor.getTimePointStopPaths();
 
-        List<IpcPrescriptiveRunTime> prescriptiveRunTimesList = getPrescriptiveRunTimeStats(timePointsStatistics,
-                                                                    timePointStopPaths, tripPatternId);
-
-        IpcPrescriptiveRunTimes prescriptiveRunTimes = createPrescriptiveRunTimes(prescriptiveRunTimesList);
+        IpcPrescriptiveRunTimes prescriptiveRunTimes = getPrescriptiveRunTimeStats(timePointsStatistics,
+                                                                                    timePointStopPaths,
+                                                                                    tripPatternId);
 
         return prescriptiveRunTimes;
     }
 
 
 
+
     /**
-     * Process run time stats information for all of the runtimes for routes
+     * Process RunTimesForStops to group them into timepoints and generate
+     * runTime stat info for each timepoint grouping
      * @param runTimesForRoutes
      * @param tripPatternId
      * @return
      */
-    private TimePointRunTimeProcessor processTripPatternStats(List<RunTimesForRoutes> runTimesForRoutes,
-                                                              String tripPatternId) {
+    private TimePointRunTimeProcessor processTimePointStatsForRunTimes(List<RunTimesForRoutes> runTimesForRoutes,
+                                                                        String tripPatternId) {
         TripPattern tripPattern = Core.getInstance().getDbConfig().getTripPatternForId(tripPatternId);
         TimePointRunTimeProcessor processor =  new TimePointRunTimeProcessor(tripPattern.getStopPaths());
 
@@ -116,8 +120,15 @@ public class PrescriptiveRunTimeService {
         return processor;
     }
 
-
-    private List<IpcPrescriptiveRunTime> getPrescriptiveRunTimeStats(Map<StopPathRunTimeKey, TimePointStatistics> timePointsStatistics,
+    /**
+     * Calculates the suggested schedule modifications by retreiving appropriate variable, dwellTime, and remainder
+     * for each timepoint segment (based on their index) and applying that to the scheduled times.
+     * @param timePointsStatistics
+     * @param timePointStopPaths
+     * @param tripPatternId
+     * @return
+     */
+    private IpcPrescriptiveRunTimes getPrescriptiveRunTimeStats(Map<StopPathRunTimeKey, TimePointStatistics> timePointsStatistics,
                                                                      Map<StopPathRunTimeKey, StopPath> timePointStopPaths,
                                                                      String tripPatternId){
 
@@ -132,29 +143,21 @@ public class PrescriptiveRunTimeService {
 
             if (!isValid(timePointStatistics)) {
                 logger.warn("No matching timepoint for {}, unable to provide prescriptive runtime", timePointStatistics);
-                return Collections.EMPTY_LIST;
+                return null;
             } else {
-                state.updateTimePointStats(timePointStatistics);
-
-                List<Double> allRunTimes = StatisticsV2.eliminateOutliers(timePointStatistics.getAllRunTimes(), 2.0f);
-                List<Double> allDwellTimes = StatisticsV2.eliminateOutliers(timePointStatistics.getAllDwellTimes(),2.0f);
-
-                boolean isFirstStop = timePointStatistics.isFirstStop();
-                boolean isLastStop = timePointStatistics.isLastStop();
-
-                if(!isFirstStop) {
-                    Double fixedTime = timePointStatistics.getMinRunTime();
-                    state.addFixedTime(fixedTime);
-                    state.addDwellTime(getDwellPercentileValue(allDwellTimes, isLastStop));
-                    state.addVariableTime(getVariablePercentileValue(fixedTime, allRunTimes, state.getCurrentTimePointIndex(), isLastStop));
-                    state.addRemainder(getRemainderPercentileValue(fixedTime, allRunTimes, state.getCurrentTimePointIndex(), isLastStop));
-                }
-                state.createRunTimeForTimePoint();
+                state.updateScheduleAdjustments(timePointStatistics);
+                state.createPrescriptiveRunTimeForTimePoint();
             }
         }
-        return state.getPrescriptiveRunTimes();
 
+        List<IpcPrescriptiveRunTime> prescriptiveRunTimesList = state.getPrescriptiveRunTimes();
+
+        IpcPrescriptiveRunTimes prescriptiveRunTimes = new IpcPrescriptiveRunTimes(prescriptiveRunTimesList,
+                state.getCurrentOnTimeFraction(), state.getExpectedOnTimeFraction(), state.getAvgRunTimes());
+
+        return prescriptiveRunTimes;
     }
+
 
     private Trip getTrip(String tripPatternId){
         List<String> tripIds = Core.getInstance().getDbConfig().getTripIdsForTripPattern(tripPatternId);
@@ -176,17 +179,5 @@ public class PrescriptiveRunTimeService {
 
     private boolean isValid(TimePointStatistics timePointStatistics){
         return timePointStatistics != null;
-    }
-
-    private IpcPrescriptiveRunTimes createPrescriptiveRunTimes(List<IpcPrescriptiveRunTime> prescriptiveRunTimesList) {
-        return new IpcPrescriptiveRunTimes(prescriptiveRunTimesList, getCurrentOtp(), getExpectedOtp());
-    }
-
-    private Double getCurrentOtp(){
-        return 0.85;
-    }
-
-    private Double getExpectedOtp(){
-        return 0.9;
     }
 }

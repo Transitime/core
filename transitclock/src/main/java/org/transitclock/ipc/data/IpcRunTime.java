@@ -19,6 +19,14 @@ public class IpcRunTime implements Serializable {
         this.dwell = dwell;
     }
 
+    public IpcRunTime(Double fixed, Double variable, Double dwell){
+        this.fixed = fixed;
+        this.variable = variable;
+        this.dwell = dwell;
+        this.avgRunTime = fixed + variable + dwell;
+
+    }
+
     public Double getAvgRunTime() {
         return avgRunTime;
     }

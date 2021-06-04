@@ -1,9 +1,22 @@
 package org.transitclock.reporting.service.runTime;
 
+import org.transitclock.config.DoubleConfigValue;
+import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.utils.Time;
+
 import java.util.Collections;
 import java.util.List;
 
 public class PrescriptiveRunTimeHelper {
+
+    private static final DoubleConfigValue prescriptiveDwellTime = new DoubleConfigValue(
+                "transitclock.runTime.prescriptiveDwellTimePercentile", 70d,
+         "The dwellTime percentile that prescriptive runtime algorithm uses when calculating schedule adjustments");
+
+    private static Double getDwellTimePercentile(){
+        return prescriptiveDwellTime.getValue();
+    }
+
     public static Double getVariablePercentileValue(Double fixedTime, List<Double> runTimeValues, int currentIndex, boolean isLastStop){
         if(isLastStop){
             return getVariable(fixedTime, getPercentileValue(runTimeValues, 45));
@@ -48,7 +61,7 @@ public class PrescriptiveRunTimeHelper {
         if(isLastStop){
             return 0d;
         }
-        return getPercentileValue(dwellValues, 85);
+        return getPercentileValue(dwellValues, getDwellTimePercentile());
     }
 
     public static Double getPercentileValue(List<Double> values, double percentile) {

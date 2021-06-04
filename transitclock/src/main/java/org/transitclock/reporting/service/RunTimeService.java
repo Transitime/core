@@ -34,14 +34,6 @@ public class RunTimeService {
         return filterRunTimeOutliers.getValue();
     }
 
-    private static FloatConfigValue runTimeScaleOfElimination = new FloatConfigValue(
-            "transitclock.reporting.runTime.scaleOfElimination", 1.5f,
-            "Configurable value for scale of elimination when filtering run time outliers.");
-
-    private static Float getRunTimeScaleOfElimination(){
-        return runTimeScaleOfElimination.getValue();
-    }
-
     @Inject
     private RunTimeRoutesDao dao;
 
@@ -73,15 +65,12 @@ public class RunTimeService {
 
         String routeShortName = getRouteShortName(routeIdOrShortName);
 
-        Integer beginTimeSeconds = beginTime != null ? beginTime.toSecondOfDay() : null;
-        Integer endTimeSeconds = endTime != null ? endTime.toSecondOfDay(): null;
-
         RunTimeForRouteQuery.Builder rtBuilder = new RunTimeForRouteQuery.Builder();
         RunTimeForRouteQuery rtQuery = rtBuilder
                 .beginDate(beginDate)
                 .endDate(endDate)
-                .beginTime(beginTimeSeconds)
-                .endTime(endTimeSeconds)
+                .beginTime(beginTime)
+                .endTime(endTime)
                 .serviceType(serviceType)
                 .routeShortName(routeShortName)
                 .headsign(headsign)
@@ -103,8 +92,7 @@ public class RunTimeService {
     public List<RunTimesForRoutes> getRunTimesForRoutes(RunTimeForRouteQuery rtQuery) throws Exception {
         List<RunTimesForRoutes> runTimesForRoutes = dao.getRunTimesForRoutes(rtQuery);
         if(getFilterRunTimeOutliers()){
-            float scaleOfElimination = getRunTimeScaleOfElimination();
-            return RunTimeStatistics.filterRunTimesForRoutes(runTimesForRoutes, scaleOfElimination);
+            return RunTimeStatistics.filterRunTimesForRoutes(runTimesForRoutes);
         }
         return runTimesForRoutes;
     }
@@ -213,10 +201,6 @@ public class RunTimeService {
 
     public boolean invalidTripStatistics(TripStopPathStatistics tripStatistics) {
         return !tripStatistics.hasAllStopPathsForRunTimes() || !tripStatistics.hasAllStopPathsForDwellTimes();
-    }
-
-    public Integer getTimeAsSecondOfDay(LocalTime time){
-        return time != null ? time.toSecondOfDay() : null;
     }
 
 }

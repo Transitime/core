@@ -30,6 +30,12 @@ public class TimePointRunTimeProcessor {
         }
     }
 
+    /**
+     * Converts RunTimesForStops and groups them into stop points
+     * If a stop for a specific timepoint grouping is missing then the entire
+     * timepoint is dropped
+     * @param runTimesForStops
+     */
     public void addRunTimesForStops(List<RunTimesForStops> runTimesForStops){
         Map<StopPathRunTimeKey, RunTimesForStops> runTimesStopPathsMap = getRunTimesStopPathsMap(runTimesForStops);
 
@@ -53,10 +59,6 @@ public class TimePointRunTimeProcessor {
                 if(validTimePoint) {
                     if(key.getStopPathIndex() == 0){
                         currentTimePointRunTime = 0d;
-                        currentTimePointDwellTime = 0d;
-                    }
-                    if(key.getStopPathId().equals("13444_to_13445")){
-                        System.out.println("here");
                     }
                     createRunTimeForTimePoint(key, stopPath, currentTimePointRunTime, currentTimePointDwellTime);
                 }
@@ -97,6 +99,7 @@ public class TimePointRunTimeProcessor {
         TimePointStatistics timePointStatistics = getOrCreateTimePointStatistics(key, stopPath);
         timePointStatistics.getRunTimeStats().add(currentTimePointRunTime);
         timePointStatistics.getDwellTimeStats().add(currentTimePointDwellTime);
+        timePointStatistics.getTotalRunTimes().add(currentTimePointRunTime + currentTimePointDwellTime);
     }
 
     private TimePointStatistics getOrCreateTimePointStatistics(StopPathRunTimeKey key, StopPath stopPath){
