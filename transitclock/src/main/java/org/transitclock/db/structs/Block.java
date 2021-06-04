@@ -1334,7 +1334,56 @@ public final class Block implements Serializable {
 	public boolean shouldBeExclusive() {
 		return CoreConfig.exclusiveBlockAssignments();
 	}
-	
+
+	private transient boolean initialized = false;
+	/**
+	 * force any lazy loaded objects to load now before moving to another thread
+	 */
+	public void initialize() {
+		if (!initialized) {
+			for (Trip unloadedTrip : getTrips()) {
+				unloadedTrip.initialize();
+			}
+			initialized = true;
+		}
+	}
+
+	public static class BlockLoader implements Runnable {
+
+		private List<String> serviceIds;
+		private int configRev;
+		private boolean finished = false;
+		private List<Block> blocks;
+
+		public BlockLoader(List<String> serviceIds, int configRev) {
+			this.serviceIds = serviceIds;
+			this.configRev = configRev;
+		}
+
+		@Override
+		public void run() {
+			try {
+				// when in a seperate thread you need a distinct session
+				Session session = HibernateUtils.getSession();
+				String hql = "FROM Blocks b "
+								+ "WHERE b.configRev = :configRev and b.serviceId in (";
+				for (String s : serviceIds) {
+					hql += "'" + s + "', ";
+				}
+				// remove last trailing comma
+				hql = hql.substring(0, hql.length()-2);
+				hql += ")";
+				logger.info("executing {}", hql);
+				Query query = session.createQuery(hql);
+				query.setInteger("configRev", configRev);
+
+				blocks = query.list();
+
+			} finally {
+				finished = true;
+			}
+		}
+	}
 	/**
 	 * For debugging
 	 * 

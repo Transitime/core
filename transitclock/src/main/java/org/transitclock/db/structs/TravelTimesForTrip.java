@@ -102,7 +102,7 @@ public class TravelTimesForTrip implements Serializable {
 	private final String tripCreatedForId;
 
 	// Load EAGERly for AVLExecutor thread safety/concurrency performance
-	@ManyToMany(fetch=FetchType.EAGER)
+	@ManyToMany(fetch=FetchType.LAZY)
 	@JoinTable(name="TravelTimesForTrip_to_TravelTimesForPath_joinTable")
 	@Cascade({CascadeType.SAVE_UPDATE})
 	@OrderColumn(name="listIndex")

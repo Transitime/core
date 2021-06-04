@@ -24,6 +24,7 @@ import javax.persistence.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.CallbackException;
+import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -120,7 +121,8 @@ public class Trip implements Lifecycle, Serializable {
 	
 	// Contains schedule time for each stop as obtained from GTFS 
 	// stop_times.txt file. Useful for determining schedule adherence.
-	@ElementCollection
+	// load EAGERly for AvlExecutor parallel execution
+	@ElementCollection(fetch = FetchType.LAZY)
   @OrderColumn
 	private final List<ScheduleTime> scheduledTimesList =
 			new ArrayList<ScheduleTime>();
@@ -1304,6 +1306,41 @@ public class Trip implements Lifecycle, Serializable {
 		} finally {
 			session.close();
 		}
+	}
+
+	/**
+	 * Force any lazy-loaded objects to be loaded now before moving to another thread.
+	 */
+	public void initialize() {
+		try {
+			if (!Hibernate.isInitialized(getScheduleTimes())) {
+				Hibernate.initialize(getScheduleTimes());
+			}
+		} catch (Throwable t) {
+			logger.error("unable to load schedule times for trip {}", this, t);
+		}
+		try {
+			if (!Hibernate.isInitialized(getTripPattern())) {
+				Hibernate.initialize(getTripPattern());
+			}
+		} catch (Throwable t) {
+			logger.error("unable to load trip pattern for trip {}", this, t);
+		}
+		try {
+			if (!Hibernate.isInitialized(getTravelTimes())) {
+				Hibernate.initialize(getTravelTimes());
+			}
+		} catch (Throwable t) {
+			logger.error("unable to load travel times for trip {}", this, t);
+		}
+		try {
+			if (getTravelTimes() != null && !Hibernate.isInitialized(getTravelTimes().getTravelTimesForStopPaths())) {
+				Hibernate.initialize(getTravelTimes().getTravelTimesForStopPaths());
+			}
+		} catch (Throwable t) {
+			logger.error("unable to load stop path travel times for trip {}", this, t);
+		}
+
 	}
 
 }
