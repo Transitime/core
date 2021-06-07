@@ -20,6 +20,7 @@ package org.transitclock.api;
 import javax.ws.rs.ApplicationPath;
 
 import org.glassfish.jersey.server.ResourceConfig;
+import org.transitclock.api.writer.CSVMessageBodyWriter;
 
 /**
  * Declares that all classes in package org.transitclock.api.rootResources will be
@@ -38,5 +39,6 @@ public class ApiApplication extends ResourceConfig {
 		// Register all root-resource classes in package that handle @Path
 		// requests
 		packages("org.transitclock.api.rootResources");
+		register(new CSVMessageBodyWriter());
 	}
 }

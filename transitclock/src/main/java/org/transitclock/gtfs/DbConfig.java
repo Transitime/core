@@ -549,10 +549,11 @@ public class DbConfig {
 				tripsMap = Trip.getTrips(globalSession, configRev);
 				tripIdsByTripPatternMap = new HashMap<>();
 				for(Map.Entry<String, Trip> tripEntry: tripsMap.entrySet()){
-					List<String> tripIdsForTripPattern = tripIdsByTripPatternMap.get(tripEntry.getKey());
+					String tripPatternId = tripEntry.getValue().getTripPattern().getId();
+					List<String> tripIdsForTripPattern = tripIdsByTripPatternMap.get(tripPatternId);
 					if(tripIdsForTripPattern == null) {
 						tripIdsForTripPattern = new ArrayList<>();
-						tripIdsByTripPatternMap.put(tripEntry.getValue().getTripPattern().getId(), tripIdsForTripPattern);
+						tripIdsByTripPatternMap.put(tripPatternId, tripIdsForTripPattern);
 					}
 					tripIdsForTripPattern.add(tripEntry.getKey());
 				}

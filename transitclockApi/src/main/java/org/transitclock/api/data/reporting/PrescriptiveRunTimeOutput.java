@@ -3,6 +3,7 @@ package org.transitclock.api.data.reporting;
 import org.transitclock.api.data.ApiRunTimeSummary;
 import org.transitclock.ipc.data.IpcPrescriptiveRunTime;
 import org.transitclock.ipc.data.IpcPrescriptiveRunTimes;
+import org.transitclock.ipc.data.IpcStopTime;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -24,8 +25,6 @@ public class PrescriptiveRunTimeOutput implements Serializable {
         data.setExpectedOtp(getFormattedPercent(prescriptiveRunTimes.getExpectedOtp()));
         return data;
     }
-
-
 
     private static String getFormattedStopPath(IpcPrescriptiveRunTime prescriptiveRunTime){
         return ReportDataFormatter.formatStopPath(prescriptiveRunTime.getStopPathId());

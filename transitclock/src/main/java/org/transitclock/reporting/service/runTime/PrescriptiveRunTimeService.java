@@ -1,5 +1,6 @@
 package org.transitclock.reporting.service.runTime;
 
+import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
@@ -9,6 +10,7 @@ import org.transitclock.db.query.RunTimeForRouteQuery;
 import org.transitclock.db.structs.*;
 import org.transitclock.ipc.data.IpcPrescriptiveRunTime;
 import org.transitclock.ipc.data.IpcPrescriptiveRunTimes;
+import org.transitclock.ipc.data.IpcStopTime;
 import org.transitclock.reporting.TimePointStatistics;
 import org.transitclock.reporting.keys.StopPathRunTimeKey;
 import org.transitclock.reporting.service.RunTimeService;
@@ -62,6 +64,34 @@ public class PrescriptiveRunTimeService {
                                                            ServiceType serviceType,
                                                            boolean readOnly) throws Exception {
 
+        PrescriptiveRunTimeState prescriptiveRunTimeState = getPrescriptiveRunTimeState(beginTime,
+                                                                                        endTime,
+                                                                                        routeIdOrShortName,
+                                                                                        headsign,
+                                                                                        directionId,
+                                                                                        tripPatternId,
+                                                                                        serviceType,
+                                                                                        readOnly);
+
+        IpcPrescriptiveRunTimes prescriptiveRunTimes = new IpcPrescriptiveRunTimes(
+                                                                prescriptiveRunTimeState.getPrescriptiveRunTimes(),
+                                                                prescriptiveRunTimeState.getCurrentOnTimeFraction(),
+                                                                prescriptiveRunTimeState.getExpectedOnTimeFraction(),
+                                                                prescriptiveRunTimeState.getAvgRunTimes());
+
+
+        return prescriptiveRunTimes;
+    }
+
+    private PrescriptiveRunTimeState getPrescriptiveRunTimeState(LocalTime beginTime,
+                                                                 LocalTime endTime,
+                                                                 String routeIdOrShortName,
+                                                                 String headsign,
+                                                                 String directionId,
+                                                                 String tripPatternId,
+                                                                 ServiceType serviceType,
+                                                                 boolean readOnly) throws Exception {
+
         String routeShortName = getRouteShortName(routeIdOrShortName);
         Period daysToLookBack = Period.ofDays(historicalSearchDays());
         LocalDate endDate = LocalDate.now();
@@ -91,11 +121,7 @@ public class PrescriptiveRunTimeService {
 
         Map<StopPathRunTimeKey, StopPath> timePointStopPaths = timePointRunTimeProcessor.getTimePointStopPaths();
 
-        IpcPrescriptiveRunTimes prescriptiveRunTimes = getPrescriptiveRunTimeStats(timePointsStatistics,
-                                                                                    timePointStopPaths,
-                                                                                    tripPatternId);
-
-        return prescriptiveRunTimes;
+        return getPrescriptiveRunTimeStateFromTimepoints(timePointsStatistics, timePointStopPaths, tripPatternId);
     }
 
 
@@ -128,9 +154,9 @@ public class PrescriptiveRunTimeService {
      * @param tripPatternId
      * @return
      */
-    private IpcPrescriptiveRunTimes getPrescriptiveRunTimeStats(Map<StopPathRunTimeKey, TimePointStatistics> timePointsStatistics,
-                                                                     Map<StopPathRunTimeKey, StopPath> timePointStopPaths,
-                                                                     String tripPatternId){
+    private PrescriptiveRunTimeState getPrescriptiveRunTimeStateFromTimepoints(Map<StopPathRunTimeKey, TimePointStatistics> timePointsStatistics,
+                                                                               Map<StopPathRunTimeKey, StopPath> timePointStopPaths,
+                                                                               String tripPatternId){
 
         Trip trip = getTrip(tripPatternId);
         Map<Integer, ScheduleTime> scheduleTimesByStopPathIndexMap = createScheduledTimesGroupedById(trip);
@@ -149,16 +175,14 @@ public class PrescriptiveRunTimeService {
                 state.createPrescriptiveRunTimeForTimePoint();
             }
         }
-
-        List<IpcPrescriptiveRunTime> prescriptiveRunTimesList = state.getPrescriptiveRunTimes();
-
-        IpcPrescriptiveRunTimes prescriptiveRunTimes = new IpcPrescriptiveRunTimes(prescriptiveRunTimesList,
-                state.getCurrentOnTimeFraction(), state.getExpectedOnTimeFraction(), state.getAvgRunTimes());
-
-        return prescriptiveRunTimes;
+        return state;
     }
 
-
+    /**
+     * Return first trip available trip for TripPatternId
+     * @param tripPatternId
+     * @return
+     */
     private Trip getTrip(String tripPatternId){
         List<String> tripIds = Core.getInstance().getDbConfig().getTripIdsForTripPattern(tripPatternId);
         List<Trip> trips = new ArrayList<>();
@@ -170,6 +194,12 @@ public class PrescriptiveRunTimeService {
         return trip;
     }
 
+    /**
+     * Get scheduled times for trip grouped by stopPathIndex
+     * StopPathIndex is determined by index when traversing scheduledTimes
+     * @param trip
+     * @return
+     */
     private Map<Integer, ScheduleTime> createScheduledTimesGroupedById(Trip trip){
         List<ScheduleTime> scheduleTimes = trip.getScheduleTimes();
         return IntStream.range(0, scheduleTimes.size())
@@ -179,5 +209,113 @@ public class PrescriptiveRunTimeService {
 
     private boolean isValid(TimePointStatistics timePointStatistics){
         return timePointStatistics != null;
+    }
+
+    /**
+     * Get Prescriptive RunTime Information for Run Times
+     * @param beginTime
+     * @param endTime
+     * @param routeIdOrShortName
+     * @param headsign
+     * @param directionId
+     * @param tripPatternId
+     * @param readOnly
+     * @return
+     * @throws Exception
+     */
+    public List<IpcStopTime> getPrescriptiveRunTimesSchedule(LocalTime beginTime,
+                                                             LocalTime endTime,
+                                                             String routeIdOrShortName,
+                                                             String headsign,
+                                                             String directionId,
+                                                             String tripPatternId,
+                                                             ServiceType serviceType,
+                                                             boolean readOnly) throws Exception {
+
+        PrescriptiveRunTimeState prescriptiveRunTimeState = getPrescriptiveRunTimeState(beginTime,
+                                                                                        endTime,
+                                                                                        routeIdOrShortName,
+                                                                                        headsign,
+                                                                                        directionId,
+                                                                                        tripPatternId,
+                                                                                        serviceType,
+                                                                                        readOnly);
+
+        Map<Integer, IpcPrescriptiveRunTime> prescriptiveRunTimes =
+                prescriptiveRunTimeState.getPrescriptiveRunTimesByStopPathIndex();
+
+        PrescriptiveAdjustmentResult result = getPrescriptiveAdjustmentResult(prescriptiveRunTimes);
+
+        List<IpcStopTime> stopTimes = getStopTimesWithScheduleAdjustments(tripPatternId, result);
+
+        return stopTimes;
+    }
+
+    private PrescriptiveAdjustmentResult getPrescriptiveAdjustmentResult(Map<Integer, IpcPrescriptiveRunTime> prescriptiveRunTimes){
+        PrescriptiveAdjustmentResult result = new PrescriptiveAdjustmentResult();
+        for(Map.Entry<Integer, IpcPrescriptiveRunTime> entry : prescriptiveRunTimes.entrySet()){
+            Integer currentStopPathIndex = entry.getKey();
+            IpcPrescriptiveRunTime prescriptiveRunTime = entry.getValue();
+            result.addScheduleAdjustmentsToStops(currentStopPathIndex, prescriptiveRunTime);
+        }
+    return result;
+    }
+
+    private List<IpcStopTime> getStopTimesWithScheduleAdjustments(String tripPatternId, PrescriptiveAdjustmentResult result){
+
+        // Get TripPattern and associated stopPaths and tripIds
+        TripPattern tripPattern = Core.getInstance().getDbConfig().getTripPatternForId(tripPatternId);
+        List<StopPath> stopPaths = tripPattern.getStopPaths();
+        List<String> tripIds = Core.getInstance().getDbConfig().getTripIdsForTripPattern(tripPatternId);
+
+        Map<Integer, Double> scheduleAdjustmentMap = result.getScheduleAdjustmentByStopPathIndex();
+
+        // Get map of all tripPattern trips mapped by tripId
+        Map<String, Trip> tripPatternTripsByTripId = getTripsByIdFromTripIds(tripIds);
+
+        // Use list to block and all associated trips for block
+        // This is necessary since we may have to adjust start times for other trips on block
+        // if trips with schedule adjustments run longer than originally scheduled
+        Map<String, Map<String,Trip>> tripsByBlockId = getTripsByBlockId(tripPatternTripsByTripId.values());
+
+        PrescriptiveScheduleProcessor processor = new PrescriptiveScheduleProcessor(tripPatternTripsByTripId,
+                                                                                    scheduleAdjustmentMap,
+                                                                                    stopPaths);
+
+        processor.processTripsForBlocks(tripsByBlockId);
+
+        List<IpcStopTime> stopTimes = processor.getStopTimes();
+
+        return stopTimes;
+    }
+
+    private Map<String, Trip> getTripsByIdFromTripIds(List<String> tripIds){
+        Map<String, Trip> trips = new HashMap<>();
+        for(String tripId : tripIds) {
+            Trip trip = Core.getInstance().getDbConfig().getTrip(tripId);
+            // TODO - filter trip by serviceId here
+            trips.put(trip.getId(),trip);
+        }
+        return trips;
+    }
+
+    private Map<String, Map<String,Trip>> getTripsByBlockId(Collection<Trip> trips){
+        Map<String, Map<String,Trip>> tripsByBlockIdMap = new HashedMap();
+        for(Trip trip : trips) {
+            Map<String,Trip> tripByTripId = tripsByBlockIdMap.get(trip.getBlockId());
+            if(tripByTripId == null){
+                Block block = Core.getInstance().getDbConfig().getBlock(trip.getServiceId(), trip.getBlockId());
+                tripsByBlockIdMap.put(block.getId(), getTripById(block.getTrips()));
+            }
+        }
+        return tripsByBlockIdMap;
+    }
+
+    private Map<String,Trip> getTripById(List<Trip> trips){
+        Map<String, Trip> tripsByTripId = new LinkedHashMap<>();
+        for(Trip trip : trips){
+            tripsByTripId.put(trip.getId(), trip);
+        }
+        return tripsByTripId;
     }
 }

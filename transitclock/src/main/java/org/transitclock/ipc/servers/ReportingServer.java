@@ -163,6 +163,20 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                 directionId, tripPatternId, serviceType, readOnly);
     }
 
+    @Override
+    public List<IpcStopTime> getPrescriptiveRunTimesSchedule(LocalTime beginTime,
+                                                               LocalTime endTime,
+                                                               String routeIdOrShortName,
+                                                               String headsign,
+                                                               String directionId,
+                                                               String tripPatternId,
+                                                               ServiceType serviceType,
+                                                               boolean readOnly) throws Exception {
+
+        return prescriptiveRunTimeService.getPrescriptiveRunTimesSchedule(beginTime, endTime, routeIdOrShortName,
+                headsign, directionId, tripPatternId, serviceType, readOnly);
+    }
+
     // On Time Performance Reports
     @Override
     public List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForOtp(LocalDate beginDate,

@@ -25,11 +25,20 @@ public interface ReportingInterface extends Remote {
                                                     boolean readOnly) throws Exception;
 
 
+    List<IpcStopTime> getPrescriptiveRunTimesSchedule(LocalTime beginTime,
+                                                      LocalTime endTime,
+                                                      String routeIdOrShortName,
+                                                      String headsign,
+                                                      String directionId,
+                                                      String tripPatternId,
+                                                      ServiceType serviceType,
+                                                      boolean readOnly) throws Exception;
+
     List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForOtp(LocalDate beginDate, LocalDate endDate,
-                                                                             LocalTime beginTime, LocalTime endTime,
-                                                                             String routeId, ServiceType serviceType,
-                                                                             boolean timePointsOnly, String headsign,
-                                                                             boolean readOnly) throws Exception;
+                                                                           LocalTime beginTime, LocalTime endTime,
+                                                                           String routeId, ServiceType serviceType,
+                                                                           boolean timePointsOnly, String headsign,
+                                                                           boolean readOnly) throws Exception;
 
     List<IpcStopWithDwellTime> getStopsWithAvgDwellTimes(LocalDate beginDate, LocalDate endDate,
                                                          LocalTime beginTime, LocalTime endTime, String routeIdOrShortName,

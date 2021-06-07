@@ -5,16 +5,14 @@ import org.transitclock.ipc.data.IpcPrescriptiveRunTime;
 import org.transitclock.ipc.data.IpcRunTime;
 import org.transitclock.reporting.TimePointStatistics;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.transitclock.reporting.service.runTime.PrescriptiveRunTimeHelper.*;
 
 public class PrescriptiveRunTimeState {
-    private List<IpcPrescriptiveRunTime> ipcPrescriptiveRunTimes = new ArrayList<>();
     Map<Integer, ScheduleTime> scheduleTimesByStopPathIndexMap;
+    Map<Integer, IpcPrescriptiveRunTime> ipcPrescriptiveRunTimesByStopPathIndex = new LinkedHashMap<>();
 
     // Avg RunTime Values
     private double avgFixed;
@@ -102,15 +100,13 @@ public class PrescriptiveRunTimeState {
         Double scheduleRunTime = getScheduledRunTime();
         Double runTimeAdjustment = getRunTimeAdjustment(scheduleRunTime);
         updateOnTimeCounts(scheduleRunTime, runTimeAdjustment);
-        ipcPrescriptiveRunTimes.add(
-                new IpcPrescriptiveRunTime(
-                        timePointStatistics.getStopPathId(),
-                        timePointStatistics.getStopName(),
-                        timePointStatistics.getStopPathIndex(),
-                        runTimeAdjustment,
-                        scheduleRunTime
-                )
-        );
+        IpcPrescriptiveRunTime ipcPrescriptiveRunTime = new IpcPrescriptiveRunTime(timePointStatistics.getStopPathId(),
+                                                                                timePointStatistics.getStopName(),
+                                                                                timePointStatistics.getStopPathIndex(),
+                                                                                runTimeAdjustment,
+                                                                                scheduleRunTime);
+
+        ipcPrescriptiveRunTimesByStopPathIndex.put(timePointStatistics.getStopPathIndex(), ipcPrescriptiveRunTime);
         resetForNewTimePoint();
     }
 
@@ -162,7 +158,11 @@ public class PrescriptiveRunTimeState {
     }
 
     public List<IpcPrescriptiveRunTime> getPrescriptiveRunTimes() {
-        return ipcPrescriptiveRunTimes;
+        return new ArrayList<>(ipcPrescriptiveRunTimesByStopPathIndex.values());
+    }
+
+    public Map<Integer, IpcPrescriptiveRunTime> getPrescriptiveRunTimesByStopPathIndex() {
+        return ipcPrescriptiveRunTimesByStopPathIndex;
     }
 
     public double getCurrentOnTimeFraction() {
@@ -175,6 +175,17 @@ public class PrescriptiveRunTimeState {
 
     public IpcRunTime getAvgRunTimes(){
         return new IpcRunTime(avgFixed, avgVariable, avgDwell);
+    }
+
+    public String getHash(String... values){
+        String hash = null;
+        for(String value : values){
+            if(hash != null){
+                hash += "_";
+            }
+            hash += "value";
+        }
+        return hash;
     }
 
 }

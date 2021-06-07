@@ -557,8 +557,6 @@
                 alert("No Prescriptive RunTimes available for selected criteria.");
             }
         })
-
-
     });
 
     function generateAverageRunTimesTable(request, response){
@@ -757,7 +755,6 @@
 
 
         params.beginTime = (timeBand.split("-")[0]).trim()+":00";
-        console.log(timeBand.split("-")[1].length);
         params.endTime = timeBand.split("-")[1] == " " ? "": (timeBand.split("-")[1]).trim()+":00";
         params.r = routeName
         params.headsign = directionName;
@@ -777,5 +774,53 @@
     }
 
     generateTimeBands();
+
+    $(".gtfs-submit").click(function () {
+        $(".gtfs-submit").attr("disabled", "disabled");
+        var request = getParams();
+        var type = "text/csv";
+        var filename = "stop_times.txt";
+        var dataUrl = apiUrlPrefix +  "/report/runTime/prescriptiveRunTimesSchedule";
+
+        $.ajax({
+            url: dataUrl,
+            accepts:{text:type},
+            // Pass in query string parameters to page being requested
+            data: request,
+            // Needed so that parameters passed properly to page being requested
+            traditional: true,
+            success: function (data) {
+                $(".gtfs-submit").attr("disabled", false);
+                var blob = new Blob([data], { type: type });
+                saveFile(filename, type, blob);
+            },
+            error: function (e) {
+                console.log(e);
+                $(".gtfs-submit").attr("disabled", false);
+                alert("Unable to export Prescriptive RunTimes GTFS Schedule.");
+            }
+        })
+
+    });
+
+    function saveFile (name, type, data) {
+        if (data !== null){
+            if(window.navigator && window.navigator.msSaveOrOpenBlob){
+                return navigator.msSaveBlob(new Blob([data], { type: type }), name);
+            }
+            else{
+                var a = $("<a style='display: none;'/>");
+                var url = window.URL.createObjectURL(new Blob([data], {type: type}));
+                a.attr("href", url);
+                a.attr("download", name);
+                $("body").append(a);
+                a[0].click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            }
+        } else {
+            alert("Unable to export Prescriptive RunTimes GTFS Schedule.");
+        }
+    }
 
 </script>

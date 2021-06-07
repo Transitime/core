@@ -113,11 +113,14 @@ public class StandardParameters {
 				mediaType = MediaType.APPLICATION_JSON;
 			else if (acceptHeader.contains(MediaType.APPLICATION_XML))
 				mediaType = MediaType.APPLICATION_XML;
+			else if (acceptHeader.contains("csv"))
+				mediaType = "text/csv";
 			else
 				throw WebUtils.badRequestException("Accept header \"Accept: "
 						+ acceptHeader + "\" is not valid. Must be \""
 						+ MediaType.APPLICATION_JSON + "\" or \""
-						+ MediaType.APPLICATION_XML + "\"");
+						+ MediaType.APPLICATION_XML + "\" or \""
+						+ "text/csv" + "\"");
 		}
 
 		// If mediaType format is overridden using the query string format
@@ -131,12 +134,14 @@ public class StandardParameters {
 				mediaType = MediaType.APPLICATION_JSON;
 			else if (formatOverride.equals("xml"))
 				mediaType = MediaType.APPLICATION_XML;
+			else if (formatOverride.equals("csv"))
+				mediaType = "csv";
 			else if (formatOverride.equals("human"))
 				mediaType = MediaType.TEXT_PLAIN;
 			else
 				throw WebUtils.badRequestException("Format \"format="
 						+ formatOverride + "\" from query string not valid. "
-						+ "Format must be \"json\" or \"xml\"");
+						+ "Format must be \"json\" or \"xml\" or \"csv\"");
 		}
 
 		return mediaType;
