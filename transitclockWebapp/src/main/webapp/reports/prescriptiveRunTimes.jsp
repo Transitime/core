@@ -356,7 +356,6 @@
                 <div class="param">
                     <label for="serviceDayType">Service Day:</label>
                     <select id="serviceDayType" name="serviceDayType">
-                        <option value="">All</option>
                         <option value="weekday">Weekday</option>
                         <option value="saturday">Saturday</option>
                         <option value="sunday">Sunday</option>
