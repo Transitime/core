@@ -4,6 +4,9 @@
      Select is created by reading in routes via API for the agency 
      specified by the "a" param. --%>
 
+
+
+
 <style type="text/css">
     /* Set font for route selector. Need to use #select2-drop because of
      * extra elements that select2 adds
@@ -15,6 +18,7 @@
 
 <script>
 
+    var isDisabled = $(".isAllRoutesDisabled");
     $.getJSON(apiUrlPrefix + "/command/routes",
         function(routes) {
             // Generate list of routes for the selector.
@@ -23,11 +27,15 @@
             // So need to use a blank string that can be determined
             // to be empty when trimmed.
             var selectorData = [{id: ' ', text: 'All Routes'}];
+            if(isDisabled && isDisabled.val() === 'true'){
+             selectorData=[];
+            }
             for (var i in routes.routes) {
                 var route = routes.routes[i];
                 var name = route.shortName + " " + route.longName
                 selectorData.push({id: route.id, text: name})
             }
+
 
             // Configure the selector to be a select2 one that has
             // search capability
@@ -46,8 +54,11 @@
             var configuredTitle = $( "#route" ).attr("title");
             $( "#select2-route-container" ).tooltip({ content: configuredTitle,
                 position: { my: "left+10 center", at: "right center" } });
-
+            if(isDisabled && isDisabled.val() === 'true' && selectorData.length > 0){
+                $("#route").val(selectorData[0].id).trigger("change");
+            }
         });
+
 
 </script>
 
