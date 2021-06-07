@@ -64,6 +64,18 @@ public class ScheduleTime implements Serializable {
 			return departureTime;
 		return arrivalTime;
 	}
+
+	/**
+	 * Returns arrival time if there is one. Otherwise returns departure time if
+	 * there is one. Otherwise returns null.
+	 *
+	 * @return
+	 */
+	public Integer getArrivalOrDepartureTime(){
+		if (arrivalTime != null)
+			return arrivalTime;
+		return departureTime;
+	}
 	
 	/**
 	 * Time of day in seconds. Will be null if there is no arrival time (even

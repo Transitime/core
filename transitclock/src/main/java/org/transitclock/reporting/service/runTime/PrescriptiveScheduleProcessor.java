@@ -86,10 +86,11 @@ public class PrescriptiveScheduleProcessor {
 
                     // Get arrival and departure times as seconds. If one or the other is not available defaults to null.
                     Integer arrivalTimeSec = getAdjustedScheduleTimeSec(st.getArrivalTime(),
-                                                                        prevScheduledArrivalTime,
-                                                                        prevAdjustedArrivalTime,
-                                                                        stopAdjustmentFraction,
-                                                                        currentBlockScheduleAdjustmentDelta);
+                            prevScheduledArrivalTime,
+                            prevAdjustedArrivalTime,
+                            stopAdjustmentFraction,
+                            currentBlockScheduleAdjustmentDelta);
+
 
                     Integer departureTimeSec = getAdjustedScheduleTimeSec(st.getDepartureTime(),
                                                                           prevScheduledDepartureTime,
@@ -101,12 +102,13 @@ public class PrescriptiveScheduleProcessor {
                     String arrivalTime = getAdjustedScheduleTimeStr(arrivalTimeSec);
                     String departureTime = getAdjustedScheduleTimeStr(departureTimeSec);
 
+
                     // Update previous adjusted arrivalTimes
                     if(tripPatternTrip != null){
-                        prevScheduledArrivalTime = st.getArrivalTime();
-                        prevScheduledDepartureTime = st.getDepartureTime();
-                        prevAdjustedArrivalTime = arrivalTimeSec;
-                        prevAdjustedDepartureTime = arrivalTimeSec;
+                        prevScheduledArrivalTime = st.getArrivalOrDepartureTime();
+                        prevScheduledDepartureTime = st.getTime();
+                        prevAdjustedArrivalTime = arrivalTimeSec != null ? arrivalTimeSec : departureTimeSec;
+                        prevAdjustedDepartureTime = departureTimeSec != null ? departureTimeSec : arrivalTimeSec;
                     }
 
                     IpcStopTime stopTime = new IpcStopTime(trip.getId(), arrivalTime, departureTime, stopPath.getStopId(),
