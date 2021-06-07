@@ -6,8 +6,11 @@ import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.ServiceType;
+import org.transitclock.core.ServiceTypeUtil;
 import org.transitclock.db.query.RunTimeForRouteQuery;
 import org.transitclock.db.structs.*;
+import org.transitclock.db.structs.Calendar;
+import org.transitclock.gtfs.DbConfig;
 import org.transitclock.ipc.data.IpcPrescriptiveRunTime;
 import org.transitclock.ipc.data.IpcPrescriptiveRunTimes;
 import org.transitclock.ipc.data.IpcStopTime;
@@ -121,7 +124,7 @@ public class PrescriptiveRunTimeService {
 
         Map<StopPathRunTimeKey, StopPath> timePointStopPaths = timePointRunTimeProcessor.getTimePointStopPaths();
 
-        return getPrescriptiveRunTimeStateFromTimepoints(timePointsStatistics, timePointStopPaths, tripPatternId);
+        return getPrescriptiveRunTimeStateFromTimepoints(timePointsStatistics, timePointStopPaths, tripPatternId, serviceType);
     }
 
 
@@ -156,9 +159,10 @@ public class PrescriptiveRunTimeService {
      */
     private PrescriptiveRunTimeState getPrescriptiveRunTimeStateFromTimepoints(Map<StopPathRunTimeKey, TimePointStatistics> timePointsStatistics,
                                                                                Map<StopPathRunTimeKey, StopPath> timePointStopPaths,
-                                                                               String tripPatternId){
+                                                                               String tripPatternId,
+                                                                               ServiceType serviceType){
 
-        Trip trip = getTrip(tripPatternId);
+        Trip trip = getTrip(tripPatternId, serviceType);
         Map<Integer, ScheduleTime> scheduleTimesByStopPathIndexMap = createScheduledTimesGroupedById(trip);
 
         PrescriptiveRunTimeState state = new PrescriptiveRunTimeState(scheduleTimesByStopPathIndexMap);
@@ -179,19 +183,23 @@ public class PrescriptiveRunTimeService {
     }
 
     /**
-     * Return first trip available trip for TripPatternId
+     * Return first trip available trip for TripPatternId for specified serviceType
      * @param tripPatternId
      * @return
      */
-    private Trip getTrip(String tripPatternId){
+    private Trip getTrip(String tripPatternId, ServiceType serviceType){
         List<String> tripIds = Core.getInstance().getDbConfig().getTripIdsForTripPattern(tripPatternId);
         List<Trip> trips = new ArrayList<>();
         for(String tripId : tripIds){
             trips.add(Core.getInstance().getDbConfig().getTrip(tripId));
         }
-
-        Trip trip = trips.stream().findAny().orElse(null);
-        return trip;
+        for(Trip trip : trips){
+            Calendar calendar = Core.getInstance().getDbConfig().getCalendarByServiceId(trip.getServiceId());
+            if(ServiceTypeUtil.isCalendarValidForServiceType(calendar, serviceType)){
+                return trip;
+            }
+        }
+        return null;
     }
 
     /**
@@ -246,7 +254,7 @@ public class PrescriptiveRunTimeService {
 
         PrescriptiveAdjustmentResult result = getPrescriptiveAdjustmentResult(prescriptiveRunTimes);
 
-        List<IpcStopTime> stopTimes = getStopTimesWithScheduleAdjustments(tripPatternId, result);
+        List<IpcStopTime> stopTimes = getStopTimesWithScheduleAdjustments(tripPatternId, result, serviceType);
 
         return stopTimes;
     }
@@ -261,7 +269,9 @@ public class PrescriptiveRunTimeService {
     return result;
     }
 
-    private List<IpcStopTime> getStopTimesWithScheduleAdjustments(String tripPatternId, PrescriptiveAdjustmentResult result){
+    private List<IpcStopTime> getStopTimesWithScheduleAdjustments(String tripPatternId,
+                                                                  PrescriptiveAdjustmentResult result,
+                                                                  ServiceType serviceType){
 
         // Get TripPattern and associated stopPaths and tripIds
         TripPattern tripPattern = Core.getInstance().getDbConfig().getTripPatternForId(tripPatternId);
@@ -271,7 +281,7 @@ public class PrescriptiveRunTimeService {
         Map<Integer, Double> scheduleAdjustmentMap = result.getScheduleAdjustmentByStopPathIndex();
 
         // Get map of all tripPattern trips mapped by tripId
-        Map<String, Trip> tripPatternTripsByTripId = getTripsByIdFromTripIds(tripIds);
+        Map<String, Trip> tripPatternTripsByTripId = getTripsByIdFromTripIds(tripIds, serviceType);
 
         // Use list to block and all associated trips for block
         // This is necessary since we may have to adjust start times for other trips on block
@@ -289,12 +299,15 @@ public class PrescriptiveRunTimeService {
         return stopTimes;
     }
 
-    private Map<String, Trip> getTripsByIdFromTripIds(List<String> tripIds){
+    private Map<String, Trip> getTripsByIdFromTripIds(List<String> tripIds, ServiceType serviceType){
         Map<String, Trip> trips = new HashMap<>();
         for(String tripId : tripIds) {
-            Trip trip = Core.getInstance().getDbConfig().getTrip(tripId);
-            // TODO - filter trip by serviceId here
-            trips.put(trip.getId(),trip);
+            DbConfig dbConfig = Core.getInstance().getDbConfig();
+            Trip trip = dbConfig.getTrip(tripId);
+            Calendar calendar = dbConfig.getCalendarByServiceId(trip.getServiceId());
+            if(ServiceTypeUtil.isCalendarValidForServiceType(calendar, serviceType)){
+                trips.put(trip.getId(),trip);
+            }
         }
         return trips;
     }

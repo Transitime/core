@@ -255,6 +255,10 @@ public class Calendar implements Serializable {
 		return map;
 	}
 
+	public boolean isOnWeekDay(){
+		return monday || tuesday || wednesday || thursday || friday;
+	}
+
 	
 	/**
 	 * Returns true if the parameter zeroOrOne is set to "1". Otherwise

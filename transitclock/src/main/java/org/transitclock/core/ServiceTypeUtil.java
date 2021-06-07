@@ -1,9 +1,13 @@
 package org.transitclock.core;
 
 import org.transitclock.db.structs.Calendar;
+import org.transitclock.db.structs.CalendarDate;
 
 import java.time.DayOfWeek;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class ServiceTypeUtil {
@@ -53,5 +57,34 @@ public class ServiceTypeUtil {
             }
         }
         return updatedTime;
+    }
+
+    public static boolean isCalendarValidForServiceType(Calendar calendar, ServiceType serviceType){
+        if(calendar != null){
+            if(serviceType.equals(ServiceType.WEEKDAY) && calendar.isOnWeekDay()){
+                return true;
+            } else if(serviceType.equals(ServiceType.SATURDAY) && calendar.getSaturday()){
+                return true;
+            } else if(serviceType.equals(ServiceType.SATURDAY) && calendar.getSunday()){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isCalendarDatesForServiceType(List<CalendarDate> calendarDates, ServiceType serviceType){
+        if(calendarDates != null){
+            for(CalendarDate calendarDate : calendarDates){
+                DayOfWeek dayOfWeek = Instant.ofEpochMilli(calendarDate.getDate().getTime())
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate().getDayOfWeek();
+                ServiceType calDateServiceType = getServiceTypeForDay(dayOfWeek);
+                if(serviceType.equals(calDateServiceType)){
+                    return true;
+                }
+            }
+
+        }
+        return false;
     }
 }
