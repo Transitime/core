@@ -337,7 +337,7 @@
             <div id="title">
                 Prescriptive Run Times
             </div>
-
+            <input type="hidden" name="isAllRoutesDisabled"  class="isAllRoutesDisabled" value="true">
             <div id="paramsFields">
                 <%-- For passing agency param to the report --%>
                 <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
@@ -485,7 +485,7 @@
     $("#route").attr("style", "width: 200px");
 
     $("#route").change(function () {
-        if ($("#route").val().trim() != "") {
+        if ($("#route").val() && $("#route").val().trim() != "") {
             $(".individual-route-only").show();
 
             populateDirection();
