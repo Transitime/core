@@ -4,6 +4,7 @@ import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
+import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.ServiceType;
 import org.transitclock.core.ServiceTypeUtil;
@@ -38,6 +39,11 @@ public class PrescriptiveRunTimeService {
             "transitclock.runTime.prescriptiveHistoricalSearchDays",
             30,
             "The number of days in the past that prescriptive runtimes looks back.");
+
+    private static final BooleanConfigValue prescriptiveAvgIncludeFirstStop = new BooleanConfigValue(
+            "transitclock.runTime.prescriptiveAvgIncludeFirstStop",
+            true,
+            "Whether or not to include the first stop dwell time in the prescriptive runtime avg calculation.");
 
     private Integer historicalSearchDays(){
         return prescriptiveHistoricalSearchDays.getValue();
@@ -175,7 +181,7 @@ public class PrescriptiveRunTimeService {
                 logger.warn("No matching timepoint for {}, unable to provide prescriptive runtime", timePointStatistics);
                 return null;
             } else {
-                state.updateScheduleAdjustments(timePointStatistics);
+                state.updateScheduleAdjustments(timePointStatistics, prescriptiveAvgIncludeFirstStop.getValue());
                 state.createPrescriptiveRunTimeForTimePoint();
             }
         }

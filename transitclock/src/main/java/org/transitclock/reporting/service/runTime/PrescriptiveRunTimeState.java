@@ -1,5 +1,7 @@
 package org.transitclock.reporting.service.runTime;
 
+import org.transitclock.config.BooleanConfigValue;
+import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.db.structs.ScheduleTime;
 import org.transitclock.ipc.data.IpcPrescriptiveRunTime;
 import org.transitclock.ipc.data.IpcRunTime;
@@ -11,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import static org.transitclock.reporting.service.runTime.PrescriptiveRunTimeHelper.*;
 
 public class PrescriptiveRunTimeState {
+
     Map<Integer, ScheduleTime> scheduleTimesByStopPathIndexMap;
     Map<Integer, IpcPrescriptiveRunTime> ipcPrescriptiveRunTimesByStopPathIndex = new LinkedHashMap<>();
 
@@ -54,7 +57,7 @@ public class PrescriptiveRunTimeState {
         return currentTimePointIndex;
     }
 
-    public void updateScheduleAdjustments(TimePointStatistics timePointStatistics) {
+    public void updateScheduleAdjustments(TimePointStatistics timePointStatistics, boolean includeFirstStopDwell) {
         this.timePointStatistics = timePointStatistics;
 
         boolean isFirstStop = timePointStatistics.isFirstStop();
@@ -73,7 +76,7 @@ public class PrescriptiveRunTimeState {
             addDwellTime(getDwellPercentileValue(allDwellTimes, isLastStop));
             addVariableTime(getVariablePercentileValue(fixedTime, allRunTimes, getCurrentTimePointIndex(), isLastStop));
             addRemainder(getRemainderPercentileValue(fixedTime, allRunTimes, getCurrentTimePointIndex(), isLastStop));
-        } else {
+        }else if(includeFirstStopDwell) {
             avgDwell += timePointStatistics.getAverageDwellTime();
         }
 
