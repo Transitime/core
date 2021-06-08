@@ -319,7 +319,7 @@ public class HistoricalPredictionLibrary {
 						referenceTime);
 		List<IpcArrivalDeparture> currentStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(currentStopKey);
 		if (currentStopList == null || currentStopList.isEmpty()) {
-			logger.info("no real-time headway stopList for {}", referenceStopId);
+			logger.debug("no real-time headway stopList for {}", referenceStopId);
 			return null;
 		}
 

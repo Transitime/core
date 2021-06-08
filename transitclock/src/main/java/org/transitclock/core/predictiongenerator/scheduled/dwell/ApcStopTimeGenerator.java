@@ -3,6 +3,7 @@ package org.transitclock.core.predictiongenerator.scheduled.dwell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
+import org.transitclock.avl.ApcCache;
 import org.transitclock.avl.ApcDataProcessor;
 import org.transitclock.avl.ApcModule;
 import org.transitclock.config.DoubleConfigValue;
@@ -270,7 +271,11 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     if (arrivalRate != null)
       return arrivalRate;
     // if we don't have any data assume no boarding during this period
-    return 0.0;
+
+    Integer defaultValue = ApcCache.DEFAULT_PAR_VALUE.getValue();
+    if (defaultValue == null)
+      return null;
+    return new Double(defaultValue);
   }
 
   private Long getScheduledArrivalTimeIncludingSchedAdh(Indices indices, VehicleState vehicleState) {
