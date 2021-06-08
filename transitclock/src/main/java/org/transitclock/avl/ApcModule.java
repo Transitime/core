@@ -15,10 +15,6 @@ public class ApcModule {
 
   private static final Logger logger = LoggerFactory.getLogger(ApcModule.class);
 
-  public static IntegerConfigValue arrivalRateWindow
-          = new IntegerConfigValue("transitclock.apc.arrivalRateWindowInMinutes",
-          60,
-          "Minutes to consider in arrival rate calculation");
   private static ApcModule instance = null;
   private ApcDataProcessor processor;
 
@@ -27,7 +23,7 @@ public class ApcModule {
 
   public static ApcModule getInstance() {
     if (instance == null) {
-      synchronized (arrivalRateWindow) {
+      synchronized (logger) {
         if (instance == null) {
           instance = new ApcModule();
           instance.init();
