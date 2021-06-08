@@ -481,7 +481,7 @@
                 <hr>
             </div>
 
-            <div class="submitDiv"><input type='submit' id='submit' value="Submit"/></div>
+            <div class="submitDiv"><button id="submit" class="submit" >Submit</button></div>
 
 
         </div>
@@ -549,7 +549,7 @@
 
     $("#submit").click(function() {
         $("#submit").attr("disabled","disabled");
-        $("#submit").attr("value","loading...");
+        $("#submit").html("Loading...").addClass("submit-loading");;
         $("#reportResults").addClass("inactive");
 
 
@@ -593,7 +593,8 @@
     })
 
     function drawChart(response) {
-        $("#submit").removeAttr("disabled").attr("value", "Submit");
+        $("#submit").removeAttr("disabled")
+        $("#submit").html("Submit").removeClass("submit-loading");;
         $("#reportResults").removeClass("inactive");
         var values = response.data.datasets[0].data
         pieChart.data.datasets[0].data = values;

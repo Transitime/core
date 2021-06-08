@@ -149,7 +149,7 @@ select:not(.datepick-month-year):not(.datepick-month-year) {
 }
 
 
-input#submit {
+input#submit, button#submit {
     margin: 24px;
     background-color: #029932;
     cursor: pointer;
@@ -161,6 +161,9 @@ input#submit {
     border-color: transparent;
     line-height: 1.5;
 
+}
+button#submit {
+    position: relative;
 }
 
 legend {
@@ -401,7 +404,7 @@ span.ui-datepicker-month {
     border-top: 0;
     border-left: 0;
     border-right: 0;
-   /* border: none;*/
+    /* border: none;*/
     border-radius: 0;
 }
 
@@ -521,4 +524,45 @@ h3#visualization-container-header {
 #radioButtons input:checked + label {
     background-color: #4ddb4c9c;
     box-shadow: none;
+}
+
+.submit-loading:after {
+    position: absolute;
+    top: 50%;
+    right:0;
+    height: 20px;
+    width: 20px;
+    margin: -12px 0 0 -10px;
+    border: 4px rgba(0, 0, 0, 0.25) solid;
+    border-top: 4px black solid;
+    border-bottom: 4px black solid;
+    border-radius: 50%;
+    -webkit-animation: spin1 1s infinite linear;
+    animation: spin1 1s infinite linear;
+    content:'';
+}
+
+@-webkit-keyframes spin1 {
+    from {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    to {
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+    }
+}
+@keyframes spin1 {
+    from {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    to {
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+    }
 }

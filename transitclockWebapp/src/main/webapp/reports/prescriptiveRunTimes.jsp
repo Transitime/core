@@ -301,9 +301,9 @@
         }
 
         .otp-content {
-           //  background-color: #e5e5e5;
+        //  background-color: #e5e5e5;
             padding: 5px;
-            // border: 1px solid #e5e5e5;
+        // border: 1px solid #e5e5e5;
             margin: 10px 0;
             display: flex;
             align-items: center;
@@ -348,10 +348,10 @@
                     <label for="direction">Direction:</label>
                     <select id="direction" name="direction" disabled="true"></select>
                 </div>
-                    <div class="param individual-route-only">
-                        <label for="tripPattern">Trip Pattern:</label>
-                        <select id="tripPattern" name="tripPattern" disabled="true"></select>
-                    </div>
+                <div class="param individual-route-only">
+                    <label for="tripPattern">Trip Pattern:</label>
+                    <select id="tripPattern" name="tripPattern" disabled="true"></select>
+                </div>
 
                 <div class="param">
                     <label for="serviceDayType">Service Day:</label>
@@ -372,7 +372,7 @@
                 </div>
             </div>
             <div class="submitDiv">
-                <input type="button" id="submit" class="submit" value="Analyze">
+                <button id="submit" class="submit">Analyze</button>
             </div>
 
 
@@ -520,6 +520,7 @@
     $("#submit").click(function () {
 
         $("#submit").attr("disabled", "disabled");
+        $("#submit").html("Loading...").addClass("submit-loading");
         $(".wrapper").addClass("split");
         $("#mainResults").hide();
 
@@ -535,6 +536,7 @@
             dataType: "json",
             success: function (response) {
                 $("#submit").attr("disabled", false);
+                $("#submit").html("Analyze").removeClass("submit-loading");
                 if (jQuery.isEmptyObject(response)) {
                     alert("No run time information available for selected parameters.");
                 } else {
@@ -554,6 +556,7 @@
             },
             error: function (e) {
                 $("#submit").attr("disabled", false);
+                $("#submit").html("Analyze").removeClass("submit-loading");
                 alert("No Prescriptive RunTimes available for selected criteria.");
             }
         })
@@ -606,7 +609,7 @@
     }
 
     function generatePrescriptiveRunTimesTable(response){
-         var currentTable = '<table class="border-table">';
+        var currentTable = '<table class="border-table">';
         currentTable += '<tbody><tr><th>Stop</th><th>Scheduled</th><th>Adjustment</th></tr>';
 
         var totalScheduleMin = 0;
@@ -710,10 +713,11 @@
                 if (resp.tripPatterns.length == 0) {
                     alert("No trip pattern data for selected route and headsign.");
                     $("#submit").attr("disabled", true);
+                    $("#submit").html("Loading").addClass("submit-loading");
                 } else {
                     $("#tripPattern").removeAttr('disabled');
                     $("#submit").removeAttr('disabled');
-
+                    $("#submit").html("Analyze").removeClass("submit-loading");
                     resp.tripPatterns.forEach(function (tripPattern) {
                         $("#tripPattern").append("<option value='" + tripPattern.id + "'>" + tripPattern.firstStopName + ' to ' + tripPattern.lastStopName + "</option>");
                     })
@@ -725,6 +729,7 @@
             error: function (request, status, error) {
                 alert(error + '. ' + request.responseText);
                 $("#submit").attr("disabled", false);
+                $("#submit").html("Analyze").removeClass("submit-loading");
             }
         });
     }
