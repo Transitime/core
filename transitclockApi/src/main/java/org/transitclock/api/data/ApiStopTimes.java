@@ -1,4 +1,4 @@
-package org.transitclock.api;
+package org.transitclock.api.data;
 
 import org.transitclock.api.data.ApiStopTime;
 import org.transitclock.ipc.data.IpcStopTime;

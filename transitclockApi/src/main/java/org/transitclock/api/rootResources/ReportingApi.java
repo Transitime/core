@@ -3,7 +3,7 @@ package org.transitclock.api.rootResources;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.apache.commons.lang3.StringUtils;
-import org.transitclock.api.ApiStopTimes;
+import org.transitclock.api.data.ApiStopTimes;
 import org.transitclock.api.data.*;
 import org.transitclock.api.data.reporting.*;
 import org.transitclock.api.data.reporting.chartjs.ChartType;
@@ -21,7 +21,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
