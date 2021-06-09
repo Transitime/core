@@ -72,7 +72,7 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     Long cachedResult = ApcStopTimeCache.getInstance().get(indices, avlReport, vehicleState);
     if (cachedResult != null) {
       getMonitoring().rateMetric("PredictionDwellApcProcessingHit", true);
-      return new PredictionResult(cachedResult, Algorithm.KALMAN);
+      return new PredictionResult(cachedResult, Algorithm.APC_DWELL);
     }
     getMonitoring().rateMetric("PredictionDwellApcProcessingHit", false);
 
