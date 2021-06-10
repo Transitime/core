@@ -401,7 +401,7 @@
             </div>
 
             <div class="submitDiv">
-                <input type="button" id="submit" class="submit" value="Submit">
+                <button id="submit" class="submit" >Submit</button>
             </div>
         </div>
     </div>
@@ -782,7 +782,7 @@
     function populateDirection() {
 
         $("#submit").attr("disabled", true);
-
+        $("#submit").html("Loading").addClass("submit-loading");
         $("#tripPattern").empty();
         $("#direction").removeAttr('disabled');
         $("#direction").empty();
@@ -811,6 +811,7 @@
             error: function (response) {
                 alert("Error retrieving directions for route " + response.r);
                 $("#submit").attr("disabled", false);
+                $("#submit").html("Submit").removeClass("submit-loading");
             }
         })
     }
@@ -841,9 +842,11 @@
                 if (resp.tripPatterns.length == 0) {
                     alert("No trip pattern data for selected route and headsign.");
                     $("#submit").attr("disabled", true);
+                    $("#submit").html("Loading").addClass("submit-loading");
                 } else {
                     $("#tripPattern").removeAttr('disabled');
                     $("#submit").removeAttr('disabled');
+                    $("#submit").html("Submit").removeClass("submit-loading");
 
                     $("#tripPattern").append("<option value=''>All</option>")
                     resp.tripPatterns.forEach(function (tripPattern) {
@@ -857,6 +860,7 @@
             error: function (request, status, error) {
                 alert(error + '. ' + request.responseText);
                 $("#submit").attr("disabled", false);
+                $("#submit").html("Submit").removeClass("submit-loading");
             }
         });
     }
@@ -1009,6 +1013,7 @@
 
     $("#submit").click(function () {
         $("#submit").attr("disabled", "disabled");
+        $("#submit").html("Loading").addClass("submit-loading");
         $(".wrapper").addClass("split");
         $("#mainResults").hide();
         $("#runTimeVisualization").hide();
@@ -1079,11 +1084,12 @@
                 if (jQuery.isEmptyObject(response)) {
                     $("#component").hide();
                     $("#submit").removeAttr("disabled");
+                    $("#submit").html("Submit").removeClass("submit-loading");
                     alert("No run time information available for selected parameters.");
                 } else if(response.data && response.data.summary && response.data.summary) {
                     $(".all-routes").hide();
                     updateParamDetails(request.r, request.headsign, request.tripPattern, beginDateString, endDateString,
-                                        timeRange, serviceDayString);
+                        timeRange, serviceDayString);
                     updateSummaryTable(response.data.summary);
 
                     $("#component").show();
@@ -1093,6 +1099,7 @@
 
                     $("#mainResults").show();
                     $("#submit").removeAttr("disabled");
+                    $("#submit").html("Submit").removeClass("submit-loading");
                 }
                 else if(response.data && response.data.routes){
                     $(".individual-route").hide();
@@ -1107,9 +1114,11 @@
 
                     $("#mainResults").show();
                     $("#submit").removeAttr("disabled");
+                    $("#submit").html("Submit").removeClass("submit-loading");
                 }
                 else {
                     $("#submit").removeAttr("disabled");
+                    $("#submit").html("Submit").removeClass("submit-loading");
                     $("#component").hide();
                     alert("Unable to find any valid results. Please try a different search.");
                 }
@@ -1117,6 +1126,7 @@
             },
             error: function () {
                 $("#submit").removeAttr("disabled");
+                $("#submit").html("Submit").removeClass("submit-loading");
                 alert("Error processing average trip run time.");
             }
         })
@@ -1204,6 +1214,7 @@
                             },
                             error: function () {
                                 $("#submit").removeAttr("disabled");
+                                $("#submit").html("Submit").removeClass("submit-loading");
                                 alert("Error retreiving trip run times.");
                             }
                         });
@@ -1259,11 +1270,26 @@
                     xAxes: [
                         {
                             stacked: true,
+                            position: 'top',
+                            display: true,
                             scaleLabel: {
                                 display: true,
                                 labelString: "Minutes"
                             },
                             ticks: options && options.xAxis && options.xAxis.ticks ||{}
+
+
+                        },{
+                            stacked: true,
+                            type:"linear",
+                            display: true,
+                            position: 'bottom',
+                            scaleLabel: {
+                                display: true,
+                                labelString: "Minutes"
+                            },
+                           ticks: options && options.xAxis && options.xAxis.ticks ||{}
+
                         }],
                     yAxes: [
                         {
@@ -1340,6 +1366,7 @@
         }
 
         barGraph.options.scales.xAxes[0].ticks.max = calculateMaxMins(highestPoints);
+        barGraph.options.scales.xAxes[1].ticks.max = calculateMaxMins(highestPoints);
 
         barGraph.update();
     }
@@ -1388,6 +1415,7 @@
         }
 
         barGraph.options.scales.xAxes[0].ticks.max = calculateMaxMins(highestPoints);
+        barGraph.options.scales.xAxes[1].ticks.max = calculateMaxMins(highestPoints);
 
         barGraph.update();
 

@@ -246,10 +246,7 @@
             width: 50%;
         }
 
-        .comparison-header{
-            font-size: 16px;
-            margin: 20px 0;
-        }
+
         .submit {
             margin: 40px 24px;
             background-color: #029932;
@@ -270,6 +267,62 @@
             transform: translateY(3px);
             outline: none;
         }
+        .late{
+            background-color:#E6D83E;
+        }
+        .early{
+            background-color: #E34B71;
+        }
+        .ontime{
+            background-color:#37E627;
+        }
+        .perceptive-table-flex{
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            margin-top: 20px;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        .color-legend-block {
+            padding: 10px;
+            text-align: center;
+            width: 50px;
+            margin: 2.5px;
+        }
+
+        .legend-container {
+            display: flex;
+            margin: 2px;
+            width: 100%;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .otp-content {
+        //  background-color: #e5e5e5;
+            padding: 5px;
+        // border: 1px solid #e5e5e5;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .otp-primary {
+            background-color: #e5e5e5;
+            border: 1px solid #e5e5e5;
+        }
+        .gtfs-submit {
+            margin: 40px 24px;
+            background-color: #029932;
+            cursor: pointer;
+            width: 210px;
+            padding: 10px 20px;
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            box-shadow: 0 4px rgb(127 127 127 / 80%);
+        }
 
     </style>
 
@@ -282,7 +335,7 @@
     <div class="paramsWrapper">
         <div id="paramsSidebar">
             <div id="title">
-                Run Time Comparison
+                Prescriptive Run Times
             </div>
 
             <div id="paramsFields">
@@ -295,122 +348,31 @@
                     <label for="direction">Direction:</label>
                     <select id="direction" name="direction" disabled="true"></select>
                 </div>
-
                 <div class="param individual-route-only">
                     <label for="tripPattern">Trip Pattern:</label>
                     <select id="tripPattern" name="tripPattern" disabled="true"></select>
                 </div>
 
-                <div class="comparison-container">
-
-                    <div class="comparison-header">Select Comparison Period 1</div>
-
-                    <div class="param">
-                        <label for="datepicker1">Date:</label>
-                        <input type="text" id="datepicker1" name="datepicker1"
-                               title="The range of dates that you want to examine data for.
-                                        <br><br> Begin date must be before the end date."
-                               size="18"
-                               value="Date range"/>
-                    </div>
-
-                    <div class="param">
-                        <label for="beginTime1">Begin Time:</label>
-                        <input id="beginTime1" name="beginTime1"
-                               title="Optional begin time of day to limit query to. Useful if
-                                            want to see result just for rush hour, for example. Leave blank
-                                            if want data for entire day.
-                                            <br/><br/>Format: hh:mm, as in '07:00' for 7AM."
-                               placeholder="(hh:mm)"
-                               style="width:100%;"
-                               value=""/>
-                    </div>
-
-                    <div class="param">
-                        <label for="endTime1">End Time:</label>
-                        <input id="endTime1" name="endTime1"
-                               title="Optional end time of day to limit query to. Useful if
-                                            want to see result just for rush hour, for example. Leave blank
-                                            if want data for entire day.
-                                            <br/><br/>Format: hh:mm, as in '09:00' for 9AM.
-                                            Use '23:59' for midnight."
-                               placeholder="(hh:mm)"
-                               style="width:100%;"
-                               value=""/>
-                    </div>
-
-                    <div class="param">
-                        <label for="serviceDayType1">Service Day:</label>
-                        <select id="serviceDayType1" name="serviceDayType1">
-                            <option value="">All</option>
-                            <option value="weekday">Weekday</option>
-                            <option value="saturday">Saturday</option>
-                            <option value="sunday">Sunday</option>
-                            <span class="select2-selection__arrow">
-                                        <b role="presentation"></b>
-                                    </span>
-                        </select>
-                    </div>
-
+                <div class="param">
+                    <label for="serviceDayType">Service Day:</label>
+                    <select id="serviceDayType" name="serviceDayType">
+                        <option value="">All</option>
+                        <option value="weekday">Weekday</option>
+                        <option value="saturday">Saturday</option>
+                        <option value="sunday">Sunday</option>
+                        <span class="select2-selection__arrow">
+                                <b role="presentation"></b>
+                        </span>
+                    </select>
                 </div>
 
-
-                <div class="comparison-container">
-
-                    <div class="comparison-header">Select Comparison Period 2</div>
-
-                    <div class="param">
-                        <label for="datepicker2">Date:</label>
-                        <input type="text" id="datepicker2" name="datepicker2"
-                               title="The range of dates that you want to examine data for.
-                                        <br><br> Begin date must be before the end date."
-                               size="18"
-                               value="Date range"/>
-                    </div>
-
-                    <div class="param">
-                        <label for="beginTime2">Begin Time:</label>
-                        <input id="beginTime2" name="beginTime2"
-                               title="Optional begin time of day to limit query to. Useful if
-                                            want to see result just for rush hour, for example. Leave blank
-                                            if want data for entire day.
-                                            <br/><br/>Format: hh:mm, as in '07:00' for 7AM."
-                               placeholder="(hh:mm)"
-                               style="width:100%;"
-                               value=""/>
-                    </div>
-
-                    <div class="param">
-                        <label for="endTime2">End Time:</label>
-                        <input id="endTime2" name="endTime2"
-                               title="Optional end time of day to limit query to. Useful if
-                                            want to see result just for rush hour, for example. Leave blank
-                                            if want data for entire day.
-                                            <br/><br/>Format: hh:mm, as in '09:00' for 9AM.
-                                            Use '23:59' for midnight."
-                               placeholder="(hh:mm)"
-                               style="width:100%;"
-                               value=""/>
-                    </div>
-
-                    <div class="param">
-                        <label for="serviceDayType2">Service Day:</label>
-                        <select id="serviceDayType2" name="serviceDayType2">
-                            <option value="">All</option>
-                            <option value="weekday">Weekday</option>
-                            <option value="saturday">Saturday</option>
-                            <option value="sunday">Sunday</option>
-                            <span class="select2-selection__arrow">
-                                        <b role="presentation"></b>
-                                    </span>
-                        </select>
-                    </div>
-
+                <div class="param">
+                    <label for="timeband">Time Band:</label>
+                    <select id="timeband" name="timeband"></select>
                 </div>
-
             </div>
             <div class="submitDiv">
-                <input type="button" id="submit" class="submit" value="Submit">
+                <button id="submit" class="submit">Analyze</button>
             </div>
 
 
@@ -419,16 +381,56 @@
 
 
     <div id="mainPage" class="scrollable-element inner-spacing">
-        <h3 id="visualization-container-header">Average Trip Run Times</h3>
 
+        <div id="perceptive-header-container"> </div>
+        <div class="perceptive-summary-container">
+            <div class="individual-route">
+                <h3>Trip Run Time Summary</h3>
+                <table class="border-table">
+                    <tbody><tr>
+                        <th>Average</th>
+                        <th>Fixed</th>
+                        <th>Variable</th>
+                        <th>Dwell</th>
+                    </tr>
+                    <tr class="average-time-details"></tr>
+                    </tbody></table>
+            </div>
 
-        <div class="visualization-container">
+        </div>
+        <div class="perceptive-table-container">
+            <div class="perceptive-table-flex">
 
-            <div id="runTimeVisualization">
+                <div class="adjustment-details inner-flex">
+
+                </div>
+
+                <div class=" inner-flex button-adjustment-details">
+                    <div class="otp-containers">
+                        <div class="otp-content otp-secondary">
+                            <span>OTP (current)</span>
+                            <span id="current_otp"></span>
+                        </div>
+                        <div class="otp-content otp-primary">
+                            <span>OTP (predicted)</span>
+                            <span id="expected_otp"></span>
+                        </div>
+                    </div>
+                    <div class="table-description-container">
+                        <h6>Actual Performance</h6>
+                        <div class="legend-container">
+                            <div class="color-legend-block early">Short</div>
+                            <div class="color-legend-block ontime">Good</div>
+                            <div class="color-legend-block late">Long</div>
+                        </div>
+                    </div>
+                </div>
+                <div class=" inner-flex export-container">
+                    <button class="gtfs-submit ">Export to GTFS</button>
+                </div>
 
             </div>
         </div>
-
     </div>
 </div>
 </body>
@@ -437,6 +439,48 @@
 <script>
 
     var stops = {};
+
+    function generateTimeBands(){
+
+        var timebandOptions = [{
+            name: "Early AM",
+            value: "00:00 - 06:30"
+
+        },{
+            name: "AM Rush",
+            value:"06:30 - 09:00"
+        },{
+            name: "AM Midday",
+            value:"09:00 - 12:00"
+        },{
+            name: "PM Midday",
+            value:"12:00 - 15:30"
+        },{
+            name:  "PM Rush",
+            value:"15:30 - 18:30"
+        },{
+            name: "Late PM",
+            value:"18:30 - "
+        }];
+
+
+        timebandOptions.forEach(function (eachTime) {
+            $("#timeband").append("<option value='" + eachTime.value + "'>" + eachTime.name + "</option>");
+        })
+
+        $("#timeband").append(' <span class="select2-selection__arrow"><b role="presentation"></b> </span>');
+
+
+    }
+
+    function getScheduledType(timeReference){
+        if (timeReference <= -6000) {
+            return "late";
+        } else if (timeReference >= 6000) {
+            return "early";
+        }
+        return "ontime";
+    }
 
     $("#route").attr("style", "width: 200px");
 
@@ -457,6 +501,7 @@
     $("#direction").change(function () {
         populateTripPattern();
     })
+
     var highestPoints = [];
 
     function msToMin(data) {
@@ -475,211 +520,142 @@
     $("#submit").click(function () {
 
         $("#submit").attr("disabled", "disabled");
+        $("#submit").html("Loading...").addClass("submit-loading");
         $(".wrapper").addClass("split");
         $("#mainResults").hide();
-        $("#runTimeVisualization").html('');
 
-        var request1 = getParams(true);
-        var request2 = getParams(false);
-        var responses = {};
-        var count = 0;
-        var sumResponse = {"avgRunTime":[],"fixed":[],"variable":[],"dwell":[],"labels":[]}
-        var callBack = function(key , response){
-            count++;
+        var request = getParams();
+        var dataUrl = apiUrlPrefix +  "/report/runTime/prescriptiveRunTimes";
 
-            if (jQuery.isEmptyObject(response)) {
-                alert("No run time information available for selected parameters.");
-            } else {
-                responses[key] = response;
+        $.ajax({
+            url: dataUrl,
+            // Pass in query string parameters to page being requested
+            data: request,
+            // Needed so that parameters passed properly to page being requested
+            traditional: true,
+            dataType: "json",
+            success: function (response) {
+                $("#submit").attr("disabled", false);
+                $("#submit").html("Analyze").removeClass("submit-loading");
+                if (jQuery.isEmptyObject(response)) {
+                    alert("No run time information available for selected parameters.");
+                } else {
+                    var adjustmentsSuccess = response.adjustments && response.adjustments.length > 0;
+                    var summarySuccess = response.summary && response.summary.avgRunTime;
+
+                    if(adjustmentsSuccess && summarySuccess){
+                        generateAverageRunTimesTable(request, response);
+                        generatePrescriptiveRunTimesTable(response);
+                    }
+                    else if(!adjustmentsSuccess) {
+                        alert("No Prescriptive RunTimes available for selected criteria.");
+                    } else if(!summarySuccess) {
+                        alert("Unable to retreive Average RunTime information for selected criteria.");
+                    }
+                }
+            },
+            error: function (e) {
+                $("#submit").attr("disabled", false);
+                $("#submit").html("Analyze").removeClass("submit-loading");
+                alert("No Prescriptive RunTimes available for selected criteria.");
             }
-
-
-            if(count === 2)
-            {
-                $("#submit").removeAttr("disabled");
-
-                Object.keys(responses).forEach(function(eachResponse, index){
-
-                    sumResponse["avgRunTime"].push(responses[eachResponse]["avgRunTime"]);
-                    sumResponse["fixed"].push(responses[eachResponse]["fixed"]);
-                    sumResponse["variable"].push(responses[eachResponse]["variable"]);
-                    sumResponse["dwell"].push(responses[eachResponse]["dwell"]);
-                    sumResponse["labels"].push("Period  " + eachResponse);
-
-                });
-
-                visualizeData(sumResponse)
-            }
-
-
-
-        };
-
-        serviceCall(request1, "1",  callBack);
-        serviceCall(request2, "2", callBack);
-
+        })
 
 
     });
 
-    function visualizeData(response){
-        var defaultHeight = (response.avgRunTime.length ) *300;
-        var defaultWidth = window.innerWidth;
+    function generateAverageRunTimesTable(request, response){
+        var beginDateArray = request.beginDate.split("-");
+        var endDateArray = request.endDate.split("-");
 
-        $("#runTimeVisualization").html(' <canvas id="visualizationCanvas" class="custom-canvas"  height="'+defaultHeight+'" width="'+defaultWidth+'"></canvas>');
-        generateComparisonChart(response);
+        [beginDateArray[0], beginDateArray[1], beginDateArray[2]] = [beginDateArray[1], beginDateArray[2], beginDateArray[0]];
+        [endDateArray[0], endDateArray[1], endDateArray[2]] = [endDateArray[1], endDateArray[2], endDateArray[0]];
+
+        var beginDateString = beginDateArray.join("/");
+        var endDateString = endDateArray.join("/");
+
+        var serviceDayString = request.serviceType;
+
+        if (serviceDayString == "") {
+            serviceDayString = "All days";
+        }
+
+        updateParamDetails(request.r, request.headsign, request.tripPattern, beginDateString, endDateString,
+            request.beginTime, request.endTime, serviceDayString);
+
+        var avgRunTime = typeof (response.summary.avgRunTime) == 'undefined' ? "N/A" : (response.summary.avgRunTime / 60000).toFixed(1) + " min";
+        var avgFixed = typeof (response.summary.fixed) == 'undefined' ? "N/A" : (response.summary.fixed / 60000).toFixed(1) + " min";
+        var avgVar = typeof (response.summary.variable) == 'undefined' ? "N/A" : (response.summary.variable / 60000).toFixed(1) + " min";
+        var avgDwell = typeof (response.summary.dwell) == 'undefined' ? "N/A" : (response.summary.dwell / 60000).toFixed(1) + " min";
+
+        var tableTD = "<td>"+avgRunTime+"</td>";
+        tableTD += "<td>"+avgFixed+"</td>";
+        tableTD += "<td>"+avgVar+"</td>";
+        tableTD += "<td>"+avgDwell+"</td>";
+
+        $(".average-time-details").html(tableTD);
     }
 
-    function calculateMaxMins(points) {
-        maxMins = Math.round(points[0]) + Math.round(points[1]) + Math.round(points[2]);
-        if (Math.round(points[3]) > maxMins) {
-            maxMins = Math.round(points[3]);
-        }
-        if (Math.round(points[4]) > maxMins) {
-            maxMins = Math.round(points[4]);
-        }
-
-        return Math.ceil(maxMins / 5) * 5;
+    function updateParamDetails(route, headsign, tripPattern, beginDateString, endDateString, beginTime,
+                                endTime, serviceDayString){
+        $("#perceptive-header-container").html("<p style='font-size: 0.8em;'>" +
+            (!route || route == "" ? "All routes" : "Route " + route) + " to " +
+            (!headsign || headsign == "" ? "All directions" : headsign) + " | " +
+            //(!tripPattern || tripPattern == "" ? "All Trip Patterns" : tripPattern) + " | " +
+            beginDateString + " to " + endDateString +  " | " +
+            beginTime + " - " + endTime +
+            (!serviceDayString || serviceDayString == "" ? "" : " | " + serviceDayString) +
+            "</p>");
     }
 
-    function generateComparisonChart(response){
-        var barGraph = getDefaultChartOptions({
-            yAxis:{
-                isStacked: true
+    function generatePrescriptiveRunTimesTable(response){
+        var currentTable = '<table class="border-table">';
+        currentTable += '<tbody><tr><th>Stop</th><th>Scheduled</th><th>Adjustment</th></tr>';
+
+        var totalScheduleMin = 0;
+        var totalAdjustmentMin = 0;
+
+        response.adjustments.forEach(function(eachAdjustment){
+
+            var scheduleMin  = parseFloat((eachAdjustment.schedule / 60000).toFixed(1));
+            var adjustment  = parseFloat((eachAdjustment.adjustment / 60000).toFixed(1));
+            var sheduledClassName = getScheduledType(eachAdjustment.adjustment);
+
+            totalScheduleMin += scheduleMin;
+            totalAdjustmentMin += adjustment;
+
+            if(adjustment > 0){
+                var adjustment = "+" + adjustment;
             }
+
+            currentTable += "<tr><td>"+eachAdjustment.stop+"</td>";
+            currentTable += '<td class="'+sheduledClassName+'">'+scheduleMin+' min</td>';
+            currentTable += "<td>"+adjustment+" min</td>";
+            currentTable += "</tr>";
+
         });
-        barGraph.data = {
-            datasets: [
-                {
-                    data: msToMin(response.fixed),
-                    backgroundColor: '#36509b',
-                    label: "Fixed",
-                    yAxisId: "bars"
-                },
-                {
-                    data: msToMin(response.variable),
-                    backgroundColor: '#df7f17',
-                    label: "Variable",
-                    yAxisId: "bars"
-                },
-                {
-                    data: msToMin(response.dwell),
-                    backgroundColor: '#8c8c8c',
-                    label: "Dwell",
-                    yAxisId: "bars"
-                }/*,
-                {
-                    type: "scatter",
-                    data: arraysToXAndY([msToMin(response.data.scheduled), response.data.stopPaths]),
-                    backgroundColor: '#70a260',
-                    label: "Scheduled",
-                    showLine: false,
-                    fill: false,
-                }*/],
-            labels: response.labels
+
+        totalAdjustmentMin = totalAdjustmentMin.toFixed(1);
+        if(totalAdjustmentMin > 0){
+            var totalAdjustmentMin = "+" + totalAdjustmentMin;
         }
 
-        barGraph.options.scales.xAxes[0].ticks.max = calculateMaxMins(highestPoints);
+        currentTable += "<tr><td>Total For All Stops</td>";
+        currentTable += "<td>"+totalScheduleMin+" min</td>";
+        currentTable += "<td>"+totalAdjustmentMin+" min</td>";
+        currentTable += "</tr>";
 
-        barGraph.update();
-
-
-    }
-    Chart.plugins.register({
-        afterDatasetsDraw: function(chart) {
-            var ctx = chart.ctx;
-
-            ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
-            ctx.fillStyle = '#000000';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'bottom';
-
-            Chart.helpers.each(chart.data.datasets.forEach(function(dataset, i) {
-                var meta = chart.controller.getDatasetMeta(i);
-                Chart.helpers.each(meta.data.forEach(function(bar, index) {
-                    ctx.save();
-                    var data = dataset.data[index];
-                    if(chart.options && chart.options.showPercentage) {
-                        data = Math.floor(data);
-                        if(data !== 0) {
-                            ctx.fillText(data + "%", bar._model.x - ((bar._model.x - bar._model.base) / 2), bar._model.y + 5);
-                        }
-                    } else {
-                        ctx.fillText(data, bar._model.x - ((bar._model.x - bar._model.base) / 2), bar._model.y + 5);
-                    }
-                    ctx.restore(); //<- restore canvas state
-                }))
-            }));
-        }
-    });
-
-
-    function getDefaultChartOptions(options){
-
-        var canvas = $("#visualizationCanvas");
-        var barGraph = new Chart(canvas, {
-            type: 'horizontalBar',
-            data: {},
-            options: {
-                showPercentage: options && options.showPercentage,
-                scales: {
-                    xAxes: [
-                        {
-                            stacked: true,
-                            scaleLabel: {
-                                display: true,
-                                labelString: "Minutes"
-                            },
-                            ticks: options && options.xAxis && options.xAxis.ticks ||{}
-                        }],
-                    yAxes: [
-                        {
-                            id: "bars",
-                            stacked: options && options.yAxis && options.yAxis.isStacked || false,
-                            ticks: options && options.yAxis && options.yAxis.ticks || {
-                                stepSize: 1
-                            }
-                        }
-                    ]
-                },
-                legend: {
-                    position: 'top',
-                    onClick: function (l) {
-                        l.stopPropagation();
-                    }
-
-                },
-                tooltips: {
-                    callbacks: {
-                        label: function (tooltipItem) {
-                            var data = this._data.datasets[tooltipItem.datasetIndex];
-                            var value = function () {
-                                if(options && options.showPercentage) {
-                                    return  Math.floor(data.data[tooltipItem.index]) +"%";
-                                } else  if (data.label == "Scheduled" || data.label == "Next trip start") {
-                                    return data.data[tooltipItem.index].x;
-                                } else {
-                                    return data.data[tooltipItem.index];
-                                }
-                            }
-                            return data.label + ": " + value();
-                        }
-                    }
-                },
-                animation: false
-            }
-        });
-        visualarGraphChart = barGraph;
-        return barGraph;
+        currentTable += '</tbody></table>';
+        $("#current_otp").html(response.current_otp);
+        $("#expected_otp").html(response.expected_otp);
+        $(".adjustment-details").html(currentTable);
     }
 
     function populateDirection() {
 
-        $("#submit").attr("disabled", true);
-
-        $("#tripPattern").empty();
         $("#direction").removeAttr('disabled');
         $("#direction").empty();
+        $("#tripPattern").empty();
 
 
         $.ajax({
@@ -705,13 +681,12 @@
             },
             error: function (response) {
                 alert("Error retrieving directions for route " + response.r);
-                $("#submit").attr("disabled", false);
             }
         })
     }
 
-    function populateTripPattern() {
 
+    function populateTripPattern() {
         $("#tripPattern").empty();
 
         var direction = JSON.parse($("#direction").val());
@@ -738,11 +713,11 @@
                 if (resp.tripPatterns.length == 0) {
                     alert("No trip pattern data for selected route and headsign.");
                     $("#submit").attr("disabled", true);
+                    $("#submit").html("Loading").addClass("submit-loading");
                 } else {
                     $("#tripPattern").removeAttr('disabled');
                     $("#submit").removeAttr('disabled');
-
-                    $("#tripPattern").append("<option value=''>All</option>")
+                    $("#submit").html("Analyze").removeClass("submit-loading");
                     resp.tripPatterns.forEach(function (tripPattern) {
                         $("#tripPattern").append("<option value='" + tripPattern.id + "'>" + tripPattern.firstStopName + ' to ' + tripPattern.lastStopName + "</option>");
                     })
@@ -754,56 +729,45 @@
             error: function (request, status, error) {
                 alert(error + '. ' + request.responseText);
                 $("#submit").attr("disabled", false);
+                $("#submit").html("Analyze").removeClass("submit-loading");
             }
         });
     }
 
-    function getParams(flag) {
 
-        var datepicker, serviceTypeSelector, endTime, beginTime;
-        if (flag) {
-            datepicker = "datepicker1";
-            beginTime="beginTime1";
-            endTime="endTime1";
-            serviceTypeSelector = "serviceDayType1";
-        } else {
-            datepicker = "datepicker2";
-            beginTime="beginTime2";
-            endTime="endTime2";
-            serviceTypeSelector = "serviceDayType2";
-        }
+    function getParams() {
 
-        if ($("#" + datepicker).val() == "Date range") {
-            var today = new Date();
-            var beginDate = endDate = today.getFullYear() + "-"
-                + (today.getMonth() <= 10 ? "0" + (today.getMonth() + 1) : (today.getMonth() + 1))
-                + "-" + (today.getDate() < 10 ? "0" + today.getDate() : today.getDate());
-        } else {
-            var dateRangeStrings = $("#" + datepicker).val().replace(/\s/g, "").split("-");
-            var beginYear = "20" + dateRangeStrings[0];
-            var endYear = "20" + dateRangeStrings[3];
-            var beginDate = [beginYear, dateRangeStrings[1], dateRangeStrings[2]].join("-");
-            var endDate = [endYear, dateRangeStrings[4], dateRangeStrings[5]].join("-");
-        }
-
-        var beginTime = $("#"+beginTime).val() == "" ? "00:00:00" : $("#"+beginTime).val() + ":00";
-        var endTime = $("#"+endTime).val() == "" ? "23:59:59" : $("#"+endTime).val() + ":00";
 
         var routeName = $("#route").val().trim() == "" ? "" : $("#route").val();
-        var tripPatternName = $("#tripPattern").val() == null ? "" : $("#tripPattern").val();
         var directionName = $("#direction").val();
-
 
         params = {};
 
-        params.beginDate = beginDate;
-        params.endDate = endDate;
-        params.beginTime = beginTime;
-        params.endTime = endTime;
+
+        var timeBand = $("#timeband").val() == null ? "00:00-06:30": $("#timeband").val();
+
+
+        var firstDay = new Date();
+        firstDay.setDate(firstDay.getDate() - 30);
+
+        var lastDay = new Date();
+
+        params.beginDate =  firstDay.getFullYear() + "-"
+            + (firstDay.getMonth() <= 10 ? "0" + (firstDay.getMonth() + 1) : (firstDay.getMonth() + 1))
+            + "-" + (firstDay.getDate() < 10 ? "0" + firstDay.getDate() : firstDay.getDate());
+
+        params.endDate =  lastDay.getFullYear() + "-"
+            + (lastDay.getMonth() <= 10 ? "0" + (lastDay.getMonth() + 1) : (lastDay.getMonth() + 1))
+            + "-" + (lastDay.getDate() < 10 ? "0" + lastDay.getDate() : lastDay.getDate());
+
+
+        params.beginTime = (timeBand.split("-")[0]).trim()+":00";
+        console.log(timeBand.split("-")[1].length);
+        params.endTime = timeBand.split("-")[1] == " " ? "": (timeBand.split("-")[1]).trim()+":00";
         params.r = routeName
         params.headsign = directionName;
-        params.serviceType = $("#" + serviceTypeSelector).val();
-        params.tripPattern = tripPatternName;
+        params.serviceType = $("#serviceDayType").val();
+        params.tripPattern =  $("#tripPattern").val() == null ? "" : $("#tripPattern").val();
 
         if(directionName == null){
             params.headsign = "";
@@ -817,68 +781,6 @@
         return params;
     }
 
-    function datePickerIntialization () {
-        var calendarIconTooltip = "Popup calendar to select date";
+    generateTimeBands();
 
-        $("#datepicker1, #datepicker2").datepick({
-            dateFormat: "yy-mm-dd",
-            showOtherMonths: true,
-            selectOtherMonths: true,
-            // Show button for calendar
-            buttonImage: "img/calendar.gif",
-            buttonImageOnly: true,
-            showOn: "both",
-            // Don't allow going past current date
-            maxDate: 0,
-            // onClose is for restricting end date to be after start date,
-            // though it is potentially confusing to user
-            rangeSelect: true,
-            showTrigger: '<button type="button" class="trigger">' +
-                '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
-            onClose: function (selectedDate) {
-                // Strangely need to set the title attribute for the icon again
-                // so that don't revert back to a "..." tooltip
-                // FIXME $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
-            }
-        });
-
-        // Use a better tooltip than the default "..." for the calendar icon
-        $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
-
-        $("#beginTime1, #endTime1, #beginTime2, #endTime2").timepicker({timeFormat: "H:i"})
-            .on('change', function (evt) {
-                if (evt.originalEvent) { // manual change
-                    // validate that this looks like HH:MM
-                    if (!evt.target.value.match(/^(([0,1][0-9])|(2[0-3])):[0-5][0-9]$/))
-                        evt.target.value = evt.target.oldval ? evt.target.oldval : "";
-                }
-                evt.target.oldval = evt.target.value;
-            });
-
-    }
-
-    function serviceCall(request, key, callBack){
-
-        $.ajax({
-            url: apiUrlPrefix + "/report/runTime/avgRunTime",
-            // Pass in query string parameters to page being requested
-            data: request,
-            // Needed so that parameters passed properly to page being requested
-            traditional: true,
-            dataType: "json",
-            success: function (response) {
-
-
-                callBack(key,response);
-
-            },
-            error: function () {
-                $("#submit").removeAttr("disabled");
-                alert("Error processing average trip run time.");
-            }
-        })
-
-    }
-
-    datePickerIntialization();
 </script>
