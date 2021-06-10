@@ -1083,7 +1083,7 @@
                 } else if(response.data && response.data.summary && response.data.summary) {
                     $(".all-routes").hide();
                     updateParamDetails(request.r, request.headsign, request.tripPattern, beginDateString, endDateString,
-                                        timeRange, serviceDayString);
+                        timeRange, serviceDayString);
                     updateSummaryTable(response.data.summary);
 
                     $("#component").show();
@@ -1259,11 +1259,26 @@
                     xAxes: [
                         {
                             stacked: true,
+                            position: 'top',
+                            display: true,
                             scaleLabel: {
                                 display: true,
                                 labelString: "Minutes"
                             },
                             ticks: options && options.xAxis && options.xAxis.ticks ||{}
+
+
+                        },{
+                            stacked: true,
+                            type:"linear",
+                            display: true,
+                            position: 'bottom',
+                            scaleLabel: {
+                                display: true,
+                                labelString: "Minutes"
+                            },
+                           ticks: options && options.xAxis && options.xAxis.ticks ||{}
+
                         }],
                     yAxes: [
                         {
@@ -1340,6 +1355,7 @@
         }
 
         barGraph.options.scales.xAxes[0].ticks.max = calculateMaxMins(highestPoints);
+        barGraph.options.scales.xAxes[1].ticks.max = calculateMaxMins(highestPoints);
 
         barGraph.update();
     }
@@ -1388,6 +1404,7 @@
         }
 
         barGraph.options.scales.xAxes[0].ticks.max = calculateMaxMins(highestPoints);
+        barGraph.options.scales.xAxes[1].ticks.max = calculateMaxMins(highestPoints);
 
         barGraph.update();
 
