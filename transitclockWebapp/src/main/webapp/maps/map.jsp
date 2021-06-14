@@ -57,6 +57,44 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
             }
         }
 
+        .each-destination {
+            display: flex;
+            flex-direction: column;
+            margin: 2px 0px;
+            width: 100%;
+            /*border-bottom:1px solid #e5e5e5;*/
+            padding-bottom: 10px;
+        }
+        .vehicle-icon-prediction{
+            height: 14px;
+            width: 14px;
+        }
+        .vehicle-image-detail{
+            display:flex;
+            flex-direction:row;
+            align-items:center;
+        }
+        .each-prediction{
+            display:flex;
+            flex-direction:row;
+            align-items:center;
+            justify-content: space-between;
+        }
+
+        .vehicle-id {
+            margin: 0px 10px
+        }
+        .eachDest-header{
+            font-size:12px;
+            font-weight: bold;
+            color: #1a73e8;
+        }
+
+        .bus-enroute {
+            margin: 10px 0px;
+           /* border-bottom:2px solid #e5e5e5; */
+        }
+
     </style>
 
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -192,89 +230,85 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
      * Called when prediction read from API. Updates the content of the
      * predictionsPopup with the new prediction info.
      */
+
     function predictionCallback(preds, status) {
         // If predictions popup was closed then don't do anything
         if (predictionsPopup == null)
             return;
 
-        // There will be predictions for just a single route/stop
-        var routeStopPreds = preds.predictions[0];
+        var currentRouteStopPreds = preds.predictions[0];
 
         // Set timeout to update predictions again in few seconds
-        predictionsTimeout = setTimeout(getPredictionsJson, 20000, routeStopPreds.routeShortName, routeStopPreds.stopId);
+        predictionsTimeout = setTimeout(getPredictionsJson, 20000, currentRouteStopPreds.routeShortName, currentRouteStopPreds.stopId);
 
-        // Add route and stop info
-        var stopName = routeStopPreds.stopName;
-        if (routeStopPreds.stopCode)
-            stopName += " (" + routeStopPreds.stopCode + ")";
-        var content = '<b>Route:</b> ' + routeStopPreds.routeName + '<br/>'
-            + '<b>Stop:</b> ' + stopName + '<br/>';
-        if (verbose)
-            content += '<b>Stop Id:</b> ' + routeStopPreds.stopId + '<br/>';
 
-        // For each destination add predictions
-        for (var i in routeStopPreds.dest) {
-            // If there are several destinations then add a horizontal rule
-            // to break predictions up by destination
-            if (routeStopPreds.dest.length > 1)
-                content += '<hr/>';
+        // There will be predictions for just a single route/stop
+        var content = "";
+        $(preds.predictions).each(function(index, routeStopPreds){
 
-            // Add the destination/headsign info
-            if (routeStopPreds.dest[i].headsign)
-                content += '<b>Destination:</b> ' + routeStopPreds.dest[i].headsign + '<br/>';
+            // var routeStopPreds = preds.predictions[0];
 
-            // Add each prediction for the current destination
-            if (routeStopPreds.dest[i].pred.length > 0) {
-                content += '<span class="prediction">';
+            if(index === 0){
+                content += '<b>Stop Name:</b> ' + routeStopPreds.stopName + '<br/>';
 
-                for (var j in routeStopPreds.dest[i].pred) {
-                    // Separators between the predictions
-                    if (j == 1)
-                        content += ', ';
-                    else if (j == 2)
-                        content += ' & '
+                if (verbose)
+                    content += '<b>Stop Id:</b> ' + routeStopPreds.stopId + '<br/>';
 
-                    // Add the actual prediction
-                    var pred = routeStopPreds.dest[i].pred[j];
-                    content += pred.min;
-
-                    // Added any special indicators for if schedule based,
-                    // delayed, or not yet departed from terminal
-                    /*
-                    if (pred.scheduleBased)
-                        content += '<sup>sched</sup>';
-                    else {
-                        if (pred.notYetDeparted)
-                            content += '<sup>not yet left</sup>';
-                        else
-                            if (pred.delayed)
-                                content += '<sup>delayed</sup>';
-                    }
-                    */
-                    // If in verbose mode add vehicle info
-                    if (verbose)
-                        content += ' <span class="vehicle">(vehicle ' + pred.vehicle + ')</span>';
-                }
-                content += ' minutes';
-
-                content += '</span>';
-            } else {
-                // There are no predictions so let user know
-                content += "No predictions";
+                content += '<div class="bus-enroute"><b>Buses en-route</b> </div>';
             }
-        }
 
+            // For each destination add predictions
+            $(routeStopPreds.dest).each(function(index2, eachDest){
+                // Add the destination/headsign info
+                content += "<div class='each-destination'><div class='eachDest-header'>"+routeStopPreds.routeShortName ;
+
+                if (eachDest.headsign){
+                    content +=  " - " + eachDest.headsign;
+                    // content += '<b>Destination:</b> ' + routeStopPreds.dest[i].headsign + '<br/>';
+                }
+                content += "</div>";
+
+                if (eachDest.pred.length > 0) {
+
+                    $(eachDest.pred).each(function(index3, eachPred){
+
+                        content += '<div class="each-prediction">'
+                        content += '<div class="vehicle-image-detail"><img src="'+busIcon.options.iconUrl+'"  class="vehicle-icon-prediction"/>';
+                        content += '<span class="vehicle-id">'+ eachPred.vehicle +'</span></div>';
+                        content += '<span class="vehicle-time">'+ eachPred.min +' minutes</span>';
+                        content += '</div>';
+
+                    });
+
+
+                } else {
+                    content += "<div class='no-predictions'>No predictions</div>";
+                }
+
+                content += "</div>";
+
+            });
+
+        });
         // Now update popup with the wonderful prediction info
         predictionsPopup.setContent(content);
     }
+
+
 
     /**
      * Initiates API call to get prediction data.
      */
     function getPredictionsJson(routeShortName, stopId) {
+
+        var selectedDataList = $("#routes").select2("data");
+        var selectedRouteId = "";
+        $(selectedDataList).each(function(index, eachList){
+            selectedRouteId += "rs=" + eachList.id + encodeURIComponent("|") + stopId + ($(selectedDataList).length-1 === index ? "": "&");
+        });
+
         // JSON request of predicton data
-        var url = apiUrlPrefix + "/command/predictions?rs=" + routeShortName
-            + encodeURIComponent("|") + stopId;
+        var url = apiUrlPrefix + "/command/predictions?" + selectedRouteId;
         $.getJSON(url, predictionCallback);
     }
 
@@ -911,7 +945,7 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
         // If route not yet configured then simply return. Don't want to read
         // in all vehicles for agency!
         if (!getRouteQueryStrParam())
-        	return;
+            return;
 
         var url = apiUrlPrefix + "/command/vehiclesDetails?" + getRouteQueryStrParam();
         // If stop specified as query str param to this page pass it to the
