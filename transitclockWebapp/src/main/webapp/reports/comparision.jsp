@@ -521,6 +521,7 @@
 
         $("#submit").attr("disabled", "disabled");
         $("#submit").html("Loading...").addClass("submit-loading");
+        $("body").addClass("loader");
         $(".wrapper").addClass("split");
         $("#mainResults").hide();
 
@@ -537,6 +538,7 @@
             success: function (response) {
                 $("#submit").attr("disabled", false);
                 $("#submit").html("Analyze").removeClass("submit-loading");
+                $("body").removeClass("loader");
                 if (jQuery.isEmptyObject(response)) {
                     alert("No run time information available for selected parameters.");
                 } else {
@@ -557,6 +559,7 @@
             error: function (e) {
                 $("#submit").attr("disabled", false);
                 $("#submit").html("Analyze").removeClass("submit-loading");
+                $("body").removeClass("loader");
                 alert("No Prescriptive RunTimes available for selected criteria.");
             }
         })
@@ -714,10 +717,12 @@
                     alert("No trip pattern data for selected route and headsign.");
                     $("#submit").attr("disabled", true);
                     $("#submit").html("Loading").addClass("submit-loading");
+                    $("body").addClass("loader");
                 } else {
                     $("#tripPattern").removeAttr('disabled');
                     $("#submit").removeAttr('disabled');
                     $("#submit").html("Analyze").removeClass("submit-loading");
+                    $("body").removeClass("loader");
                     resp.tripPatterns.forEach(function (tripPattern) {
                         $("#tripPattern").append("<option value='" + tripPattern.id + "'>" + tripPattern.firstStopName + ' to ' + tripPattern.lastStopName + "</option>");
                     })
@@ -730,6 +735,7 @@
                 alert(error + '. ' + request.responseText);
                 $("#submit").attr("disabled", false);
                 $("#submit").html("Analyze").removeClass("submit-loading");
+                $("body").removeClass("loader");
             }
         });
     }
