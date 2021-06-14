@@ -392,7 +392,6 @@
                 </div>
                 <div class="param vertical route-settings">
                     <span>Route Settings</span>
-
                     <div id="radioButtons" class="custom-radioButtons">
                         <input type="radio" name="stopType"  checked="checked"  id="timePointsOnly"><label for="timePointsOnly" id="timePointsOnlyLabel">Time Points</label>
                         <input type="radio" name="stopType" id="allStops"><label for="allStops">All Stops</label>
@@ -405,9 +404,15 @@
             </div>
         </div>
     </div>
-
-
     <div id="mainPage" class="scrollable-element inner-spacing">
+        <div id="overlay"></div>
+        <div id="bars1">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
         <div id="paramDetails" class="paramDetails">
             <p style='font-size: 0.8em;'></p>
         </div>
@@ -471,6 +476,7 @@
         </div>
 
     </div>
+
 </div>
 </body>
 </html>
@@ -782,7 +788,7 @@
     function populateDirection() {
 
         $("#submit").attr("disabled", true);
-        $("#submit").html("Loading").addClass("submit-loading");
+        $("#submit").html("Loading...");
         $("body").addClass("loader");
         $("#tripPattern").empty();
         $("#direction").removeAttr('disabled');
@@ -813,7 +819,7 @@
                 alert("Error retrieving directions for route " + response.r);
                 $("#submit").attr("disabled", false);
                 $("body").removeClass("loader");
-                $("#submit").html("Submit").removeClass("submit-loading");
+                $("#submit").html("Submit");
             }
         })
     }
@@ -844,12 +850,12 @@
                 if (resp.tripPatterns.length == 0) {
                     alert("No trip pattern data for selected route and headsign.");
                     $("#submit").attr("disabled", true);
-                    $("#submit").html("Loading").addClass("submit-loading");
+                    $("#submit").html("Loading...");
                     $("body").addClass("loader");
                 } else {
                     $("#tripPattern").removeAttr('disabled');
                     $("#submit").removeAttr('disabled');
-                    $("#submit").html("Submit").removeClass("submit-loading");
+                    $("#submit").html("Submit");
                     $("body").removeClass("loader");
 
                     $("#tripPattern").append("<option value=''>All</option>")
@@ -865,7 +871,7 @@
                 alert(error + '. ' + request.responseText);
                 $("#submit").attr("disabled", false);
                 $("body").removeClass("loader");
-                $("#submit").html("Submit").removeClass("submit-loading");
+                $("#submit").html("Submit");
             }
         });
     }
@@ -1018,32 +1024,13 @@
 
     $("#submit").click(function () {
         $("#submit").attr("disabled", "disabled");
-        $("#submit").html("Loading").addClass("submit-loading");
-        $("body").addClass("loader");
+        $("#submit").html("Loading...");
+        $("#overlay").show();
+        $("#bars1").show();
         $(".wrapper").addClass("split");
         $("#mainResults").hide();
         $("#runTimeVisualization").hide();
         $("#modalDatepicker").val("Date range")
-        $("#comparisonModal").hide();
-        $("#comparisonResults").hide();
-        $("#comparisonResults").html(
-            '<hr>' +
-
-            '<div id="comparisonParams" class="paramDetails" style="float: left;">' +
-            '<p style="font-size: 0.8em;"></p>' +
-            '</div>' +
-
-            '<div id="comparisonAvgRunTime" style="display: inline-block; margin-left: 20px; width: 90%; vertical-align: middle;">' +
-            '<p style="font-size: 0.8em;display: inline-block;"></p>' +
-            '<p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>' +
-            '<p style="font-size: 0.8em;display: inline-block;"></p>' +
-            '<p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>' +
-            '<p style="font-size: 0.8em;display: inline-block;"></p>' +
-            '<p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>' +
-            '<p style="font-size: 0.8em;display: inline-block;"></p>' +
-            '<p style="font-size: 0.8em;display: inline-block; width: 60px; height: 1.5em;"></p>' +
-            '</div>'
-        );
 
         request = getParams();
 
@@ -1090,8 +1077,9 @@
                 if (jQuery.isEmptyObject(response)) {
                     $("#component").hide();
                     $("#submit").removeAttr("disabled");
-                    $("#submit").html("Submit").removeClass("submit-loading");
-                    $("body").removeClass("loader");
+                    $("#submit").html("Submit");
+                    $("#overlay").hide();
+                    $("#bars1").hide();
                     alert("No run time information available for selected parameters.");
                 } else if(response.data && response.data.summary && response.data.summary) {
                     $(".all-routes").hide();
@@ -1106,8 +1094,9 @@
 
                     $("#mainResults").show();
                     $("#submit").removeAttr("disabled");
-                    $("#submit").html("Submit").removeClass("submit-loading");
-                    $("body").removeClass("loader");
+                    $("#submit").html("Submit");
+                    $("#overlay").hide();
+                    $("#bars1").hide();
                 }
                 else if(response.data && response.data.routes){
                     $(".individual-route").hide();
@@ -1122,13 +1111,15 @@
 
                     $("#mainResults").show();
                     $("#submit").removeAttr("disabled");
-                    $("#submit").html("Submit").removeClass("submit-loading");
-                    $("body").removeClass("loader");
+                    $("#submit").html("Submit");
+                    $("#overlay").hide();
+                    $("#bars1").hide();
                 }
                 else {
                     $("#submit").removeAttr("disabled");
-                    $("#submit").html("Submit").removeClass("submit-loading");
-                    $("body").removeClass("loader");
+                    $("#submit").html("Submit");
+                    $("#overlay").hide();
+                    $("#bars1").hide();
                     $("#component").hide();
                     alert("Unable to find any valid results. Please try a different search.");
                 }
@@ -1136,8 +1127,9 @@
             },
             error: function () {
                 $("#submit").removeAttr("disabled");
-                $("#submit").html("Submit").removeClass("submit-loading");
-                $("body").removeClass("loader");
+                $("#submit").html("Submit");
+                $("#overlay").hide();
+                $("#bars1").hide();
                 alert("Error processing average trip run time.");
             }
         })
@@ -1225,7 +1217,7 @@
                             },
                             error: function () {
                                 $("#submit").removeAttr("disabled");
-                                $("#submit").html("Submit").removeClass("submit-loading");
+                                $("#submit").html("Submit");
                                 $("body").removeClass("loader");
                                 alert("Error retreiving trip run times.");
                             }
