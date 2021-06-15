@@ -37,7 +37,7 @@ public class ApcCache {
                   "Bin size in minutes to cache APC data");
   public static IntegerConfigValue DEFAULT_DWELL_VALUE =
           new IntegerConfigValue("transitclock.apc.defaultDwell",
-                  0,
+                  null,
                   "Default Dwell");
   public static IntegerConfigValue DEFAULT_PAR_VALUE =
           new IntegerConfigValue("transitclock.apc.defaultPAR",
