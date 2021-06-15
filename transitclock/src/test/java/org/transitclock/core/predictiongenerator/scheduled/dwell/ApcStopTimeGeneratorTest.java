@@ -145,7 +145,7 @@ public class ApcStopTimeGeneratorTest {
     VehicleState vehicleState = dataGenerator.getVehicleStateForApc(referenceTime, tripIndex, stopPathIndex, testScheduleDeviationSeconds);
     AvlReport avlReport = vehicleState.getAvlReport();
     long stopTimeForPath = generator.getStopTimeForPath(indices, avlReport, vehicleState).getPrediction();
-    assertEquals(8000, stopTimeForPath);
+    assertEquals(7743, stopTimeForPath);
 
     long alternate = defaultGenerator.getStopTimeForPath(indices, avlReport, vehicleState).getPrediction();
     assertEquals(10000, alternate);
