@@ -6,18 +6,22 @@ import org.transitclock.applications.Core;
 import org.transitclock.avl.ApcCache;
 import org.transitclock.avl.ApcDataProcessor;
 import org.transitclock.avl.ApcModule;
+import org.transitclock.config.DoorFactorConfigValue;
 import org.transitclock.config.DoubleConfigValue;
+import org.transitclock.config.DoubleListConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.Algorithm;
 import org.transitclock.core.Indices;
 import org.transitclock.core.PredictionResult;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.KalmanError;
+import org.transitclock.core.dataCache.VehicleDataCache;
 import org.transitclock.core.predictiongenerator.HistoricalPredictionLibrary;
 import org.transitclock.core.predictiongenerator.kalman.KalmanPredictionResult;
 import org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman.KalmanPredictionGeneratorImpl;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.ScheduleTime;
+import org.transitclock.db.structs.VehicleConfig;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
 
@@ -57,6 +61,27 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
   private static final DoubleConfigValue initialErrorValue = new DoubleConfigValue(
           "transitclock.prediction.data.kalman.apc.initialerrorvalue", new Double(50),
           "Initial Kalman error value to use to start filter.");
+
+  private static final DoubleConfigValue passengerBoardingConstant = new DoubleConfigValue(
+          "transitclock.prediction.data.kalman.apc.boardingConstant",
+          2.6,
+          "base boarding constant");
+
+  private static final DoorFactorConfigValue doorFactorMatrix = new DoorFactorConfigValue(
+          "transitclock.prediction.data.kalman.apc.doorFactors",
+          null,
+          "Matrix of boarding types + door count to ratio of ons/offs.  " +
+                  "Used to precisely tune boarding algorithm");
+
+  private static final DoubleListConfigValue secondsPerBoarding = new DoubleListConfigValue(
+          "transitclock.prediction.data.kalman.apc.secondsPerBoarding",
+          DoubleListConfigValue.unencodeString("4.3;2.5;3.4"),
+          "Second per Boarding per trip boarding type");
+
+  private static final DoubleConfigValue defaultSecondsPerBoarding = new DoubleConfigValue(
+          "transitclock.prediction.data.kalman.apc.defaultSecondsPerBoarding",
+          2.5,
+          "Default seconds per boarding of boarding type unknown");
 
   private static final Logger logger = LoggerFactory.getLogger(ApcStopTimeGenerator.class);
 
@@ -101,7 +126,7 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     }
 
     IntervalTimer boardingTimer = new IntervalTimer();
-    double passengerBoardingTime = getPassengerBoardingTime(vehicleState);
+    double passengerBoardingTime = getPassengerBoardingTime(indices, vehicleState, passengerArrivalRateInSeconds, currentHeadwayInSeconds);
     long dwellTime = new Double(passengerArrivalRateInSeconds * currentHeadwayInSeconds * passengerBoardingTime).longValue();
     logger.debug("dwellTime={} = passengerArrivalRateInSeconds={} * currentHeadway={} * passengerBoardingTime={}",
             dwellTime, passengerArrivalRateInSeconds, currentHeadwayInSeconds, passengerBoardingTime);
@@ -294,9 +319,42 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
             vehicleState.getRealTimeSchedAdh());
     return arrivalTime;
   }
-  private double getPassengerBoardingTime(VehicleState vehicleState) {
-    // TODO - this will be heuristic derived from vehicleType
-    return 2.5 * Time.MS_PER_SEC; // seconds per passenger
+  private double getPassengerBoardingTime(Indices indices, VehicleState vehicleState, Double passengerArrivalRateInSeconds, Long currentHeadwayInSeconds) {
+    return passengerBoardingConstant.getValue() * Time.MS_PER_SEC
+            + (passengerArrivalRateInSeconds * currentHeadwayInSeconds) /* ons */
+            * getBoardingFactor(indices, vehicleState)
+            * getSecondsPerBoarding(indices);
+
+  }
+
+  private double getSecondsPerBoarding(Indices indices) {
+    Integer boardingType = indices.getTrip().getBoardingType();
+    if (boardingType == null) return defaultSecondsPerBoarding.getValue();
+    if (secondsPerBoarding.getValue() == null || boardingType > secondsPerBoarding.getValue().size()) {
+      return defaultSecondsPerBoarding.getValue();
+    }
+    return secondsPerBoarding.getValue().get(boardingType);
+  }
+
+  private double getBoardingFactor(Indices indices, VehicleState vehicleState) {
+    Integer boardingType = indices.getTrip().getBoardingType();
+    VehicleConfig vehicleConfig = VehicleDataCache.getInstance().getVehicleConfigById(vehicleState.getVehicleId());
+    if (vehicleConfig == null) {
+      logger.error("vehicle {} has no configuration data", vehicleState.getVehicleId());
+      return getBoardingFactor(1, 1);
+    }
+    Integer doorCount = vehicleConfig.getDoorCount();
+    return getBoardingFactor(boardingType, doorCount);
+  }
+
+  private double getBoardingFactor(Integer boardingType, Integer doorCount) {
+    if (boardingType == null || doorCount == null)
+      return 1; // default ratio
+
+    if (doorFactorMatrix.getValue() == null)
+      return 1; // default ratio
+
+    return doorFactorMatrix.getValueForIndex(boardingType, doorCount);
   }
 
 

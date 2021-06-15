@@ -41,6 +41,7 @@ public class GtfsTrip extends CsvBase {
 	private final String shapeId;
 	private final Integer wheelchairAccessible;
 	private final Integer bikesAllowed;
+	private final Integer boardingType;
 		
 	// For determining a trip_short_name from the trip_id if the 
 	// trip_short_name is not specified in GTFS file.
@@ -86,6 +87,7 @@ public class GtfsTrip extends CsvBase {
 
 		this.wheelchairAccessible = null;
 		this.bikesAllowed = null;
+		this.boardingType = null;
 	}	
 
 	/**
@@ -129,6 +131,12 @@ public class GtfsTrip extends CsvBase {
 		String bikesAllowedStr = getOptionalValue(record, "bikes_allowed");
 		bikesAllowed = bikesAllowedStr == null ? 
 				null : Integer.parseInt(bikesAllowedStr);
+		String boardingTypeStr = getOptionalValue(record, "boarding_type");
+		if (boardingTypeStr != null) {
+			boardingType = Integer.parseInt(boardingTypeStr);
+		} else {
+			boardingType = null;
+		}
 	}	
 
 	/**
@@ -158,6 +166,7 @@ public class GtfsTrip extends CsvBase {
 		this.shapeId = shapeId;
 		this.wheelchairAccessible = wheelchairAccessible;
 		this.bikesAllowed = bikesAllowed;
+		this.boardingType = null;
 	}
 	
 	/**
@@ -184,6 +193,7 @@ public class GtfsTrip extends CsvBase {
 		shapeId = s.shapeId == null ? o.shapeId : s.shapeId;
 		wheelchairAccessible = s.wheelchairAccessible == null ? o.wheelchairAccessible : s.wheelchairAccessible;
 		bikesAllowed = s.bikesAllowed == null ? o.bikesAllowed : s.bikesAllowed;
+		boardingType = s.boardingType == null ? o.boardingType : s.boardingType;
 	}
 	
 	/**
@@ -209,6 +219,7 @@ public class GtfsTrip extends CsvBase {
 		this.shapeId = null;
 		this.wheelchairAccessible = null;
 		this.bikesAllowed = null;
+		this.boardingType = null;
 	}
 	
 	/**
@@ -318,6 +329,9 @@ public class GtfsTrip extends CsvBase {
 	public Integer getBikesAllowed() {
 		return bikesAllowed;
 	}
+	public Integer getBoardingType() {
+		return boardingType;
+	}
 	
 	@Override
 	public String toString() {
@@ -341,5 +355,5 @@ public class GtfsTrip extends CsvBase {
 				+ "]";
 	}
 
-	
+
 }

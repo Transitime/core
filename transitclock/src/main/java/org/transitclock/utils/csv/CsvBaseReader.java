@@ -127,8 +127,19 @@ public abstract class CsvBaseReader<T> {
 			// reset the reader to back to the beginning if it is not. This
 			// way the CSV parser will process the file starting with the first
 			// true character.
-			
-			Reader in = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), "UTF-8"));
+			Reader in;
+			if (fileName.startsWith("classpath:")) {
+				// allow the file to exist on the class path
+				try {
+					in = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader()
+									.getResourceAsStream(fileName.substring("classpath:".length()))));
+				} catch (Exception any) {
+					throw new IllegalArgumentException("file '" + fileName + "' not found on classpath");
+				}
+			} else {
+				// typical configuration of an external file on disk
+				in = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), "UTF-8"));
+			}
 			
 			// Deal with the possible BOM character at the beginning of the file
 			in.mark(1);

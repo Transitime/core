@@ -211,7 +211,12 @@ public class VehicleDataCache {
 		}
 		return vehicleConfig;
 	}
-	
+
+	public VehicleConfig getVehicleConfigById(String vehicleId) {
+		return this.vehicleConfigsMap.get(vehicleId);
+	}
+
+
 	/**
 	 * Returns an unmodifiable collection of the static vehicle configurations.
 	 * 

@@ -157,6 +157,15 @@ public class Trip implements Lifecycle, Serializable {
 	@ManyToMany(mappedBy = "trips")
 	private List<Block> blocks;
 
+	@Column
+	/*
+	 * Custom extension representing boarding style.
+	 * 0 = onboard fare payment, pay on entry
+	 * 1 = offboard fare payment
+	 * 2 = onboard fare payment, pay on exit
+	 */
+	private final Integer boardingType;
+
 	@Transient
 	private Route route;
 	
@@ -231,6 +240,7 @@ public class Trip implements Lifecycle, Serializable {
 
 		// Not a frequency based trip with an exact time so remember such
 		this.exactTimesHeadway = false;
+		this.boardingType = gtfsTrip.getBoardingType();
 	}
 
 	/**
@@ -285,7 +295,8 @@ public class Trip implements Lifecycle, Serializable {
 		// Since this constructor is only for frequency based trips where
 		// exact_times is true set the corresponding members to indicate such
 		this.noSchedule = false;
-		this.exactTimesHeadway = true;		
+		this.exactTimesHeadway = true;
+		this.boardingType = tripFromStopTimes.boardingType;
 	}
 	
 	/**
@@ -327,7 +338,8 @@ public class Trip implements Lifecycle, Serializable {
 		// Since this constructor is only for frequency based trips where
 		// exact_times is false set the corresponding members to indicate such
 		this.noSchedule = true;
-		this.exactTimesHeadway = false;		
+		this.exactTimesHeadway = false;
+		this.boardingType = tripFromStopTimes.boardingType;
 	}
 	
 	/**
@@ -347,6 +359,7 @@ public class Trip implements Lifecycle, Serializable {
 		shapeId = null;
 		noSchedule = false;
 		exactTimesHeadway = false;
+		boardingType = null;
 	}
 
 	/**
@@ -1115,6 +1128,15 @@ public class Trip implements Lifecycle, Serializable {
 	public int getNumberStopPaths() {
 		return getTripPattern().getStopPaths().size();
 	}
+
+	/**
+	 * GTFS extension representing information about boarding
+	 * @return
+	 */
+	public final Integer getBoardingType() {
+		return boardingType;
+	}
+
 
 	/**
 	 * Callback due to implementing Lifecycle interface. Used to compact

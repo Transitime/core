@@ -71,7 +71,16 @@ public class DbWriter {
 			logger.info("flushed with " + counter + " % " + DbSetupConfig.getBatchSize());
 		}
 	}
-	
+
+	/**
+	 * unversioned objects need to be deleted before saving
+	 * @param session
+	 * @param object
+	 */
+	private void deleteObject(Session session, Object object) {
+		session.delete(object);
+	}
+
 	/**
 	 * Goes through the collections in GtfsData and writes the objects
 	 * to the database.
@@ -174,6 +183,21 @@ public class DbWriter {
 		Transfer.deleteFromRev(session, configRev);
 		for (Transfer transfer : gtfsData.getTransfers()) {
 			writeObject(session, transfer);
+		}
+
+		logger.info("deleting vehicles that have updates....");
+		for (VehicleConfig vc : gtfsData.getUpdatedVehicleConfigs()) {
+			deleteObject(session, vc);
+		}
+
+		logger.info("storing updated vehicles...");
+		for (VehicleConfig vc : gtfsData.getUpdatedVehicleConfigs()) {
+			writeObject(session, vc, false);
+		}
+
+		logger.info("storing new vehicles....");
+		for (VehicleConfig vc : gtfsData.getNewVehicleConfigs()) {
+			writeObject(session, vc, false);
 		}
 
 		logger.info("Saving feedinfo to database...");
