@@ -41,7 +41,7 @@ public class ApcCache {
                   "Default Dwell");
   public static IntegerConfigValue DEFAULT_PAR_VALUE =
           new IntegerConfigValue("transitclock.apc.defaultPAR",
-                  0,
+                  null,
                   "Default PAR");
 
   private String tz = null;
