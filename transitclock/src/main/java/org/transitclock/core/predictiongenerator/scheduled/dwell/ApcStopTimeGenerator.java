@@ -6,6 +6,7 @@ import org.transitclock.applications.Core;
 import org.transitclock.avl.ApcCache;
 import org.transitclock.avl.ApcDataProcessor;
 import org.transitclock.avl.ApcModule;
+import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.DoorFactorConfigValue;
 import org.transitclock.config.DoubleConfigValue;
 import org.transitclock.config.DoubleListConfigValue;
@@ -67,6 +68,17 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
           2.6,
           "base boarding constant");
 
+  private static final IntegerConfigValue maxHeadwaySecs = new IntegerConfigValue(
+          "transitclock.prediction.data.kalman.apc.maxHeadwaySeconds",
+          7200,
+          "max time in seconds buses can be spaced and still considered a headway value.");
+
+  private static final BooleanConfigValue allowEmptyDwell = new BooleanConfigValue(
+          "transitclock.prediction.data.kalman.apc.allowEmptyDwell",
+          true,
+          "if data doesn't support a dwell time, assume no dwell happened.  " +
+                  "Alternatively fall back on base dewll algorithm");
+
   private static final DoorFactorConfigValue doorFactorMatrix = new DoorFactorConfigValue(
           "transitclock.prediction.data.kalman.apc.doorFactors",
           null,
@@ -108,7 +120,7 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
       logger.debug("exiting apc dwell time, no passenger arrival rate");
       getMonitoring().rateMetric("PredictionDwellApcHit", false);
       logMiss();
-      return super.getStopTimeForPath(indices, avlReport, vehicleState);
+      return getDefaultStopTime(indices, avlReport, vehicleState);
     } else {
       getMonitoring().rateMetric("PredictionDwellApcHit", true);
       getMonitoring().averageMetric("PredictionApcPARProcessingTime", parTimer.elapsedMsec());
@@ -119,6 +131,8 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     if (currentHeadwayInSeconds == null) {
       logMiss();
       getMonitoring().rateMetric("PredictionDwellHeadwayHit", false);
+
+      // for headway failure we need fall back on default algol
       return super.getStopTimeForPath(indices, avlReport, vehicleState);
     } else {
       getMonitoring().rateMetric("PredictionDwellHeadwayHit", true);
@@ -138,7 +152,8 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
       logger.debug("exiting apc dwell time, no historical data");
       getMonitoring().rateMetric("PredictionDwellHistoryHit", false);
       logMiss();
-      return super.getStopTimeForPath(indices, avlReport, vehicleState);
+      // either stop is new, or not used for boarding
+      return getDefaultStopTime(indices, avlReport, vehicleState);
     } else {
       getMonitoring().rateMetric("PredictionDwellHistoryHit", true);
       getMonitoring().averageMetric("PredictionApcHistoryProcessingTime", historyTimer.elapsedMsec());
@@ -152,6 +167,13 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     getMonitoring().averageMetric("PredictionApcPredictProcessingTime", predictTimer.elapsedMsec());
     ApcStopTimeCache.getInstance().put(indices, avlReport, vehicleState, new Double(result.getResult()).longValue());
     return new PredictionResult(new Double(result.getResult()).longValue(), Algorithm.APC_DWELL);
+  }
+
+  private PredictionResult getDefaultStopTime(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
+    if (allowEmptyDwell.getValue()) {
+      return new PredictionResult(0L, Algorithm.APC_DWELL);
+    }
+    return super.getStopTimeForPath(indices, avlReport, vehicleState);
   }
 
   private void logHit() {
@@ -185,7 +207,13 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
       Long headway = HistoricalPredictionLibrary.getLastHeadway(
               indices.getStopPath().getStopId(),
               indices.getTrip().getRouteId(), new Date(stopArrivalTime));
-      if (headway != null) return headway / Time.MS_PER_SEC;
+      if (headway != null) {
+        long headwaySec = headway / Time.MS_PER_SEC;
+        if (headwaySec > maxHeadwaySecs.getValue()) {
+          return null;
+        }
+        return headwaySec;
+      }
     } catch (Exception e) {
       logger.error("travel time lookup threw exception {}", e, e);
     }

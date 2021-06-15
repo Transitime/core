@@ -37,11 +37,11 @@ public class ApcCache {
                   "Bin size in minutes to cache APC data");
   public static IntegerConfigValue DEFAULT_DWELL_VALUE =
           new IntegerConfigValue("transitclock.apc.defaultDwell",
-                  null,
+                  0,
                   "Default Dwell");
   public static IntegerConfigValue DEFAULT_PAR_VALUE =
           new IntegerConfigValue("transitclock.apc.defaultPAR",
-                  null,
+                  0,
                   "Default PAR");
 
   private String tz = null;
@@ -54,14 +54,14 @@ public class ApcCache {
     CacheManager cm = CacheManagerFactory.getInstance();
     binCache = cm.getCache(cacheName, CacheBin.class, ApcCacheElements.class);
     if (binCache == null) throw new IllegalStateException("Invalid configuration, cache "
-    + cacheName+"Bin did not load successfully");
+    + cacheName + " did not load successfully");
   }
 
   public Double getBoardingsPerMinute(String routeId, String stopId, Date arrival) {
     CacheBin bin = new CacheBin(arrival.getTime(), routeId, stopId, 0, WINDOW_IN_MINUTES.getValue()*Time.MS_PER_MIN);
     ApcCacheElements apcCacheElements = binCache.get(bin);
     Double average = average(apcCacheElements);
-    if (average == null) return getDefaultPAR();
+    if (average == null || average == 0.0) return getDefaultPAR();
     return average / WINDOW_IN_MINUTES.getValue();
   }
 

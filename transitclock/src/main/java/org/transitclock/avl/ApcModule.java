@@ -47,6 +47,7 @@ public class ApcModule {
   public Double getPassengerArrivalRate(Trip trip, String stopId, Date arrivalTime) {
     String routeId = trip.getRouteId();
     boolean isHoliday = DateUtils.isHoliday(trip);
+    // this considers holidays / calendar types
     Date previousDayArrivalTime = DateUtils.getPreviousDayForArrivalTime(arrivalTime, isHoliday);
     Double boardingsPerMinute = processor.getBoardingsPerMinute(routeId, stopId, previousDayArrivalTime);
     if (boardingsPerMinute == null || boardingsPerMinute == 0.0) return boardingsPerMinute;
