@@ -380,7 +380,14 @@
 
 
     <div id="mainPage" class="scrollable-element inner-spacing">
-
+        <div id="overlay"></div>
+        <div id="bars1">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
         <div id="perceptive-header-container"> </div>
         <div class="perceptive-summary-container">
             <div class="individual-route">
@@ -519,8 +526,11 @@
     $("#submit").click(function () {
 
         $("#submit").attr("disabled", "disabled");
-        $("#submit").html("Loading...").addClass("submit-loading");
-        $("body").addClass("loader");
+        $("#submit").html("Loading...");
+        // $("body").addClass("loader");
+        $("#overlay").show();
+        $("#bars1").show();
+        $("#mainPage").addClass("inactive-split")
         $(".wrapper").addClass("split");
         $("#mainResults").hide();
 
@@ -536,8 +546,11 @@
             dataType: "json",
             success: function (response) {
                 $("#submit").attr("disabled", false);
-                $("#submit").html("Analyze").removeClass("submit-loading");
-                $("body").removeClass("loader");
+                $("#submit").html("Analyze");
+              //  $("body").removeClass("loader");
+                $("#overlay").hide();
+                $("#mainPage").removeClass("inactive-split")
+                $("#bars1").hide();
                 if (jQuery.isEmptyObject(response)) {
                     alert("No run time information available for selected parameters.");
                 } else {
@@ -557,8 +570,11 @@
             },
             error: function (e) {
                 $("#submit").attr("disabled", false);
-                $("#submit").html("Analyze").removeClass("submit-loading");
-                $("body").removeClass("loader");
+                $("#submit").html("Analyze");
+                $("#overlay").hide();
+                $("#bars1").hide()
+                $("#mainPage").removeClass("inactive-split")
+                // $("body").removeClass("loader");
                 alert("No Prescriptive RunTimes available for selected criteria.");
             }
         })
@@ -713,13 +729,14 @@
                 if (resp.tripPatterns.length == 0) {
                     alert("No trip pattern data for selected route and headsign.");
                     $("#submit").attr("disabled", true);
-                    $("#submit").html("Loading").addClass("submit-loading");
-                    $("body").addClass("loader");
+                    $("#submit").html("Loading");
+                    // $("body").addClass("loader");
+
                 } else {
                     $("#tripPattern").removeAttr('disabled');
                     $("#submit").removeAttr('disabled');
-                    $("#submit").html("Analyze").removeClass("submit-loading");
-                    $("body").removeClass("loader");
+                    $("#submit").html("Analyze");
+                    // $("body").removeClass("loader");
                     resp.tripPatterns.forEach(function (tripPattern) {
                         $("#tripPattern").append("<option value='" + tripPattern.id + "'>" + tripPattern.firstStopName + ' to ' + tripPattern.lastStopName + "</option>");
                     })
@@ -731,8 +748,8 @@
             error: function (request, status, error) {
                 alert(error + '. ' + request.responseText);
                 $("#submit").attr("disabled", false);
-                $("#submit").html("Analyze").removeClass("submit-loading");
-                $("body").removeClass("loader");
+                $("#submit").html("Analyze");
+               // $("body").removeClass("loader");
             }
         });
     }
