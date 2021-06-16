@@ -81,6 +81,9 @@ public class StandardParameters {
 	@DefaultValue("application/json")
 	String acceptHeader;
 
+	@HeaderParam("key")
+	String headerKey;
+
 	@Context
 	HttpServletRequest request;
 
@@ -358,6 +361,9 @@ public class StandardParameters {
 	 * @return
 	 */
 	public String getKey() {
+		if(headerKey != null) {
+			return headerKey;
+		}
 		return key;
 	}
 

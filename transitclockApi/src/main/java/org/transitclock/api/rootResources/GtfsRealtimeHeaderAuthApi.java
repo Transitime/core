@@ -8,8 +8,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("/key/{key}/agency/{agency}")
-public class GtfsRealtimeApi extends AbstractGtfsRealtimeApi{
+@Path("/agency/{agency}")
+public class GtfsRealtimeHeaderAuthApi extends AbstractGtfsRealtimeApi{
 
     @Path("/command/gtfs-rt/vehiclePositions")
     @GET
