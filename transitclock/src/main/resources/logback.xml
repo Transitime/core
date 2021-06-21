@@ -548,10 +548,25 @@
 		<appender-ref ref="UPDATE_TRAVEL_TIMES" />
 	</logger>
 
-	<logger name="org.transitclock.core.reporting.RunTimeGenerator"
+	<logger name="org.transitclock.core.reporting.RunTimeProcessor"
                         level="debug" additivity="false">
                 <appender-ref ref="RUN_TIME_GENERATOR" />
         </logger>
+
+	<logger name="org.transitclock.core.reporting.RunTimeProcessorResult"
+			level="debug" additivity="false">
+		<appender-ref ref="RUN_TIME_GENERATOR" />
+	</logger>
+
+	<logger name="org.transitclock.core.reporting.RunTimeProcessorHelper"
+			level="debug" additivity="false">
+		<appender-ref ref="RUN_TIME_GENERATOR" />
+	</logger>
+
+	<logger name="org.transitclock.core.reporting.RunTimeProcessorHelper"
+			level="debug" additivity="false">
+		<appender-ref ref="RUN_TIME_GENERATOR" />
+	</logger>
 
 	<!-- In order to log the hibernate SQL queries need to set org.hibernate.SQL
 		to debug. To show the values of the parameters need to set org.hibernate.type
