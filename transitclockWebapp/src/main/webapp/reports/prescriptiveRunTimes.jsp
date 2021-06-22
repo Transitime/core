@@ -442,23 +442,23 @@
     function generateTimeBands(){
 
         var timebandOptions = [{
-            name: "Early AM",
+            name: "Early AM (00:00 - 06:30)",
             value: "00:00 - 06:30"
 
         },{
-            name: "AM Rush",
+            name: "AM Rush (06:30 - 09:00)",
             value:"06:30 - 09:00"
         },{
-            name: "AM Midday",
+            name: "AM Midday (09:00 - 12:00)",
             value:"09:00 - 12:00"
         },{
-            name: "PM Midday",
+            name: "PM Midday (12:00 - 15:30)",
             value:"12:00 - 15:30"
         },{
-            name:  "PM Rush",
+            name:  "PM Rush (15:30 - 18:30)",
             value:"15:30 - 18:30"
         },{
-            name: "Late PM",
+            name: "Late PM (18:30 - 11:59)",
             value:"18:30 - "
         }];
 
