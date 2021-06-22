@@ -92,7 +92,7 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
 
         .bus-enroute {
             margin: 10px 0px;
-           /* border-bottom:2px solid #e5e5e5; */
+            /* border-bottom:2px solid #e5e5e5; */
         }
 
     </style>
@@ -243,7 +243,16 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
 
 
         // There will be predictions for just a single route/stop
+
         var content = "";
+
+        var maxObservationsToShow = 3;
+        if(preds.predictions.length > 5) {
+            maxObservationsToShow = 1;
+        } else if(preds.predictions.length > 3) {
+            maxObservationsToShow = 2;
+        }
+
         $(preds.predictions).each(function(index, routeStopPreds){
 
             // var routeStopPreds = preds.predictions[0];
@@ -271,7 +280,9 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
                 if (eachDest.pred.length > 0) {
 
                     $(eachDest.pred).each(function(index3, eachPred){
-
+                        if(maxObservationsToShow < index3+1){
+                            return false;
+                        }
                         content += '<div class="each-prediction">'
                         content += '<div class="vehicle-image-detail"><img src="'+busIcon.options.iconUrl+'"  class="vehicle-icon-prediction"/>';
                         content += '<span class="vehicle-id">'+ eachPred.vehicle +'</span></div>';
@@ -299,13 +310,18 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
     /**
      * Initiates API call to get prediction data.
      */
+
     function getPredictionsJson(routeShortName, stopId) {
 
         var selectedDataList = $("#routes").select2("data");
         var selectedRouteId = "";
-        $(selectedDataList).each(function(index, eachList){
-            selectedRouteId += "rs=" + eachList.id + encodeURIComponent("|") + stopId + ($(selectedDataList).length-1 === index ? "": "&");
-        });
+        if(selectedDataList.length){
+            $(selectedDataList).each(function(index, eachList){
+                selectedRouteId += "rs=" + eachList.id + encodeURIComponent("|") + stopId + ($(selectedDataList).length-1 === index ? "": "&");
+            });
+        } else {
+            selectedRouteId += "rs=" +stopId
+        }
 
         // JSON request of predicton data
         var url = apiUrlPrefix + "/command/predictions?" + selectedRouteId;
@@ -865,7 +881,7 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
             / interpolationSteps;
         var interpolatedLoc = [interpolatedLat, interpolatedLon];
 
-//	console.log("interpolating vehicleId=" + vehicleMarker.vehicleData.id + " cnt=" + cnt + 
+//	console.log("interpolating vehicleId=" + vehicleMarker.vehicleData.id + " cnt=" + cnt +
 //			" interpolatedLat=" + interpolatedLat + " interpolatedLon=" + interpolatedLon);
 
         // Update all markers sto have interpolated location
@@ -1164,35 +1180,52 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
         $('#mapTitle').hide('fade', 1000);
     }, 1000);
 
+    function resetLayers(){
+        if (routeFeatureGroup) {
+            map.removeLayer(routeFeatureGroup);
+        }
+        predictionsPopup = null
+        if(map){
+            map.closePopup();
+        }
+
+        removeAllVehicles();
+    }
 
     function showStopDetails(routeShortName, stopId) {
         var url;
 
         var routeParam = "";
         var stopParam = "";
-        if(routeShortName && routeShortName.length > 0) {
+        resetLayers();
+        // if(routeShortName && routeShortName.length > 0) {
             $(routeShortName).each(function (index, eachList) {
                 routeParam += "r=" + eachList + ($(routeShortName).length - 1 === index ? "" : "&");
             });
-        }
 
-        if (stopId.trim() != "") {
-            stopParam = "s=" + stopId;
-        }
 
-        url = apiUrlPrefix + "/command/routesDetails";
-        if (routeParam != "" || stopParam != "") {
-            url += "?" + routeParam;
-            if (routeParam != "") {
-                url += "&"
+            if (stopId.trim() != "") {
+                stopParam = "s=" + stopId;
             }
-            url += stopParam;
-        }
 
-        $.getJSON(url, routeConfigCallback).error(function() {alert("Specified stop not found.");});
+            url = apiUrlPrefix + "/command/routesDetails";
+            if (routeParam != "" || stopParam != "") {
+                url += "?" + routeParam;
+                if (routeParam != "") {
+                    url += "&"
+                }
+                url += stopParam;
+            }
+
+            $.getJSON(url, routeConfigCallback).error(function() {alert("Specified stop not found.");});
+        // }
     }
 
+
     function openVehiclePopup(vehicleMarker) {
+        if(!vehicleMarker){
+            return false;
+        }
         var content = getVehiclePopupContent(vehicleMarker.vehicleData);
         var latlng = L.latLng(vehicleMarker.vehicleData.loc.lat,
             vehicleMarker.vehicleData.loc.lon);

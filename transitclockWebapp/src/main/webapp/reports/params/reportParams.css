@@ -723,3 +723,8 @@ body.loader:after {
     background-color: rgba(0,0,0,.5);
     z-index: 10;
 }
+
+.leaflet-popup-content {
+    max-height: 300px;
+    overflow: auto;
+}

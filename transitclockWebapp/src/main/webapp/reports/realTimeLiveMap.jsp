@@ -240,6 +240,12 @@
 
         // There will be predictions for just a single route/stop
         var content = "";
+        var maxObservationsToShow = 3;
+        if(preds.predictions.length > 5) {
+            maxObservationsToShow = 1;
+        } else if(preds.predictions.length > 3) {
+            maxObservationsToShow = 2;
+        }
         $(preds.predictions).each(function(index, routeStopPreds){
 
             // var routeStopPreds = preds.predictions[0];
@@ -247,7 +253,7 @@
             if(index === 0){
                 content += '<b>Stop Name:</b> ' + routeStopPreds.stopName + '<br/>';
 
-                    content += '<b>Stop Id:</b> ' + routeStopPreds.stopId + '<br/>';
+                content += '<b>Stop Id:</b> ' + routeStopPreds.stopId + '<br/>';
 
                 content += '<div class="bus-enroute"><b>Buses en-route</b> </div>';
             }
@@ -266,6 +272,10 @@
                 if (eachDest.pred.length > 0) {
 
                     $(eachDest.pred).each(function(index3, eachPred){
+
+                        if(maxObservationsToShow < index3+1){
+                            return false;
+                        }
 
                         content += '<div class="each-prediction">'
                         content += '<div class="vehicle-image-detail"><img src="'+busIcon.options.iconUrl+'"  class="vehicle-icon-prediction"/>';
@@ -298,9 +308,13 @@
 
         var selectedDataList = $("#route").select2("data");
         var selectedRouteId = "";
-        $(selectedDataList).each(function(index, eachList){
-            selectedRouteId += "rs=" + eachList.id + encodeURIComponent("|") + stopId + ($(selectedDataList).length-1 === index ? "": "&");
-        });
+        if(selectedDataList.length){
+            $(selectedDataList).each(function(index, eachList){
+                selectedRouteId += "rs=" + eachList.id + encodeURIComponent("|") + stopId + ($(selectedDataList).length-1 === index ? "": "&");
+            });
+        } else {
+            selectedRouteId += "rs=" +stopId
+        }
 
         // JSON request of predicton data
         var url = apiUrlPrefix + "/command/predictions?" + selectedRouteId;
