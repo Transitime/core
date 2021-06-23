@@ -490,6 +490,14 @@
         <script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script>
     </div>
     <div id="reportResults">
+        <div id="overlay"></div>
+        <div id="bars1">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
         <h2>On Time Performance By Route</h2>
         <div class="closeIcon">&times;</div>
         <canvas id="chartCanvas" style="margin-top: 10px;"></canvas>
@@ -549,9 +557,11 @@
 
     $("#submit").click(function() {
         $("#submit").attr("disabled","disabled");
-        $("#submit").html("Loading...").addClass("submit-loading");
-        $("body").addClass("loader");
-        $("#reportResults").addClass("inactive");
+        $("#submit").html("Loading...");
+        // $("body").addClass("loader");
+        $("#overlay").show();
+        $("#bars1").show();
+        $("#reportResults").addClass("inactive-split");
 
 
         if ($("#beginDate").val() == "Date range") {
@@ -595,9 +605,11 @@
 
     function drawChart(response) {
         $("#submit").removeAttr("disabled")
-        $("#submit").html("Submit").removeClass("submit-loading");
-        $("body").removeClass("loader");
-        $("#reportResults").removeClass("inactive");
+        $("#submit").html("Submit");
+        // $("body").removeClass("loader");
+        $("#overlay").hide();
+        $("#bars1").hide();
+        $("#reportResults").removeClass("inactive-split");
         var values = response.data.datasets[0].data
         pieChart.data.datasets[0].data = values;
         pieChart.update();
