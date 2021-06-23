@@ -789,7 +789,7 @@
 
         $("#submit").attr("disabled", true);
         $("#submit").html("Loading...");
-        $("body").addClass("loader");
+        // $("body").addClass("loader");
         $("#tripPattern").empty();
         $("#direction").removeAttr('disabled');
         $("#direction").empty();
@@ -818,7 +818,7 @@
             error: function (response) {
                 alert("Error retrieving directions for route " + response.r);
                 $("#submit").attr("disabled", false);
-                $("body").removeClass("loader");
+               //  $("body").removeClass("loader");
                 $("#submit").html("Submit");
             }
         })
@@ -851,12 +851,12 @@
                     alert("No trip pattern data for selected route and headsign.");
                     $("#submit").attr("disabled", true);
                     $("#submit").html("Loading...");
-                    $("body").addClass("loader");
+                   //  $("body").addClass("loader");
                 } else {
                     $("#tripPattern").removeAttr('disabled');
                     $("#submit").removeAttr('disabled');
                     $("#submit").html("Submit");
-                    $("body").removeClass("loader");
+                    // $("body").removeClass("loader");
 
                     $("#tripPattern").append("<option value=''>All</option>")
                     resp.tripPatterns.forEach(function (tripPattern) {
@@ -870,7 +870,7 @@
             error: function (request, status, error) {
                 alert(error + '. ' + request.responseText);
                 $("#submit").attr("disabled", false);
-                $("body").removeClass("loader");
+               //  $("body").removeClass("loader");
                 $("#submit").html("Submit");
             }
         });
@@ -1027,6 +1027,7 @@
         $("#submit").html("Loading...");
         $("#overlay").show();
         $("#bars1").show();
+        $("#mainPage").addClass("inactive-split")
         $(".wrapper").addClass("split");
         $("#mainResults").hide();
         $("#runTimeVisualization").hide();
@@ -1080,6 +1081,7 @@
                     $("#submit").html("Submit");
                     $("#overlay").hide();
                     $("#bars1").hide();
+                    $("#mainPage").removeClass("inactive-split")
                     alert("No run time information available for selected parameters.");
                 } else if(response.data && response.data.summary && response.data.summary) {
                     $(".all-routes").hide();
@@ -1120,6 +1122,7 @@
                     $("#submit").html("Submit");
                     $("#overlay").hide();
                     $("#bars1").hide();
+                    $("#mainPage").removeClass("inactive-split")
                     $("#component").hide();
                     alert("Unable to find any valid results. Please try a different search.");
                 }
@@ -1130,6 +1133,7 @@
                 $("#submit").html("Submit");
                 $("#overlay").hide();
                 $("#bars1").hide();
+                $("#mainPage").removeClass("inactive-split")
                 alert("Error processing average trip run time.");
             }
         })
