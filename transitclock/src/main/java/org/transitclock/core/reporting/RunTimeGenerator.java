@@ -74,12 +74,11 @@ public class RunTimeGenerator {
 		return false;
 	}
 
-	boolean hasCrossedToNextTrip(TemporalMatch currentMatch,
-															 TemporalMatch previousMatch) {
-
+	boolean hasCrossedToNextTrip(TemporalMatch currentMatch, TemporalMatch previousMatch) {
 		if(currentMatch != null && previousMatch != null &&
 						previousMatch.getTripIndex() < currentMatch.getTripIndex() &&
 						previousMatch.getBlock().getId().equals(currentMatch.getBlock().getId())){
+			logger.debug("Found trip transition between prevMatch {} and currentMatch {}", previousMatch, currentMatch);
 			return true;
 		}
 		return false;
