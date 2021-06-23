@@ -22,10 +22,22 @@ import java.util.List;
  */
 public class RunTimeProcessor {
 
-  private static final Logger logger =
-          LoggerFactory.getLogger(RunTimeProcessor.class);
+  private static final Logger logger = LoggerFactory.getLogger(RunTimeProcessor.class);
 
 
+  /**
+   * Process RunTimes for Trip
+   * Used by RunTimes Generator
+   * @param vehicleId
+   * @param trip
+   * @param block
+   * @param arrivalDeparturesForStop
+   * @param matchAtPreviousStop
+   * @param matchAtCurrentStop
+   * @param lastStopIndex
+   * @param serviceUtils
+   * @return
+   */
   public boolean processRunTimesForTrip(String vehicleId,
                                         Trip trip,
                                         Block block,
@@ -48,6 +60,22 @@ public class RunTimeProcessor {
             serviceUtils, true).success();
   }
 
+  /**
+   * Process RunTimes for Trip
+   * Used by RunTimes Loader
+   * @param cache
+   * @param vehicleId
+   * @param trip
+   * @param block
+   * @param arrivalDeparturesForStop
+   * @param matchAtPreviousStop
+   * @param matchAtCurrentStop
+   * @param lastStopIndex
+   * @param clampingSpeed
+   * @param serviceUtils
+   * @param writeToDb
+   * @return
+   */
   public RunTimeProcessorResult processRunTimesForTrip(RunTimeCache cache,
                                                        String vehicleId,
                                                        Trip trip,
@@ -157,10 +185,10 @@ public class RunTimeProcessor {
     RunTimeProcessorResult result = new RunTimeProcessorResult(validateSpeed(state.getRunTimesForRoutes(), clampingSpeed));
 
     if (matchAtPreviousStop != null) {
-      logger.debug("Previous Match {}", matchAtPreviousStop.toString());
+      logger.trace("Previous Match {}", matchAtPreviousStop.toString());
     }
     if (matchAtPreviousStop != null) {
-      logger.debug("Current Match {}", matchAtCurrentStop.toString());
+      logger.trace("Current Match {}", matchAtCurrentStop.toString());
     }
 
     if(result.success()) {

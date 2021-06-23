@@ -1,5 +1,7 @@
 package org.transitclock.core.reporting;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitclock.db.structs.RunTimesForRoutes;
 
 /**
@@ -7,8 +9,11 @@ import org.transitclock.db.structs.RunTimesForRoutes;
  */
 public class RunTimeProcessorResult {
 
+  private static final Logger logger = LoggerFactory.getLogger(RunTimeProcessorResult.class);
+
   private boolean success;
   private RunTimesForRoutes routes = null;
+
 
   public RunTimeProcessorResult(RunTimesForRoutes routes) {
     if (isValid(routes)) {
@@ -26,6 +31,7 @@ public class RunTimeProcessorResult {
     if(routes != null && routes.getVehicleId() != null && routes.getTripId() != null && routes.getStartTime() != null){
       return true;
     }
+    logger.warn("Invalid RunTimeForRoutes {}", routes);
     return false;
   }
 

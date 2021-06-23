@@ -277,19 +277,19 @@
             margin: auto;
         }
 
-        .loader {
+        /*.loader {
             position: absolute;
             left: 50%;
             top: 50%;
-            border: 16px solid #f3f3f3; /* Light grey */
-            border-top: 16px solid #3498db; /* Blue */
+            border: 16px solid #f3f3f3;
+            border-top: 16px solid #3498db;
             border-radius: 50%;
             width: 120px;
             height: 120px;
             -webkit-animation: spin 2s linear infinite;
             animation: spin 2s linear infinite;
             z-index: 1000;
-        }
+        }*/
 
         .submit {
             margin: 24px;
@@ -481,6 +481,7 @@
     </div>
 
     <div id="mainPage">
+
         <div id="paramDetailsTop" class="paramDetails" style="height: 3%; float: left; margin-left: 20px; width: 60%;">
             <p style='font-size: 0.8em;'></p>
         </div>
@@ -543,7 +544,16 @@
             </div>
         </div>
         <div id="map" style="height: 90%; width: 90%; margin: auto;">
-            <div class="loader" hidden="true"></div>
+            <div class="loader" hidden="true">
+                <div id="overlay"></div>
+                <div id="bars1">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -841,7 +851,7 @@
         $(".loader").hide();
         $("#mainSubmit").removeAttr("disabled");
         $("#mainSubmit").attr("value","Submit");
-        $("#mainPage").removeClass("inactive");
+        $("#mainPage").removeClass("inactive-split");
     }
 
     $("#mainSubmit").click(function() {
@@ -852,7 +862,7 @@
         $("#runTimesFlyout").hide();
         $(".loader").show();
         $(".wrapper").addClass("split");
-        $("#mainPage").addClass("inactive");
+        $("#mainPage").addClass("inactive-split");
 
         request = {}
 
@@ -913,7 +923,7 @@
                         $(".loader").hide();
                         $("#mainSubmit").removeAttr("disabled");
                         $("#mainSubmit").attr("value","Submit");
-                        $("#mainPage").removeClass("inactive");
+                        $("#mainPage").removeClass("inactive-split");
                         alert("Error processing stop details.");
                     }
                 })
@@ -922,7 +932,7 @@
                 $(".loader").hide();
                 $("#mainSubmit").removeAttr("disabled");
                 $("#mainSubmit").attr("value","Submit");
-                $("#mainPage").removeClass("inactive");
+                $("#mainPage").removeClass("inactive-split");
                 alert("Error processing speed details for stops.");
             }
         })
@@ -955,7 +965,7 @@
                 $(".loader").hide();
                 $("#mainSubmit").removeAttr("disabled");
                 $("#mainSubmit").attr("value","Submit");
-                $("#mainPage").removeClass("inactive");
+                $("#mainPage").removeClass("inactive-split");
                 alert("Error processing average trip run time.");
             }
         })

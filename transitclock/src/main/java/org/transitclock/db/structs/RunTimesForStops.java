@@ -229,4 +229,25 @@ public class RunTimesForStops implements Serializable {
         return Objects.hashCode(stopPathIndex, time, stopPathId, prevStopDepartureTime, scheduledTime,
                 scheduledPrevStopArrivalTime, dwellTime, speed, lastStop, timePoint);
     }
+
+    @Override
+    public String toString() {
+        return "RunTimesForStops{" +
+                "stopPathIndex=" + stopPathIndex +
+                ", time=" + time +
+                ", stopPathId='" + stopPathId + '\'' +
+                ", prevStopDepartureTime=" + prevStopDepartureTime +
+                ", scheduledTime=" + scheduledTime +
+                ", scheduledPrevStopArrivalTime=" + scheduledPrevStopArrivalTime +
+                ", dwellTime=" + dwellTime +
+                ", speed=" + speed +
+                ", lastStop=" + lastStop +
+                ", timePoint=" + timePoint +
+                ", firstStopDwellSet=" + firstStopDwellSet +
+                ", vehicleId=" + runTimesForRoutes.getVehicleId() +
+                ", tripId=" + runTimesForRoutes.getTripId() +
+                ", startTime=" + runTimesForRoutes.getStartTime() +
+                ", route=" + runTimesForRoutes.getRouteShortName() +
+                '}';
+    }
 }

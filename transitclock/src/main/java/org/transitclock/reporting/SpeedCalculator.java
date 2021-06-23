@@ -3,6 +3,7 @@ package org.transitclock.reporting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.core.TemporalDifference;
+import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.ipc.interfaces.ArrivalDepartureSpeed;
 import org.transitclock.utils.Geo;
 import org.transitclock.utils.Time;
@@ -27,10 +28,14 @@ public class SpeedCalculator {
     }
 
     private static boolean isValidArrivalDeparturePair(ArrivalDepartureSpeed prevDeparture, ArrivalDepartureSpeed currentDeparture){
-        return  prevDeparture != null && currentDeparture != null &&
-                isScheduleAdherenceValid(prevDeparture, currentDeparture) &&
+        if(prevDeparture == null || currentDeparture == null){
+            logger.warn("prevDeparture {} or currentDeparture {} is null", prevDeparture, currentDeparture);
+            return false;
+        }
+        return  isScheduleAdherenceValid(prevDeparture, currentDeparture) &&
                 !isSameStop(prevDeparture, currentDeparture) &&
-                isPrevAndCurrentStopDeparture(prevDeparture, currentDeparture);
+                isPrevAndCurrentStopDeparture(prevDeparture, currentDeparture) &&
+                isValidCurrentDeparture(currentDeparture);
     }
 
     /**
@@ -44,7 +49,12 @@ public class SpeedCalculator {
         if (schedAdh == null) {
             schedAdh = currentDeparture.getScheduleAdherence();
         }
-        return schedAdh == null || schedAdh.isWithinBounds(getMaxSchedAdh(), getMaxSchedAdh());
+        boolean isScheduleAdherenceValid = schedAdh == null || schedAdh.isWithinBounds(getMaxSchedAdh(), getMaxSchedAdh());
+        if(!isScheduleAdherenceValid){
+            logger.warn("schedule adherence {} is not valid for prevDeparture {} and currentDeparture {} is null",
+                    schedAdh, prevDeparture, currentDeparture);
+        }
+        return isScheduleAdherenceValid;
     }
 
     /**
@@ -54,7 +64,12 @@ public class SpeedCalculator {
      * @return
      */
     private static boolean isSameStop(ArrivalDepartureSpeed prevDeparture, ArrivalDepartureSpeed currentDeparture){
-        return prevDeparture.getStopPathIndex() == currentDeparture.getStopPathIndex();
+        boolean isSameStop = prevDeparture.getStopPathIndex() == currentDeparture.getStopPathIndex();
+        if(isSameStop){
+            logger.warn("Found same stop when determining speed for prevDeparture {} and currentDeparture {}",
+                    prevDeparture, currentDeparture);
+        }
+        return isSameStop;
     }
 
     /**
@@ -65,7 +80,24 @@ public class SpeedCalculator {
      * @return
      */
     private static boolean isPrevAndCurrentStopDeparture(ArrivalDepartureSpeed prevDeparture, ArrivalDepartureSpeed currentDeparture){
-        return currentDeparture.getStopPathIndex() - prevDeparture.getStopPathIndex() == 1 && prevDeparture.isDeparture();
+        boolean isSequentialDeparture = currentDeparture.getStopPathIndex() - prevDeparture.getStopPathIndex() == 1 &&
+                prevDeparture.isDeparture();
+        if(!isSequentialDeparture){
+            logger.warn("prevDeparture {} and currentDeparture {} are not sequential", prevDeparture, currentDeparture);
+        }
+        return isSequentialDeparture;
+    }
+
+    private static boolean isValidCurrentDeparture(ArrivalDepartureSpeed currentDeparture){
+        if(currentDeparture.getDwellTime() == null){
+            logger.warn("currentDeparture {} does not have dwellTime, can't caluculate speed", currentDeparture);
+            return false;
+        }
+        if(Float.isNaN(currentDeparture.getStopPathLength())){
+            logger.warn("currentDeparture {} does not have stopPathLength, can't caluculate speed", currentDeparture);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -77,14 +109,18 @@ public class SpeedCalculator {
     public static Double determineTravelSpeedForStopPath(ArrivalDepartureSpeed prevDeparture,
                                                          ArrivalDepartureSpeed currentDeparture) {
         try {
-            if(currentDeparture.getDwellTime() == null){
-                return null;
-            }
             long prevDepartureTime = getDepartureTime(prevDeparture);
             long currentArrivalTime = currentDeparture.getDate().getTime() - currentDeparture.getDwellTime();
 
             double travelTimeBetweenStopsMsec = (currentArrivalTime - prevDepartureTime) / Time.MS_PER_SEC;
-            double speedMps = (currentDeparture.getStopPathLength() / travelTimeBetweenStopsMsec);
+            Double speedMps = (currentDeparture.getStopPathLength() / travelTimeBetweenStopsMsec);
+
+            if(Double.isNaN(speedMps)){
+                logger.warn("speed is NaN for prevDeparture {} and currentDeparture {} with travelTimeBetweenStops {} " +
+                                "ms and currentDeparture stopLength {}", prevDeparture, currentDeparture,
+                        travelTimeBetweenStopsMsec, currentDeparture.getStopPathLength());
+                return null;
+            }
 
             if(getMaxStopPathSpeedMps() < speedMps){
                 logger.warn("For stopPath {} the speed of {} is above the max stoppath speed limit of {} m/s. " +
