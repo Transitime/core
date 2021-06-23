@@ -724,7 +724,3 @@ body.loader:after {
     z-index: 10;
 }
 
-.leaflet-popup-content {
-    max-height: 300px;
-    overflow: auto;
-}

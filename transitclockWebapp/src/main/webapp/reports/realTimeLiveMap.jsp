@@ -223,6 +223,43 @@
     var MAX_AVL_POLLING_RATE = 20000;
     var avlTimer = null;
 
+
+    function getSortedPredictions(data){
+        var sortArrayObj = [];
+
+        data.predictions.forEach(function(eachPred){
+            if(eachPred.dest && eachPred.dest.length ){
+                eachPred.dest.forEach(function(eachDest){
+                    if(eachDest.pred.length){
+
+                        var currentTimeSortingObj = {};
+                        var currentTimeSorting = eachDest.pred.sort(function(a,b){ return a.time - b.time });
+
+                        currentTimeSorting.forEach(function(eachPredDest){
+                            currentTimeSortingObj[eachPredDest.time] = eachPredDest;
+                        });
+
+                        sortArrayObj.push({
+                            orignalPred: eachPred,
+                            sortOrder: currentTimeSorting
+                        });
+                    }
+                });
+            }
+        });
+
+
+        if(sortArrayObj.length > 1){
+            sortArrayObj = sortArrayObj.sort(function(a,b){
+                return a.sortOrder[0].time - b.sortOrder[0].time
+            })
+        }
+
+
+        return sortArrayObj;
+    }
+
+
     /**
      * Called when prediction read from API. Updates the content of the
      * predictionsPopup with the new prediction info.
@@ -240,15 +277,18 @@
 
         // There will be predictions for just a single route/stop
         var content = "";
+        var sortedContent = getSortedPredictions(preds);
+
         var maxObservationsToShow = 3;
-        if(preds.predictions.length > 5) {
+        if(sortedContent.length > 5) {
             maxObservationsToShow = 1;
-        } else if(preds.predictions.length > 3) {
+        } else if(sortedContent.length > 3) {
             maxObservationsToShow = 2;
         }
-        $(preds.predictions).each(function(index, routeStopPreds){
 
-            // var routeStopPreds = preds.predictions[0];
+        $(sortedContent).each(function(index, eachSortedContent){
+
+            var routeStopPreds = eachSortedContent.orignalPred;
 
             if(index === 0){
                 content += '<b>Stop Name:</b> ' + routeStopPreds.stopName + '<br/>';
@@ -257,6 +297,10 @@
 
                 content += '<div class="bus-enroute"><b>Buses en-route</b> </div>';
             }
+            if(index > 4) {
+                return false;
+            }
+
 
             // For each destination add predictions
             $(routeStopPreds.dest).each(function(index2, eachDest){

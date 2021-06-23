@@ -226,6 +226,41 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
     var MAX_AVL_POLLING_RATE = 20000;
     var avlTimer = null;
 
+    function getSortedPredictions(data){
+        var sortArrayObj = [];
+
+        data.predictions.forEach(function(eachPred){
+            if(eachPred.dest && eachPred.dest.length ){
+                eachPred.dest.forEach(function(eachDest){
+                    if(eachDest.pred.length){
+
+                        var currentTimeSortingObj = {};
+                        var currentTimeSorting = eachDest.pred.sort(function(a,b){ return a.time - b.time });
+
+                        currentTimeSorting.forEach(function(eachPredDest){
+                            currentTimeSortingObj[eachPredDest.time] = eachPredDest;
+                        });
+
+                        sortArrayObj.push({
+                            orignalPred: eachPred,
+                            sortOrder: currentTimeSorting
+                        });
+                    }
+                });
+            }
+        });
+
+
+        if(sortArrayObj.length > 1){
+            sortArrayObj = sortArrayObj.sort(function(a,b){
+                return a.sortOrder[0].time - b.sortOrder[0].time
+            })
+        }
+
+
+        return sortArrayObj;
+    }
+
     /**
      * Called when prediction read from API. Updates the content of the
      * predictionsPopup with the new prediction info.
@@ -246,15 +281,22 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
 
         var content = "";
 
+        var sortedContent = getSortedPredictions(preds);
+
         var maxObservationsToShow = 3;
-        if(preds.predictions.length > 5) {
+        if(sortedContent.length > 5) {
             maxObservationsToShow = 1;
-        } else if(preds.predictions.length > 3) {
+        } else if(sortedContent.length > 3) {
             maxObservationsToShow = 2;
         }
 
-        $(preds.predictions).each(function(index, routeStopPreds){
 
+        $(sortedContent).each(function(index, eachSortedContent){
+
+            var routeStopPreds = eachSortedContent.orignalPred;
+            if(index > 5) {
+                return false;
+            }
             // var routeStopPreds = preds.predictions[0];
 
             if(index === 0){
@@ -1198,27 +1240,25 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
         var routeParam = "";
         var stopParam = "";
         resetLayers();
-        // if(routeShortName && routeShortName.length > 0) {
-            $(routeShortName).each(function (index, eachList) {
-                routeParam += "r=" + eachList + ($(routeShortName).length - 1 === index ? "" : "&");
-            });
+        $(routeShortName).each(function (index, eachList) {
+            routeParam += "r=" + eachList + ($(routeShortName).length - 1 === index ? "" : "&");
+        });
 
 
-            if (stopId.trim() != "") {
-                stopParam = "s=" + stopId;
+        if (stopId.trim() != "") {
+            stopParam = "s=" + stopId;
+        }
+
+        url = apiUrlPrefix + "/command/routesDetails";
+        if (routeParam != "" || stopParam != "") {
+            url += "?" + routeParam;
+            if (routeParam != "") {
+                url += "&"
             }
+            url += stopParam;
+        }
 
-            url = apiUrlPrefix + "/command/routesDetails";
-            if (routeParam != "" || stopParam != "") {
-                url += "?" + routeParam;
-                if (routeParam != "") {
-                    url += "&"
-                }
-                url += stopParam;
-            }
-
-            $.getJSON(url, routeConfigCallback).error(function() {alert("Specified stop not found.");});
-        // }
+        $.getJSON(url, routeConfigCallback).error(function() {alert("Specified stop not found.");});
     }
 
 
