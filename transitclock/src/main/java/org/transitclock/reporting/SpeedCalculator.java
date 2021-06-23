@@ -3,6 +3,7 @@ package org.transitclock.reporting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.core.TemporalDifference;
+import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.ipc.interfaces.ArrivalDepartureSpeed;
 import org.transitclock.utils.Geo;
 import org.transitclock.utils.Time;
@@ -33,7 +34,8 @@ public class SpeedCalculator {
         }
         return  isScheduleAdherenceValid(prevDeparture, currentDeparture) &&
                 !isSameStop(prevDeparture, currentDeparture) &&
-                isPrevAndCurrentStopDeparture(prevDeparture, currentDeparture);
+                isPrevAndCurrentStopDeparture(prevDeparture, currentDeparture) &&
+                isValidCurrentDeparture(currentDeparture);
     }
 
     /**
@@ -86,6 +88,18 @@ public class SpeedCalculator {
         return isSequentialDeparture;
     }
 
+    private static boolean isValidCurrentDeparture(ArrivalDepartureSpeed currentDeparture){
+        if(currentDeparture.getDwellTime() == null){
+            logger.warn("currentDeparture {} does not have dwellTime, can't caluculate speed", currentDeparture);
+            return false;
+        }
+        if(Float.isNaN(currentDeparture.getStopPathLength())){
+            logger.warn("currentDeparture {} does not have stopPathLength, can't caluculate speed", currentDeparture);
+            return false;
+        }
+        return true;
+    }
+
     /**
      * Determine and return the travel time between the stop departures
      * @param prevDeparture
@@ -95,15 +109,18 @@ public class SpeedCalculator {
     public static Double determineTravelSpeedForStopPath(ArrivalDepartureSpeed prevDeparture,
                                                          ArrivalDepartureSpeed currentDeparture) {
         try {
-            if(currentDeparture.getDwellTime() == null){
-                logger.warn("currentDeparture {} does not have dwellTime, can't caluculate speed", currentDeparture);
-                return null;
-            }
             long prevDepartureTime = getDepartureTime(prevDeparture);
             long currentArrivalTime = currentDeparture.getDate().getTime() - currentDeparture.getDwellTime();
 
             double travelTimeBetweenStopsMsec = (currentArrivalTime - prevDepartureTime) / Time.MS_PER_SEC;
-            double speedMps = (currentDeparture.getStopPathLength() / travelTimeBetweenStopsMsec);
+            Double speedMps = (currentDeparture.getStopPathLength() / travelTimeBetweenStopsMsec);
+
+            if(Double.isNaN(speedMps)){
+                logger.warn("speed is NaN for prevDeparture {} and currentDeparture {} with travelTimeBetweenStops {} " +
+                                "ms and currentDeparture stopLength {}", prevDeparture, currentDeparture,
+                        travelTimeBetweenStopsMsec, currentDeparture.getStopPathLength());
+                return null;
+            }
 
             if(getMaxStopPathSpeedMps() < speedMps){
                 logger.warn("For stopPath {} the speed of {} is above the max stoppath speed limit of {} m/s. " +
