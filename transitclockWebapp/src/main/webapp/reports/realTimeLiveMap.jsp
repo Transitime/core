@@ -280,66 +280,72 @@
         var sortedContent = getSortedPredictions(preds);
 
         var maxObservationsToShow = 3;
-        if(sortedContent.length > 5) {
+        if (sortedContent.length > 5) {
             maxObservationsToShow = 1;
-        } else if(sortedContent.length > 3) {
+        } else if (sortedContent.length > 3) {
             maxObservationsToShow = 2;
         }
+        var routeStopPreds = preds.predictions[0];
+        if (routeStopPreds) {
+            content += '<b>Stop Name:</b> ' + routeStopPreds.stopName + '<br/>';
 
-        $(sortedContent).each(function(index, eachSortedContent){
+            content += '<b>Stop Id:</b> ' + routeStopPreds.stopId + '<br/>';
 
-            var routeStopPreds = eachSortedContent.orignalPred;
+            content += '<div class="bus-enroute"><b>Buses en-route</b> </div>';
+        }
+        if (sortedContent.length) {
 
-            if(index === 0){
-                content += '<b>Stop Name:</b> ' + routeStopPreds.stopName + '<br/>';
+            $(sortedContent).each(function (index, eachSortedContent) {
 
-                content += '<b>Stop Id:</b> ' + routeStopPreds.stopId + '<br/>';
-
-                content += '<div class="bus-enroute"><b>Buses en-route</b> </div>';
-            }
-            if(index > 4) {
-                return false;
-            }
+                var routeStopPreds = eachSortedContent.orignalPred;
 
 
-            // For each destination add predictions
-            $(routeStopPreds.dest).each(function(index2, eachDest){
-                // Add the destination/headsign info
-                content += "<div class='each-destination'><div class='eachDest-header'>"+routeStopPreds.routeShortName ;
-
-                if (eachDest.headsign){
-                    content +=  " - " + eachDest.headsign;
-                    // content += '<b>Destination:</b> ' + routeStopPreds.dest[i].headsign + '<br/>';
-                }
-                content += "</div>";
-
-                if (eachDest.pred.length > 0) {
-
-                    $(eachDest.pred).each(function(index3, eachPred){
-
-                        if(maxObservationsToShow < index3+1){
-                            return false;
-                        }
-
-                        content += '<div class="each-prediction">'
-                        content += '<div class="vehicle-image-detail"><img src="'+busIcon.options.iconUrl+'"  class="vehicle-icon-prediction"/>';
-                        content += '<span class="vehicle-id">'+ eachPred.vehicle +'</span></div>';
-                        content += '<span class="vehicle-time">'+ eachPred.min +' minutes</span>';
-                        content += '</div>';
-
-                    });
-
-
-                } else {
-                    content += "<div class='no-predictions'>No predictions</div>";
+                if (index > 4) {
+                    return false;
                 }
 
-                content += "</div>";
+
+                // For each destination add predictions
+                $(routeStopPreds.dest).each(function (index2, eachDest) {
+                    // Add the destination/headsign info
+                    content += "<div class='each-destination'><div class='eachDest-header'>" + routeStopPreds.routeShortName;
+
+                    if (eachDest.headsign) {
+                        content += " - " + eachDest.headsign;
+                        // content += '<b>Destination:</b> ' + routeStopPreds.dest[i].headsign + '<br/>';
+                    }
+                    content += "</div>";
+
+                    if (eachDest.pred.length > 0) {
+
+                        $(eachDest.pred).each(function (index3, eachPred) {
+
+                            if (maxObservationsToShow < index3 + 1) {
+                                return false;
+                            }
+
+                            content += '<div class="each-prediction">'
+                            content += '<div class="vehicle-image-detail"><img src="' + busIcon.options.iconUrl + '"  class="vehicle-icon-prediction"/>';
+                            content += '<span class="vehicle-id">' + eachPred.vehicle + '</span></div>';
+                            content += '<span class="vehicle-time">' + eachPred.min + ' minutes</span>';
+                            content += '</div>';
+
+                        });
+
+
+                    } else {
+                        content += "<div class='no-predictions'>No predictions</div>";
+                    }
+
+                    content += "</div>";
+
+                });
 
             });
-
-        });
-        // Now update popup with the wonderful prediction info
+            // Now update popup with the wonderful prediction info
+        } else{
+            content += "<div class='no-predictions'>No predictions</div>";
+        }
         predictionsPopup.setContent(content);
     }
 
@@ -371,6 +377,9 @@
      */
     function showStopPopup(stopMarker) {
         // JSON request of predicton data
+        predictionsPopup = null;
+        window.clearTimeout(predictionsTimeout);
+        map.closePopup();
         getPredictionsJson(stopMarker.routeShortName, stopMarker.stop.id);
 
         // Create popup in proper place but content will be added in predictionCallback()
@@ -394,6 +403,8 @@
         // the paths & stops are drawn below the vehicles even if the vehicles
         // happen to be drawn first.
         routeFeatureGroup = L.featureGroup();
+
+        var canTriggerShowStop = false;
 
         // Only working with single route at a time for now
         // var route = routesData.routes[0];
@@ -441,7 +452,8 @@
                         showStopPopup(this);
                     }).addTo(map);
 
-                    if (stopMarker.stop.id == $("#stopsSearch").val()) {
+                    if (stopMarker.stop.id == $("#stopsSearch").val() && !canTriggerShowStop) {
+                        canTriggerShowStop = true;
                         showStopPopup(stopMarker);
                     }
                 }
@@ -1062,7 +1074,7 @@
     // anymore since stop popup not displayed anymore.
     map.on('popupclose', function(e) {
         predictionsPopup = null;
-        clearTimeout(predictionsTimeout);
+        window.clearTimeout(predictionsTimeout);
 
         if (e.popup.parent)
             e.popup.parent.popup = null;
