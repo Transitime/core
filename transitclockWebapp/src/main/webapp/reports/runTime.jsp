@@ -818,7 +818,7 @@
             error: function (response) {
                 alert("Error retrieving directions for route " + response.r);
                 $("#submit").attr("disabled", false);
-               //  $("body").removeClass("loader");
+                //  $("body").removeClass("loader");
                 $("#submit").html("Submit");
             }
         })
@@ -851,7 +851,7 @@
                     alert("No trip pattern data for selected route and headsign.");
                     $("#submit").attr("disabled", true);
                     $("#submit").html("Loading...");
-                   //  $("body").addClass("loader");
+                    //  $("body").addClass("loader");
                 } else {
                     $("#tripPattern").removeAttr('disabled');
                     $("#submit").removeAttr('disabled');
@@ -870,7 +870,7 @@
             error: function (request, status, error) {
                 alert(error + '. ' + request.responseText);
                 $("#submit").attr("disabled", false);
-               //  $("body").removeClass("loader");
+                //  $("body").removeClass("loader");
                 $("#submit").html("Submit");
             }
         });
@@ -1177,7 +1177,7 @@
         } else{
             $(".only-individual-route").removeClass("hide-routes");
             $(".all-routes").hide();
-            $("#run-time-tabs" ).tabs();
+            $("#run-time-tabs" ).tabs({ active: 0 });
         }
 
         if(response.data && ((response.data.trips && response.data.trips.length > 0) ||
