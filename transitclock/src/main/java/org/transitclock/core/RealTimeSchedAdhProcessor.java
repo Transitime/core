@@ -173,6 +173,10 @@ public class RealTimeSchedAdhProcessor {
 	 */
 	public static TemporalDifference generateEffectiveScheduleDifference(VehicleState vehicleState) {
 	  TemporalMatch match = vehicleState.getMatch();
+	  if (match == null) {
+	  	logger.error("No match (assignment grabbed?) for vehicle {}", vehicleState.getVehicleId());
+	  	return null;
+		}
     Trip trip = match.getTrip();
     long avlTime = match.getAvlTime();
     String vehicleId = vehicleState.getVehicleId();
