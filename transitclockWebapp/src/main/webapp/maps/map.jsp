@@ -228,7 +228,6 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
 
     function getSortedPredictions(data){
         var sortArrayObj = [];
-
         data.predictions.forEach(function(eachPred){
             if(eachPred.dest && eachPred.dest.length ){
                 eachPred.dest.forEach(function(eachDest){
@@ -236,13 +235,18 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
 
                         var currentTimeSortingObj = {};
                         var currentTimeSorting = eachDest.pred.sort(function(a,b){ return a.time - b.time });
-
                         currentTimeSorting.forEach(function(eachPredDest){
                             currentTimeSortingObj[eachPredDest.time] = eachPredDest;
                         });
-
+                        var clonedEachPred = JSON.parse(JSON.stringify(eachPred));
+                        clonedEachPred.dest=[{
+                            dir: eachDest.dir,
+                            headsign: eachDest.headsign,
+                            pred: currentTimeSorting
+                        }]
+                        console.log(eachPred);
                         sortArrayObj.push({
-                            orignalPred: eachPred,
+                            orignalPred: clonedEachPred,
                             sortOrder: currentTimeSorting
                         });
                     }
@@ -250,16 +254,14 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
             }
         });
 
-
         if(sortArrayObj.length > 1){
             sortArrayObj = sortArrayObj.sort(function(a,b){
                 return a.sortOrder[0].time - b.sortOrder[0].time
             })
         }
-
-
         return sortArrayObj;
     }
+
 
     /**
      * Called when prediction read from API. Updates the content of the
@@ -290,65 +292,60 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
             maxObservationsToShow = 2;
         }
 
-        var routeStopPreds = preds.predictions[0];
-        if (routeStopPreds) {
-            content += '<b>Stop Name:</b> ' + routeStopPreds.stopName + '<br/>';
 
-            content += '<b>Stop Id:</b> ' + routeStopPreds.stopId + '<br/>';
+        $(sortedContent).each(function(index, eachSortedContent){
 
-            content += '<div class="bus-enroute"><b>Buses en-route</b> </div>';
-        }
-        if (sortedContent.length) {
+            var routeStopPreds = eachSortedContent.orignalPred;
+            if(index > 5) {
+                return false;
+            }
+            // var routeStopPreds = preds.predictions[0];
 
-            $(sortedContent).each(function(index, eachSortedContent){
+            if(index === 0){
+                content += '<b>Stop Name:</b> ' + routeStopPreds.stopName + '<br/>';
 
-                var routeStopPreds = eachSortedContent.orignalPred;
-                if(index > 4) {
-                    return false;
+                if (verbose)
+                    content += '<b>Stop Id:</b> ' + routeStopPreds.stopId + '<br/>';
+
+                content += '<div class="bus-enroute"><b>Buses en-route</b> </div>';
+            }
+
+            // For each destination add predictions
+            $(routeStopPreds.dest).each(function(index2, eachDest){
+                // Add the destination/headsign info
+                content += "<div class='each-destination'><div class='eachDest-header'>"+routeStopPreds.routeShortName ;
+
+                if (eachDest.headsign){
+                    content +=  " - " + eachDest.headsign;
+                    // content += '<b>Destination:</b> ' + routeStopPreds.dest[i].headsign + '<br/>';
                 }
-                // var routeStopPreds = preds.predictions[0];
+                content += "</div>";
+
+                if (eachDest.pred.length > 0) {
+
+                    $(eachDest.pred).each(function(index3, eachPred){
+                        if(maxObservationsToShow < index3+1){
+                            return false;
+                        }
+                        content += '<div class="each-prediction">'
+                        content += '<div class="vehicle-image-detail"><img src="'+busIcon.options.iconUrl+'"  class="vehicle-icon-prediction"/>';
+                        content += '<span class="vehicle-id">'+ eachPred.vehicle +'</span></div>';
+                        content += '<span class="vehicle-time">'+ eachPred.min +' minutes</span>';
+                        content += '</div>';
+
+                    });
 
 
+                } else {
+                    content += "<div class='no-predictions'>No predictions</div>";
+                }
 
-                // For each destination add predictions
-                $(routeStopPreds.dest).each(function(index2, eachDest){
-                    // Add the destination/headsign info
-                    content += "<div class='each-destination'><div class='eachDest-header'>"+routeStopPreds.routeShortName ;
-
-                    if (eachDest.headsign){
-                        content +=  " - " + eachDest.headsign;
-                        // content += '<b>Destination:</b> ' + routeStopPreds.dest[i].headsign + '<br/>';
-                    }
-                    content += "</div>";
-
-                    if (eachDest.pred.length > 0) {
-
-                        $(eachDest.pred).each(function(index3, eachPred){
-                            if(maxObservationsToShow < index3+1){
-                                return false;
-                            }
-                            content += '<div class="each-prediction">'
-                            content += '<div class="vehicle-image-detail"><img src="'+busIcon.options.iconUrl+'"  class="vehicle-icon-prediction"/>';
-                            content += '<span class="vehicle-id">'+ eachPred.vehicle +'</span></div>';
-                            content += '<span class="vehicle-time">'+ eachPred.min +' minutes</span>';
-                            content += '</div>';
-
-                        });
-
-
-                    } else {
-                        content += "<div class='no-predictions'>No predictions</div>";
-                    }
-
-                    content += "</div>";
-
-                });
+                content += "</div>";
 
             });
-            // Now update popup with the wonderful prediction info
-        }   else{
-            content += "<div class='no-predictions'>No predictions</div>";
-        }
+
+        });
+        // Now update popup with the wonderful prediction info
         predictionsPopup.setContent(content);
     }
 
@@ -381,9 +378,6 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
      */
     function showStopPopup(stopMarker) {
         // JSON request of predicton data
-        predictionsPopup = null;
-        window.clearTimeout(predictionsTimeout);
-        map.closePopup();
         getPredictionsJson(stopMarker.routeShortName, stopMarker.stop.id);
 
         // Create popup in proper place but content will be added in predictionCallback()
@@ -408,7 +402,6 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
         // happen to be drawn first.
         routeFeatureGroup = L.featureGroup();
 
-        var canTriggerShowStop = null;
         // Only working with single route at a time for now
         // var route = routesData.routes[0];
 
@@ -451,14 +444,11 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
                         showStopPopup(this);
                     }).addTo(map);
 
-                    if (stopMarker.stop.id == $("#stopsSearch").val() && !canTriggerShowStop) {
-                        canTriggerShowStop = true;
+                    if (stopMarker.stop.id == $("#stopsSearch").val()) {
                         showStopPopup(stopMarker);
                     }
-
                 }
             }
-
 
             // Draw the paths for the route
             for (var i=0; i<route.shape.length; ++i) {
@@ -1080,7 +1070,7 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
     // anymore since stop popup not displayed anymore.
     map.on('popupclose', function (e) {
         predictionsPopup = null;
-        window.clearTimeout(predictionsTimeout);
+        clearTimeout(predictionsTimeout);
 
         if (e.popup.parent)
             e.popup.parent.popup = null;
