@@ -68,8 +68,6 @@ public class RunTimeLoader {
                   trip,
                   block,
                   toIpcArrivalDepartures(arrivalDeparturesList),
-                  null,
-                  null,
                   getLastStopIndex(arrivalDeparturesList),
                   clampingSpeed,
                   serviceUtils, false);

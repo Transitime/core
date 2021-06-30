@@ -85,6 +85,10 @@ public class VehicleState {
 
 	private Integer tripCounter = 0;
 
+	private Integer lastTripIndex = null;
+
+	private String lastBlockId = null;
+
 	private Headway headway=null;
 
 	private HoldingTime holdingTime=null;
@@ -489,6 +493,24 @@ public class VehicleState {
 	}
 
 	/**
+	 * Returns the next to last temporal match that is not null. Returns null if there isn't
+	 * one. Useful for when need to compare the previous to last match with
+	 * the last one, such as for determining if vehicle has crossed any
+	 * stops.
+	 *
+	 * @return
+	 */
+	public TemporalMatch getPreviousValidMatch() {
+		for(int i =1; i < temporalMatchHistory.size(); i++){
+			TemporalMatch prevMatch = temporalMatchHistory.get(i);
+			if(prevMatch != null){
+				return prevMatch;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Returns the current AvlReport. Returns null if there isn't one.
 	 * @return
 	 */
@@ -500,7 +522,21 @@ public class VehicleState {
 		}
 	}
 
+	public Integer getLastTripIndex() {
+		return lastTripIndex;
+	}
 
+	public void setLastTripIndex(Integer lastTripIndex) {
+		this.lastTripIndex = lastTripIndex;
+	}
+
+	public String getLastBlockId() {
+		return lastBlockId;
+	}
+
+	public void setLastBlockId(String lastBlockId) {
+		this.lastBlockId = lastBlockId;
+	}
 
 	/**
 	 * Looks in the AvlReport history for the most recent AvlReport that is at
