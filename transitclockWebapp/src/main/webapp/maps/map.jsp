@@ -244,7 +244,6 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
                             headsign: eachDest.headsign,
                             pred: currentTimeSorting
                         }]
-                        console.log(eachPred);
                         sortArrayObj.push({
                             orignalPred: clonedEachPred,
                             sortOrder: currentTimeSorting
