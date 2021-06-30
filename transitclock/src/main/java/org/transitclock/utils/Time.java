@@ -16,7 +16,10 @@
  */
 package org.transitclock.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitclock.config.BooleanConfigValue;
+import org.transitclock.core.PredictionGeneratorDefaultImpl;
 import org.transitclock.db.structs.Agency;
 import org.transitclock.gtfs.DbConfig;
 
@@ -24,6 +27,11 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -140,8 +148,7 @@ public class Time {
 	private static final DateFormat timeFormat24Msec =
 			new SimpleDateFormat("HH:mm:ss.SSS z");
 
-	private static final DateFormat timeFormat24MsecNoTimeZone =
-			new SimpleDateFormat("HH:mm:ss.SSS");
+	private static final DateTimeFormatter timeFormat24MsecNoTimeZone = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
 
 	// Sun, 06 Nov 1994 08:49:37 GMT  ; RFC 822, updated by RFC 1123
 	private static final DateFormat httpFormat =
@@ -167,6 +174,8 @@ public class Time {
 
 	// Have a shared calendar so don't have to keep creating one
 	private Calendar calendar;
+
+	private static final Logger logger = LoggerFactory.getLogger(Time.class);
 
 	private static BooleanConfigValue useMonthDayYearFormat =
 			new BooleanConfigValue(
@@ -945,7 +954,12 @@ public class Time {
 	 * @return
 	 */
 	public static String timeStrMsecNoTimeZone(long epochTime) {
-		return timeFormat24MsecNoTimeZone.format(epochTime);
+		try {
+			return Instant.ofEpochMilli(epochTime).atZone(ZoneId.systemDefault()).format(timeFormat24MsecNoTimeZone);
+		} catch(Exception e){
+			logger.error("Unable to convert epoch time {} to formatted time", epochTime, e);
+			return null;
+		}
 	}
 
 	/**
@@ -956,7 +970,12 @@ public class Time {
 	 * @return
 	 */
 	public static String timeStrMsecNoTimeZone(Date epochTime) {
-		return timeFormat24MsecNoTimeZone.format(epochTime);
+		try {
+			return LocalDateTime.ofInstant(epochTime.toInstant(), ZoneId.systemDefault()).format(timeFormat24MsecNoTimeZone);
+		} catch(Exception e){
+			logger.error("Unable to convert epoch time {} to formatted time", epochTime, e);
+			return null;
+		}
 	}
 
 	/**
