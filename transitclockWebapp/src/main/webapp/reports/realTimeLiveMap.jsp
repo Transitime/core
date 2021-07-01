@@ -240,6 +240,7 @@
                             headsign: eachDest.headsign,
                             pred: currentTimeSorting
                         }]
+
                         sortArrayObj.push({
                             orignalPred: clonedEachPred,
                             sortOrder: currentTimeSorting
@@ -1222,7 +1223,26 @@
             url += stopParam;
         }
 
-        $.getJSON(url, routeConfigCallback).error(function() {alert("Specified stop not found.");});
+        $.getJSON(url, function(routesData, status){
+            routeConfigCallback(routesData, status);
+            if(routesData && routesData.routes.length){
+                var routeParam2 = "";
+                var selectedDataList = [];
+                routesData.routes.forEach(function(eachData,index){
+                    routeParam2 += "r=" + eachData.shortName + ($(routesData.routes).length - 1 === index ? "" : "&");
+                });
+
+                // Reset the polling rate back down to minimum value since selecting new route
+                avlPollingRate = MIN_AVL_POLLING_RATE;
+                if (avlTimer)
+                    clearTimeout(avlTimer);
+
+                // Read in vehicle locations now
+                setRouteQueryStrParam(routeParam2);
+                updateVehiclesUsingApiData();
+            }
+
+        }).error(function() {alert("Specified stop not found.");});
     }
 
     function openVehiclePopup(vehicleMarker) {
