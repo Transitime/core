@@ -32,8 +32,6 @@ public class RunTimeProcessor {
    * @param trip
    * @param block
    * @param arrivalDeparturesForStop
-   * @param matchAtPreviousStop
-   * @param matchAtCurrentStop
    * @param lastStopIndex
    * @param serviceUtils
    * @return
@@ -42,8 +40,6 @@ public class RunTimeProcessor {
                                         Trip trip,
                                         Block block,
                                         List<IpcArrivalDeparture> arrivalDeparturesForStop,
-                                        TemporalMatch matchAtPreviousStop,
-                                        TemporalMatch matchAtCurrentStop,
                                         Integer lastStopIndex,
                                         ServiceUtilsImpl serviceUtils) {
     RunTimeCache cache = new RunTimeCacheImpl();
@@ -53,8 +49,6 @@ public class RunTimeProcessor {
             trip,
             block,
             arrivalDeparturesForStop,
-            matchAtPreviousStop,
-            matchAtCurrentStop,
             lastStopIndex,
             null,
             serviceUtils, true).success();
@@ -68,8 +62,6 @@ public class RunTimeProcessor {
    * @param trip
    * @param block
    * @param arrivalDeparturesForStop
-   * @param matchAtPreviousStop
-   * @param matchAtCurrentStop
    * @param lastStopIndex
    * @param clampingSpeed
    * @param serviceUtils
@@ -81,8 +73,6 @@ public class RunTimeProcessor {
                                                        Trip trip,
                                                        Block block,
                                                        List<IpcArrivalDeparture> arrivalDeparturesForStop,
-                                                       TemporalMatch matchAtPreviousStop,
-                                                       TemporalMatch matchAtCurrentStop,
                                                        Integer lastStopIndex,
                                                        Double clampingSpeed,
                                                        RunTimeServiceUtils serviceUtils,
@@ -136,8 +126,6 @@ public class RunTimeProcessor {
                    state,
                    trip,
                    arrivalDeparture,
-                   matchAtPreviousStop,
-                   matchAtCurrentStop,
                    lastStopIndex,
                    timer,
                    clampingSpeed,
@@ -157,8 +145,6 @@ public class RunTimeProcessor {
             state,
             trip,
             arrivalDeparturesForStop.get(0),
-            matchAtPreviousStop,
-            matchAtCurrentStop,
             lastStopIndex,
             timer,
             clampingSpeed,
@@ -170,8 +156,6 @@ public class RunTimeProcessor {
                                                RunTimeProcessorState state,
                                                Trip trip,
                                                IpcArrivalDeparture arrivalDeparture,
-                                               TemporalMatch matchAtPreviousStop,
-                                               TemporalMatch matchAtCurrentStop,
                                                Integer lastStopIndex,
                                                IntervalTimer timer,
                                                Double clampingSpeed,
@@ -183,13 +167,6 @@ public class RunTimeProcessor {
     RunTimesForRoutes runTimesForRoutes = state.populateRuntimesForRoutes(vehicleId, serviceType, lastStopIndex);
 
     RunTimeProcessorResult result = new RunTimeProcessorResult(validateSpeed(state.getRunTimesForRoutes(), clampingSpeed));
-
-    if (matchAtPreviousStop != null) {
-      logger.trace("Previous Match {}", matchAtPreviousStop.toString());
-    }
-    if (matchAtPreviousStop != null) {
-      logger.trace("Current Match {}", matchAtCurrentStop.toString());
-    }
 
     if(result.success()) {
       logger.debug("{} with {} stops", runTimesForRoutes.toString(), state.getRunTimesForStops().size());

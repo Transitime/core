@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.BooleanConfigValue;
+import org.transitclock.configData.CoreConfig;
 import org.transitclock.core.*;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
@@ -40,14 +41,26 @@ public class RunTimeGenerator {
 				return false;
 			}
 
-			// check that this is a valid run time candidate
-			TemporalMatch match = vehicleState.getMatch();
-			TemporalMatch prevMatch = vehicleState.getPreviousMatch();
-			if(!hasCrossedToNextTrip(match, prevMatch)){
+			TemporalMatch currentMatch = vehicleState.getMatch();
+
+			// check that it crossed to the next trip
+			// if it crossed to next trip continue
+			// otherwise update last known block and trip idx for vehicle
+			boolean crossedToNextTrip = hasCrossedToNextTrip(vehicleState, currentMatch);
+			updateVehicleLastKnownBlockAndTrip(vehicleState, currentMatch);
+			if(!crossedToNextTrip){
 				return false;
 			}
 
-			// Lookup Arrivals Departures for Trip
+			// Look for prevMatch
+			// This is the trip we are trying to generate runTimes for
+			TemporalMatch prevMatch = vehicleState.getPreviousValidMatch();
+			if(prevMatch == null){
+				return false;
+			}
+
+			// Lookup ArrivalsDepartures for Trip
+			// If no valid ArrivalsDepartures then return
 			String tripId = prevMatch.getTrip().getId();
 			long vehicleMatchAvlTime = prevMatch.getAvlTime();
 			Integer tripStartTime = prevMatch.getTrip().getStartTime();
@@ -65,8 +78,8 @@ public class RunTimeGenerator {
 			Block block = trip.getBlock();
 
 			ServiceUtilsImpl serviceUtils = Core.getInstance().getServiceUtils();
-			return processor.processRunTimesForTrip(vehicleId, trip, block, arrivalDeparturesForStop, prevMatch,
-					match, lastStopIndex, serviceUtils);
+			return processor.processRunTimesForTrip(vehicleId, trip, block, arrivalDeparturesForStop,
+					lastStopIndex, serviceUtils);
 
 		} catch (Exception e) {
 			logger.error("Exception when processing run times", e);
@@ -74,20 +87,60 @@ public class RunTimeGenerator {
 		return false;
 	}
 
-	boolean hasCrossedToNextTrip(TemporalMatch currentMatch, TemporalMatch previousMatch) {
-		if(currentMatch != null && previousMatch != null &&
-						previousMatch.getTripIndex() < currentMatch.getTripIndex() &&
-						previousMatch.getBlock().getId().equals(currentMatch.getBlock().getId())){
-			logger.debug("Found trip transition between prevMatch {} and currentMatch {}", previousMatch, currentMatch);
+	private void updateVehicleLastKnownBlockAndTrip(VehicleState vehicleState, TemporalMatch currentMatch) {
+		if(currentMatch != null){
+			if(!vehicleState.getBlock().getId().equals(vehicleState.getLastBlockId())){
+				vehicleState.setLastBlockId(currentMatch.getBlock().getId());
+			}
+			vehicleState.setLastTripIndex(currentMatch.getTripIndex());
+		}
+	}
+
+	boolean hasCrossedToNextTrip(VehicleState vehicleState, TemporalMatch currentMatch) {
+		Block currentMatchBlock = currentMatch.getBlock();
+		Integer currentTripIndex = currentMatch.getTripIndex();
+		String lastValidBlockId = vehicleState.getLastBlockId();
+		Integer lastValidTripIndex = vehicleState.getLastTripIndex();
+		VehicleAtStopInfo atStopInfo = currentMatch.getAtStop();
+
+		// 1 - Check if at end of block
+		if (atStopInfo != null && atStopInfo.atEndOfBlock()){
 			return true;
 		}
+
+		// Check to make sure have current match, lastValidBlockId and lastValidTripIndex
+		if(currentMatchBlock != null && lastValidBlockId != null && lastValidTripIndex != null){
+
+			// 2 - Check if same block but transitioned to next trip
+			if(currentMatchBlock.getId().equals(lastValidBlockId) && currentTripIndex > lastValidTripIndex) {
+				logger.debug("Found trip transition with vehicleState lastTripIndex {} and vehicleState lastBlockId {} " +
+						"and currentMatch tripIndex {}", lastValidTripIndex, lastValidBlockId, currentTripIndex);
+				return true;
+			}
+
+			// 3 - Check if transitioned to new block (in case step 1 fails since vehicles don't always reach last stop)
+			// If using exact trip match should in theory minimize block flapping making this method more accurate
+			if(CoreConfig.tryForExactTripMatch() &&
+					currentMatchBlock != null &&  !currentMatchBlock.getId().equals(lastValidBlockId)){
+				logger.debug("Found a block transition, hopefully not due to flapping. Prev block is {}, new block is {}",
+						lastValidBlockId, currentMatchBlock.getId());
+				return true;
+			}
+		}
+
 		return false;
 	}
 
 	boolean isVehicleStateValid(VehicleState vehicleState){
-		return vehicleState.isPredictable() &&
-						vehicleState.getMatch() != null &&
-						vehicleState.getMatch().getMatchAtPreviousStop() != null;
+		if(vehicleState.getMatch() == null){
+			logger.warn("Can't process RunTime, currentMatch is null for {}", vehicleState);
+			return false;
+		}
+		if(!vehicleState.isPredictable()){
+			logger.warn("Can't process RunTime, vehicle is not predictable for {}", vehicleState);
+			return false;
+		}
+		return true;
 	}
 
 

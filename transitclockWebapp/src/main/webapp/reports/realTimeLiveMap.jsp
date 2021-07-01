@@ -207,7 +207,6 @@
             routeQueryStrParam =  null;
             return;
         }
-        console.log(getQueryVariable("r"))
 
         if (getQueryVariable("r"))
             routeQueryStrParam = "r=" + getQueryVariable("r");
@@ -241,7 +240,7 @@
                             headsign: eachDest.headsign,
                             pred: currentTimeSorting
                         }]
-                        console.log(eachPred);
+
                         sortArrayObj.push({
                             orignalPred: clonedEachPred,
                             sortOrder: currentTimeSorting
