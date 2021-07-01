@@ -226,21 +226,24 @@
 
     function getSortedPredictions(data){
         var sortArrayObj = [];
-
         data.predictions.forEach(function(eachPred){
             if(eachPred.dest && eachPred.dest.length ){
                 eachPred.dest.forEach(function(eachDest){
                     if(eachDest.pred.length){
-
                         var currentTimeSortingObj = {};
                         var currentTimeSorting = eachDest.pred.sort(function(a,b){ return a.time - b.time });
-
                         currentTimeSorting.forEach(function(eachPredDest){
                             currentTimeSortingObj[eachPredDest.time] = eachPredDest;
                         });
-
+                        var clonedEachPred = JSON.parse(JSON.stringify(eachPred));
+                        clonedEachPred.dest=[{
+                            dir: eachDest.dir,
+                            headsign: eachDest.headsign,
+                            pred: currentTimeSorting
+                        }]
+                        console.log(eachPred);
                         sortArrayObj.push({
-                            orignalPred: eachPred,
+                            orignalPred: clonedEachPred,
                             sortOrder: currentTimeSorting
                         });
                     }
@@ -254,11 +257,8 @@
                 return a.sortOrder[0].time - b.sortOrder[0].time
             })
         }
-
-
         return sortArrayObj;
     }
-
 
     /**
      * Called when prediction read from API. Updates the content of the
@@ -1224,7 +1224,26 @@
             url += stopParam;
         }
 
-        $.getJSON(url, routeConfigCallback).error(function() {alert("Specified stop not found.");});
+        $.getJSON(url, function(routesData, status){
+            routeConfigCallback(routesData, status);
+            if(routesData && routesData.routes.length){
+                var routeParam2 = "";
+                var selectedDataList = [];
+                routesData.routes.forEach(function(eachData,index){
+                    routeParam2 += "r=" + eachData.shortName + ($(routesData.routes).length - 1 === index ? "" : "&");
+                });
+
+                // Reset the polling rate back down to minimum value since selecting new route
+                avlPollingRate = MIN_AVL_POLLING_RATE;
+                if (avlTimer)
+                    clearTimeout(avlTimer);
+
+                // Read in vehicle locations now
+                setRouteQueryStrParam(routeParam2);
+                updateVehiclesUsingApiData();
+            }
+
+        }).error(function() {alert("Specified stop not found.");});
     }
 
     function openVehiclePopup(vehicleMarker) {
