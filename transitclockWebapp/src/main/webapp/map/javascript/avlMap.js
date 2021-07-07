@@ -136,38 +136,38 @@ function processAvlCallback(jsonData) {
 	return vehicles;
 }
 
-  
+
 /**
  * Reads in route data obtained via AJAX and draws route and stops on map.
  */
 function routeConfigCallback(data, status) {
 	// Draw the paths for the route
-	
+
 	var route = data.routes[0];
-	
+
 	for (var i=0; i<route.shape.length; ++i) {
 		var shape = route.shape[i];
 		L.polyline(shape.loc, routeOptions).addTo(routeGroup);
 	}
-	  
-  	// Draw stops for the route. 
+
+  	// Draw stops for the route.
   	for (var i=0; i<route.direction.length; ++i) {
   		var direction = route.direction[i];
   		for (var j=0; j<direction.stop.length; ++j) {
   			var stop = direction.stop[j];
-  			
+
   			// Create the stop Marker
   			var stopMarker = L.circleMarker([stop.lat,stop.lon], stopOptions).addTo(routeGroup);
-  					
+
   			// Create popup for stop marker
-  
+
   			var content = $("<table />").attr("class", "popupTable");
   			var labels = ["Stop ID", "Name"], keys = ["id", "name"];
-  			for (var i = 0; i < labels.length; i++) {
-  				var label = $("<td />").attr("class", "popupTableLabel").text(labels[i] + ": ");
-  				var value = $("<td />").text(stop[keys[i]]);
-  				content.append( $("<tr />").append(label, value) );
-  			}
+			for (var k = 0; k < labels.length; k++) {
+				var label = $("<td />").attr("class", "popupTableLabel").text(labels[k] + ": ");
+				var value = $("<td />").text(stop[keys[k]]);
+				content.append( $("<tr />").append(label, value) );
+			}
   			
   			stopMarker.bindPopup(content[0]);
   		}
