@@ -168,7 +168,7 @@ public class AvlJsonQuery {
 	private static String getHeadwayWhereSql(String includeHeadway){
 		String sql = "";
 		if(includeHeadway != null && includeHeadway.equalsIgnoreCase("true")){
-			sql +=  "AND h.headway < " + MAX_HEADWAY;
+			sql +=  "AND (h.headway < " + MAX_HEADWAY + " OR h.headway is null) ";
 		}
 		return sql;
 
