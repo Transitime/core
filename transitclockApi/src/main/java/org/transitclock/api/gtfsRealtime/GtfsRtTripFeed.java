@@ -299,7 +299,7 @@ public class GtfsRtTripFeed {
 			String canceledTripTripId = canceledTrip.getTripId();
 			logger.info("Found canceled tripId {} found for firstPred tripId {} and vehicleId {}",canceledTripTripId, tripId, vehicleId);
 		} else {
-			logger.info("No canceled trip found for firstPred tripId {} and vehicleId {}", tripId, vehicleId);
+			logger.debug("No canceled trip found for firstPred tripId {} and vehicleId {}", tripId, vehicleId);
 		}
 
 		if(canceledTrip != null && canceledTrip.getTripId() != null && canceledTrip.getTripId().equalsIgnoreCase(tripId)){
