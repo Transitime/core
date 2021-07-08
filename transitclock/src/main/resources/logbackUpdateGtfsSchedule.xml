@@ -1,0 +1,119 @@
+<!-- This is the configuration file for the logback logging system. This file 
+     will be used if it is in the classpath (because logback looks for the file
+     logback.xml in the classpath) or if explicitly invoked using the 
+     Java param -Dlogback.configurationFile=/DIR/src/main/config/logbackUpdateGtfsSchedule.xml
+  -->
+       
+<configuration>
+
+  <!-- Set properties here. NOTE: it is expected that the property
+       -Dtransitclock.core.agencyId=xx will be set. Also, if want logging
+       to use the proper timezone then need to set the timezone property
+       to something like -Dlogback.timezone=America/Los_Angeles . Valid 
+       timezone format is at http://en.wikipedia.org/wiki/List_of_tz_zones
+    -->
+
+  <!-- Need to use TIMESTAMP when using FileAppender instead of 
+       RollingFileAppender -->
+  <timestamp key="TIMESTAMP" datePattern="yyyy/MM/dd" />
+
+  <property name="LOG_FILE_ROOT" 
+            value="${transitclock.logging.dir:-/Logs}/${transitclock.core.agencyId:-DEFAULT}/updateSchedule/" />
+
+  <!-- The pattern layout how the log file should log info is set here. Note that 
+       a newline is used at beginning so that there is a blank line between
+       each entry. Newline needs to be at beginning so stack traces for exceptions
+       are displayed properly since they are displayed after the message.
+       Info on layouts is out http://logback.qos.ch/manual/layouts.html .
+       The timezone for logging is set using the Java property 
+       -Dlogback.timezone=America/New_York or such. Timezone formats are described
+       at http://en.wikipedia.org/wiki/List_of_tz_zones .
+    -->
+  <property name="DEFAULT_PATTERN" 
+            value="%n%d{HH:mm:ss.SSS, ${logback.timezone:-America/Los_Angeles}} %-5level [%file:%line] %msg%n" />
+
+  <property name="DATA_PATTERN" 
+	    value="%n%d{HH:mm:ss.SSS, ${logback.timezone:-America/Los_Angeles}} %msg%n" />
+
+  <!-- The main appender for the Core module. 
+    -->
+  <appender name="CORE" class="ch.qos.logback.core.FileAppender">
+    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/updateSchedule.log</file> 
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${DEFAULT_PATTERN}</pattern> 
+    </encoder>
+  </appender>
+
+  <!--  In order to log the hibernate SQL queries need to set org.hibernate.SQL
+        to debug. To show the values of the parameters need to set
+        org.hibernate.type to trace. Probably also want to set in
+        hibernate.cfg.xml the properties format_sql and use_sql_comments
+        to true so that the output of the SQL looks nice and includes the
+        SQL comments.
+
+        NOTE: Turning on this logging can greaty slow things down.
+        When inserting 10000 rows of AVLReports the time increated
+        from about 2.5 seconds to 10 seconds when the sql logging
+        was enabled. So don't use all the time!-->
+  <appender name="SQL" class="ch.qos.logback.core.FileAppender">
+    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/sql.log</file> 
+    <encoder>
+      <pattern>${DEFAULT_PATTERN}</pattern> 
+    </encoder>
+  </appender>
+
+  <!-- Separate file for config parameters logging -->
+  <appender name="CONFIG" class="ch.qos.logback.core.FileAppender">
+    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/configParams.log</file> 
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${DATA_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="org.hibernate.SQL" level="debug" additivity="false">
+    <appender-ref ref="SQL" />
+  </logger>
+
+  <!-- For logging the parameter values for the SQL -->
+  <logger name="org.hibernate.type.descriptor.sql.BasicBinder" 
+          level="trace" additivity="false">
+    <appender-ref ref="SQL" />
+  </logger>
+
+  <logger name="org.transitclock.config"
+          level="info" additivity="false">
+    <appender-ref ref="CONFIG" />
+  </logger>
+
+  <!-- For setting debug mode to Transitime code. Can't just set
+       level to debug for the root because then get a huge number
+       of unuseful Hibernate messages.
+    -->
+  <logger name="org.transitclock" level="debug" additivity="false">
+    <appender-ref ref="CORE" />
+  </logger>
+
+  <!-- There are some Transitime classes don't want debug info for
+       since that would just be too verbose.
+    -->
+  <logger name="org.transitclock.db.hibernate.HibernateUtils" level="info" 
+   additivity="false">
+    <appender-ref ref="CORE" />
+  </logger>
+
+  <!--======================================================-->
+  <!--=============== Loggers defined here =================-->
+  <!--======================================================-->
+
+
+  <!-- Set default level of root logger to "info" instead of to the
+       the default of "debug". This way the default is to only see important
+       messages. Debug messages have to be enabled by creating a logger
+       for the class. 
+    -->
+  <root level="info">          
+    <appender-ref ref="CORE" />
+  </root>
+</configuration>

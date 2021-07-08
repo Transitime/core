@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	version="3.0">
+	<display-name>The Transit Clock api</display-name>
+
+	<context-param>
+		<param-name>transitclock_config_file_location</param-name>
+		<!-- Set to customized properties file with db config info and such -->
+		 <param-value>${transitclock.configFiles}</param-value>      
+	</context-param>
+
+
+
+	<!-- So that configuration parameters can be read in from file -->
+	<listener>
+		<listener-class>org.transitclock.web.ReadConfigListener</listener-class>
+	</listener>
+
+	<!-- For special Http response 416 "Requested Range Not Satisfiable" which 
+		is used for when there is no data for a request, use special error page that 
+		only returns the message instead of a bunch of ugly html. This way the page 
+		that requested the data page via AJAX can read the resulting message and 
+		display it without lots of ugly error page html. -->
+	<error-page>
+		<error-code>416</error-code>
+		<location>/error/messageOnlyError.jsp</location>
+	</error-page>
+
+	
+	 <filter>
+	    <filter-name>ApiLoggingFilter</filter-name>
+	    <filter-class>org.transitclock.api.utils.ApiLoggingFilter</filter-class>
+	  </filter> 
+	  <filter-mapping>
+	    <filter-name>ApiLoggingFilter</filter-name>
+	    <url-pattern>/api/*</url-pattern>
+	  </filter-mapping> 
+	  
+<!-- Swagger v3 -->
+
+
+  <servlet>
+    <servlet-name>jersey</servlet-name>
+    <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+    <init-param>
+      <param-name>jersey.config.server.wadl.disableWadl</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <init-param>
+      <param-name>jersey.config.server.provider.packages</param-name>
+      <!-- adding 'io.swagger.v3.jaxrs2.integration.resources' is sufficent on it own to register the following paths:
+      /openapi.json : OpenApi spec in json
+      /openapi.yaml : OpenApi spec in yaml
+      /openapi (Accept:  : "application/json" : OpenApi spec in json
+      /openapi (Accept:  : "application/yaml" : OpenApi spec in yaml
+      -->
+      <param-value>
+        io.swagger.v3.jaxrs2.integration.resources, org.transitclock.api.rootResources,org.transitclock.api.utils
+      </param-value>
+    </init-param>
+    <init-param>
+      <param-name>openApi.configuration.prettyPrint</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>jersey</servlet-name>
+    <url-pattern>/doc/*</url-pattern>
+  </servlet-mapping>
+  
+    <filter>
+    <filter-name>ApiOriginFilter</filter-name>
+    <filter-class>org.transitclock.servlet.swagger.ApiOriginFilter</filter-class>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>ApiOriginFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+    
+    
+    
+</web-app>
+

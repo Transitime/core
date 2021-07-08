@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transitclock>
+ <modules>
+        <optionalModulesList>org.transitclock.avl.GtfsRealtimeModule</optionalModulesList>        
+    </modules>
+    <autoBlockAssigner><autoAssignerEnabled>true</autoAssignerEnabled></autoBlockAssigner>
+    <core>
+	<agencyId>02</agencyId>
+    </core>	
+    <avl>
+        <gtfsRealtimeFeedURI>http://realtime.prod.obahart.org:8088/vehicle-positions</gtfsRealtimeFeedURI> 		  
+		<url>http://realtime.prod.obahart.org:8088/vehicle-positions</url>	
+        <!-- URL for GTFS realtime vechicle location stream -->
+               <!--  commented out for now for ease of use -->
+   <!--      <minLatitude>30.145125</minLatitude>   
+        <maxLatitude>30.517681</maxLatitude>
+        
+        <minLongitude>-98.072043</minLongitude>
+        <maxLongitude>-97.495917</maxLongitude>   -->   
+    </avl>  
+    <hibernate>
+        <configFile>src/main/resources/hsql_hibernate.cfg.xml</configFile>        
+    </hibernate>
+</transitclock>

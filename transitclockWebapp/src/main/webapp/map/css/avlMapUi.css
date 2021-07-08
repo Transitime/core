@@ -1,0 +1,108 @@
+body {
+  margin: 0px;
+}
+
+/* For the AVL points */
+div.avlMarker {
+  background-color: #ff7800;
+  border-color: black;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  width:7px;
+  height:7px;
+}
+
+div.avlTriangle {
+  width: 0px;
+  height: 0px;
+  border-bottom: 10px solid blue;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent
+}
+
+div.avlTriangleon-time {
+    width: 0px;
+    height: 0px;
+    border-bottom: 10px solid #ff7800;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent
+}
+
+div.avlTrianglelate {
+  width: 0px;
+  height: 0px;
+  border-bottom: 10px solid #ff2000;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent
+}
+
+div.avlTriangleearly {
+  width: 0px;
+  height: 0px;
+  border-bottom: 10px solid #fffe00;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent
+}
+
+.popupTable {
+  border-spacing: 0px;
+}
+	
+.popupTableLabel {
+  font-weight: bold;
+  text-align: right;
+}
+
+/* For the params menu */
+#params {
+  background: lightgrey;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border-radius: 4px;
+  padding: 2%;
+  box-shadow: 0px 2px 10px #696969;
+}
+
+ /* Playback menu */
+#playbackContainer {
+  position: absolute;
+  left: 50%;
+  bottom: 5%;
+}
+#playback {
+  background: lightgrey;
+  position: relative;
+  left: -50%;
+  text-align: center;
+  border-radius: 4px;
+  padding: 2%;
+  font-family: monospace;
+  width: 300px;
+  box-shadow: 0px 2px 10px #696969;
+}
+
+#playback input {
+  background: lightgrey;
+}
+
+#playback input:hover {
+  border: 1px solid #CCC;
+  box-shadow: 1px 1px 5px #999
+}
+
+#playback input:active {
+  background: lightblue;
+}
+
+/* For the params menu */
+#legend {
+  background: lightgrey;
+  position: absolute;
+  right: 10px;
+  bottom: 5%;
+  border-radius: 4px;
+  padding: 1%;
+  box-shadow: 0px 2px 10px #696969;
+}

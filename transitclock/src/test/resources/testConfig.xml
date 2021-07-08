@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transitclock>
+    <modules>
+        <!-- <optionalModulesList>org.transitclock.core.schedBasedPreds.SchedBasedPredsModule;org.transitclock.avl.GtfsRealtimeModule</optionalModulesList> -->
+        <!-- GtfsRealtimeModule read a GTFS vehicle location feed as the source of AVL data. -->
+        <!-- PredictionAccuracyModule is used to store the transiTime prediction and record their accuracy. Look in class for comments explaining detail. -->
+        <!-- GTFSRealtimePredictionAccuracyModule is used to store an alternative source of predictions and again record there accuracy based on actual arrival/departure times -->                            
+        <optionalModulesList>org.transitclock.avl.GtfsRealtimeModule;org.transitclock.core.predAccuracy.gtfsrt.GTFSRealtimePredictionAccuracyModule</optionalModulesList>                
+    </modules>    
+    <predAccuracy>
+    	<pollingRateMsec>30000</pollingRateMsec>
+    	<!-- This value is used by GTFSRealtimePredictionAccuracyModule to pick up feed to compare against transitime feed -->
+    	<gtfsTripUpdateUrl>http://realtime.prod.obahart.org:8088/trip-updates</gtfsTripUpdateUrl>
+    	<maxPredTimeMinutes>60</maxPredTimeMinutes>
+    	<maxPredStalenessMinutes>45</maxPredStalenessMinutes>
+    	<stopsPerTrip>10</stopsPerTrip>
+    </predAccuracy>
+    
+    <autoBlockAssigner>
+		<autoAssignerEnabled>true</autoAssignerEnabled>
+		<ignoreAvlAssignments>false</ignoreAvlAssignments>
+		<allowableEarlySeconds>600</allowableEarlySeconds>
+		<allowableLateSeconds>600</allowableLateSeconds>
+    </autoBlockAssigner>
+    <core>
+    	<predictionGeneratorClass>org.transitclock.core.predictiongenerator.average.HistoricalAveragePredictionGeneratorImpl</predictionGeneratorClass>
+    	<maxDistanceFromSegment>15000</maxDistanceFromSegment>	
+    </core>	
+    <avl>
+        <!-- URL for GTFS realtime vechicle location stream. Changed name in versions do use both for the moment. -->
+        <gtfsRealtimeFeedURI>http://realtime.prod.obahart.org:8088/vehicle-positions</gtfsRealtimeFeedURI> 		  
+		<url>http://realtime.prod.obahart.org:8088/vehicle-positions</url>		    
+		<!--  These are the values used for Irish Rail. -->
+        <!-- 
+        <minLongitude>-10.725</minLongitude>
+        <maxLongitude>-5.35</maxLongitude>             
+        <minLatitude>51.35</minLatitude>
+        <maxLatitude>55.45</maxLatitude>
+         -->                
+        <!--  defaults are for north america so only need this if we are not using data from there. -->
+        <!--  These are the values used for CAPMETRO in Austin, Texas. -->
+        <!-- <minLatitude>30.145125</minLatitude>   
+        <maxLatitude>30.517681</maxLatitude>
+        
+        <minLongitude>-98.072043</minLongitude>
+        <maxLongitude>-97.495917</maxLongitude>
+         -->
+                                                 
+        <feedPollingRateSecs>30</feedPollingRateSecs>
+        
+    </avl>   
+
+    <db>        
+        <dbName>GOHART</dbName>
+        <dbHost>192.168.99.100:5432</dbHost>
+        <dbType>postgresql</dbType>
+        <dbUserName>postgres</dbUserName>
+        <dbPassword>transitime</dbPassword>
+
+    </db>     
+    <hibernate>
+        <configFile>C:\\cygwin64\\home\\SeanOg\\workspace\\transitime-all\\transitime\\src\\test\\resources\\postgres_hibernate.cfg.xml</configFile>        
+    </hibernate>
+
+</transitclock>
+

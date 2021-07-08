@@ -1,0 +1,436 @@
+<!-- This is the configuration file for the logback logging system. This file 
+     will be used if it is in the classpath (because logback looks for the file
+     logback.xml in the classpath) or if explicitly invoked using the 
+     Java param -Dlogback.configurationFile=/DIR/src/main/config/logback.xml 
+     (testing from eclipse)
+  -->
+       
+<!-- Note that scanPeriod is set to 30 seconds so that config file will
+     be automatically reloaded if needed and take effect every 30 seconds.
+  -->
+<configuration scan="true" scanPeriod="30 seconds" >
+
+  <!-- Set properties here. NOTE: it is expected that the property
+       -Dtransitclock.core.agencyId=xx will be set. Also, if want logging
+       to use the proper timezone then need to set the timezone property
+       to something like -Dlogback.timezone=America/Los_Angeles . Valid 
+       timezone format is at http://en.wikipedia.org/wiki/List_of_tz_zones
+    -->
+
+  <property name="LOG_FILE_ROOT" 
+            value="${transitclock.logging.dir:-/Logs}/${transitclock.core.agencyId:-DEFAULT}/core/%d{yyyy/MM/dd}" />
+
+  <!-- The pattern layout how the log file should log info is set here. Note that 
+       a newline is used at beginning so that there is a blank line between
+       each entry. Newline needs to be at beginning so stack traces for exceptions
+       are displayed properly since they are displayed after the message.
+       Info on layouts is out http://logback.qos.ch/manual/layouts.html .
+       The timezone for logging is set using the Java property 
+       -Dlogback.timezone=America/New_York or such. Timezone formats are described
+       at http://en.wikipedia.org/wiki/List_of_tz_zones .
+    -->
+  <property name="DEFAULT_PATTERN" 
+            value="%n%d{HH:mm:ss.SSS, ${logback.timezone:-America/Los_Angeles}} %-5level thread=%t [%logger{10}:%line] %msg%n" />
+
+  <property name="DEBUG_PATTERN"   
+            value="%n%d{HH:mm:ss.SSS, ${logback.timezone:-America/Los_Angeles}} %-5level thread=%t [%logger{10}:%line] %msg%n" />
+
+  <property name="DATA_PATTERN" value="%n%d{HH:mm:ss.SSS, ${logback.timezone:-America/Los_Angeles}} %msg%n" />
+      
+  <!-- For logging to stdout logback status message for when logback is initializing
+    -->
+  <!-- <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" /> -->
+
+  <!-- The main appender for the Core module. use a RollingFileAppender
+       so that can store log files in a calendar based directory structure
+       logs/agency/yyyy/MM/dd/logFile.log . 
+       C:/Users/Mike/git/testProject/testProject/logs... The log file
+       is called "core.log". The files are rolled over at
+       midnight since "dd" specify that logs should be dealt with daily. 
+       Logs are compressed automatically since "gz" specified.
+    -->
+  <appender name="CORE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- daily rollover. Compress the file when rolling it over.
+        -->
+      <fileNamePattern>${LOG_FILE_ROOT}/core.log.gz</fileNamePattern> 
+    </rollingPolicy>
+
+    <!-- Only want this appender to take effect if not DEBUG level. This
+         way when DEBUG level the CORE_DEBUG can instead handle things
+         and use more verbose logging that could be useful for debugging.
+      -->
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <level>DEBUG</level>
+      <onMatch>DENY</onMatch>
+      <onMismatch>ACCEPT</onMismatch>
+    </filter>
+
+    <encoder>
+      <!-- Info on possible patterns is at 
+           http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout
+        -->
+      <charset>UTF-8</charset>
+      <pattern>${DEFAULT_PATTERN}</pattern> 
+    </encoder>
+  </appender>
+
+
+
+  <!-- For debugging probably want to log additional info so the
+       pattern is enhanced. Otherwise it should be identical to 
+       the CORE appender.
+    -->
+  <appender name="CORE_DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- daily rollover. Compress the file when rolling it over.
+        -->
+      <fileNamePattern>${LOG_FILE_ROOT}/core.log.gz</fileNamePattern>
+    </rollingPolicy>
+
+    <!-- Only want this appender to take effect if DEBUG level. This
+         way when DEBUG level this CORE_DEBUG appender can handle things
+         and use more verbose logging that could be useful for debugging.
+      -->
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <level>DEBUG</level>
+      <onMatch>ACCEPT</onMatch>
+      <onMismatch>DENY</onMismatch>
+    </filter>
+
+    <encoder>
+      <!-- A more complete pattern that provides additional info for debugging.
+        -->
+      <charset>UTF-8</charset>
+      <pattern>${DEBUG_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+
+  <!-- For sending out e-mails when there is a logging message that is marked
+       for notification. Usually, but not necessarily always, this will be
+       an ERROR level message.
+    -->
+  <appender name="ERROR_SMTP" class="ch.qos.logback.classic.net.SMTPAppender">
+
+    <!-- LIST ALL E-MAIL ADDRESS HERE.
+         Note that gmail seems to filter out messages sometimes. Therefore
+         make sure using non-gmail accounts. 
+      -->
+    <to>${logback.errorEmail}</to>
+
+    <!-- Only send e-mail if special "EMAIL" marker is specified for an
+         ERROR level message. 
+      -->
+    <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+     <marker>EMAIL</marker>
+   </evaluator>
+
+   <!-- Don't include messages that are DEBUG or TRACE if using cyclicBufferTracker
+     -->
+   <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+     <level>INFO</level>
+   </filter>
+
+   <!-- Provide last 5 entries (INFO, WARN, or ERROR) to provide context.
+     -->
+   <cyclicBufferTracker class="ch.qos.logback.core.spi.CyclicBufferTracker">
+     <bufferSize>3</bufferSize>
+   </cyclicBufferTracker>
+
+    <!-- NOTE: it is important to set asynchronousSending to false. Otherwise
+         if trigger two SMTP messages within a short interval (within about 3
+         seconds) they overwrite each other causing the first message to be 
+         delivered but to have the same content as the 2nd message. Also,
+         need async so that if program exits the message is first sent. 
+         This means that if an error message sends out an e-mail the thread
+         will hang for the few seconds it takes to complete the sending of
+         the e-mail.
+      -->
+    <asynchronousSending>false</asynchronousSending>
+
+    <!-- Specifies details of how the message is sent and the format of it
+      -->
+    <smtpHost>${logback.smtpHost}</smtpHost>
+    <smtpPort>465</smtpPort>
+    <SSL>true</SSL>
+    <username>${logback.smtpUsername}</username>
+    <password>${logback.smtpPassword}</password>
+    <from>errorLogger@transitclock.org</from>
+    <subject>%level %logger{0} - %m</subject>
+    <layout class="ch.qos.logback.classic.PatternLayout">
+      <pattern>%d{MMM dd yyyy - HH:mm:ss.SSS} - %-5level - %logger{35} :%n%message%n</pattern>
+    </layout>
+  </appender>
+
+  <!-- Separate file for config parameters logging -->
+  <appender name="CONFIG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/configParams.log.gz</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${DATA_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Separate file for AVL logging -->
+  <appender name="AVL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/avl.log.gz</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${DEFAULT_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Separate file for ArrivalDeparture logging -->
+  <appender name="ARRIVAL_DEPARTURE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/arrivalDeparture.log.gz</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${DATA_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Separate file for VehicleEvents logging -->
+  <appender name="VEHICLE_EVENT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/vehicleEvents.log.gz</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${DATA_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Separate file for Prediction logging -->
+  <appender name="PREDICTION" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/prediction.log.gz</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${DATA_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Separate file for schedule based predictions logging -->
+  <appender name="SCHED_BASED_PREDS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/schedBasedPreds.log.gz</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${DATA_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Separate file for PRED_ACCURACY logging -->
+  <appender name="PRED_ACCURACY" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/predAccuracy.log.gz</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${DEFAULT_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Separate file for Match logging -->
+  <appender name="MATCH" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/match.log.gz</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${DATA_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Separate file for Monitoring logging -->
+  <appender name="MONITORING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/monitoring.log.gz</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${DEFAULT_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- In case easiest to write logs to console.  -->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${DATA_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  
+  <!--======================================================-->
+  <!--=============== Loggers defined here =================-->
+  <!--======================================================-->
+
+  <!-- Specify various loggers. This where the logging
+       level is specified for each class. Note: cannot just have
+       two loggers defined for a name in order to define different
+       logging types depending on the level. Only the last definition is used
+       when duplicating the logging for a name. But can use filters as shown in
+       http://stackoverflow.com/questions/5653062/how-can-i-configure-logback-to-log-different-levels-for-a-logger-to-different-de
+    -->
+
+  <!-- For all the data logging files. Note: additivity must be set
+       to false so that data only logged to the data files instead
+       of also to the core logging file.
+    -->
+  <logger name="org.transitclock.db.structs.ArrivalDeparture"
+          level="info" additivity="false">
+    <appender-ref ref="ARRIVAL_DEPARTURE" />
+  </logger>
+
+  <logger name="org.transitclock.db.structs.VehicleEvent"
+          level="info" additivity="false">
+    <appender-ref ref="VEHICLE_EVENT" />
+  </logger>
+
+  <!-- Taken out (by setting level to warn instead of info) for now because 
+       so verbose -->
+  <logger name="org.transitclock.core.PredictionGeneratorDefaultImpl"
+          level="warn" additivity="false">
+    <appender-ref ref="PREDICTION" />
+  </logger>
+
+  <logger name="org.transitclock.core.schedBasedPreds"
+          level="debug" additivity="false">
+    <appender-ref ref="SCHED_BASED_PREDS" />
+  </logger>
+  
+  <logger name="org.transitclock.db.structs.Match"
+          level="info" additivity="false">
+    <appender-ref ref="MATCH" />
+  </logger>
+
+  <logger name="org.transitclock.avl"
+          level="info" additivity="false">
+    <appender-ref ref="AVL" />
+  </logger>
+
+  <!-- For config params it is more complicated because want to both have
+       config params logged in separate file but also want some errors
+       to send out an e-mail. Need to use ERROR_SMTP and additivity=true
+       to make sure the e-mail is sent out. But unfortunately when I did
+       this the regular info logging for org.transitclock.config stopped
+       working. So not sending out e-mail error messages for now.  -->
+  <logger name="org.transitclock.config"
+          level="info" additivity="false">
+    <appender-ref ref="CONFIG" />
+  </logger>
+<!--
+  <logger name="org.transitclock.config"
+          level="error" additivity="false">
+    <appender-ref ref="ERROR_SMTP" />
+  </logger>
+-->
+
+  <logger name="org.transitclock.core.predAccuracy"
+          level="info" additivity="false">
+    <appender-ref ref="PRED_ACCURACY" />
+  </logger>
+
+  <logger name="org.transitclock.monitoring"
+          level="debug" additivity="false">
+    <appender-ref ref="MONITORING" />
+  </logger>
+
+  <!--  In order to log the hibernate SQL queries need to set org.hibernate.SQL
+        to debug. To show the values of the parameters need to set
+        org.hibernate.type to trace. Probably also want to set in 
+        hibernate.cfg.xml the properties format_sql and use_sql_comments 
+        to true so that the output of the SQL looks nice and includes the 
+        SQL comments. 
+
+        NOTE: Turning on this logging can greaty slow things down.
+        When inserting 10000 rows of AVLReports the time increated
+        from about 2.5 seconds to 10 seconds when the sql logging
+        was enabled. So don't use all the time!
+   -->
+  <!-- 
+  <logger name="org.hibernate.SQL" level="debug" additivity="false">
+    <appender-ref ref="CORE_DEBUG" />
+  </logger>
+  -->
+
+ <!-- For logging the parameter values for the SQL -->
+  <!-- 
+  <logger name="org.hibernate.type.descriptor.sql.BasicBinder" 
+          level="trace" additivity="false">
+    <appender-ref ref="SQL" />
+  </logger>
+  -->
+
+  <!-- for debugging lazy loading -->
+<!--
+  <logger name="org.transitclock.db.structs" 
+   level="debug" additivity="true">
+    <appender-ref ref="CORE_DEBUG" />
+  </logger>
+-->
+
+  <!-- Miscellaneous debugging. Need to set additivity to true
+       so that will still get info and error level messages even
+       though CORE and CORE_DEBUG have filters to only show
+       proper info.
+    -->
+<!--
+  <logger name="org.transitclock.gtfs.DbConfig"
+   level="debug" additivity="true">
+    <appender-ref ref="CORE_DEBUG" />
+  </logger>
+-->
+
+<!--
+  <logger name="org.transitclock.core.AvlProcessor"
+   level="debug" additivity="true">
+    <appender-ref ref="CORE_DEBUG" />
+  </logger>
+-->
+
+<!--
+  <logger name="org.transitclock.core.MatchProcessor"
+   level="debug" additivity="true">
+    <appender-ref ref="CORE_DEBUG" />
+  </logger>
+-->
+
+<!--
+  <logger name="org.transitclock.core.TemporalMatcher"
+   level="debug" additivity="true">
+    <appender-ref ref="CORE_DEBUG" />
+  </logger>
+-->
+
+<!--
+  <logger name="org.transitclock.core.ArrivalDepartureGeneratorDefaultImpl"
+   level="debug" additivity="true">
+    <appender-ref ref="CORE_DEBUG" />
+  </logger>
+-->
+
+  <!-- Set default level of root logger to "info" instead of to the
+       the default of "debug". This way the default is to only see important
+       messages. Debug messages have to be enabled by creating a logger
+       for the class. Was originally hoping to log errors to stdout but
+       this interfered with other loggers. If another logger level was set
+       to debug then for that class the message would also be logged via root
+       even though the logging level for root is configured to be info, 
+       which is a higher level.
+    -->
+  <root level="info">          
+    <appender-ref ref="CORE" />
+    <appender-ref ref="ERROR_SMTP" />
+  </root>
+</configuration>

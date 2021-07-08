@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transitclock>
+    <modules>
+        <optionalModulesList>org.transitclock.avl.GtfsRealtimeModule</optionalModulesList>        
+    </modules>
+    <autoBlockAssigner><autoAssignerEnabled>true</autoAssignerEnabled></autoBlockAssigner>
+    <core>
+	<agencyId>02</agencyId>
+    </core>	
+    <avl>
+        <!-- URL for GTFS realtime vechicle location stream -->
+        <gtfsRealtimeFeedURI>http://realtime.prod.obahart.org:8088/vehicle-positions</gtfsRealtimeFeedURI> 		  
+		<url>http://realtime.prod.obahart.org:8088/vehicle-positions</url>	   
+    </avl>   
+ <!--    <db>
+        <dbName>transiTime</dbName>
+        <dbHost>localhost:5432</dbHost>
+        <dbType>postgresql</dbType>
+        <dbUserName>transiTime</dbUserName>
+        <dbPassword>welcome</dbPassword>
+    </db>      -->
+    <hibernate>
+        <configFile>hsql_hibernate.cfg.xml</configFile>        
+    </hibernate>
+</transitclock>

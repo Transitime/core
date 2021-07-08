@@ -1,0 +1,2 @@
+agency_id,route_id,route_short_name,route_long_name,route_type,route_color,route_text_color
+1,S2,S2,SIXTEENTH STREET,3,D83E26,000000

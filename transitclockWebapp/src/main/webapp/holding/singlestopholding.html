@@ -1,0 +1,517 @@
+<html>
+<link rel="stylesheet" href="css/general.css">
+<head>
+<style>
+
+body {
+   margin:0;
+   padding:0;
+   font: 30px Arial, sans-serif;
+  }
+
+#holding_div {
+	width: 98%;
+	margin-top: 30px;
+	margin-left: 10px;
+	
+}
+.container {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%;
+}
+.mapframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 98%;
+    height: 100%;
+}
+.holdinginfo {
+  font-family:Arial,Verdana,sans-serif;
+  font-size:1em; <font color='red'>/* Never set font sizes in pixels! */</font>
+  color:#00f;
+}
+</style>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="js/ion.sound.js"></script>
+<script src="js/transiTimeHolding.js"></script>
+<script src="js/transiTimeVehicles.js"></script>
+<script src="js/transiTimeRoutes.js"></script>
+<script src="js/transiTimeTrips.js"></script>
+<script src="js/transiTimeEvents.js"></script>
+<script src="js/transiTimeUtils.js"></script>
+<title>Vehicle Holding Times</title>
+</head>
+
+<body>
+	<div id="header">
+	<img class="gt-logo-svg" alt="Georgia Tech" src="http://www.gatech.edu/sites/all/themes/gt/images/logos/logo-gt.png"/>
+		<a href="http://www.transitime.org" id="heading">transitimeExtension: Holding
+			Times for ATLANTA STREETCAR</a>		       
+	</div>
+
+	<div id="holding_div">
+		<table width="100%"  border="0" class="holdinginfo">
+
+			<tr>
+				<td width="10%">
+					
+				<td>
+				<td width="40%">Remaining Holding Time
+					<div id="counter"></div>
+					<table  class="holdinginfo">						
+						<tr>
+							<td>Vehicle ID</td>
+							<td>
+								<div id="vehicleid"></div>
+							</td>
+						</tr>
+						<tr>
+							<td>Time of Arrival</td>
+							<td>
+								<div id="timeofarrival"></div>
+							</td>
+						</tr>
+						<tr>
+							<td>Time of Departure</td>
+							<td>
+								<div id="timeofdeparture"></div>
+							</td>
+						</tr>
+						<tr>
+							<td>Next departure</td>
+							<td>
+								<div id="nextdeparturevehicleid"></div>
+							</td>
+						</tr>
+                        <tr>
+							<td>Next arrival</td>
+							<td>
+								<div id="nextarrival"></div>
+							</td>
+						</tr>
+						<tr>
+							<td>Predicted arrival</td>
+							<td>
+								<div id="nextarrivaltime"></div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2">
+								<br/>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2">
+								<div id="byline">Developed by Sean &Oacute;g Crudden (og.crudden@gmail.com) and Simon Berrebi (simon@berrebi.net)</div>
+							</td>
+						</tr>
+					</table>
+ 				
+				</td>
+				
+				<td width="40%">
+					<table>
+					<tr align="justify">
+						Real-Time Vehicle Location
+					</tr>
+					<tr>
+						<div class="container">				
+							<iframe id="mapframe"  src="/web/maps/map.jsp?a=ASC&r=r0&verbose=true&showUnassignedVehicles=true" frameborder="0" allowfullscreen class="mapframe">
+							</iframe>
+						</div>
+					</tr>
+					<tr> 
+					
+					 <div id="lastevent"></div>
+					</tr>
+					</table>
+				</td>
+				<td width="10%">
+					
+				<td>
+			</tr>
+            
+
+		</table>
+        
+
+	</div>
+</body>
+
+<script>
+  	function getUrlParameter(name) 
+    {
+	    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+	    var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+	    var results = regex.exec(location.search);
+	    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+	};
+ 	document.getElementById('mapframe').src="/web/maps/map.jsp?a="+getUrlParameter('agency')+"&verbose=true&showUnassignedVehicles=true&r="+getUrlParameter('route'); 	
+ 	
+ 	var threshold=parseInt(getUrlParameter('threshold')); 	 
+ 	
+ 	var obj = document.getElementById("heading");
+ 	
+    obj.innerText = 'transitimeExtension: Holding Times for '+ getUrlParameter('agencyname')+ ' : ' + getUrlParameter('stopname');
+ 	
+	ion.sound({
+	    sounds: [	        
+	        {
+	            name: "ship_bell",
+	            volume: 0.3
+	        },
+	        {
+	            name: "store_door",
+	            volume: 0.3	            
+	        }
+	    ],
+	    volume: 0.5,
+	    path: "sounds/",
+	    preload: true
+	});
+    var myTimer = null;
+	var host = null;
+	var vehicle = null;
+	var timeofarrival = new Date(0);
+	var timeofdepature = new Date(0);
+	var predictednextarrival = new Date(0);
+    $("#byline").css({'color' : 'green','font-size' : '60%'});
+	function str_pad_left(string, pad, length) {
+		return (new Array(length + 1).join(pad) + string).slice(-length);
+	}
+	var data =  {
+			vehicle: null,
+			holdingTimeKeys:null,
+			holdingTimes: {},			
+			holdingTimes: {},			
+			predictions : null,
+			vehicleDetails: {},
+			currentServerTime:null,
+	};
+	var playarrivalsound=true;
+	var playdepartcound=true;
+	function vehicleToDisplay(data, stopid)
+    {
+        if(data.holdingTimes != null && data.predictions!=null)
+		{
+            var keys=Object.keys(data.holdingTimes);
+            for (var index = 0; index < keys.length; ++index) {
+                if(vehicleAtStop(data, stopid, keys[index]) || counterFinished(data, stopid, keys[index], threshold)==false)
+                {
+                	try
+                	{
+                        if(getHoldingTimeMilliseconds(data, stopid, keys[index])>-1200000)
+                        {
+                                return keys[index];
+                        }
+
+                	}catch(err)
+                	{
+                		
+                	}
+                	
+                }
+            }
+            return null;
+                                            	
+        }else
+        {
+            return null;
+        }
+    }
+	function getNextVehicleToDepart(data, stopid, vehicleid)
+	{
+		  var keys=Object.keys(data.holdingTimes);
+		  var nextHoldingTime = null;
+		  for (var index = 0; index < keys.length; ++index) {
+        	  if(vehicleAtStop(data, stopid, keys[index]))
+        	  {
+        		  	if(getHoldingTimeMilliseconds(data, stopid, keys[index])>-1200000)
+        		  	{		        	 	
+		        	 	if(getHoldingTimeMilliseconds(data, stopid, keys[index])>getHoldingTimeMilliseconds(data, stopid, vehicleid))
+		        	  	{		        	 				        	 		
+		        	  		if(nextHoldingTime==null ||getHoldingTimeMilliseconds(data, stopid, keys[index])<getHoldingTimeMilliseconds(data, stopid, nextHoldingTime.vehicleId))
+		        	  		{
+		        	  			nextHoldingTime=data.holdingTimes[keys[index]];
+		        	  		}
+		        	 			
+		        	  	}		        				        	 
+        		  	}
+        	  }
+          }
+		  if(nextHoldingTime!=null)
+	          	return nextHoldingTime.vehicleId;
+	      else
+	        	return null;
+	};
+	function vehicleToDisplayAlternativeMethod(data, stopid)
+	{
+		  var keys=Object.keys(data.holdingTimes);
+		  var minHoldingTime = null;
+		  
+          for (var index = 0; index < keys.length; ++index) {
+        	  if(vehicleAtStop(data, stopid, keys[index]))
+        	  {
+        		  	if(getHoldingTimeMilliseconds(data, stopid, keys[index])>-1200000)
+        		  	{
+		        	 	if(minHoldingTime!=null)
+		        		{
+		        	 		if(getHoldingTimeMilliseconds(data, stopid, keys[index])<getHoldingTimeMilliseconds(data, stopid, minHoldingTime.vehicleId))
+		        	  		{
+		        	  			minHoldingTime=data.holdingTimes[keys[index]];
+		        	  		}
+		        		}
+		        	  	else
+	        	  		{
+		        	  		minHoldingTime=data.holdingTimes[keys[index]];
+	        	  		}
+        		  	}
+        	  }
+          }
+          if(minHoldingTime!=null)
+          	return minHoldingTime.vehicleId;
+          else
+        	return null;
+	};
+	function getData(data, agencyid, routeid, stopid)
+	{		
+		getCurrentServerTime(host, agencyid, processCurrentTime, data);
+		
+		getNextVehicleArrivalPredictions(host, agencyid, routeid, stopid, processArrivalPredictions, data);
+                    		                            
+        getAllVehicleDetails(host, agencyid, routeid, processAllVehicleDetails, data);     
+	};
+		
+	function getAllVehicleDetails(host, agencyid, routeid,processAllVehicleDetails, data) {
+		console.log("Calling getAllVehicleDetails.");
+		var baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/"+agencyid+"/command/vehiclesDetails";
+		if(routeid.length > 0)            
+			baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/"+agencyid+"/command/vehiclesDetails?r="+routeid;
+		                
+		var xmlhttp = new XMLHttpRequest();
+		                                
+		xmlhttp.onreadystatechange = function() {
+		                   
+		        if (this.readyState == 4 && this.status == 200) 
+		        {                                              
+		            var allVehicleDetails = JSON.parse(this.responseText);
+		            processAllVehicleDetails(data, allVehicleDetails);                                                                                       
+		        }
+		};                                                             
+		xmlhttp.open("GET", baseurl, true);
+		xmlhttp.send();     
+	};
+	function processCurrentTime(data, currentServerTime)
+	{
+		data.currentServerTime=currentServerTime.currentTime;
+	};
+	function processAllVehicleDetails(data, allVehicleDetails)
+	{
+		console.log(allVehicleDetails);
+		for (var index = 0; index < allVehicleDetails.vehicles.length; index++) {
+			data.vehicleDetails[allVehicleDetails.vehicles[index].id]=allVehicleDetails.vehicles[index];
+			if(allVehicleDetails.vehicles[index].hasOwnProperty("holdingTime")){
+				data.holdingTimes[allVehicleDetails.vehicles[index].id]=allVehicleDetails.vehicles[index].holdingTime;
+			}
+		}
+	};
+	
+	function updateScreen(data, agencyid, routeid, stopid)
+	{
+     			
+        var vehicle=vehicleToDisplayAlternativeMethod(data, stopid);
+       
+        if(vehicle!=null)
+        {
+            clearInterval(myTimer);
+            myTimer = setInterval(updateDashBoard, 1000);
+            console.log("Display holding info for:"+vehicle); 
+            data.vehicle=vehicle;
+            $("#vehicleid").text(data.vehicle);
+            
+            if(data.holdingTimes[data.vehicle] != null)
+		    {                       
+			    console.log("Have data");
+			    									
+                if(playarrivalsound)
+                {
+                	ion.sound.play("store_door");
+                	playarrivalsound=false;
+                }
+                
+                try
+                {
+                        var nextdep=getNextVehicleToDepart(data, stopid, data.vehicle);
+                        if(nextdep!=null)
+                        {
+                                $("#nextdeparturevehicleid").text(nextdep);
+                        }else
+                        {
+                                $("#nextdeparturevehicleid").text("");
+                        }
+                }catch(err)
+                {
+                        console.log("Caught nextdeparturevehicleid error.");
+                }
+
+                
+                
+                $("#timeofdeparture").text(
+						new Date(data.holdingTimes[data.vehicle].holdingTime).toLocaleTimeString());
+                
+                $("#timeofarrival").text(
+						new Date(data.holdingTimes[data.vehicle].arrivalTime).toLocaleTimeString());
+                
+                var holdingTimeMilliseconds = new Date(data.holdingTimes[data.vehicle].holdingTime)
+						.getTime()
+						- new Date(data.currentServerTime).getTime();
+				
+				var time = Math.abs(holdingTimeMilliseconds) / 1000;
+                
+                var minutes = Math.floor(time / 60);
+                
+				var seconds = time - (minutes * 60);
+                
+           		if(data.holdingTimes[data.vehicle].hasD1)
+           		{
+	                if(holdingTimeMilliseconds>0)
+	                {
+	                	if(data.holdingTimes[data.vehicle].arrivalPredictionUsed)
+	                	{
+	                		$("#counter").css({'color' : 'aquamarine','font-size' : '400%'});
+	                	}else
+	                	{	                			                
+	                    	$("#counter").css({'color' : 'green','font-size' : '400%'});
+	                	}
+	                    $("#counter").text(str_pad_left(minutes.toFixed(), '0', 2) + ':' + str_pad_left(seconds.toFixed(), '0', 2));
+	                }
+	                else
+	                {
+	                 	if(playdepartsound)
+	                 	{
+	                 		ion.sound.play("ship_bell");
+	                 		playdepartsound=false;
+	                 	}
+	                
+	                	if(data.holdingTimes[data.vehicle].arrivalPredictionUsed)
+	                	{
+	                    	$("#counter").css({'color' : 'darksalmon','font-size' : '400%'});
+	                	}
+	                	else
+	                	{
+	                    	$("#counter").css({'color' : 'red','font-size' : '400%'});
+	                	}
+	                	
+						$("#counter").text('-'+str_pad_left(minutes.toFixed(), '0', 2) + ':' + str_pad_left(seconds.toFixed(), '0', 2));
+	                }
+	              
+	                  
+                }else
+                {
+                   	$("#counter").css({'color' : 'blue','font-size' : '400%'});                
+					$("#counter").text('No data.');
+                }
+		    }
+            else
+            {
+                console.log("Need data");
+                
+            }
+        }
+        else
+        {
+            $("#vehicleid").text("No vehicle at stop");
+            $("#timeofdeparture").text("");
+            $("#timeofarrival").text("");            
+            $("#nextarrivaltime").text("");
+            $("#nextarrival").text("");
+            $("#counter").text("00:00");
+            $("#counter").css({'color' : 'blue','font-size' : '400%'});
+            
+            playarrivalsound=true;
+            playdepartsound=true;
+            
+            clearInterval(myTimer);
+            myTimer = setInterval(updateDashBoard, 5000);
+        }        
+        
+        /* display the next prediction. TODO this could be a function. */
+        if(data.predictions!=null)
+        {
+            var predictednextarrival = new Date(data.predictions[0].time * 1000);		
+            $("#nextarrivaltime").text(predictednextarrival.toLocaleTimeString());
+            $("#nextarrival").text(data.predictions[0].vehicle);
+        }
+	};
+    
+
+	function processHoldingTime(data, vehicleid, holdingTime) {
+		data.holdingTimes[vehicleid]=holdingTime;
+	};
+	function processHoldingTimeKeys(data, holdingTimeKeys) {
+		data.holdingTimeKeys=holdingTimeKeys;
+		//getHoldingTime(host, '4560595', vehicle, processHoldingTime, data);
+	};
+	function processArrivalPredictions(predictions, data)
+	{
+		data.predictions=predictions.predictions[0].dest[0].pred;		
+	};
+	function processVehicleDetails(data, vehicleDetails)
+	{
+		console.log(vehicleDetails);
+		data.vehicleDetails[vehicleDetails.vehicles[0].id]=vehicleDetails.vehicles[0];
+	}
+	function vehicleAtStop(data, stopId, vehicleId)
+	{		
+		if(data.vehicleDetails[vehicleId].nextStopId==stopId)
+        {
+            return true;
+            /*
+			if(data.vehicleDetails[vehicleId].isAtStop)
+            {
+                return true;        
+            }*/
+        }
+	    return false;
+	};
+	function counterFinished(data, stopId, vehicleId, treshold)
+	{
+		var holdingTimeMilliseconds = new Date(data.holdingTimes[vehicleId].holdingTime)
+		.getTime() - new Date(data.currentServerTime).getTime();
+		
+		if(holdingTimeMilliseconds<(treshold*-1))
+		{
+			return true;	
+		}
+		else
+		{
+			return false;
+		}		
+	};
+	function getHoldingTimeMilliseconds(data, stopId, vehicleId)
+	{
+		var holdingTimeMilliseconds = new Date(data.holdingTimes[vehicleId].holdingTime)
+		.getTime() - new Date(data.currentServerTime).getTime();
+		return holdingTimeMilliseconds;
+	};
+    function updateDashBoard()
+    {
+    	
+        getData(data, getUrlParameter('agency'), getUrlParameter('route'), getUrlParameter('stop'));
+       
+        updateScreen(data, getUrlParameter('agency'), getUrlParameter('route'), getUrlParameter('stop'));
+    };
+  
+	$(document).ready(function() {
+
+		host = document.location.host;
+        //host = "127.0.0.1:8080";
+		myTimer = setInterval(updateDashBoard, 5000);		
+	});
+</script>
+
+</html>

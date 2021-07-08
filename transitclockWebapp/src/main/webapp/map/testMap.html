@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Test Map</title>
+  <!-- So that get proper sized map on iOS mobile device -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  
+  <link rel="stylesheet" href="css/mapUi.css" />
+ 
+  <!-- Load javascript and css files -->
+  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+  <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+  <!-- New version of map. CLIP_PADDING doesn't seem to work
+  <link rel="stylesheet" href="leaflet/leaflet.css" />
+  <script src="leaflet/leaflet.js"></script>
+  -->
+  <script src="javascript/leafletRotatedMarker.js"></script>
+  <script src="javascript/mapUiOptions.js"></script>
+  <script src="javascript/map.js"></script>
+  
+  <!-- Load in JQuery -->
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
+  <!--  Override the body style from the includes.jsp/general.css files -->
+  <style>
+    body {
+	  margin: 0px;
+    }
+  </style>
+  
+  <style>
+  /* Make prediction popup small */
+  .leaflet-popup-content {
+    line-height: 1.2;
+    margin: 3px 3px;
+    text-align: center;
+  }
+  
+  .prediction {font-size: large; font-weight: bold;}
+  </style>
+  
+</head>
+<body>
+  <!--  Create map that takes up entire view -->
+  <div id="map"></div>
+</body>
+  
+  <script>
+  var mapTileUrl ='http://tile.openstreetmap.org/{z}/{x}/{y}.png'
+  //Create the map with a scale and specify which map tiles to use
+  var map = L.map('map');
+  L.control.scale({metric: false}).addTo(map);
+  L.tileLayer(mapTileUrl, {
+  	// Specifying a shorter version of attribution. Original really too long.
+      //attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery ? <a href="http://mapbox.com">Mapbox</a>',
+      attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery ? <a href="http://mapbox.com">Mapbox</a>',
+      maxZoom: 19
+  }).addTo(map);
+
+  // Set the CLIP_PADDING to a higher value so that when user pans on map
+  // the route path doesn't need to be redrawn. Note: leaflet documentation
+  // says that this could decrease drawing performance. But hey, it looks
+  // better.
+  L.Path.CLIP_PADDING = 0.8;
+
+  var stopPopupOptions = {
+			offset: L.point(0, -0),
+			closeButton: false,
+			closeOnClick: false
+		}
+  
+  var minorShapeOptions = {
+			color: '#00ee00',
+			weight: 1,
+			opacity: 0.4,
+		};
+  
+//Initiate event handler to be called when a popup is closed. Sets 
+//predictionsPopup to null to indicate that don't need to update predictions 
+//anymore since stop popup not displayed anymore.
+map.on('popupclose', function(e) {
+	predictionsPopup = null;
+	clearTimeout(predictionsTimeout);
+	
+	if (e.popup.parent)
+		e.popup.parent.popup = null;
+});
+
+//  showRoute("mbta-cr", "CR-Franklin", "Norwood Central", "5ec0de94");
+  showRoute("sfmta", "21", "4992", "5ec0de94");
+  
+  function showOtherRoute() {
+	  //showRoute("mbta-cr", "CR-Haverhill", null, "5ec0de94");
+	  showRoute("sfmta", "38", "4271", "5ec0de94");
+  }
+  
+  setTimeout(showOtherRoute, 5000);
+  
+  /**
+   * Initiate timerloop that constantly updates vehicle positions.
+   * Update every few seconds.
+   */
+  setInterval(updateVehiclesUsingApiData, 5000);
+
+  /**
+   * Setup timer to determine if haven't updated vehicles in a while.
+   * This happens when open up a laptop or tablet that was already
+   * displaying the map. For this situation should get rid of the
+   * old predictions and vehicles so that they don't scoot around
+   * wildly once actually do a vehicle update. This should happen
+   * pretty frequently (every 300ms) so that stale vehicles and
+   * such are removed as quickly as possible.
+   */
+  setInterval(hideThingsIfStale, 300);
+  </script>
+
+</html>

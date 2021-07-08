@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transitclock>
+    <modules>
+    </modules>
+    <schedBasedPreds>
+        <pollingRateMsec>30000</pollingRateMsec>
+        <beforeStartTimeMins>5</beforeStartTimeMins>
+    </schedBasedPreds>
+    <autoBlockAssigner>
+        <autoAssignerEnabled>false</autoAssignerEnabled>
+        <ignoreAvlAssignments>false</ignoreAvlAssignments>
+        <allowableEarlySeconds>180</allowableEarlySeconds>
+        <allowableLateSeconds>180</allowableLateSeconds>
+    </autoBlockAssigner>
+    <core>
+        <agencyId>1</agencyId>
+    </core>
+    <avl>
+        <!-- URL for GTFS realtime vechicle location stream -->
+        <gtfsRealtimeFeedURI>http://developer.onebusaway.org/wmata-gtfsr/vehiclePositions</gtfsRealtimeFeedURI>
+        <!-- This is the location to read bulk AVL data from using BatchCsvAvlFeedModule -->
+        <!--         <csvAvlFeedFileName>d:/transiTime/siri_13_route_id_assigned.csv</csvAvlFeedFileName> -->
+        <realTime>false</realTime>
+        <minLongitude>-360.0</minLongitude>
+        <maxLongitude>360.0</maxLongitude>
+        <minLatitude>-360.0</minLatitude>
+        <maxLatitude>360.0</maxLatitude>
+    </avl>
+
+    <find>
+        <!--  Used to match the last stop of a vehicle to a time. Comments in VechiclesServer. Times are in milliseconds -->
+        <dwelltime>30000</dwelltime>
+        <fuzzytime>180000</fuzzytime>
+    </find>
+
+    <hibernate>
+        <configFile>transitclock/src/test/resources/mysql_integration_test_hibernate.cfg.xml</configFile>
+    </hibernate>
+</transitclock>

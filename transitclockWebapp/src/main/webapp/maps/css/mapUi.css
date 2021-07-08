@@ -1,0 +1,128 @@
+@CHARSET "ISO-8859-1";
+
+html, body, #map { 
+	height: 100%; width: 100%; padding: 0px; margin: 0px;
+}
+
+/* Center the title. 
+ * Need to use the one div inside the other trick to do this so that
+ * it works in both iOS and elsewhere. Sheesh! 
+ */
+#titleContainer {
+	position:absolute; top: 40%; left: 50%;
+}
+
+#mapTitle { 
+	/* Center in page */
+	position: relative; left: -50%; 
+	padding: 0.5em; border-radius: 0.5em; 
+	/* Special semi-transparent color */
+	background: rgba(0,255,0,0.5);
+	/* Nice big font */
+	font-family: sans-serif; font-size: 42pt; font-weight: bold;
+}
+
+/* Set the title text here in css 
+ */
+#mapTitle:before {
+	content: "TransitClock";
+}
+	
+/* Center the route selector.
+ * Need to use the one div inside the other trick to do this so that
+ * it works in both iOS and elsewhere. Sheesh!
+ */
+#routesContainer {
+	position:absolute; top: 5px; left: 5px;
+}
+
+/* Set font for route selector. Need to use #select2-drop because of 
+ * extra elements that select2 adds 
+ */
+#select2-drop, #routesDiv {
+  font-family: sans-serif; font-size: normal;
+}
+
+/* For the vehicle and prediction popups 
+ */
+.vehicle { font-size: x-small; font-weight: normal;}
+.prediction {font-size: large; font-weight: bold;}
+
+/* For when displaying special info for predictions using superscript
+ */
+sup {
+	vertical-align: super;
+	font-size: xx-small;
+}
+
+
+
+/*Update styles*/
+.page-container {
+	display: flex;
+	width: 100%;
+	height: 100%;
+	flex-direction: row;
+}
+
+.side-container-view {
+	width: 20%;
+	height: 100%;
+	border-right: 1px solid black;
+}
+
+.map-container-view {
+	width: 80%;
+	position: relative;
+	height: 100%;
+}
+.param {
+	display: flex;
+	flex-flow: row;
+	justify-content: space-between;
+	margin-top: 6%;
+	align-items: center;
+}
+
+.param > * {
+	font-size: 14px;
+	font-family: 'Montserrat', sans-serif;
+}
+
+.select2-container--default  {
+	background-color: white;
+	border: 1px solid #c1c1c1c1;
+	border-radius: 0px;
+	cursor: text;
+	box-shadow: 0px 1px 4px rgb(0 0 0 / 33% );
+}
+.select2-container {
+	width: 236px!important;
+}
+.param-container{
+	flex-flow: column;
+	width: 94%;
+	max-width: 30vw;
+	justify-content: space-between;
+	padding: 0 3%;
+	display: flex;
+}
+
+.param-container label{
+	margin-right: 2px;
+	width: auto;
+}
+.margintop{
+	margin-top: 20px;
+}
+
+.title {
+	margin-top: 40px;
+	margin-bottom: 10px;
+	font-weight: normal;
+	text-align: center;
+	background: #019932;
+	color: white;
+	padding: 8px;
+	font-size: 24px;
+}
