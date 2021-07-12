@@ -274,7 +274,10 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
             return;
 
         var currentRouteStopPreds = preds.predictions[0];
-
+        if(predictionsTimeout){
+            clearTimeout(predictionsTimeout);
+            predictionsTimeout = 0;
+        }
         // Set timeout to update predictions again in few seconds
         predictionsTimeout = setTimeout(getPredictionsJson, 20000, currentRouteStopPreds.routeShortName, currentRouteStopPreds.stopId);
 
@@ -368,6 +371,10 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
         }
 
         // JSON request of predicton data
+        if(predictionsTimeout){
+            clearTimeout(predictionsTimeout);
+            predictionsTimeout = 0;
+        }
         var url = apiUrlPrefix + "/command/predictions?" + selectedRouteId;
         $.getJSON(url, predictionCallback);
     }
@@ -1071,6 +1078,7 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
     map.on('popupclose', function (e) {
         predictionsPopup = null;
         clearTimeout(predictionsTimeout);
+        predictionsTimeout = 0;
 
         if (e.popup.parent)
             e.popup.parent.popup = null;

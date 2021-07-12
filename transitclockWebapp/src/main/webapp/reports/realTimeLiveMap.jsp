@@ -270,6 +270,10 @@
 
         var currentRouteStopPreds = preds.predictions[0];
 
+        if(predictionsTimeout){
+            clearTimeout(predictionsTimeout);
+            predictionsTimeout = 0;
+        }
         // Set timeout to update predictions again in few seconds
         predictionsTimeout = setTimeout(getPredictionsJson, 20000, currentRouteStopPreds.routeShortName, currentRouteStopPreds.stopId);
 
@@ -361,6 +365,10 @@
 
         // JSON request of predicton data
         var url = apiUrlPrefix + "/command/predictions?" + selectedRouteId;
+        if(predictionsTimeout){
+            clearTimeout(predictionsTimeout);
+            predictionsTimeout = 0;
+        }
         $.getJSON(url, predictionCallback);
     }
 
@@ -1062,7 +1070,7 @@
     map.on('popupclose', function(e) {
         predictionsPopup = null;
         clearTimeout(predictionsTimeout);
-
+        predictionsTimeout = 0;
         if (e.popup.parent)
             e.popup.parent.popup = null;
     });
