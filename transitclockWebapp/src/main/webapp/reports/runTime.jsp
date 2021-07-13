@@ -1064,6 +1064,8 @@
             delete request.serviceType
             delete  request.headsign;
             isAllRoutes = true;
+            request.minEarlySec="60";
+            request.minLateSec="300";
             visualDataURL =  apiUrlPrefix + "/report/runTime/routeRunTimes";
         }
 

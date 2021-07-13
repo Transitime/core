@@ -450,11 +450,11 @@
 
                     <div class="pair">
                         <label for="early">Min Early:</label>
-                        <input type="number" id="early" name="early" min="0" max="1440" step="0.5" value="1.5">
+                        <input type="number" id="early" name="early" min="0" max="1440" step="0.5" value="1">
                     </div>
                     <div class="pair">
                         <label for="late">Min Late:</label>
-                        <input type="number" id="late" name="late" min="0" max="1440" step="0.5" value="2.5">
+                        <input type="number" id="late" name="late" min="0" max="1440" step="0.5" value="5">
                     </div>
 
 
