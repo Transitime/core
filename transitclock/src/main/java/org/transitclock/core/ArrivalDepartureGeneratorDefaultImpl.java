@@ -293,9 +293,9 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			freqStartDate = new Date(vehicleState.getTripStartTime(vehicleState.getTripCounter()));
 		}
 
-		String stopPathId = block.getStopPath(tripIndex, stopPathIndex).getId();
 		Date avlTime=vehicleState.getAvlReport().getDate();
 		Date time = new Date(departureTime);
+		StopPath stopPath = block.getStopPath(tripIndex, stopPathIndex);
 
 		Departure departure = new Departure(vehicleState.getVehicleId(),
 				time,
@@ -305,7 +305,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				stopPathIndex,
 				freqStartDate,
 				dwellTime,
-				stopPathId);
+				stopPath.getId(),
+				stopPath.isWaitStop());
 
 		departure = StopArrivalDepartureCacheFactory.getInstance().verifyDeparture(departure);
 		updateCache(vehicleState, departure);
@@ -358,7 +359,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			freqStartDate = new Date(vehicleState.getTripStartTime(vehicleState.getTripCounter()));
 		}
 
-		String stopPathId = block.getStopPath(tripIndex, stopPathIndex).getId();
+		StopPath stopPath = block.getStopPath(tripIndex, stopPathIndex);
 
 		Arrival arrival = new Arrival(vehicleState.getVehicleId(),
 				new Date(arrivalTime),
@@ -367,7 +368,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				tripIndex,
 				stopPathIndex,
 				freqStartDate,
-				stopPathId);
+				stopPath.getId(),
+				stopPath.isWaitStop());
 
 		arrival = StopArrivalDepartureCacheFactory.getInstance().verifyArrival(arrival);
 		updateCache(vehicleState, arrival);

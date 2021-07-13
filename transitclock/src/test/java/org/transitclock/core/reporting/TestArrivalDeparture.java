@@ -34,6 +34,7 @@ public class TestArrivalDeparture {
         private Date freqStartTime = null;
         private String stopPathId = null;
         private Long dwellTime = null;
+        private boolean isWaitStop;
 
         public Builder(boolean isArrival){
             this.isArrival = isArrival;
@@ -89,6 +90,11 @@ public class TestArrivalDeparture {
             return this;
         }
 
+        public TestArrivalDeparture.Builder isWaitStop(boolean isWaitStop) {
+            this.isWaitStop = isWaitStop;
+            return this;
+        }
+
         protected Arrival buildArrival(){
             return new Arrival(
                     configRev,
@@ -99,7 +105,8 @@ public class TestArrivalDeparture {
                     tripIndex,
                     pathIndex,
                     freqStartTime,
-                    stopPathId
+                    stopPathId,
+                    isWaitStop
             );
 
         }
@@ -115,7 +122,8 @@ public class TestArrivalDeparture {
                     pathIndex,
                     freqStartTime,
                     dwellTime,
-                    stopPathId
+                    stopPathId,
+                    isWaitStop
             );
         }
 

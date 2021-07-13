@@ -80,7 +80,8 @@ public class KalmanPredictionGeneratorTestImpl extends KalmanPredictionGenerator
             0,
             0,
             null,
-            KalmanDataGenerator.STOP_PATH_ID);
+            KalmanDataGenerator.STOP_PATH_ID,
+            false);
     IpcArrivalDeparture arrival = new IpcArrivalDeparture(a);
     TravelTimeDetails ttd = new TravelTimeDetails(departure, arrival);
     Core.getInstance().getDbConfig().addBlockToServiceMap(KalmanDataGenerator.SERVICE_ID, KalmanDataGenerator.BLOCK_ID, test.getBlock());

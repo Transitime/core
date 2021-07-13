@@ -63,6 +63,8 @@ public class IpcArrivalDeparture implements ArrivalDepartureSpeed, Serializable 
 	private Date scheduledDate;
 	@XmlAttribute
 	private String stopPathId;
+	@XmlAttribute
+	private boolean isWaitStop;
 
 	protected IpcArrivalDeparture(){}
 
@@ -86,6 +88,7 @@ public class IpcArrivalDeparture implements ArrivalDepartureSpeed, Serializable 
 		this.tripPatternId=arrivalDepature.getTripPatternId();
 		this.scheduledDate=arrivalDepature.getScheduledDate();
 		this.stopPathId = arrivalDepature.getStopPathId();
+		this.isWaitStop = arrivalDepature.isWaitStop();
 	}
 	
 	
@@ -170,6 +173,14 @@ public class IpcArrivalDeparture implements ArrivalDepartureSpeed, Serializable 
 	}
 	public void setTripIndex(int tripIndex) {
 		this.tripIndex = tripIndex;
+	}
+
+	public boolean isWaitStop() {
+		return isWaitStop;
+	}
+
+	public void setWaitStop(boolean waitStop) {
+		isWaitStop = waitStop;
 	}
 
 	public TemporalDifference getScheduleAdherence() {
@@ -267,6 +278,7 @@ public class IpcArrivalDeparture implements ArrivalDepartureSpeed, Serializable 
 		result = prime * result + ((dwellTime == null) ? 0 : dwellTime.hashCode());
 		result = prime * result + ((scheduledDate == null) ? 0 : scheduledDate.hashCode());
 		result = prime * result + ((tripPatternId == null) ? 0 : tripPatternId.hashCode());
+		result = prime * result + (isWaitStop ? 1231 : 1237);
 		return result;
 	}
 
@@ -362,6 +374,8 @@ public class IpcArrivalDeparture implements ArrivalDepartureSpeed, Serializable 
 				return false;
 		} else if (!tripPatternId.equals(other.tripPatternId))
 			return false;
+		if (isWaitStop != other.isWaitStop)
+			return false;
 		return true;
 	}
 
@@ -373,7 +387,8 @@ public class IpcArrivalDeparture implements ArrivalDepartureSpeed, Serializable 
 				+ routeId + ", routeShortName=" + routeShortName + ", serviceId=" + serviceId + ", directionId="
 				+ directionId + ", tripIndex=" + tripIndex + ", stopPathIndex=" + stopPathIndex + ", stopPathLength="
 				+ stopPathLength + ", freqStartTime=" + freqStartTime + (dwellTime != null ? ", dwellTime=" + dwellTime : "")
-				+ ", tripPatternId=" + tripPatternId + (scheduledDate != null ? ", scheduledDate=" + scheduledDate : "") + "]";
+				+ ", tripPatternId=" + tripPatternId + (scheduledDate != null ? ", scheduledDate=" + scheduledDate : "")
+				+ ", isWaitStop=" + isWaitStop + "]";
 	}
 
 

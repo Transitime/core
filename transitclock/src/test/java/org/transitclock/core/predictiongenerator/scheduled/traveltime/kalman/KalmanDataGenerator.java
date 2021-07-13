@@ -339,7 +339,8 @@ public class KalmanDataGenerator {
             0,
             null,
             0l,
-            KalmanDataGenerator.STOP_PATH_ID);
+            KalmanDataGenerator.STOP_PATH_ID,
+            false);
     return d;
   }
 
@@ -354,7 +355,8 @@ public class KalmanDataGenerator {
             0,
             0,
             null,
-            KalmanDataGenerator.STOP_PATH_ID);
+            KalmanDataGenerator.STOP_PATH_ID,
+            false);
     return a;
   }
 

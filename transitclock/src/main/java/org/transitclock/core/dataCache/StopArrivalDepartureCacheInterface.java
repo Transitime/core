@@ -223,7 +223,8 @@ public abstract class StopArrivalDepartureCacheInterface {
 							tripIndex,
 							ad.getStopPathIndex(),
 							ad.getFreqStartTime(),
-							null /* stopPathId not present */);
+							null /* stopPathId not present */,
+							ad.isWaitStop());
 			return a;
 		}
 		Departure d = null;
@@ -236,7 +237,8 @@ public abstract class StopArrivalDepartureCacheInterface {
 					ad.getStopPathIndex(),
 					ad.getFreqStartTime(),
 					ad.getDwellTime(),
-					null /* stopPathId not present */);
+					null, /* stopPathId not present */
+					ad.isWaitStop());
 		} catch(Exception e){
 			e.printStackTrace();
 		}

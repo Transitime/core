@@ -72,7 +72,9 @@ import java.util.*;
 			       @Index(name="ArrivalsDeparturesTripPatternIdIndex",
 					   columnList="tripPatternId" ),
 			       @Index(name="ArrivalsDeparturesScheduledTimeIndex",
-					   columnList="scheduledTime" )} )
+					   columnList="scheduledTime" ),
+				   @Index(name="ArrivalsDeparturesTimePointIndex",
+					   columnList="isWaitStop" )} )
 public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartureSpeed {
 	
 	@Id 
@@ -207,6 +209,9 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 	@Column(length=2*HibernateUtils.DEFAULT_ID_SIZE)
 	private String stopPathId;
 
+	@Column
+	private final boolean isWaitStop;
+
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumns(
 		{
@@ -261,7 +266,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 	 */
 	protected ArrivalDeparture(int configRev, String vehicleId, Date time, Date avlTime, Block block,
 							   int tripIndex, int stopPathIndex, boolean isArrival, Date freqStartTime, Long dwellTime,
-							   String stopPathId) {
+							   String stopPathId, boolean isWaitStop) {
 		this.vehicleId = vehicleId;
 		this.time = time;
 		this.avlTime = avlTime;
@@ -273,6 +278,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 		this.freqStartTime = freqStartTime;
 		this.dwellTime = dwellTime;
 		this.stopPathId = stopPathId;
+		this.isWaitStop = isWaitStop;
 		
 		// Some useful convenience variables
 
@@ -305,17 +311,14 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 			Date scheduledEpochTime = null;
 			if (!trip.isNoSchedule()) {
 				ScheduleTime scheduleTime = trip.getScheduleTime(stopPathIndex);
-				if (stopPath.isLastStopInTrip() && scheduleTime.getArrivalTime() != null
-						&& isArrival) {
-					long epochTime = Core.getInstance().getTime()
-							.getEpochTime(scheduleTime.getArrivalTime(), time);
-					scheduledEpochTime = new Date(epochTime);
-				} else if (!stopPath.isLastStopInTrip()
-						&& scheduleTime.getDepartureTime() != null && !isArrival) {
-					long epochTime = Core.getInstance().getTime()
-							.getEpochTime(scheduleTime.getDepartureTime(), time);
-					scheduledEpochTime = new Date(epochTime);
+				Integer scheduleTimeSec;
+				if(!isArrival){
+					scheduleTimeSec = scheduleTime.getTime();
+				} else {
+					scheduleTimeSec = scheduleTime.getArrivalOrDepartureTime();
 				}
+				long epochTime = Core.getInstance().getTime().getEpochTime(scheduleTimeSec, time);
+				scheduledEpochTime = new Date(epochTime);
 
 			}
 			this.scheduledTime = scheduledEpochTime;
@@ -344,10 +347,10 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 	}
 	protected ArrivalDeparture(String vehicleId, Date time, Date avlTime, Block block,
 							   int tripIndex, int stopPathIndex, boolean isArrival, Date freqStartTime, Long dwellTime,
-							   String stopPathId) {
+							   String stopPathId, boolean isWaitStop) {
 		
 		this(Core.getInstance().getDbConfig().getConfigRev(),vehicleId, time, avlTime, block, 
-				tripIndex, stopPathIndex, isArrival, freqStartTime, dwellTime, stopPathId);
+				tripIndex, stopPathIndex, isArrival, freqStartTime, dwellTime, stopPathId, isWaitStop);
 	}
 	public Date getFreqStartTime() {
 		return freqStartTime;
@@ -380,6 +383,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 		this.dwellTime = null;
 		this.tripPatternId = null;
 		this.stopPathId = null;
+		this.isWaitStop = false;
 	}
 
 	/**
@@ -496,6 +500,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 		result =
 				prime * result
 						+ ((stopPathId == null) ? 0 : stopPathId.hashCode());
+		result = prime * result + (isWaitStop ? 1231 : 1237);
 		return result;
 	}
 
@@ -604,6 +609,8 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 				return false;
 		} else if (!stopPathId.equals(other.stopPathId))
 			return false;
+		if (isWaitStop != other.isWaitStop)
+			return false;
 		return true;
 	}
 
@@ -637,6 +644,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 						", schedAdh=" + new TemporalDifference(
 								scheduledTime.getTime() - time.getTime()) : "")
 				+ (dwellTime != null ? ", dwellTime=" + dwellTime : "")
+				+ ", isWaitStop=" + isWaitStop
 				+ "]";
 	}
 	
@@ -1076,7 +1084,6 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 				"ad " +
 				"FROM " +
 				"ArrivalDeparture ad " +
-				getTimePointsJoin(adQuery.isTimePointsOnly()) +
 				getServiceTypeJoin(adQuery.getServiceType()) +
 				getStopsJoin(adQuery.isIncludeStop()) +
 				getTripsJoin(adQuery.getHeadsign(), adQuery.isIncludeTrip()) +
@@ -1239,7 +1246,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 
 	private static String getTimePointsWhere(boolean timePointsOnly){
 		if(timePointsOnly){
-			return "AND ad.configRev = sp.configRev AND ad.stopId = sp.stopId AND ad.tripPatternId = sp.tripPatternId AND sp.scheduleAdherenceStop = true ";
+			return "AND ad.isWaitStop = true ";
 		}
 		return "";
 	}
@@ -1459,6 +1466,8 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 	public String getStopPathId() {
 		return stopPathId;
 	}
+
+	public boolean isWaitStop() { return isWaitStop; }
 
 	public String getTripPatternId() {
 		return tripPatternId;

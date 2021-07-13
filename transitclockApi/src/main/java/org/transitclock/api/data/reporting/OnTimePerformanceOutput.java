@@ -48,19 +48,29 @@ public class OnTimePerformanceOutput {
         otpLabelsAndCountsMap.put(LATE, 0);
         otpLabelsAndCountsMap.put(ON_TIME, 0);
 
-        int count;
+        int earlyCount;
+        int lateCount;
+        int onTimeCount;
 
         for(IpcArrivalDeparture ad : arrivalDepartures) {
-            if (ad.getScheduledAdherence().isEarlierThan(minEarlySec)) {
-                count = otpLabelsAndCountsMap.get(EARLY);
-                otpLabelsAndCountsMap.put(EARLY, count + 1);
-            } else if (ad.getScheduledAdherence().isLaterThan(minLateSec)) {
-                count = otpLabelsAndCountsMap.get(LATE);
-                otpLabelsAndCountsMap.put(LATE, count + 1);
+            if(ad.isArrival()){
+                if (ad.getScheduledAdherence().isLaterThan(minLateSec)) {
+                    lateCount = otpLabelsAndCountsMap.get(LATE);
+                    otpLabelsAndCountsMap.put(LATE, lateCount + 1);
+                } else {
+                    onTimeCount = otpLabelsAndCountsMap.get(ON_TIME);
+                    otpLabelsAndCountsMap.put(ON_TIME, onTimeCount + 1);
+                }
             } else {
-                count = otpLabelsAndCountsMap.get(ON_TIME);
-                otpLabelsAndCountsMap.put(ON_TIME, count + 1);
+                if (ad.getScheduledAdherence().isEarlierThan(minEarlySec)) {
+                    earlyCount = otpLabelsAndCountsMap.get(EARLY);
+                    otpLabelsAndCountsMap.put(EARLY, earlyCount + 1);
+                } else {
+                    onTimeCount = otpLabelsAndCountsMap.get(ON_TIME);
+                    otpLabelsAndCountsMap.put(ON_TIME, onTimeCount + 1);
+                }
             }
+
         }
 
         return otpLabelsAndCountsMap;
