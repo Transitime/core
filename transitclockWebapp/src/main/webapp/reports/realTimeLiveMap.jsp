@@ -124,7 +124,6 @@
             <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
             <jsp:include page="params/routeMultipleNoLabel.jsp" />
         </div>
-
         <div id="search" class="margintop">
             <div class="paramLabel">Search</div>
             <div class="param">
@@ -135,6 +134,15 @@
             <div class="param">
                 <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
                 <button type="submit" id="vehiclesSubmit" onclick="openVehiclePopup(getVehicleMarker($('#vehiclesSearch').val()))">Show Vehicle</button>
+            </div>
+        </div>
+
+        <div class="margintop">
+            <div class="paramCheckbox">
+                <label for="assignedFilter">
+                    <span>Assigned Only</span>
+                    <input type="checkbox" id="assignedFilter" name="assignedFilter">
+                </label>
             </div>
         </div>
     </div>
@@ -1014,6 +1022,10 @@
         // Use ajax() instead of getJSON() so that can set timeout since
         // will be polling vehicle info every 10 seconds and don't want there
         // to be many simultaneous requests.
+
+        var isAssigned = document.querySelector("#assignedFilter").checked;
+        url += "&onlyAssigned="+isAssigned;
+
         $.ajax(url, {
             dataType: 'json',
             data: {
