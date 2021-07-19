@@ -178,6 +178,10 @@
         return $.format.date(offsetDate, 'HH:mm:ss');
     }
 
+    $("#assignedFilter").on("change",function(){
+        updateVehiclesUsingApiData();
+    });
+
     $("#stopsSearch").keydown(function(e){
         if(e.which == 13) {
             showStopDetails($('#route').val(), $('#stopsSearch').val());
