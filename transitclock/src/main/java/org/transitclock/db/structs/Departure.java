@@ -49,15 +49,15 @@ public class Departure extends ArrivalDeparture {
 	 */
 	public Departure(String vehicleId, Date time, Date avlTime, Block block,
 					 int tripIndex, int stopPathIndex, Date freqStartTime, Long dwellTime, String stopPathId,
-					 boolean isWaitStop) {
+					 boolean isScheduleAdherenceStop) {
 		super(vehicleId, time, avlTime, block, tripIndex, stopPathIndex, 
-				false, freqStartTime, dwellTime, stopPathId, isWaitStop);
+				false, freqStartTime, dwellTime, stopPathId, isScheduleAdherenceStop);
 	}
 	public Departure(int configRev, String vehicleId, Date time, Date avlTime, Block block,
 					 int tripIndex, int stopPathIndex, Date freqStartTime, Long dwellTime, String stopPathId,
-					 boolean isWaitStop) {
+					 boolean isScheduleAdherenceStop) {
 		super(configRev, vehicleId, time, avlTime, block, tripIndex, stopPathIndex, 
-				false, freqStartTime, dwellTime, stopPathId, isWaitStop);
+				false, freqStartTime, dwellTime, stopPathId, isScheduleAdherenceStop);
 	}
 	/**
 	 * Hibernate always wants a no-arg constructor. Made private since 
@@ -79,7 +79,7 @@ public class Departure extends ArrivalDeparture {
 	public Departure withUpdatedTime(Date newTime) {
 		return new Departure(getVehicleId(), newTime, getAvlTime(), getBlock(),
 						getTripIndex(), getStopPathIndex(), getFreqStartTime(), getDwellTime(), getStopPathId(),
-						isWaitStop());
+						isScheduleAdherenceStop());
 	}
 
 }

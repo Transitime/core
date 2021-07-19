@@ -306,7 +306,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				freqStartDate,
 				dwellTime,
 				stopPath.getId(),
-				stopPath.isWaitStop());
+				stopPath.isScheduleAdherenceStop());
 
 		departure = StopArrivalDepartureCacheFactory.getInstance().verifyDeparture(departure);
 		updateCache(vehicleState, departure);
@@ -369,7 +369,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				stopPathIndex,
 				freqStartDate,
 				stopPath.getId(),
-				stopPath.isWaitStop());
+				stopPath.isScheduleAdherenceStop());
 
 		arrival = StopArrivalDepartureCacheFactory.getInstance().verifyArrival(arrival);
 		updateCache(vehicleState, arrival);

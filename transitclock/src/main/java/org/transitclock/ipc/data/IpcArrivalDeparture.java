@@ -64,7 +64,7 @@ public class IpcArrivalDeparture implements ArrivalDepartureSpeed, Serializable 
 	@XmlAttribute
 	private String stopPathId;
 	@XmlAttribute
-	private boolean isWaitStop;
+	private boolean scheduleAdherenceStop;
 
 	protected IpcArrivalDeparture(){}
 
@@ -88,7 +88,7 @@ public class IpcArrivalDeparture implements ArrivalDepartureSpeed, Serializable 
 		this.tripPatternId=arrivalDepature.getTripPatternId();
 		this.scheduledDate=arrivalDepature.getScheduledDate();
 		this.stopPathId = arrivalDepature.getStopPathId();
-		this.isWaitStop = arrivalDepature.isWaitStop();
+		this.scheduleAdherenceStop = arrivalDepature.isScheduleAdherenceStop();
 	}
 	
 	
@@ -175,12 +175,12 @@ public class IpcArrivalDeparture implements ArrivalDepartureSpeed, Serializable 
 		this.tripIndex = tripIndex;
 	}
 
-	public boolean isWaitStop() {
-		return isWaitStop;
+	public boolean isScheduleAdherenceStop() {
+		return scheduleAdherenceStop;
 	}
 
-	public void setWaitStop(boolean waitStop) {
-		isWaitStop = waitStop;
+	public void setScheduleAdherenceStop(boolean isScheduleAdherenceStop) {
+		this.scheduleAdherenceStop = isScheduleAdherenceStop;
 	}
 
 	public TemporalDifference getScheduleAdherence() {
@@ -278,7 +278,7 @@ public class IpcArrivalDeparture implements ArrivalDepartureSpeed, Serializable 
 		result = prime * result + ((dwellTime == null) ? 0 : dwellTime.hashCode());
 		result = prime * result + ((scheduledDate == null) ? 0 : scheduledDate.hashCode());
 		result = prime * result + ((tripPatternId == null) ? 0 : tripPatternId.hashCode());
-		result = prime * result + (isWaitStop ? 1231 : 1237);
+		result = prime * result + (scheduleAdherenceStop ? 1231 : 1237);
 		return result;
 	}
 
@@ -374,7 +374,7 @@ public class IpcArrivalDeparture implements ArrivalDepartureSpeed, Serializable 
 				return false;
 		} else if (!tripPatternId.equals(other.tripPatternId))
 			return false;
-		if (isWaitStop != other.isWaitStop)
+		if (scheduleAdherenceStop != other.scheduleAdherenceStop)
 			return false;
 		return true;
 	}
@@ -388,7 +388,7 @@ public class IpcArrivalDeparture implements ArrivalDepartureSpeed, Serializable 
 				+ directionId + ", tripIndex=" + tripIndex + ", stopPathIndex=" + stopPathIndex + ", stopPathLength="
 				+ stopPathLength + ", freqStartTime=" + freqStartTime + (dwellTime != null ? ", dwellTime=" + dwellTime : "")
 				+ ", tripPatternId=" + tripPatternId + (scheduledDate != null ? ", scheduledDate=" + scheduledDate : "")
-				+ ", isWaitStop=" + isWaitStop + "]";
+				+ ", isScheduleAdherenceStop=" + scheduleAdherenceStop + "]";
 	}
 
 

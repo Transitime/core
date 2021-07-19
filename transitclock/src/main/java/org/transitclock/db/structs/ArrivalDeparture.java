@@ -74,7 +74,7 @@ import java.util.*;
 			       @Index(name="ArrivalsDeparturesScheduledTimeIndex",
 					   columnList="scheduledTime" ),
 				   @Index(name="ArrivalsDeparturesTimePointIndex",
-					   columnList="isWaitStop" )} )
+					   columnList="scheduleAdherenceStop" )} )
 public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartureSpeed {
 	
 	@Id 
@@ -210,7 +210,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 	private String stopPathId;
 
 	@Column
-	private final boolean isWaitStop;
+	private final boolean scheduleAdherenceStop;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumns(
@@ -266,7 +266,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 	 */
 	protected ArrivalDeparture(int configRev, String vehicleId, Date time, Date avlTime, Block block,
 							   int tripIndex, int stopPathIndex, boolean isArrival, Date freqStartTime, Long dwellTime,
-							   String stopPathId, boolean isWaitStop) {
+							   String stopPathId, boolean scheduleAdherenceStop) {
 		this.vehicleId = vehicleId;
 		this.time = time;
 		this.avlTime = avlTime;
@@ -278,7 +278,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 		this.freqStartTime = freqStartTime;
 		this.dwellTime = dwellTime;
 		this.stopPathId = stopPathId;
-		this.isWaitStop = isWaitStop;
+		this.scheduleAdherenceStop = scheduleAdherenceStop;
 		
 		// Some useful convenience variables
 
@@ -347,10 +347,10 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 	}
 	protected ArrivalDeparture(String vehicleId, Date time, Date avlTime, Block block,
 							   int tripIndex, int stopPathIndex, boolean isArrival, Date freqStartTime, Long dwellTime,
-							   String stopPathId, boolean isWaitStop) {
+							   String stopPathId, boolean scheduleAdherenceStop) {
 		
 		this(Core.getInstance().getDbConfig().getConfigRev(),vehicleId, time, avlTime, block, 
-				tripIndex, stopPathIndex, isArrival, freqStartTime, dwellTime, stopPathId, isWaitStop);
+				tripIndex, stopPathIndex, isArrival, freqStartTime, dwellTime, stopPathId, scheduleAdherenceStop);
 	}
 	public Date getFreqStartTime() {
 		return freqStartTime;
@@ -383,7 +383,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 		this.dwellTime = null;
 		this.tripPatternId = null;
 		this.stopPathId = null;
-		this.isWaitStop = false;
+		this.scheduleAdherenceStop = false;
 	}
 
 	/**
@@ -500,7 +500,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 		result =
 				prime * result
 						+ ((stopPathId == null) ? 0 : stopPathId.hashCode());
-		result = prime * result + (isWaitStop ? 1231 : 1237);
+		result = prime * result + (scheduleAdherenceStop ? 1231 : 1237);
 		return result;
 	}
 
@@ -609,7 +609,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 				return false;
 		} else if (!stopPathId.equals(other.stopPathId))
 			return false;
-		if (isWaitStop != other.isWaitStop)
+		if (scheduleAdherenceStop != other.scheduleAdherenceStop)
 			return false;
 		return true;
 	}
@@ -644,7 +644,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 						", schedAdh=" + new TemporalDifference(
 								scheduledTime.getTime() - time.getTime()) : "")
 				+ (dwellTime != null ? ", dwellTime=" + dwellTime : "")
-				+ ", isWaitStop=" + isWaitStop
+				+ ", isScheduleAdherenceStop=" + scheduleAdherenceStop
 				+ "]";
 	}
 	
@@ -1246,7 +1246,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 
 	private static String getTimePointsWhere(boolean timePointsOnly){
 		if(timePointsOnly){
-			return "AND ad.isWaitStop = true ";
+			return "AND ad.scheduleAdherenceStop = true ";
 		}
 		return "";
 	}
@@ -1467,7 +1467,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 		return stopPathId;
 	}
 
-	public boolean isWaitStop() { return isWaitStop; }
+	public boolean isScheduleAdherenceStop() { return scheduleAdherenceStop; }
 
 	public String getTripPatternId() {
 		return tripPatternId;

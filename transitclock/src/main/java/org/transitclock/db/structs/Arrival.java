@@ -48,15 +48,15 @@ public class Arrival extends ArrivalDeparture {
 	 * @param freqStartTime
 	 */
 	public Arrival(String vehicleId, Date time, Date avlTime, Block block,
-			int tripIndex, int pathIndex, Date freqStartTime, String stopPathId, boolean isWaitStop) {
+			int tripIndex, int pathIndex, Date freqStartTime, String stopPathId, boolean isScheduleAdherenceStop) {
 		super(vehicleId, time, avlTime, block, tripIndex, pathIndex, 
-				true, freqStartTime, null, stopPathId, isWaitStop); // isArrival
+				true, freqStartTime, null, stopPathId, isScheduleAdherenceStop); // isArrival
 	}
 	
 	public Arrival(int configRev, String vehicleId, Date time, Date avlTime, Block block,
-			int tripIndex, int pathIndex, Date freqStartTime, String stopPathId, boolean isWaitStop) {
+			int tripIndex, int pathIndex, Date freqStartTime, String stopPathId, boolean isScheduleAdherenceStop) {
 		super(configRev, vehicleId, time, avlTime, block, tripIndex, pathIndex, 
-				true, freqStartTime, null, stopPathId, isWaitStop); // isArrival
+				true, freqStartTime, null, stopPathId, isScheduleAdherenceStop); // isArrival
 	}
 	/**
 	 * Hibernate always wants a no-arg constructor. Made private since 
@@ -77,7 +77,7 @@ public class Arrival extends ArrivalDeparture {
 	 */
 	public Arrival withUpdatedTime(Date newTime) {
 		return new Arrival(getVehicleId(), newTime, getAvlTime(), getBlock(),
-				getTripIndex(), getStopPathIndex(), getFreqStartTime(), getStopPathId(), isWaitStop());
+				getTripIndex(), getStopPathIndex(), getFreqStartTime(), getStopPathId(), isScheduleAdherenceStop());
 	}
 	
 }
