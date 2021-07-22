@@ -50,7 +50,7 @@ label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-rig
 
 
 /* updated css */
-#title {
+#title,  .header-title {
     margin-top: 40px;
     margin-bottom: 2px;
     font-weight: normal;
@@ -59,6 +59,7 @@ label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-rig
     color: white;
     padding: 8px;
     font-size: 24px;
+    width: calc(100% - 16px);
 }
 
 #mainDiv {
@@ -713,8 +714,8 @@ body.loader:after {
 
 
 #overlay {
-   /* width: 100%;
-    height: 100%;*/
+    /* width: 100%;
+     height: 100%;*/
     position: fixed;
     top: 0;
     right: 0;
@@ -728,3 +729,213 @@ body.loader:after {
     filter: blur(0px) grayscale(0%);
 }
 
+
+/**Adding inline styles from run-time jsp*/
+
+.run-time-screen .wrapper {
+    background: #f1f1f1f1;
+    font-family: 'Montserrat', sans-serif !important;
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    display: flex;
+    flex-flow: row;
+}
+.run-time-screen .paramsWrapper {
+    width: 100%;
+    height: 100vh;
+    transition: width .75s ease-in-out, max-width .75s ease-in-out;
+    font-size: 16px;
+    background-color: #fff;
+    border: #969696 solid 1px;
+    box-shadow: 3px 3px 4px rgb(0 0 0 / 30%);
+    /* align-self: center; */
+    position: relative;
+    z-index: 8;
+}
+
+.run-time-screen .wrapper.split {
+    flex-flow: row;
+}
+
+.run-time-screen #routesDiv {
+    font-family: 'Montserrat', sans-serif !important;
+}
+
+.run-time-screen .param {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+    margin-top: 6%;
+}
+
+.run-time-screen #paramsSidebar {
+    height: 100vh;
+    max-width: 420px;
+    width: 100%;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    flex-flow: column;
+    background-color: #fff;
+    z-index: 2;
+}
+
+.run-time-screen .split .paramsWrapper {
+    width: 22%;
+}
+
+.run-time-screen  #paramsFields {
+    flex-flow: column;
+    width: 90%;
+    max-width: 30vw;
+}
+
+.run-time-screen .param > label {
+    width: 130px;
+}
+
+
+.run-time-screen .param > span {
+    font-weight: 500;
+    padding-bottom: 12px;
+}
+
+.run-time-screen .param > input, .run-time-screen .param > select {
+    height: 30px;
+}
+
+.run-time-screen #mainPage {
+    visibility: hidden;
+    opacity: 0;
+    display: none;
+    margin-left: 2vw;
+    margin-top: 20vh;
+    height: 100vh;
+    width: 90%;
+    max-width: 1250px;
+    padding: 10px 30px;
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+    transition: visibility .25s .75s ease-in-out, opacity .25s .75s ease-in-out;
+}
+
+.run-time-screen .split #mainPage {
+    display: inline-block;
+    position: relative;
+    visibility: visible;
+    opacity: 1;
+    margin-top: 2vh;
+}
+
+
+.run-time-screen #serviceDayType {
+    width: 100%;
+    height: 30px;
+    margin-top: 0px;
+    box-shadow: 0px 1px 4px #69696969;
+    font-family: 'Montserrat', sans-serif;
+
+}
+
+.run-time-screen #beginTime,.run-time-screen #endTime {
+    width: 50%;
+}
+
+.run-time-screen .submit {
+    margin: 40px 24px;
+    background-color: #029932;
+    cursor: pointer;
+    width: 210px;
+    padding: 5px 70px;
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    box-shadow: 0 4px rgba(127, 127, 127, 0.8);
+}
+
+.run-time-screen .submit:hover {
+    background-color: #02772c;
+}
+
+.run-time-screen .submit:active {
+    box-shadow: 0 1px rgba(127, 127, 127, 0.33);
+    transform: translateY(3px);
+    outline: none;
+}
+
+.run-time-screen .hide-routes{
+    display: none !important;
+}
+
+.run-time-screen  .vertical {
+    flex-flow: column;
+    margin-top: 8%;
+    /* background-color: #f1f1f1f1; */
+    padding: 10px 0px;
+}
+/***/
+
+/**Adding inline styles from comparision JSP*/
+
+.comparison-header{
+    font-size: 16px;
+    margin: 20px 0;
+}
+
+/** */
+
+/**Adding inline styles from Prescriptive Run times JSP*/
+.late{
+    background-color:#E6D83E;
+}
+.early{
+    background-color: #E34B71;
+}
+.ontime{
+    background-color:#37E627;
+}
+.perceptive-table-flex{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    margin-top: 20px;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+.color-legend-block {
+    padding: 10px;
+    text-align: center;
+    width: 50px;
+    margin: 2.5px;
+}
+.legend-container {
+    display: flex;
+    margin: 2px;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+}
+.otp-content {
+    padding: 5px;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.otp-primary {
+    background-color: #e5e5e5;
+    border: 1px solid #e5e5e5;
+}
+.gtfs-submit {
+    margin: 40px 24px;
+    background-color: #029932;
+    cursor: pointer;
+    width: 210px;
+    padding: 10px 20px;
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    box-shadow: 0 4px rgb(127 127 127 / 80%);
+}
+
+/** */
