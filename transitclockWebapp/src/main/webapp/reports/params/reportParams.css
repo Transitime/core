@@ -51,6 +51,8 @@ label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-rig
 
 /* updated css */
 #title,  .header-title {
+
+
     margin-top: 40px;
     margin-bottom: 2px;
     font-weight: normal;
@@ -59,6 +61,9 @@ label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-rig
     color: white;
     padding: 8px;
     font-size: 24px;
+}
+
+.header-title {
     width: calc(100% - 16px);
 }
 
