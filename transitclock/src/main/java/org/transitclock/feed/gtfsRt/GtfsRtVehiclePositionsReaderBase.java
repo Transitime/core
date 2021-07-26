@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.transitclock.avl.AvlExecutor;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.StringConfigValue;
+import org.transitclock.configData.AvlConfig;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.AvlReport.AssignmentType;
 import org.transitclock.utils.IntervalTimer;
@@ -255,6 +256,10 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 
 			HttpURLConnection
 					connection = (HttpURLConnection) url.openConnection();
+			// Set the timeout so don't wait forever
+			int timeoutMsec = AvlConfig.getAvlFeedTimeoutInMSecs();
+			connection.setConnectTimeout(timeoutMsec);
+			connection.setReadTimeout(timeoutMsec);
 
 			if (gtfsRealtimeHeaderKey.getValue() != null &&
 					gtfsRealtimeHeaderValue.getValue() != null) {
