@@ -40,15 +40,13 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
     <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet"/>
     <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
 
-    <link href="../../webapp/reports/params/reportParams.css" rel="stylesheet"/>
-
 
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 
     <title>TransitClock Map</title>
 </head>
 
-<body class="run-time-screen map-screen">
+<body class="map-screen">
 
 <!-- To center successfully in all situations tried to use a div within a div.
      The title text is set in css so that it is easily configurable -->
@@ -69,7 +67,7 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
             <div id="routesParam" class="margintop">
                 <div class="paramLabel">Routes</div>
                 <div id="routesDiv" class="param">
-                    <select id="routes"  multiple="multiple"></select>
+                    <select id="route"  multiple="multiple"></select>
                 </div>
             </div>
 
@@ -93,5 +91,8 @@ showUnassignedVehicles=true (optional, for showing unassigned vehicles)
 
 
 </body>
-
+<script type="text/javascript">
+    var mapTileUrl = '<%= WebConfigParams.getMapTileUrl() %>';
+    var copyRight ='<%= WebConfigParams.getMapTileCopyright() %>';
+</script>
 <script type="text/javascript"  src="<%= request.getContextPath() %>/javascript/map-helper.js"> </script>

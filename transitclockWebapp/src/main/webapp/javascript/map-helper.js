@@ -923,11 +923,11 @@ function predictionCallback(preds, status) {
     L.control.scale({metric: false}).addTo(map);
     L.control.zoom({position: 'bottomleft'}).addTo(map);
 
-    var mapTileUrl = '<%= WebConfigParams.getMapTileUrl() %>';
+
     L.tileLayer(mapTileUrl, {
         // Specifying a shorter version of attribution. Original really too long.
         //attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery � <a href="http://mapbox.com">Mapbox</a>',
-        attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery �<%= WebConfigParams.getMapTileCopyright() %>',
+        attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery �'+copyRight,
         maxZoom: 19
     }).addTo(map);
 

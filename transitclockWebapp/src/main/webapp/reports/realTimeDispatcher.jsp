@@ -15,10 +15,10 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
 
 </head>
-<body class="run-time-screen map-screen real-time-live-map real-time-schedule-adhrence">
+<body class="map-screen real-time-live-map real-time-schedule-adhrence real-time-dispatcher">
 <%@include file="/template/header.jsp" %>
 <div id="paramsSidebar">
-    <div id="title" style="text-align: left; font-size:x-large">
+    <div class="header-title">
         Dispatcher View
     </div>
 

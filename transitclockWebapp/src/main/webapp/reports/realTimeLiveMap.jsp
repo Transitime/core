@@ -29,7 +29,7 @@
 
     <title>TransitClock Map</title>
 </head>
-<body class="run-time-screen map-screen real-time-live-map">
+<body class="map-screen real-time-live-map">
 <%@include file="/template/header.jsp" %>
 
 <div id="paramsSidebar">
@@ -80,6 +80,10 @@
     <div id="map"></div>
 </div>
 
+<script type="text/javascript">
+    var mapTileUrl = '<%= WebConfigParams.getMapTileUrl() %>';
+    var copyRight ='<%= WebConfigParams.getMapTileCopyright() %>';
+</script>
 
 <script type="text/javascript"  src="<%= request.getContextPath() %>/javascript/map-helper.js"> </script>
 

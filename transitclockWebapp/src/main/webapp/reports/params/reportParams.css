@@ -1015,6 +1015,14 @@ body.loader:after {
     border-right: 1px solid black;
 }
 
+.real-time-dispatcher #tableContainer{
+    border-left: 1px solid black;
+    padding: 10px;
+}
+
+.real-time-dispatcher #paramsSidebar {
+    border-right: none;
+}
 .real-time-live-map #paramsFields {
     flex-flow: column;
     width: 90%;
@@ -1063,4 +1071,10 @@ body.loader:after {
     border-radius: 10px;
 }
 
+/***/
+
+/***/
+#routeDiv .param > span  {
+    padding: 0;.
+}
 /***/
