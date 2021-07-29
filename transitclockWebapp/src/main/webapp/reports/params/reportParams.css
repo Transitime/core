@@ -737,7 +737,7 @@ body.loader:after {
 
 /**Adding inline styles from run-time jsp*/
 
-.run-time-screen .wrapper {
+.run-time-screen .wrapper, .speed-map-page .wrapper {
     background: #f1f1f1f1;
     font-family: 'Montserrat', sans-serif !important;
     height: 100vh;
@@ -746,7 +746,7 @@ body.loader:after {
     display: flex;
     flex-flow: row;
 }
-.run-time-screen .paramsWrapper {
+.run-time-screen .paramsWrapper, .speed-map-page .paramsWrapper {
     width: 100%;
     height: 100vh;
     transition: width .75s ease-in-out, max-width .75s ease-in-out;
@@ -759,7 +759,7 @@ body.loader:after {
     z-index: 8;
 }
 
-.run-time-screen .wrapper.split {
+.run-time-screen .wrapper.split, .speed-map-page .wrapper.split {
     flex-flow: row;
 }
 
@@ -774,7 +774,7 @@ body.loader:after {
     margin-top: 6%;
 }
 
-.run-time-screen #paramsSidebar {
+.run-time-screen #paramsSidebar , .speed-map-page #paramsSidebar{
     height: 100vh;
     max-width: 420px;
     width: 100%;
@@ -786,7 +786,7 @@ body.loader:after {
     z-index: 2;
 }
 
-.run-time-screen .split .paramsWrapper {
+.run-time-screen .split .paramsWrapper, .speed-map-page .split .paramsWrapper{
     width: 22%;
 }
 
@@ -835,7 +835,7 @@ body.loader:after {
 }
 
 
-.run-time-screen #serviceDayType {
+.run-time-screen #serviceDayType , .speed-map-page #serviceDayType{
     width: 100%;
     height: 30px;
     margin-top: 0px;
@@ -845,7 +845,7 @@ body.loader:after {
 }
 
 .run-time-screen #beginTime,.run-time-screen #endTime {
-    width: 50%;
+    /*width: 50%;*/
 }
 
 .run-time-screen .submit {
@@ -1075,6 +1075,127 @@ body.loader:after {
 
 /***/
 #routeDiv .param > span  {
-    padding: 0;.
+    padding: 0;
+}
+/***/
+
+
+/**speed Map.jsp*/
+
+.speed-map-page .speedLegend {
+    display: inline-block;
+    width: 14px;
+    min-width: 14px;
+    height: 14px;
+    border: 1px solid black;
+    margin-bottom: 5px;
+}
+
+
+
+.speed-map-page .pair {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.speed-map-page .vertical {
+    flex-flow: column;
+    margin-top: 8%;
+    /* background-color: #f1f1f1f1; */
+    padding: 10px 0px;
+}
+
+#speedParams .vertical {
+    margin-top: 0px;
+}
+
+#speedParams input[type="number"]{
+    max-width: 48px;
+}
+
+#speedParams .pair span {
+    width: 90%;
+    margin: auto;
+}
+
+.speed-map-page .submit {
+    margin: 24px;
+    background-color: #029932;
+    cursor: pointer;
+    width: 210px;
+    padding: 5px 70px;
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    box-shadow: 0 4px rgba(127, 127, 127, 0.8);
+}
+
+.speed-map-page .submit:hover {
+    background-color: #02772c;
+}
+
+.speed-map-page .submit:active {
+    box-shadow: 0 1px rgba(127, 127, 127, 0.33);
+    transform: translateY(3px);
+    outline: none;
+}
+
+
+@-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.speed-map-page .datepick-popup {
+    z-index: 1002 !important;
+}
+.speed-map-page  #runTimesFlyout {
+    width: 23%;
+    height: 100%;
+    position: absolute;
+    right: 0px;
+    z-index: 1001;
+    border-left: 1px solid black;
+    background-color: white;
+    transition: all .5s ease
+}
+.speed-map-page #mainPage h2 {
+    text-align: center;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #019932;
+    color: #fff;
+}
+
+.speed-map-page label {
+    text-align: left;
+    width: auto;
+}
+
+.speed-map-page .select2-selection.select2-selection--single {
+    background-color: #fff;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.33);
+    border: none;
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+    border-radius: 0px;
+}
+
+.speed-map-page .select2-dropdown.select2-dropdown--below {
+    border: none;
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+    border-radius: 0px;
+    box-shadow: 0px 4px 4px rgba(0,0,0,0.3);
+}
+
+.speed-map-page .select2-route-container{
+    font-family: 'Montserrat', sans-serif;
 }
 /***/
