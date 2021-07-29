@@ -25,318 +25,24 @@
     <script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.datepick.js"></script>
 
     <link rel="stylesheet" href="<%= request.getContextPath() %>/maps/css/mapUi.css" />
-
+    <link rel="stylesheet" type="text/css" href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
     <link href="params/reportParams.css" rel="stylesheet"/>
-    <style>
-        hr {
-            height: 2px;
-            background-color: darkgray;
-            margin-right: 5px;
-        }
 
-        label {
-            text-align: left;
-            width: auto;
-        }
-
-        .wrapper {
-            background: #f1f1f1f1;
-            font-family: 'Montserrat', sans-serif;
-            height: 100vh;
-            width: 100vw;
-            position: fixed;
-            display: flex;
-            flex-flow: row;
-            font-family: 'Montserrat', sans-serif;
-        }
-        .wrapper.split {
-            flex-flow: row;
-        }
-
-        #title {
-            margin-top: 40px;
-            margin-bottom: 2px;
-            font-weight: normal;
-            text-align: center;
-            background: #019932;
-            color: white;
-            padding: 8px;
-            font-size: 24px;
-            width: -webkit-fill-available;
-            display: inline-block !important;
-        }
-
-        input {
-            -webkit-appearance: none;
-            width: -webkit-fill-available;
-            border: 1px solid #c1c1c1c1;
-            background-color: #fff;
-            line-height: 1.5;
-            box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.33);
-            color: #444;
-            padding: 0px 6px;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 16px;
-        }
-
-        select:not(.datepick-month-year):not(.datepick-month-year) {
-            width: -webkit-fill-available;
-            border: 1px solid #c1c1c1c1;
-            background-color: #fff;
-            line-height: 1.5;
-            box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.33);
-            color: #444;
-            padding: 0px 6px;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 16px;
-        }
-
-        input::placeholder {
-            color: #44444469;
-        }
-
-        input[type="range"] {
-            -webkit-appearance: slider-horizontal;
-            box-shadow: none;
-            border: none;
-        }
-
-        .paramsWrapper {
-            width: 100%;
-            height: 100vh;
-            transition: width .75s ease-in-out, max-width .75s ease-in-out;
-            font-size: 16px;
-            background-color: #fff;
-            border: #969696 solid 1px;
-            box-shadow: 3px 3px 4px rgba(0,0,0,0.3);
-            /* align-self: center; */
-            position: relative;
-            z-index: 8;
-        }
-        .split .paramsWrapper {
-            width: 22%;
-        }
-        #paramsSidebar {
-            height: 100vh;
-            max-width: 420px;
-            width: 100%;
-            margin: auto;
-            display: flex;
-            align-items: center;
-            flex-flow: column;
-            background-color: #fff;
-            z-index: 2;
-        }
-        .split #paramsSidebar {
-        }
-        #paramsSidebar > * {
-            display: flex;
-        }
-        #paramsFields {
-            flex-flow: column;
-            width: 90%;
-            max-width: 30vw;
-        }
-
-        .param {
-            display: flex;
-            flex-flow: row;
-            justify-content: space-between;
-            margin-top: 6%;
-        }
-        .param > * {
-            font-size: 14px;
-        }
-        .param > span {
-            font-weight: 500;
-            padding-bottom: 12px;
-        }
-
-        .param > input, .param > select {
-            height: 30px;
-        }
-
-        .param > label {
-            width: 130px;
-        }
-
-        .pair {
-            display: flex;
-            flex-flow: row;
-            justify-content: space-between;
-            margin-bottom: 6px;
-        }
-
-        .vertical {
-            flex-flow: column;
-            margin-top: 8%;
-            /* background-color: #f1f1f1f1; */
-            padding: 10px 0px;
-        }
-
-        .select2-selection.select2-selection--single {
-            background-color: #fff;
-            box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.33);
-            border: none;
-            -webkit-border-radius: 0px;
-            -moz-border-radius: 0px;
-            border-radius: 0px;
-        }
-
-        .select2-dropdown.select2-dropdown--below {
-            border: none;
-            -webkit-border-radius: 0px;
-            -moz-border-radius: 0px;
-            border-radius: 0px;
-            box-shadow: 0px 4px 4px rgba(0,0,0,0.3);
-        }
-        .select2-route-container{
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        #serviceDayType {
-            width: 100%;
-            height: 30px;
-            margin-top: 0px;
-            box-shadow: 0px 1px 4px #69696969;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-
-        #mainPage {
-            visibility: hidden;
-            opacity: 0;
-            display: none;
-            margin-left: 2vw;
-            margin-top: 20vh;
-            height: 80vh;
-            width: 90%;
-            max-width: 1400px;
-            padding: 10px 0px;
-            background-color: #fff;
-            border-radius: 4px;
-            box-shadow: 0px 4px 8px rgba(0,0,0,0.3);
-            transition: visibility .25s .75s ease-in-out, opacity .25s .75s ease-in-out;
-        }
-
-        .split #mainPage {
-            display: inline-block;
-            position: relative;
-            visibility: visible;
-            opacity: 1;
-            margin-top: 2vh;
-        }
-
-
-        #mainPage h2 {
-            text-align: center;
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #019932;
-            color: #fff;
-        }
-
-        .inactive {
-            filter: blur(2px) grayscale(100%);
-        }
-
-        #runTimesFlyout {
-            width: 23%;
-            height: 100%;
-            position: absolute;
-            right: 0px;
-            z-index: 1001;
-            border-left: 1px solid black;
-            background-color: white;
-            transition: all .5s ease
-        }
-
-        .datepick-popup {
-            z-index: 1002 !important;
-        }
-
-        .speedLegend {
-            display: inline-block;
-            width: 14px;
-            min-width: 14px;
-            height: 14px;
-            border: 1px solid black;
-            margin-bottom: 5px;
-        }
-
-        #speedParams .vertical {
-            margin-top: 0px;
-        }
-
-        #speedParams input[type="number"]{
-            max-width: 48px;
-        }
-
-        #speedParams .pair span {
-            width: 90%;
-            margin: auto;
-        }
-
-        /*.loader {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            border: 16px solid #f3f3f3;
-            border-top: 16px solid #3498db;
-            border-radius: 50%;
-            width: 120px;
-            height: 120px;
-            -webkit-animation: spin 2s linear infinite;
-            animation: spin 2s linear infinite;
-            z-index: 1000;
-        }*/
-
-        .submit {
-            margin: 24px;
-            background-color: #029932;
-            cursor: pointer;
-            width: 210px;
-            padding: 5px 70px;
-            color: #fff;
-            font-family: 'Montserrat', sans-serif;
-            box-shadow: 0 4px rgba(127, 127, 127, 0.8);
-        }
-
-        .submit:hover {
-            background-color: #02772c;
-        }
-
-        .submit:active {
-            box-shadow: 0 1px rgba(127, 127, 127, 0.33);
-            transform: translateY(3px);
-            outline: none;
-        }
-
-
-        @-webkit-keyframes spin {
-            0% { -webkit-transform: rotate(0deg); }
-            100% { -webkit-transform: rotate(360deg); }
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-    </style>
 
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
     <script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script>
+    <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
+
 </head>
-<body>
-    <%@include file="/template/header.jsp" %>
-    <div class="wrapper">
+<body class="run-time-screen speed-map-page">
+<%@include file="/template/header.jsp" %>
+<div class="wrapper">
 
     <div class="paramsWrapper">
 
         <div id="paramsSidebar">
-            <div id="title">
+            <div class="header-title">
                 Speed Map
             </div>
 
@@ -353,54 +59,10 @@
                     </select>
                 </div>
 
-                <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
-                <link rel="stylesheet" type="text/css" href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
-
-                <script>
-                    $(function() {
-                        var calendarIconTooltip = "Popup calendar to select date";
-
-                        $( "#mainDatepicker" ).datepick({
-                            dateFormat: "yy-mm-dd",
-                            showOtherMonths: true,
-                            selectOtherMonths: true,
-                            // Show button for calendar
-                            buttonImage: "img/calendar.gif",
-                            buttonImageOnly: true,
-                            showOn: "both",
-                            // Don't allow going past current date
-                            maxDate: 0,
-                            // onClose is for restricting end date to be after start date,
-                            // though it is potentially confusing to user
-                            rangeSelect: true,
-                            showTrigger: '<button type="button" class="trigger">' +
-                                '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
-                            onClose: function( selectedDate ) {
-                                // Strangely need to set the title attribute for the icon again
-                                // so that don't revert back to a "..." tooltip
-                                // FIXME $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
-                            }
-                        });
-
-                        // Use a better tooltip than the default "..." for the calendar icon
-                        $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
-
-                        $("#beginTime, #endTime").timepicker({timeFormat: "H:i"})
-                            .on('change', function(evt) {
-                                if (evt.originalEvent) { // manual change
-                                    // validate that this looks like HH:MM
-                                    if (!evt.target.value.match(/^(([0,1][0-9])|(2[0-3])):[0-5][0-9]$/))
-                                        evt.target.value = evt.target.oldval ? evt.target.oldval : "";
-                                }
-                                evt.target.oldval = evt.target.value;
-                            });
-
-                    });
-                </script>
 
                 <div class="param">
                     <label for="mainDatepicker">Date:</label>
-                    <input type="text" id="mainDatepicker" name="mainDatepicker"
+                    <input type="text" id="mainDatepicker" class="date-picker-input" name="mainDatepicker"
                            title="The range of dates that you want to examine data for.
                                    <br><br> Begin date must be before the end date."
                            value="Date range" style:/>
@@ -408,7 +70,7 @@
 
                 <div class="param">
                     <label for="beginTime">Begin Time:</label>
-                    <input id="beginTime" name="beginTime"
+                    <input id="beginTime" name="beginTime" class="time-picker-input"
                            title="Optional begin time of day to limit query to. Useful if
                                     want to see result just for rush hour, for example. Leave blank
                                     if want data for entire day.
@@ -420,7 +82,7 @@
 
                 <div class="param">
                     <label for="endTime">End Time:</label>
-                    <input id="endTime" name="endTime"
+                    <input id="endTime" name="endTime"  class="time-picker-input"
                            title="Optional end time of day to limit query to. Useful if
                                     want to see result just for rush hour, for example. Leave blank
                                     if want data for entire day.
@@ -441,7 +103,7 @@
                     </select>
                 </div>
 
-                <hr>
+
 
                 <div id="speedParams">
                     <div class = "param vertical">
@@ -495,43 +157,12 @@
                 <div id="paramDetailsFlyout" class="paramDetails" style="margin-top: 20px; margin-bottom: 20px;"></div>
                 <div id="avgRunTimeFlyout" class="avgRunTime" style="margin-top: 20px; margin-bottom: 20px;"></div>
 
-                <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
-                <link rel="stylesheet" type="text/css" href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
 
-                <script>
-                    $(function() {
-                            var calendarIconTooltip = "Popup calendar to select date";
-
-                            $("#flyoutDatepicker").datepick({
-                                dateFormat: "yy-mm-dd",
-                                showOtherMonths: true,
-                                selectOtherMonths: true,
-                                // Show button for calendar
-                                buttonImage: "img/calendar.gif",
-                                buttonImageOnly: true,
-                                showOn: "both",
-                                // Don't allow going past current date
-                                maxDate: 0,
-                                // onClose is for restricting end date to be after start date,
-                                // though it is potentially confusing to user
-                                rangeSelect: true,
-                                showTrigger: '<button type="button" class="trigger">' +
-                                    '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
-                                onClose: function (selectedDate) {
-                                    // Strangely need to set the title attribute for the icon again
-                                    // so that don't revert back to a "..." tooltip
-                                    // FIXME $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
-                                }
-                            });
-
-                            // Use a better tooltip than the default "..." for the calendar icon
-                            $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
-                        })
-                </script>
 
                 <div class="param">
                     <label for="flyoutDatepicker">Date:</label>
                     <input type="text" id="flyoutDatepicker" name="flyoutDatepicker"
+                           class="date-picker-input"
                            title="The range of dates that you want to examine data for.
                                <br><br> Begin date must be before the end date."
                            size="18"
@@ -557,7 +188,7 @@
         </div>
     </div>
 
-    </div>
+</div>
 
 <script>
     var mapTileUrl ='http://tile.openstreetmap.org/{z}/{x}/{y}.png'
@@ -567,7 +198,7 @@
     });
     L.control.scale({metric: false}).addTo(map);
     L.tileLayer(mapTileUrl, {
-        attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+        attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery ? <a href="http://mapbox.com">Mapbox</a>',
         maxZoom: 19
     }).addTo(map);
     // Calculate the offset
@@ -848,10 +479,7 @@
             stopMarker.bindPopup(content[0]);
         })
 
-        $(".loader").hide();
-        $("#mainSubmit").removeAttr("disabled");
-        $("#mainSubmit").attr("value","Submit");
-        $("#mainPage").removeClass("inactive-split");
+        resetDetail();
     }
 
     $("#mainSubmit").click(function() {
@@ -920,20 +548,13 @@
                         stopsCallback(response);
                     },
                     error: function (e) {
-                        $(".loader").hide();
-                        $("#mainSubmit").removeAttr("disabled");
-                        $("#mainSubmit").attr("value","Submit");
-                        $("#mainPage").removeClass("inactive-split");
-                        alert("Error processing stop details.");
+                        resetDetail("Error processing stop details.");
                     }
                 })
             },
             error: function (e) {
-                $(".loader").hide();
-                $("#mainSubmit").removeAttr("disabled");
-                $("#mainSubmit").attr("value","Submit");
-                $("#mainPage").removeClass("inactive-split");
-                alert("Error processing speed details for stops.");
+
+                resetDetail("Error processing speed details for stops.");
             }
         })
 
@@ -962,11 +583,7 @@
                 }
             },
             error: function () {
-                $(".loader").hide();
-                $("#mainSubmit").removeAttr("disabled");
-                $("#mainSubmit").attr("value","Submit");
-                $("#mainPage").removeClass("inactive-split");
-                alert("Error processing average trip run time.");
+                resetDetail("Error processing average trip run time.");
             }
         })
     })
@@ -999,13 +616,11 @@
                     runTimesChart.data.datasets[0].data[1] = response.averageRunTime;
                     runTimesChart.update();
                 }
-                $(".loader").hide();
-                $(".submit").removeAttr("disabled");
+
+                resetDetail();
             },
             error: function () {
-                $(".loader").hide();
-                $(".submit").removeAttr("disabled");
-                alert("Error processing average trip run time.");
+                resetDetail("Error processing average trip run time.");
             }
         })
     })
@@ -1013,5 +628,60 @@
     $("#closeFlyout").click(function() {
         $("#runTimesFlyout").hide();
     })
+    function resetDetail(alertContent, isRemoveClass){
 
+        $(".loader").hide();
+        $("#mainSubmit").removeAttr("disabled");
+        $("#mainSubmit").attr("value","Submit");
+
+        if(!isRemoveClass){
+            $("#mainPage").removeClass("inactive-split");
+        }
+
+        if(alertContent){
+            alert(alertContent);
+        }
+
+    }
+    function datePickerIntialization () {
+        var calendarIconTooltip = "Popup calendar to select date";
+
+        $(".date-picker-input").datepick({
+            dateFormat: "yy-mm-dd",
+            showOtherMonths: true,
+            selectOtherMonths: true,
+            // Show button for calendar
+            buttonImage: "img/calendar.gif",
+            buttonImageOnly: true,
+            showOn: "both",
+            // Don't allow going past current date
+            maxDate: 0,
+            // onClose is for restricting end date to be after start date,
+            // though it is potentially confusing to user
+            rangeSelect: true,
+            showTrigger: '<button type="button" class="trigger">' +
+                '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
+            onClose: function (selectedDate) {
+                // Strangely need to set the title attribute for the icon again
+                // so that don't revert back to a "..." tooltip
+                // FIXME $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
+            }
+        });
+
+        // Use a better tooltip than the default "..." for the calendar icon
+        $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
+
+        $(".time-picker-input").timepicker({timeFormat: "H:i"})
+            .on('change', function (evt) {
+                if (evt.originalEvent) { // manual change
+                    // validate that this looks like HH:MM
+                    if (!evt.target.value.match(/^(([0,1][0-9])|(2[0-3])):[0-5][0-9]$/))
+                        evt.target.value = evt.target.oldval ? evt.target.oldval : "";
+                }
+                evt.target.oldval = evt.target.value;
+            });
+
+    }
+
+    datePickerIntialization();
 </script>

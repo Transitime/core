@@ -19,102 +19,17 @@
     <link rel="stylesheet" href="<%= request.getContextPath() %>/maps/css/mapUi.css"/>
 
     <link href="params/reportParams.css" rel="stylesheet"/>
-    <style>
 
-        label {
-            text-align: left;
-            width: auto;
-        }
-
-        #title {
-            margin-top: 40px;
-            margin-bottom: 10px;
-            margin-right: 10px;
-            font-weight: normal;
-            text-align: center;
-            background: #019932;
-            color: white;
-            padding: 8px;
-            font-size: 24px;
-            width: -webkit-fill-available;
-            display: inline-block !important;
-        }
-
-        #paramsSidebar {
-            width: 20%;
-            height: 100%;
-            margin-left: 10px;
-            float: left;
-            border-right: 1px solid black;
-        }
-
-        #paramsFields {
-            flex-flow: column;
-            width: 90%;
-            max-width: 30vw;
-        }
-
-        #links {
-            margin-top: 200px;
-        }
-
-        #links div {
-            margin-bottom: 30px;
-        }
-
-        html, body, #map {
-            height: 100%;
-            width: 100%;
-            padding: 0px;
-            margin: 0px;
-        }
-
-        #legend {
-            background: lightgrey;
-            position: absolute;
-            right: 10px;
-            bottom: 5%;
-            border-radius: 4px;
-            padding: 1%;
-            box-shadow: 0px 2px 10px #696969;
-        }
-
-        .schedule-legend-container{
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-        }
-
-        .circular-element{
-            width: 10px;
-            height: 10px;
-            border: 2px solid #000;
-            margin-right: 5px;
-            margin-bottom: 2px;
-            border-radius: 10px;
-        }
-
-        .late{
-            background-color: #E6D83E;
-        }
-        .early{
-            background-color: #E34B71;
-        }
-        .onTime{
-            background-color: #37E627;
-        }
-
-    </style>
     <%--        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>--%>
 
     <!-- Load in Select2 files so can create fancy route selector -->
     <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet"/>
     <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
 </head>
-<body>
+<body class="map-screen real-time-live-map real-time-schedule-adhrence">
 <%@include file="/template/header.jsp" %>
 <div id="paramsSidebar">
-    <div id="title" style="text-align: left; font-size:x-large">
+    <div class="header-title">
         Schedule Adherence
     </div>
 
@@ -450,8 +365,8 @@
 
         L.tileLayer(mapTileUrl, {
             // Specifying a shorter version of attribution. Original really too long.
-            //attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-            attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery ©<%= WebConfigParams.getMapTileCopyright() %>',
+            //attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery ? <a href="http://mapbox.com">Mapbox</a>',
+            attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery ?<%= WebConfigParams.getMapTileCopyright() %>',
             maxZoom: 19
         }).addTo(map);
 
