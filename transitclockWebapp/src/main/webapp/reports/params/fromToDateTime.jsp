@@ -53,3 +53,6 @@
            size="3"
            value="" /> <span class="note">(hh:mm)</span>
 </div>
+    <script type="text/javascript">
+        datePickerIntialization();
+    </script>

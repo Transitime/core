@@ -1199,3 +1199,94 @@ body.loader:after {
     font-family: 'Montserrat', sans-serif;
 }
 /***/
+
+/***/
+.on-time-performance  .wrapper {
+    background: #f1f1f1f1;
+    font-family: 'Montserrat', sans-serif;
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    display: block;
+}
+.on-time-performance #paramsFields{
+    margin-top: 30px;
+}
+.on-time-performance   header {
+    position: relative;
+    z-index: 3;
+}
+.on-time-performance .datepick-trigger {
+    height: 29px;
+    -webkit-appearance: none;
+    vertical-align: top;
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.33);
+    border: 1px solid #c1c1c1c1;
+}
+.on-time-performance .spinner {
+    display: inline-block;
+    width: 80px;
+}
+.on-time-performance .vert-offset {
+    font-weight: 500;
+    margin-top: 20px;
+    margin-bottom: -10px;
+}
+.on-time-performance  #reportResults {
+    visibility: hidden;
+    opacity: 0;
+    margin-left: 2vw;
+    margin-top: 20vh;
+    height: 80vh;
+    width: 68%;
+    max-width: 1250px;
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 0px 4px 8px rgba(0,0,0,0.3);
+    transition: visibility .25s .75s ease-in-out, opacity .25s .75s ease-in-out;
+}
+
+.on-time-performance  #endTimeLabel {
+    margin-left: 12px;
+}
+
+.on-time-performance .split #reportResults {
+    display: inline-block;
+    position: relative;
+    visibility: visible;
+    opacity: 1;
+    margin-top: 0vh;
+}
+.on-time-performance #timePointsOnlyLabel {
+    margin-left: -1px !important;
+}
+
+.on-time-performance #reportResults h2 {
+    text-align: center;
+    margin-top: 0px;
+    padding: 10px;
+    background-color: #019932;
+    color: #fff;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+
+}
+
+.on-time-performance .closeIcon {
+    display: none;
+    padding: 6px 12px;
+    margin-right: 12px;
+    float: right;
+    cursor: pointer;
+    border: 0px solid #afadad;
+    border-radius: 8px;
+    box-shadow: 0px 0px 6px #696969;
+}
+
+.on-time-performance #chartTotal {
+    text-align: center;
+    width: 100%;
+    float: right;
+}
+
+/***/
