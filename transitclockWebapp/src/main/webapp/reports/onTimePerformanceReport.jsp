@@ -13,327 +13,20 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="../jquery.datepick.package-5.1.0/css/jquery.datepick.css">
+    <link rel="stylesheet" type="text/css" href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
 
     <script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.plugin.js"></script>
     <script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.datepick.js"></script>
+    <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
+
 
 
     <link href="params/reportParams.css" rel="stylesheet"/>
-    <style>
-        header {
-            position: relative;
-            z-index: 3;
-        }
-        .wrapper {
-            background: #f1f1f1f1;
-            font-family: 'Montserrat', sans-serif;
-            height: 100vh;
-            width: 100vw;
-            position: fixed;
-        }
 
-        .spinner {
-            display: inline-block;
-            width: 80px;
-        }
-
-        input {
-            -webkit-appearance: none;
-            width: -webkit-fill-available;
-            border: 1px solid #c1c1c1c1;
-            background-color: #fff;
-            line-height: 1.5;
-            box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.33);
-            color: #444;
-            padding: 0px 6px;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 16px;
-        }
-
-        input::placeholder {
-            color: #44444469;
-        }
-
-        hr {
-            height: 2px;
-            background-color: darkgray;
-            margin-right: 5px;
-        }
-
-        label {
-            text-align: left;
-            /*width: auto;*/
-            font-family: 'Montserrat', sans-serif;
-            cursor: pointer;
-        }
-
-        input::-webkit-input-placeholder, input::-moz-placeholder, input:-ms-input-placeholder,
-        select::-webkit-input-placeholder, select::-moz-placeholder, select:-ms-input-placeholder {
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        #title {
-            margin-top: 40px;
-            margin-bottom: 2px;
-            font-weight: normal;
-            text-align: center;
-            background: #019932;
-            color: white;
-            padding: 8px;
-            font-size: 21px;
-        }
-
-        #route {
-            visibility: hidden;
-        }
-
-        .vert-offset {
-            font-weight: 500;
-            margin-top: 20px;
-            margin-bottom: -10px;
-        }
-
-        .select2-selection.select2-selection--single {
-            background-color: #fff;
-            box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.33);
-            border: none;
-            -webkit-border-radius: 0px;
-            -moz-border-radius: 0px;
-            border-radius: 0px;
-        }
-
-        .select2-dropdown.select2-dropdown--below {
-            border: none;
-            -webkit-border-radius: 0px;
-            -moz-border-radius: 0px;
-            border-radius: 0px;
-            box-shadow: 0px 4px 4px rgba(0,0,0,0.3);
-        }
-        .select2-route-container{
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        .datepick-trigger {
-            height: 29px;
-            -webkit-appearance: none;
-            vertical-align: top;
-            box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.33);
-            border: 1px solid #c1c1c1c1;
-        }
-
-        .paramsWrapper {
-            width: 100%;
-            margin: auto;
-            display: inline-block;
-            position: relative;
-            z-index: 2;
-            transition: width .75s ease-in-out, max-width .75s ease-in-out;
-            font-size: 16px;
-            background-color: #fff;
-            border: #969696 solid 1px;
-            box-shadow: 3px 3px 4px rgba(0,0,0,0.3);
-        }
-        .split .paramsWrapper {
-            width: 25%;
-            z-index: 2;
-
-        }
-
-        .split #route {
-            max-width: 200px;
-        }
-
-        #paramsSidebar {
-            height: 100vh;
-            max-width: 420px;
-            width: 100%;
-            margin: auto;
-            display: flex;
-            align-items: center;
-            flex-flow: column;
-            background-color: #fff;
-            z-index: 2;
-        }
-        .split #paramsSidebar {
-        }
-        #paramsSidebar > * {
-            display: flex;
-        }
-        #paramsFields {
-            flex-flow: column;
-            width: 90%;
-            max-width: 30vw;
-            margin-top: 10px;
-        }
-
-        .param {
-            display: flex;
-            flex-flow: row;
-            justify-content: space-between;
-            margin-top: 6%;
-        }
-        .param > * {
-            font-size: 16px;
-        }
-        .param > span {
-            font-weight: 500;
-            padding-bottom: 12px;
-        }
-
-        .param > .select2 {
-            max-width: 75%;
-        }
-        /*.split .param > span {*/
-        /*width: 75% !important;*/
-        /*}*/
-
-        .pair {
-            display: flex;
-            flex-flow: row;
-            justify-content: space-between;
-            margin-bottom: 6px;
-        }
-
-        .pair input {
-            max-width: 100px;
-        }
-
-        .vertical {
-            flex-flow: column;
-            margin-top: 8%;
-            /* background-color: #f1f1f1f1; */
-            padding: 10px 0px;
-        }
-
-        #endTimeLabel {
-            margin-left: 12px;
-        }
-
-        #radioButtons {
-            display: flex;
-            overflow: hidden;
-        }
-
-        #radioButtons input {
-            position: absolute !important;
-            clip: rect(0, 0, 0, 0);
-            height: 1px;
-            width: 1px;
-            border: 0;
-            overflow: hidden;
-        }
-
-        #radioButtons label {
-            width: 50%;
-            margin: auto;
-            background-color: #f1f1f1f1;
-            font-size: 16px;
-            padding: 8px;
-            border: 1px solid rgba(0, 0, 0, 0.2);
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px rgba(255, 255, 255, 0.1);
-            transition: all 0.25s ease-in-out;
-            white-space: nowrap;
-            overflow: hidden;
-            text-align: center;
-        }
-
-        #radioButtons input:checked + label {
-            background-color: #4ddb4c9c;
-            box-shadow: none;
-        }
-
-        #timePointsOnlyLabel {
-            margin-left: -1px !important;
-        }
-
-        #serviceDayType {
-            width: 100%;
-            height: 36px;
-            margin-top: 6px;
-            box-shadow: 0px 1px 4px #69696969;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        .inactive {
-            filter: blur(2px) grayscale(100%);
-        }
-
-        #reportResults {
-            visibility: hidden;
-            opacity: 0;
-            margin-left: 2vw;
-            margin-top: 20vh;
-            height: 80vh;
-            width: 68%;
-            max-width: 1250px;
-            background-color: #fff;
-            border-radius: 4px;
-            box-shadow: 0px 4px 8px rgba(0,0,0,0.3);
-            transition: visibility .25s .75s ease-in-out, opacity .25s .75s ease-in-out;
-        }
-
-        .split #reportResults {
-            display: inline-block;
-            position: relative;
-            visibility: visible;
-            opacity: 1;
-            margin-top: 0vh;
-        }
-
-
-        #reportResults h2 {
-            text-align: center;
-            margin-top: 0px;
-            padding: 10px;
-            background-color: #019932;
-            color: #fff;
-            border-top-left-radius: 4px;
-            border-top-right-radius: 4px;
-
-        }
-        .closeIcon {
-            display: none;
-            padding: 6px 12px;
-            margin-right: 12px;
-            float: right;
-            cursor: pointer;
-            border: 0px solid #afadad;
-            border-radius: 8px;
-            box-shadow: 0px 0px 6px #696969;
-        }
-        #submit {
-            margin: 10px;
-            background-color: #029932;
-            cursor: pointer;
-            width: 210px;
-            padding: 5px 70px;
-            color: #fff;
-            font-family: 'Montserrat', sans-serif;
-            box-shadow: 0 4px rgba(127, 127, 127, 0.8);
-        }
-
-        #submit:hover {
-            background-color: #02772c;
-        }
-
-        #submit:active {
-            box-shadow: 0 1px rgba(127, 127, 127, 0.33);
-            transform: translateY(3px);
-            outline: none;
-        }
-
-        #chartTotal {
-            text-align: center;
-            width: 100%;
-            float: right;
-        }
-
-
-
-    </style>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script>
 </head>
-<body>
+<body class="run-time-screen speed-map-page on-time-performance">
 <%@include file="/template/header.jsp" %>
 <div class="wrapper">
 
@@ -342,7 +35,7 @@
 
 
             <div id="paramsFields">
-                <%--<div id="title"><span>Service Delivery Report</span></div>--%>
+                <%--<div id="title" class="header-title"><span>Service Delivery Report</span></div>--%>
                 <%-- For passing agency param to the report --%>
                 <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
                 <span class="vert-offset">Route Options</span>
@@ -351,54 +44,9 @@
 
                 <%-- For specifying a begin date, number of days, begin time, and end time --%>
 
-                <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
-                <link rel="stylesheet" type="text/css" href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
-
-                <script>
-                    $(function() {
-                        var calendarIconTooltip = "Popup calendar to select date";
-
-                        $( "#beginDate" ).datepick({
-                            dateFormat: "yy-mm-dd",
-                            showOtherMonths: true,
-                            selectOtherMonths: true,
-                            // Show button for calendar
-                            buttonImage: "img/calendar.gif",
-                            buttonImageOnly: true,
-                            showOn: "both",
-                            // Don't allow going past current date
-                            maxDate: 0,
-                            // onClose is for restricting end date to be after start date,
-                            // though it is potentially confusing to user
-                            rangeSelect: true,
-                            showTrigger: '<button type="button" class="trigger">' +
-                                '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
-                            onClose: function( selectedDate ) {
-                                // Strangely need to set the title attribute for the icon again
-                                // so that don't revert back to a "..." tooltip
-                                // FIXME $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
-                            }
-                        });
-
-                        // Use a better tooltip than the default "..." for the calendar icon
-                        $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
-
-                        $("#beginTime, #endTime").timepicker({timeFormat: "H:i"})
-                            .on('change', function(evt) {
-                                if (evt.originalEvent) { // manual change
-                                    // validate that this looks like HH:MM
-                                    if (!evt.target.value.match(/^(([0,1][0-9])|(2[0-3])):[0-5][0-9]$/))
-                                        evt.target.value = evt.target.oldval ? evt.target.oldval : "";
-                                }
-                                evt.target.oldval = evt.target.value;
-                            });
-
-                    });
-                </script>
-
                 <div class="param">
                     <label for="beginDate">Date:</label>
-                    <input type="text" id="beginDate" name="beginDate"
+                    <input type="text" id="beginDate" name="beginDate" class="date-picker-input"
                            title="The range of dates that you want to examine data for.
                                <br><br> Begin date must be before the end date."
                            size="18"
@@ -407,7 +55,7 @@
 
                 <div class="param pair">
                     <label for="beginTime">Begin:</label>
-                    <input id="beginTime" name="beginTime"
+                    <input id="beginTime" name="beginTime" class="time-picker-input"
                            title="Optional begin time of day to limit query to. Useful if
                                 want to see result just for rush hour, for example. Leave blank
                                 if want data for entire day.
@@ -417,7 +65,7 @@
                            placeholder="hh:mm"/>
                     <%--<span class="note">(hh:mm)</span>--%>
                     <label for="endTime" id="endTimeLabel">End:</label>
-                    <input id="endTime" name="endTime"
+                    <input id="endTime" name="endTime" class="time-picker-input"
                            title="Optional end time of day to limit query to. Useful if
                                 want to see result just for rush hour, for example. Leave blank
                                 if want data for entire day.
@@ -478,7 +126,7 @@
                     </select>
                 </div>
 
-                <hr>
+
             </div>
 
             <div class="submitDiv"><button id="submit" class="submit" >Submit</button></div>
@@ -486,8 +134,6 @@
 
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
-        <script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script>
     </div>
     <div id="reportResults">
         <div id="overlay"></div>
@@ -508,6 +154,7 @@
 </body>
 </html>
 
+<script src="<%= request.getContextPath() %>/javascript/date-picker.js"></script>
 <script>
     // $("#route").attr("style", "width: 200px");
 
@@ -618,4 +265,5 @@
         showSplit();
 
     }
+    datePickerIntialization();
 </script>
