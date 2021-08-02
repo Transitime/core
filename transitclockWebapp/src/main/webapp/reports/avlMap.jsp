@@ -63,22 +63,22 @@
     </div>
 </div>
 <div id="legend">
-    <p style="margin-block-start: 0em; margin-block-end: 0.5em; font-weight: bold;">AVL Marker Legend</p>
-    <div>
-        <div class="avlTriangleon-time" style="display: inline-block;"></div>
-        <text style="display: inline-block;">= On Time</text>
+    <p  class="avl-legend-elements-p">AVL Marker Legend</p>
+    <div class="avl-legend-elements">
+        <div class="avlTriangleon-time" ></div>
+        <text >= On Time</text>
     </div>
-    <div>
-        <div class="avlTrianglelate" style="display: inline-block;"></div>
-        <text style="display: inline-block;">= Late</text>
+    <div class="avl-legend-elements">
+        <div class="avlTrianglelate" ></div>
+        <text >= Late</text>
     </div>
-    <div>
-        <div class="avlTriangleearly" style="display: inline-block;"></div>
-        <text style="display: inline-block;">= Early</text>
+    <div class="avl-legend-elements">
+        <div class="avlTriangleearly" ></div>
+        <text >= Early</text>
     </div>
-    <div>
-        <div class="avlTriangle" style="display: inline-block;"></div>
-        <text style="display: inline-block;">= No Data</text>
+    <div class="avl-legend-elements">
+        <div class="avlTriangle" ></div>
+        <text >= No Data</text>
     </div>
 </div>
 </body>

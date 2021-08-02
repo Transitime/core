@@ -2,6 +2,14 @@ body {
   margin: 0px;
 }
 
+.avl-legend-elements-p{
+  margin-block-start: 0em; margin-block-end: 0.5em; font-weight: bold;
+}
+
+.avl-legend-elements div,
+.avl-legend-elements text{
+ display: inline-block;
+}
 /* For the AVL points */
 div.avlMarker {
   background-color: #ff7800;

@@ -1,0 +1,81 @@
+#accordion {
+    margin-left: 20px;
+    margin-right: 20px;
+    line-height: 1.0;
+}
+
+.routeLabel, .routeValue {
+    float: right;
+    font-size: 18px;
+}
+
+.routeLabel {
+    color: #999;
+    padding-left: 10px;
+}
+
+.routeValue {
+    padding-left: 3px;
+    padding-right: 3px;
+    width: 1.2em;
+    text-align: right;
+}
+
+/* Separate Blocks: & Vehicles: from the schedule adherence labels */
+#routeVehicles {
+    margin-right: 50px;
+}
+
+#blocksDiv {
+    background: #ccc;
+    line-height: 1.0;
+    font-size: large;
+    padding: 0.0em 0.1em 0.6em;
+}
+
+/* Make all the labels in the detailed block info window similar */
+.blockLabel {
+    padding-left: 2.0em;
+    text-align: right;
+    font-size: medium;
+    color: #999;
+}
+
+.blockValueSmallerFont {
+    font-size: 14px;
+}
+
+/* Separate each block by a bit of space */
+#block {
+    padding-top: 0.6em;
+}
+
+/* Since using padding to separate each block need to align text in cells to bottom */
+#blocksTable td {
+    vertical-align: text-bottom;
+}
+
+#summary {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 16px;
+    text-align: center;
+}
+
+#percentWithVehiclesLabel, #percentOnTimeLabel, #percentEarlyLabel, #asOfLabel {
+    margin-left: 20px;
+}
+
+#percentLateLabel {
+    margin-left: 40px;
+}
+
+#totalBlocksLabel, #percentWithVehiclesLabel, #percentOnTimeLabel, #percentEarlyLabel, #percentLateLabel, #asOfLabel {
+    margin-right: 4px;
+    color: graytext;
+}
+
+#menu {
+    text-align: center;
+}
+

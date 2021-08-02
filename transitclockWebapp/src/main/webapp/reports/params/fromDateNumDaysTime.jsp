@@ -1,9 +1,7 @@
 <%-- For specifying a begin date, number of days, begin time, and end time --%>
 
 
-<script src="<%= request.getContextPath() %>//jquery-ui.js"></script>
-
-
+<script src="<%= request.getContextPath() %>/jquery-ui/jquery-ui.js"></script>
 
 <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
 <link rel="stylesheet" type="text/css" href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
@@ -22,8 +20,6 @@
             showOn: "button",
             // Don't allow going past current date
             maxDate: 0,
-            // showTrigger: '<button type="button" class="trigger">' +
-            //     '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
             // onClose is for restricting end date to be after start date,
             // though it is potentially confusing to user
             onClose: function( selectedDate ) {
