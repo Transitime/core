@@ -461,26 +461,6 @@ $("#playbackRew").on("click", function() {
 });
 
 function scheduleAjax(tripId) {
-	// var form = document.createElement("form");
-	// var agency = document.createElement("input");
-	// var route = document.createElement("input");
-	// var trip = document.createElement("input");
-	//
-	// form.action= "scheduleVertStopsReport.jsp";
-	// form.method = "POST";
-	// agency.name = "a";
-	// agency.value = "1";
-	// route.name= "r";
-	// route.value = routeName;
-	// trip.name = "t";
-	// trip.value = tripId;
-	//
-	// form.appendChild(agency);
-	// form.appendChild(route);
-	// form.appendChild(trip);
-	// document.body.appendChild(form);
-	//
-	// form.submit();
 
 	if ($("#schedule-modal").length == 0) {
 		var containerHeight = $(".leaflet-popup-content").height();
