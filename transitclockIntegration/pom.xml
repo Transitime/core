@@ -3,14 +3,14 @@
     <parent>
         <groupId>TheTransitClock</groupId>
         <artifactId>transitclock</artifactId>
-        <version>2.0.52-cs-SNAPSHOT</version>
+        <version>2.0.53-cs-SNAPSHOT</version>
     </parent>
     <artifactId>transitclockIntegration</artifactId>
     <dependencies>
         <dependency>
             <groupId>TheTransitClock</groupId>
             <artifactId>transitclockCore</artifactId>
-            <version>2.0.52-cs-SNAPSHOT</version>
+            <version>2.0.53-cs-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.hsqldb</groupId>
