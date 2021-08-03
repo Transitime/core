@@ -89,7 +89,7 @@ function getSortedPredictions(data){
     data.predictions.forEach(function(eachPred){
         if(eachPred.dest && eachPred.dest.length ){
             eachPred.dest.forEach(function(eachDest){
-                if(eachDest.pred.length){
+             //   if(eachDest.pred.length){
 
                     var currentTimeSortingObj = {};
                     var currentTimeSorting = eachDest.pred.sort(function(a,b){ return a.time - b.time });
@@ -107,14 +107,18 @@ function getSortedPredictions(data){
                         orignalPred: clonedEachPred,
                         sortOrder: currentTimeSorting
                     });
-                }
+               // }
             });
-        }
+         }
     });
 
     if(sortArrayObj.length > 1){
         sortArrayObj = sortArrayObj.sort(function(a,b){
-            return a.sortOrder[0].time - b.sortOrder[0].time
+            if(a.sortOrder.length && b.sortOrder.length){
+                return a.sortOrder[0].time - b.sortOrder[0].time
+            }
+            return -1;
+
         })
     }
     return sortArrayObj;
@@ -151,66 +155,72 @@ function predictionCallback(preds, status) {
             maxObservationsToShow = 2;
         }
 
-        $(sortedContent).each(function(index, eachSortedContent){
+        if(sortedContent.length) {
+            $(sortedContent).each(function (index, eachSortedContent) {
 
-            var routeStopPreds = eachSortedContent.orignalPred;
+                var routeStopPreds = eachSortedContent.orignalPred;
 
-            if(index === 0){
-                content += '<b>Stop Name:</b> ' + routeStopPreds.stopName + '<br/>';
+                if (index === 0) {
+                    content += '<b>Stop Name:</b> ' + routeStopPreds.stopName + '<br/>';
 
-                if(isRealTimePage){
-                    content += '<b>Stop Id:</b> ' + routeStopPreds.stopId + '<br/>';
-                } else {
-                    if (verbose)
-                        content += '<b>Stop Id:</b> ' + routeStopPreds.stopId + '<br/>'; 
+                    if (isRealTimePage) {
+                        content += '<b>Stop Id:</b> ' + routeStopPreds.stopId + '<br/>';
+                    } else {
+                        if (verbose)
+                            content += '<b>Stop Id:</b> ' + routeStopPreds.stopId + '<br/>';
+                    }
+
+
+                    content += '<div class="bus-enroute"><b>Buses en-route</b> </div>';
                 }
-                
-
-                content += '<div class="bus-enroute"><b>Buses en-route</b> </div>';
-            }
-            if(index > 4) {
-                return false;
-            }
-
-
-            // For each destination add predictions
-            $(routeStopPreds.dest).each(function(index2, eachDest){
-                // Add the destination/headsign info
-                content += "<div class='each-destination'><div class='eachDest-header'>"+routeStopPreds.routeShortName ;
-
-                if (eachDest.headsign){
-                    content +=  " - " + eachDest.headsign;
-                    // content += '<b>Destination:</b> ' + routeStopPreds.dest[i].headsign + '<br/>';
-                }
-                content += "</div>";
-
-                if (eachDest.pred.length > 0) {
-
-                    $(eachDest.pred).each(function(index3, eachPred){
-
-                        if(maxObservationsToShow < index3+1){
-                            return false;
-                        }
-
-                        content += '<div class="each-prediction">'
-                        content += '<div class="vehicle-image-detail"><img src="'+busIcon.options.iconUrl+'"  class="vehicle-icon-prediction"/>';
-                        content += '<span class="vehicle-id">'+ eachPred.vehicle +'</span></div>';
-                        content += '<span class="vehicle-time">'+ eachPred.min +' minutes</span>';
-                        content += '</div>';
-
-                    });
-
-
-                } else {
-                    content += "<div class='no-predictions'>No predictions</div>";
+                if (index > 4) {
+                    return false;
                 }
 
-                content += "</div>";
+
+                // For each destination add predictions
+                $(routeStopPreds.dest).each(function (index2, eachDest) {
+                    // Add the destination/headsign info
+                    content += "<div class='each-destination'><div class='eachDest-header'>" + routeStopPreds.routeShortName;
+
+                    if (eachDest.headsign) {
+                        content += " - " + eachDest.headsign;
+                        // content += '<b>Destination:</b> ' + routeStopPreds.dest[i].headsign + '<br/>';
+                    }
+                    content += "</div>";
+
+                    if (eachDest.pred.length > 0) {
+
+                        $(eachDest.pred).each(function (index3, eachPred) {
+
+                            if (maxObservationsToShow < index3 + 1) {
+                                return false;
+                            }
+
+                            content += '<div class="each-prediction">'
+                            content += '<div class="vehicle-image-detail"><img src="' + busIcon.options.iconUrl + '"  class="vehicle-icon-prediction"/>';
+                            content += '<span class="vehicle-id">' + eachPred.vehicle + '</span></div>';
+                            content += '<span class="vehicle-time">' + eachPred.min + ' minutes</span>';
+                            content += '</div>';
+
+                        });
+
+
+                    } else {
+                        content += "<div class='no-predictions'>No predictions</div>";
+                    }
+
+                    content += "</div>";
+
+                });
 
             });
+        }
+ else{
+            content += "<div class='no-predictions'>No predictions</div>";
+ }        // Now update popup with the wonderful prediction info
 
-        });
-        // Now update popup with the wonderful prediction info
+
         predictionsPopup.setContent(content);
     }
 
