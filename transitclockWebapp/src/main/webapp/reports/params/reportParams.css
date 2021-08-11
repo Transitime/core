@@ -1289,4 +1289,9 @@ body.loader:after {
     float: right;
 }
 
+.on-time-performance .split .paramsWrapper{
+    display: inline-block;
+}
+
+
 /***/
