@@ -96,7 +96,7 @@ if ((beginTime != null && !beginTime.isEmpty()) || (endTime != null && !endTime.
   <div id="chart_div" style="width: 100%; height: 600px;"></div>
   <div id="loading"></div>
   <div id="errorMessage"></div>
-  <div id="summary"><small>Schedule Adherence loading....</small></div>
+  <div id="summary"></div>
 </body>
 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
@@ -211,7 +211,7 @@ function getDataAndDrawChart() {
     getDataTable();
     if (globalDataTable != null) {
 		drawChart();
-		showSummary();
+		//showSummary();
     }
 	
     // Now that chart has been drawn faceout the loading image
