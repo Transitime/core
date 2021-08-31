@@ -85,7 +85,7 @@ $("#search-realpage").keydown(function(e){
 
 
 // $("form").on("click",function(e){ e.preventDefault()});
-$("#vehicleRadioBtn").prop("checked", true);
+$("#stopRadioBtn").prop("checked", true);
 $("input[type='radio'][name='liveMapRadio']").on("click",function(e){
     e.stopPropagation();
     var radioValue =    $("input[type='radio'][name='liveMapRadio']:checked").val();

@@ -3,14 +3,6 @@
      number of routes. 
      Reads in routes via API for the agency specified by the "a" param. --%>
 
-<style type="text/css">
-    /* Set font for route selector. Need to use #select2-drop because of
-     * extra elements that select2 adds
-     */
-    #select2-drop, #routesDiv {
-        font-size: large;
-    }
-</style>
 
 <script>
 
@@ -32,7 +24,7 @@
             for (var i in routes.routes) {
                 var route = routes.routes[i];
                 var name = route.shortName + " " + route.longName
-                selectorData.push({id: route.shortName, text: name})
+                selectorData.push({id: route.shortName, text: name, value: route.shortName, innerHTML:route.shortName})
             }
 
             // Configure the selector to be a select2 one that has
@@ -56,15 +48,18 @@
             var configuredTitle = $( "#route" ).attr("title");
             $( "#select2-route-container" ).tooltip({ content: configuredTitle,
                 position: { my: "left+10 center", at: "right center" } });
+
+
         });
 
 </script>
 
-<div id="routesDiv"  class="param">
-    <select id="route" name="r" multiple="multiple"
+<div  class="col-sm-12">
+    <select id="route" name="r" multiple="multiple" class="form-select"
             title="Select which routes you want data for. You can use the Ctrl key along
       		   with the mouse to select multiple routes. Note: selecting all routes
       		   indeed reads in data for all routes which means it could be 
       		   somewhat slow." ></select>
 </div>
-    
+
+

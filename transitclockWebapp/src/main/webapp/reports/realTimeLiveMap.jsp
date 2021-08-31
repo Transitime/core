@@ -2,6 +2,13 @@
          pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <%@page import="org.transitclock.web.WebConfigParams"%>
+<%
+    String agencyId = request.getParameter("a");
+    if (agencyId == null || agencyId.isEmpty()) {
+        response.getWriter().write("You must specify agency in query string (e.g. ?a=mbta)");
+        return;
+    }
+%>
 <html>
 <head>
     <%@include file="/template/includes.jsp" %>
@@ -22,69 +29,84 @@
 
     <link rel="stylesheet" href="<%= request.getContextPath() %>/maps/css/mapUi.css" />
 
-    <link href="params/reportParams.css" rel="stylesheet"/>
+
 
     <%--        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>--%>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/page-panels.css">
     <title>TransitClock Map</title>
 </head>
-<body class="map-screen real-time-live-map">
-<%@include file="/template/header.jsp" %>
+<body class="real-time-live-map">
+    <%@include file="/template/header.jsp" %>
+    <div class="panel split">
+        <div class="left-panel">
+            <h4 class="page-title">
+                Live Map View
+            </h4>
+            <form class="row" novalidate>
+                <div class="row">
+                    <label class="col-sm-12 col-form-label">Routes</label>
 
-<div id="paramsSidebar">
-    <div class="title">
-        Live Map
-    </div>
-    <div id="paramsFields">
-        <div id="routesParam" class="margintop">
-            <div class="paramLabel">Routes</div>
-            <%-- For passing agency param to the report --%>
-            <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
-            <jsp:include page="params/routeMultipleNoLabel.jsp" />
-        </div>
-        <div id="search" class="margintop">
-            <div class="paramLabel">Search</div>
-            <div class="param">
-                <input type="text" id="stopsSearch" placeholder="Stops" name="stopsSearch">
-                <button type="submit" id="stopsSubmit" onclick="showStopDetails($('#routes').val(), $('#stopsSearch').val())">Show Stop</button>
+                        <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
+                        <jsp:include page="params/routeMultipleNoLabel.jsp" />
+                </div>
+
+                <div class="row">
+                    <label class="col-sm-12 col-form-label">Search</label>
+                    <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+
+                        <input type="radio" class="btn-check" value="Stop" name="liveMapRadio" id="stopRadioBtn" autocomplete="off" >
+                        <label class="btn btn-outline-primary" for="stopRadioBtn">Stop</label>
+
+                        <input type="radio" class="btn-check" value="Vehicle" name="liveMapRadio" id="vehicleRadioBtn" autocomplete="off">
+                        <label class="btn btn-outline-primary" for="vehicleRadioBtn">Vehicle</label>
+
+                    </div>
+                </div>
+
+
+
+
+                <div class="row">
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="search-realpage" placeholder="Vehicle">
+                    </div>
+                    <div class="col-sm-3 pad-left-0">
+                        <button class="btn btn-primary submit-button "  type="button" value="show" onclick="toggleShow()">Show</button>
+                    </div>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox"  id="assignedFilter">
+                    <label class="form-check-label" for="assignedFilter">
+                        Assigned Only
+                    </label>
+                </div>
+
+            </form>
+            <div class="list-group">
+                <button  class="list-group-item list-group-item-action">
+                    Live Map View
+                </button>
+                <a  class="list-group-item list-group-item-action secondary-btn"
+                    href="realTimeDispatcher.jsp?a=<%= agencyId %>" >
+                    Dispatcher View
+                </a>
+                <a  class="list-group-item list-group-item-action secondary-btn"
+                    href="realTimeScheduleAdherence.jsp?a=<%= agencyId %>" >
+                    Schedule Adherence View
+                </a>
             </div>
-
-            <div class="param">
-                <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
-                <button type="submit" id="vehiclesSubmit" onclick="openVehiclePopup(getVehicleMarker($('#vehiclesSearch').val()))">Show Vehicle</button>
-            </div>
         </div>
-
-        <div class="margintop">
-            <div class="paramCheckbox">
-                <label for="assignedFilter">
-                    <span>Assigned Only</span>
-                    <input type="checkbox" id="assignedFilter" name="assignedFilter">
-                </label>
-            </div>
+        <div class="right-panel">
+            <div id="map"></div>
         </div>
     </div>
-    <div id="links">
-        <div id="dispatcherLink">
-            <a href="realTimeDispatcher.jsp?a=1">Dispatcher View >></a>
-        </div>
-        <div id="schAdhLink">
-            <a href="realTimeScheduleAdherence.jsp?a=1">Schedule Adherence View >></a>
-        </div>
-    </div>
-</div>
+    <script type="text/javascript">
+        var mapTileUrl = '<%= WebConfigParams.getMapTileUrl() %>';
+        var copyRight ='<%= WebConfigParams.getMapTileCopyright() %>';
+    </script>
 
-
-<div id="mainPage" style="width: 79%; height: 100%; display: inline-block;">
-    <div id="map"></div>
-</div>
-
-<script type="text/javascript">
-    var mapTileUrl = '<%= WebConfigParams.getMapTileUrl() %>';
-    var copyRight ='<%= WebConfigParams.getMapTileCopyright() %>';
-</script>
-
-<script type="text/javascript"  src="<%= request.getContextPath() %>/javascript/map-helper.js"> </script>
+    <script type="text/javascript"  src="<%= request.getContextPath() %>/javascript/map-helper.js"> </script>
 
 </body>
