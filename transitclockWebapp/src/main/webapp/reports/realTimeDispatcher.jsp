@@ -2,80 +2,121 @@
          pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <%@page import="org.transitclock.web.WebConfigParams"%>
+<%
+    String agencyId = request.getParameter("a");
+    if (agencyId == null || agencyId.isEmpty()) {
+        response.getWriter().write("You must specify agency in query string (e.g. ?a=mbta)");
+        return;
+    }
+%>
 <html>
 <head>
     <%@include file="/template/includes.jsp" %>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
     <title>Real-time Operations</title>
 
-    <link href="params/reportParams.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="//unpkg.com/leaflet@0.7.3/dist/leaflet.css" />
+    <script src="//unpkg.com/leaflet@0.7.3/dist/leaflet.js"></script>
+    <script src="<%= request.getContextPath() %>/javascript/jquery-dateFormat.min.js"></script>
 
+    <script src="<%= request.getContextPath() %>/maps/javascript/leafletRotatedMarker.js"></script>
+    <script src="<%= request.getContextPath() %>/maps/javascript/mapUiOptions.js"></script>
+
+    <!-- Load in Select2 files so can create fancy selectors -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
+
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/maps/css/mapUi.css" />
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
 
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
 
+
+    <%--        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>--%>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/page-panels.css">
+    <title>TransitClock Map</title>
 </head>
-<body class="map-screen real-time-live-map real-time-schedule-adhrence real-time-dispatcher">
+<body class="real-time-live-map">
 <%@include file="/template/header.jsp" %>
-<div id="paramsSidebar">
-    <div class="header-title">
-        Dispatcher View
-    </div>
+<div class="panel split">
+    <div class="left-panel">
+        <h4 class="page-title">
+            Dispatcher View
+        </h4>
+        <form class="row" novalidate>
 
-    <div id="paramsFields">
-        <%-- For passing agency param to the report --%>
-        <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
+            <div class="row mb-0">
+                <label class="col-sm-12 col-form-label">Search</label>
 
-        <div id="search">
-            <div class="paramLabel">Search</div>
-            <div class="param">
-                <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
             </div>
-        </div>
-        <div id="assigned" style="margin-top: 30px;">
-            <div class="paramCheckbox">
-                <label for="assignedFilter">
-                    <span>Assigned Only</span>
-                    <input type="checkbox" id="assignedFilter" name="assignedFilter">
+
+            <div class="row">
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
+                </div>
+                <div class="col-sm-3 pad-left-0">
+                    <button class="btn btn-primary submit-button refresh-button "  type="button" value="show" onclick="showVehicle()">Show</button>
+                </div>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox"  id="assignedFilter">
+                <label class="form-check-label" for="assignedFilter">
+                    Assigned Only
                 </label>
             </div>
+
+        </form>
+        <div class="list-group">
+            <a  class="list-group-item list-group-item-action secondary-btn"
+                href="realTimeLiveMap.jsp?a=<%= agencyId %>" >
+                Live Map View
+            </a>
+            <a  class="list-group-item list-group-item-action secondary-btn"
+                href="realTimeScheduleAdherence.jsp?a=<%= agencyId %>" >
+
+                Schedule Adherence View
+            </a>
+            <button  class="list-group-item list-group-item-action">
+
+                Dispatcher View
+            </button>
         </div>
     </div>
-    <div id="links">
-        <div id="liveMapLink">
-            <a href="realTimeLiveMap.jsp?a=1">Live Map View >></a>
+    <div class="right-panel  no-borders">
+        <div class="gap-2 box-shadow">
+            <div class="p-5">
+                <div class="d-flex justify-content-end">
+                    <button class="btn btn-primary refresh-button " id="tableRefresh" onclick="refreshTable()">Refresh</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table display " id="resultsTable" width="100%">
+                        <thead>
+                        <tr>
+                            <th>Vehicle</th>
+                            <th>Last Report</th>
+                            <th>Block</th>
+                            <th>Speed</th>
+                            <th>Route</th>
+                            <th>Sched Adherence</th>
+                            <th></th>
+                            <th></th>
+                            <th>Headway</th>
+                            <th>View on Map</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                </div>
+            </div>
         </div>
-        <div id="schAdhLink">
-            <a href="realTimeScheduleAdherence.jsp?a=1">Schedule Adherence View >></a>
-        </div>
-    </div>
+</div>
 </div>
 
-<div id="mainPage" style="width: 79%; height: 100%; display: inline-block;">
-    <button id="tableRefresh" onclick="refreshTable()" style="float: right; margin-right: 30px; margin-top: 20px;">Refresh</button>
-    <div id="tableContainer" style="width:90%; margin-left: 30px; margin-top: 40px;">
-        <table id="resultsTable" class="display">
-            <thead>
-            <tr>
-                <th>Vehicle</th>
-                <th>Last Report</th>
-                <th>Block</th>
-                <th>Speed</th>
-                <th>Route</th>
-                <th>Sched Adherence</th>
-                <th></th>
-                <th></th>
-                <th>Headway</th>
-                <th>View on Map</th>
-            </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    </div>
-</div>
-</body>
-</html>
 
 <script>
 
@@ -110,7 +151,7 @@
                         return "";
                     }},
                 { data: 'map_link', render: function (data, type, row) {
-                        return '<a href="realTimeLiveMap.jsp?a=1&v=' + row['vehicle'] + '">>></a>';
+                        return '<div class="d-flex justify-content-center"><a class="" href="realTimeLiveMap.jsp?a=1&v=' + row['vehicle'] + '"><i class="bi bi-arrow-right-circle-fill dark-blue"></i></a></div>';
                     }}
             ],
             columnDefs: [
@@ -129,6 +170,8 @@
             },
             dom: 'lrtip'
         });
+
+        $(".dataTables_length select").addClass("form-select dispatcher-select-drop-down");
     });
 
     function refreshTable() {
@@ -148,3 +191,5 @@
         }
     } );
 </script>
+
+</body>
