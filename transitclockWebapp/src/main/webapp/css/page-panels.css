@@ -70,7 +70,8 @@ button.submit-button {
 .select2-container--default .select2-selection--multiple{
     /*border-color:transparent;*/
 }
-.select2-container--default .select2-selection--multiple {
+.select2-container--default .select2-selection--multiple,
+.select2-container--default .select2-selection--single {
     border-color: #ced4da;
 }
 
@@ -370,4 +371,55 @@ button.submit-button {
 
 .box-shadow{
     box-shadow: -3px 0px 0px #e5e5e5;
+}
+
+.time-label{
+    max-width: 100px;
+    margin-right:10px;
+    padding-right: 0;
+}
+.end-label{
+    max-width: 80px;
+}
+.time-input-box{
+    width: 70px;
+    padding: .375rem .25rem;
+}
+.date-icon-wrapper input {
+    width: calc(100% - 50px);
+}
+
+.ui-datepicker-trigger{
+    background: none;
+    border: none;
+
+}
+
+.select2-container .select2-selection--single,
+.select2-container .select2-selection--single span,
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    line-height: 38px !important;
+    height: 38px;
+}
+
+
+
+.yellow{
+    color:#E6D83E;
+}
+
+.green{
+    color: #37E627;
+}
+
+.red{
+   color: #E34B71;
+}
+
+.blue{
+    color: blue;
+}
+
+.dark-blue{
+    color:#1E3F78;
 }
