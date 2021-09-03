@@ -122,6 +122,19 @@ public abstract class StopArrivalDepartureCacheInterface {
 		return smoothArrivalDepartures(results);
 	}
 
+	public static List<ArrivalDeparture> createArrivalDeparturesCriteriaMultiDay(Criteria criteria, Date startDate, Date endDate) {
+		@SuppressWarnings("unchecked")
+		List<ArrivalDeparture> results = criteria.add(Restrictions.between("time", startDate, endDate))
+						.addOrder(Order.asc("time"))
+						.addOrder(Order.asc("tripId"))
+						.addOrder(Order.asc("stopPathIndex"))
+						.addOrder(Order.desc("isArrival"))
+						.list();
+		if (!StopArrivalDepartureCacheFactory.enableSmoothinng()) return results;
+		return smoothArrivalDepartures(results);
+	}
+
+
 	/**
 	 * Use the existing cache to ensure the departure is not before
 	 * the arrival

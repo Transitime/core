@@ -480,7 +480,7 @@ public class Core {
 		if(cacheReloadStartTimeStr.getValue().length()>0&&cacheReloadEndTimeStr.getValue().length()>0)
 		{
 			Criteria criteria = session.createCriteria(ArrivalDeparture.class);
-			List<ArrivalDeparture> results = StopArrivalDepartureCache.createArrivalDeparturesCriteria(criteria,
+			List<ArrivalDeparture> results = StopArrivalDepartureCache.createArrivalDeparturesCriteriaMultiDay(criteria,
 							new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()),
 							new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
 
@@ -503,7 +503,14 @@ public class Core {
 			}
 
 			if (TrafficManager.getInstance() != null) {
-				TrafficManager.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
+				try {
+					TrafficManager.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
+				} catch (Exception any) {
+					logger.error("TrafficManager populate failed:", any, any);
+				}
+			}
+			if (ApcModule.getInstance() != null) {
+				ApcModule.getInstance().populateFromDb(results);
 			}
 		}else
 		{
@@ -582,7 +589,7 @@ public class Core {
 			// clean up after ourselves -- releasing threads
 			pp.shutdown();
 		}		
-	
+	logger.info("populate caches complete");
 	}
 
 	private static String getDateAsString(LocalDateTime date){

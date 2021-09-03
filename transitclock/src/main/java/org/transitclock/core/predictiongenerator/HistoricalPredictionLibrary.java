@@ -323,12 +323,15 @@ public class HistoricalPredictionLibrary {
 			return null;
 		}
 
-		// list is sorted in newest order.  Assume first hit is our last headway
+		// list is sorted in newest order.  First hit AFTER our reference time is the answer
 		for (int i = 0; i < currentStopList.size(); i++) {
 			IpcArrivalDeparture ipcArrivalDeparture = currentStopList.get(i);
 			Trip headwayTrip = Core.getInstance().getDbConfig().getTrip(ipcArrivalDeparture.getTripId());
 			if (headwayTrip == null || headwayTrip.getRouteId().equals(routeId)) {
-				return referenceTime.getTime() - ipcArrivalDeparture.getTime().getTime();
+				// don't let the headway be negative -- as can happen during playback (or bad data)
+				if (referenceTime.getTime() > ipcArrivalDeparture.getTime().getTime()) {
+					return referenceTime.getTime() - ipcArrivalDeparture.getTime().getTime();
+				}
 			}
 		}
 		return null;

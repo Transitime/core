@@ -265,8 +265,10 @@ public class ApcDataProcessor {
     ArrivalDeparture firstRecord = arrivalDepartures.get(0);
 
     long startOfDay = Time.getStartOfDay(new Date(firstRecord.getTime()));
-    long endOfDay = startOfDay + Time.MS_PER_DAY;
-    return new TimeRange(startOfDay, endOfDay);
+    long minEndOfDay = startOfDay + Time.MS_PER_DAY;
+    ArrivalDeparture lastRecord = arrivalDepartures.get(arrivalDepartures.size()-1);
+    long endOfDay = Time.getEndOfDay(new Date(lastRecord.getTime()));
+    return new TimeRange(startOfDay, Math.max(minEndOfDay, endOfDay));
   }
 
 

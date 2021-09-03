@@ -392,6 +392,20 @@ public class Time {
 		return epochTime;
 	}
 
+	public static long getEndOfDay(Date date) {
+		Calendar calendar = new GregorianCalendar();
+		calendar.setTime(date);
+
+		calendar.set(Calendar.MILLISECOND, 999);
+		calendar.set(Calendar.SECOND, 59);
+		calendar.set(Calendar.MINUTE, 59);
+		calendar.set(Calendar.HOUR_OF_DAY, 23);
+
+		// Get the epoch time
+		long epochTime = calendar.getTimeInMillis();
+		return epochTime;
+	}
+
 	/**
 	 * Converts secondsIntoDay into an epoch time.
 	 *
