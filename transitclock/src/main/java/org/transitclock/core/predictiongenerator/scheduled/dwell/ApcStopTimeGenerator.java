@@ -101,7 +101,7 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
   public PredictionResult getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
     if (indices.atBeginningOfTrip()) {
       logger.debug("returning base prediction for start of trip " + indices);
-      return super.getStopTimeForPath(indices, avlReport, vehicleState);;
+      return super.getStopTimeForPath(indices, avlReport, vehicleState);
     }
 
     IntervalTimer apcTimer = new IntervalTimer();
