@@ -137,7 +137,7 @@ function getSortedPredictions(data){
                 });
                 // }
             });
-         }
+        }
     });
 
     if(sortArrayObj.length > 1){
@@ -185,7 +185,7 @@ function predictionCallback(preds, status) {
     if(sortedContent.length) {
         $(sortedContent).each(function (index, eachSortedContent) {
 
-                var routeStopPreds = eachSortedContent.orignalPred;
+            var routeStopPreds = eachSortedContent.orignalPred;
 
             if (index === 0) {
                 content +=  routeStopPreds.stopName
@@ -204,10 +204,6 @@ function predictionCallback(preds, status) {
                 return false;
             }
 
-                // For each destination add predictions
-                $(routeStopPreds.dest).each(function (index2, eachDest) {
-                    // Add the destination/headsign info
-                    content += "<div class='each-destination'><div class='eachDest-header'>" + routeStopPreds.routeShortName;
 
             // For each destination add predictions
             $(routeStopPreds.dest).each(function (index2, eachDest) {
@@ -220,7 +216,7 @@ function predictionCallback(preds, status) {
                 }
                 content += "</a>";
 
-                        $(eachDest.pred).each(function (index3, eachPred) {
+                if (eachDest.pred.length > 0) {
 
                     $(eachDest.pred).each(function (index3, eachPred) {
 
@@ -234,20 +230,16 @@ function predictionCallback(preds, status) {
                         content += '<span class="vehicle-time"> Vehicle ' + eachPred.vehicle + ' </span>';
                         content += '</div>';
 
+                    });
 
-                    } else {
-                        content += "<div class='no-predictions'>No predictions</div>";
-                    }
 
-                    content += "</div>";
+                } else {
+                    content += "<div class='no-predictions'>No predictions</div>";
+                }
 
-                });
+                content += "</div>";
 
             });
-        }
- else{
-            content += "<div class='no-predictions'>No predictions</div>";
- }        // Now update popup with the wonderful prediction info
 
         });
         content += "</div>";
@@ -262,7 +254,7 @@ function predictionCallback(preds, status) {
     $(".eachDest-header",).on("click",function updateInputs(e){
         e.preventDefault();
         if(e.target) {
-           var routeValue = e.target.getAttribute("data-route-name");
+            var routeValue = e.target.getAttribute("data-route-name");
             var routeStopId = e.target.getAttribute("data-stop-id");
             $("#route").val(routeValue).trigger("change");
             $("input[name=liveMapRadio]")[0].click();
@@ -462,7 +454,7 @@ function getVehiclePopupContent(vehicleData) {
     content += "<div class='vehicle-item'><b>Route: </b><div class='vehicle-value'>" + (vehicleData.routeShortName ||   'Unassigned' ) +"</div></div>" ;
     content +=
         "<div class='vehicle-item'><b>To:</b><div class='vehicle-value'>" + (
-        (typeof vehicleData.headsign !== "undefined" && typeof vehicleData.direction !== "undefined")  ?  vehicleData.headsign + " (" + vehicleData.direction + ") ": 'Unassigned' )+ "</div></div>";
+            (typeof vehicleData.headsign !== "undefined" && typeof vehicleData.direction !== "undefined")  ?  vehicleData.headsign + " (" + vehicleData.direction + ") ": 'Unassigned' )+ "</div></div>";
 
     if(typeof vehicleData.loc !== "undefined") {
         content += vehicleData.loc.speed ? "<div class='vehicle-item'><b>Speed:</b><div class='vehicle-value'>" + formatSpeed(vehicleData.loc.speed)+"</div></div>" : "";
@@ -477,7 +469,7 @@ function getVehiclePopupContent(vehicleData) {
 
     content +=
         "<div class='vehicle-item'><b>Headway:</b><div class='vehicle-value'>" + ((typeof vehicleData.headway !== "undefined" && vehicleData.headway > -1 )?
-            msToHMS(vehicleData.headway)  : 'N/A'  )+"</div></div>" ;
+        msToHMS(vehicleData.headway)  : 'N/A'  )+"</div></div>" ;
 
     if(!isRealTimePage){
         content += "<div class='vehicle-item'><b>Schedule Adherence:</b><div class='vehicle-value'>" + (vehicleData.isScheduledService ? vehicleData.schAdhStr : 'N/A') +"</div></div>" ;
@@ -488,7 +480,7 @@ function getVehiclePopupContent(vehicleData) {
     content += "<div class='vehicle-item'><b>In Layover:</b><div class='vehicle-value'>" + (vehicleData.layover ||  'N/A' ) +"</div></div>" ;
     content +=
         "<div class='vehicle-item'><b>Scheduled Departure:</b><div class='vehicle-value'>" + ( (typeof vehicleData.layover !== "undefined" && typeof vehicleData.layoverDepTime !== "undefined") ?
-            dateFormat(vehicleData.layoverDepTime)  : 'N/A' )  +"</div></div>";
+        dateFormat(vehicleData.layoverDepTime)  : 'N/A' )  +"</div></div>";
     content += "<div class='vehicle-item'><b>Driver:</b><div class='vehicle-value'>" + (vehicleData.driver  || 'N/A' )+"</div></div>" ;
 
     content += "</div>";
