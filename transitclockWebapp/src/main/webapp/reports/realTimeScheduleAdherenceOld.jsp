@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-         pageEncoding="ISO-8859-1"%>
+         pageEncoding="ISO-8859-1" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<%@page import="org.transitclock.web.WebConfigParams"%>
+<%@page import="org.transitclock.web.WebConfigParams" %>
 <%
     String agencyId = request.getParameter("a");
     if (agencyId == null || agencyId.isEmpty()) {
@@ -16,104 +16,83 @@
     <title>Real-time Operations</title>
 
     <link rel="stylesheet" href="//unpkg.com/leaflet@0.7.3/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+
     <script src="//unpkg.com/leaflet@0.7.3/dist/leaflet.js"></script>
-    <script src="<%= request.getContextPath() %>/javascript/jquery-dateFormat.min.js"></script>
 
     <script src="<%= request.getContextPath() %>/maps/javascript/leafletRotatedMarker.js"></script>
     <script src="<%= request.getContextPath() %>/maps/javascript/mapUiOptions.js"></script>
 
-    <!-- Load in Select2 files so can create fancy selectors -->
-    <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/maps/css/mapUi.css"/>
 
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/maps/css/mapUi.css" />
-
+    <link href="params/reportParams.css" rel="stylesheet"/>
 
     <%--        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>--%>
-    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/page-panels.css">
-    <title>TransitClock Map</title>
+
+    <!-- Load in Select2 files so can create fancy route selector -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet"/>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
 </head>
-<body class="real-time-live-map">
+<body class="map-screen real-time-live-map real-time-schedule-adhrence">
 <%@include file="/template/header.jsp" %>
-<div class="panel split">
-    <div class="left-panel">
-        <h4 class="page-title">
-            Schedule Adherence
-        </h4>
-        <form class="row" novalidate>
-            <div class="row">
-                <label class="col-sm-12 col-form-label">Routes</label>
+<div id="paramsSidebar">
+    <div class="header-title">
+        Schedule Adherence
+    </div>
 
-                <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
-                <jsp:include page="params/routeMultipleNoLabel.jsp" />
+    <div id="paramsFields">
+        <div id="routesParam" class="margintop">
+            <div class="paramLabel">Routes</div>
+            <%-- For passing agency param to the report --%>
+            <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
+            <jsp:include page="params/routeMultipleNoLabel.jsp" />
+        </div>
+
+        <div id="search" class="margintop">
+            <div class="paramLabel">Search</div>
+            <div class="param">
+                <input type="text" id="vehiclesSearch" placeholder="Vehicles" name="vehiclesSearch">
+                <button type="submit" id="vehiclesSubmit"
+                        onclick="getAndProcessSchAdhData($('#route').val(), $('#vehiclesSearch').val())">Show Vehicle
+                </button>
             </div>
-
-            <div class="row mb-0">
-                <label class="col-sm-12 col-form-label">Search</label>
-
-            </div>
-
-            <div class="row">
-                <div class="col-sm-9">
-                    <input type="text" class="form-control" id="search-realpage" placeholder="Vehicle">
-                </div>
-                <div class="col-sm-3 pad-left-0">
-                    <button class="btn btn-primary submit-button "  type="button" value="show" onclick="showVehicle()">Show</button>
-                </div>
-            </div>
-
-        </form>
-        <div class="list-group">
-            <a  class="list-group-item list-group-item-action secondary-btn"
-                href="realTimeLiveMap.jsp?a=<%= agencyId %>" >
-                Live Map View
-            </a>
-            <button  class="list-group-item list-group-item-action">
-
-                Schedule Adherence View
-            </button>
-
-            <a  class="list-group-item list-group-item-action secondary-btn"
-                href="realTimeDispatcher.jsp?a=<%= agencyId %>" >
-                Dispatcher View
-            </a>
         </div>
     </div>
-    <div class="right-panel">
-        <div id="map"></div>
-
-        <div class="map-legend-icons leaflet-popup-content ">
-            <div class="card">
-<%--                <div class="card-header header-theme">
-                    <b>Schedule Marker Legend</b>
-                </div>--%>
-
-                <div class="card-body">
-                    <ul class="list-group">
-                        <li class="list-group-item d-flex align-items-center">
-                            <span class="badge bg-green rounded-pill"> &nbsp;</span>
-                            = &nbsp; On Time
-                        </li>
-                        <li class="list-group-item d-flex align-items-center">
-                            <span class="badge bg-yellow rounded-pill">&nbsp;</span>
-                            = &nbsp; Late
-                        </li>
-                        <li class="list-group-item d-flex  align-items-center">
-                            <span class="badge bg-red rounded-pill">&nbsp;</span>
-                            = &nbsp; Early
-                        </li>
-                    </ul>
-                </div>
-
-            </div>
+    <div id="links">
+        <div id="liveMapLink">
+            <a href="realTimeLiveMap.jsp?a=1">Live Map View >></a>
+        </div>
+        <div id="dispatcherLink">
+            <a href="realTimeDispatcher.jsp?a=1">Dispatcher View >></a>
         </div>
     </div>
 </div>
+
+<div id="mainPage" style="width: 79%; height: 100%; display: inline-block;">
+    <div id="map"></div>
+</div>
+
+<div id="legend">
+    <div><b>Schedule Marker Legend</b></div>
+    <br/>
+    <div class="schedule-legend-container">
+        <div class="circular-element onTime" ></div>
+        <text> = On Time</text>
+    </div>
+    <div class="schedule-legend-container">
+        <div class="circular-element late" ></div>
+        <text> = Late</text>
+    </div>
+    <div class="schedule-legend-container">
+        <div class="circular-element early" ></div>
+        <text> = Early</text>
+    </div>
+
 </div>
 
 <script>
+
+    $("#route").attr("style", "width: 200px");
 
     var routeOptions = {
         color: '#0080FF',
@@ -139,9 +118,6 @@
         return route.id;
     }
 
-    function showVehicle(){
-        getAndProcessSchAdhData($('#route').val(), $('#search-realpage').val())
-    }
     function selectUnSelectCallBack(e){
 
         var configuredTitle = $( "#route" ).attr("title");
@@ -199,22 +175,20 @@
      * schedule adherence.
      */
     function getVehiclePopupContent(vehicle) {
-        var content = '<div class="card"><div class="card-header header-theme">';
-        content +=  "<b>Vehicle:</b> " + vehicle.id +"</div>";
+        var content =
+            "<b>Vehicle:</b> " + vehicle.id
+            + "<br/><b>Route:</b> " + vehicle.routeName;
+        if (vehicle.headsign)
+            content += "<br/><b>To:</b> " + vehicle.headsign;
+        if (vehicle.schAdhStr)
+            content += "<br/><b>SchAhd:</b> " + vehicle.schAdhStr;
+        if (vehicle.block)
+            content += "<br/><b>Block:</b> " + vehicle.block;
+        if (vehicle.tripId)
+            content += "<br/><b>Trip:</b> " + vehicle.tripId;
+        if (vehicle.driver)
+            content += "<br/><b>Driver:</b> " + vehicle.driver;
 
-        content +=  "<div class='card-body'><div class='vehicle-item'><b >Route:</b> <div class='vehicle-value'> " + vehicle.routeName+"</div></div>";
-
-            content += "<div class='vehicle-item'><b>To:</b> <div class='vehicle-value'>" + (vehicle.headsign || 'N/A' )+"</div></div>";
-
-            content += "<div class='vehicle-item'><b>SchAhd:</b> <div class='vehicle-value'>" + (vehicle.schAdhStr  || 'N/A' )+"</div></div>";
-
-            content += "<div class='vehicle-item'><b>Block:</b> <div class='vehicle-value'>" + ( vehicle.block  || 'N/A' )+"</div></div>";
-
-            content += "<div class='vehicle-item'><b>Trip:</b> <div class='vehicle-value'>" + (vehicle.tripId  || 'N/A' )+"</div></div>";
-
-            content += "<div class='vehicle-item'><b>Driver:</b> <div class='vehicle-value'>" + (vehicle.driver  || 'N/A')+"</div></div>";
-
-        content += "</div></div></div>";
 
         return content;
     }
@@ -318,7 +292,7 @@
                         openVehiclePopup(this);
                     });
 
-                    if (vehicleId && vehicleId.trim() != "" && vehicle.id == vehicleId) {
+                    if (vehicleId.trim() != "" && vehicle.id == vehicleId) {
                         openVehiclePopup(vehicleMarker);
                     }
 
@@ -451,5 +425,5 @@
 
 </script>
 
-
 </body>
+</html>

@@ -1,0 +1,49 @@
+
+/* For the header on each page */
+.welcome #header {
+    background: linear-gradient(to right, #1E3F78 , #3564B5);
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 5px;
+
+    text-shadow: 2px 2px 4px #0D6E0E;
+}
+
+.welcome .no-button, .no-button:hover, .no-button:focus{
+    border-color: transparent;
+    margin-top: 0 !important;
+    font-size: xx-large;
+    color: white;
+    background-color: transparent !important;
+}
+
+.welcome #mainDiv{
+    padding: 50px;
+    border: 1px solid #e5e5e5;
+    box-shadow: 0px 3px 9px black;
+    margin: auto;
+    height: 100vh;
+    width: calc(60% - 100px);
+    background: white;
+}
+.welcome .btn.btn-primary, .welcome .btn-title{
+    background-color:  #1E3F78;
+    color: white;
+    margin-top: 20px;
+    min-width: 150px;
+    border-radius: 0;
+    border-color: transparent;
+}
+
+.welcome .btn-title{
+    background: linear-gradient(to right, #1E3F78 , #3564B5);
+    font-weight: normal;
+    font-size: x-large;
+    text-align: center;
+    padding: 10px 0px;
+}
+
+.welcome  .space-between{
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
