@@ -49,33 +49,30 @@
     String currentDateStr = org.transitclock.utils.Time.dateStr(new java.util.Date());
 %>
 
-<div class="row">
-    <label class="col-sm-12 col-form-label">Date</label>
-    <div class="col-sm-12 d-flex justify-content-between date-icon-wrapper">
-    <input type="text" id="beginDate" name="beginDate" class="form-control"
+<div class="param">
+    <label for="beginDate">Date:</label>
+    <input type="text" id="beginDate" name="beginDate"
            title="The first day of the range you want to examine data for.
-    	<br><br> Begin date must be before the end date." value="<%= currentDateStr%>" />
-    </div>
+    	<br><br> Begin date must be before the end date."
+           size="10"
+           value="<%= currentDateStr%>" />
 </div>
 
-
-<div class="row  align-items-center">
-    <label class="time-label col-form-label"  for="beginTime">Begin Time</label>
-
-    <input type="text" class="form-control time-input time-input-box"
-           id="beginTime" name="beginTime"
+<div class="param">
+    <label for="beginTime">Begin Time:</label>
+    <input id="beginTime" name="beginTime"
            title="Optional begin time of day to limit query to. Useful if
     	    want to see result just for rush hour, for example. Leave blank
     		if want data for entire day.
     		<br/><br/>Format: hh:mm, as in '07:00' for 7AM."
            size="3"
            placeholder="(hh:mm)"
-           value=""
-    />
-    <label class="time-label end-label  text-center col-form-label p-0"   for="endTime">End Time</label>
+           value="" />
+</div>
 
-    <input type="text" class="form-control time-input time-input-box"
-           id="endTime" name="endTime"
+<div class="param">
+    <label for="endTime">End Time:</label>
+    <input id="endTime" name="endTime"
            title="Optional end time of day to limit query to. Useful if
     	    want to see result just for rush hour, for example. Leave blank
     		if want data for entire day.
@@ -83,6 +80,5 @@
     		Use '23:59' for midnight."
            size="3"
            placeholder="(hh:mm)"
-           value=""
-    />
+           value="" />
 </div>
