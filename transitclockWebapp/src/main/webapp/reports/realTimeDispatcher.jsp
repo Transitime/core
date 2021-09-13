@@ -151,7 +151,7 @@
                         return "";
                     }},
                 { data: 'map_link', render: function (data, type, row) {
-                        return '<div class="d-flex justify-content-center"><a class="" href="realTimeLiveMap.jsp?a=1&v=' + row['vehicle'] + '"><i class="bi bi-arrow-right-circle-fill dark-blue"></i></a></div>';
+                        return '<div class="d-flex justify-content-center"><a class="" href="realTimeLiveMap.jsp?a=1&v=' + row['vehicle'] + '"><i class="bi bi-arrow-right-circle-fill inherit"></i></a></div>';
                     }}
             ],
             columnDefs: [

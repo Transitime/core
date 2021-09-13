@@ -69,7 +69,7 @@
 
                 <div class="row">
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" id="search-realpage" placeholder="Vehicle">
+                        <input type="text" class="form-control" id="search-realpage" placeholder="Stop">
                     </div>
                     <div class="col-sm-3 pad-left-0">
                         <button class="btn btn-primary submit-button "  type="button" value="show" onclick="toggleShow()">Show</button>

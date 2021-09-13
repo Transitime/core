@@ -133,7 +133,7 @@ button.submit-button {
     color: #1E3F78;
     text-decoration:underline;
     cursor:pointer;
-    line-height 14px;
+    line-height: 14px;
     padding: 0px 2px;
 }
 
@@ -295,9 +295,9 @@ button.submit-button {
 
 .map-legend-icons {
     position: fixed;
-    bottom: 25px;
+    top: 85px;
     right: 20px;
-    width: 240px;
+    width: 200px;
     background: #e8e8e89e;
     border: 1px solid #FFFFFF;
     border-radius: 5px;
@@ -340,6 +340,7 @@ button.submit-button {
 .map-legend-icons .card .card-body{
     padding: 5px;
     background: transparent;
+    text-align: center;
 }
 
 .refresh-button{
@@ -375,11 +376,12 @@ button.submit-button {
 
 .time-label{
     max-width: 100px;
-    margin-right:10px;
+    margin-right:5px;
     padding-right: 0;
 }
 .end-label{
     max-width: 80px;
+    margin-left: 15px;
 }
 .time-input-box{
     width: 70px;
@@ -403,7 +405,6 @@ button.submit-button {
 }
 
 
-
 .yellow{
     color:#E6D83E;
 }
@@ -422,4 +423,56 @@ button.submit-button {
 
 .dark-blue{
     color:#1E3F78;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field:hover {
+    border: solid #86b7fe 1px;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgb(13 110 253 / 25%);
+}
+
+.select2-search__field{
+    outline: 0;
+}
+
+.calendar-icon{
+    font-size: 1.75rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #e26161;
+}
+
+.reverse {
+    transform: scaleX(-1);
+}
+
+.image-container .img-thumbnail {
+    border: none;
+}
+
+#playback {
+    background: white;
+    position: relative;
+    left: 0%;
+    text-align: center;
+    border-radius: 8px;
+    padding: 12px;
+    font-family: monospace;
+    width: 300px;
+    box-shadow: 0px 2px 10px #696969;
+}
+
+.pause-custom{
+    width: 42px;
+}
+
+/* Playback menu */
+#playbackContainer {
+    position: fixed;
+    left: 50%;
+    bottom: 5%;
+}
+
+.overflow-x-hidden{
+    overflow-x: hidden;
 }

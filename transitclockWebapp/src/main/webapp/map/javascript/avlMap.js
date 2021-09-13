@@ -1,6 +1,4 @@
-//Edit route input width.
-$("#route").attr("style", "width: 200px");
-	
+
 /* For drawing the route and stops */
 var routeOptions = {
 	color: '#00ee00',
