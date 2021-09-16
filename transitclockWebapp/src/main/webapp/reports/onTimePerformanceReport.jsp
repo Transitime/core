@@ -65,15 +65,12 @@
 
             <div class="row">
                 <label class="col-sm-12 col-form-label">Report Settings</label>
-                <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-
-
-
+                <div class="btn-group d-flex" role="group" aria-label="Basic radio toggle button group">
                     <input type="radio" class="btn-check" value="timePointsOnly" name="stopType" id="timePointsOnly" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="timePointsOnly">Timepoints Only</label>
+                    <label class="btn btn-outline-primary w-100" for="timePointsOnly">Timepoints Only</label>
 
                     <input type="radio" class="btn-check" value="allStops" name="stopType" id="allStops" autocomplete="off" >
-                    <label class="btn btn-outline-primary" for="allStops">All stops</label>
+                    <label class="btn btn-outline-primary w-100" for="allStops">All stops</label>
 
                 </div>
             </div>
