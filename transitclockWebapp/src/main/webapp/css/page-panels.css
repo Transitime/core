@@ -425,6 +425,18 @@ button.submit-button {
     color:#1E3F78;
 }
 
+.chart-container{
+    position: relative;
+    height: 300px;
+    width: 60vw;
+}
+
+.full-width-image{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
 .select2-container--default .select2-search--dropdown .select2-search__field:hover {
     border: solid #86b7fe 1px;
     outline: 0;
@@ -448,6 +460,19 @@ button.submit-button {
 
 .image-container .img-thumbnail {
     border: none;
+}
+
+.grey-bg{
+    background-color: #EFEFEF;
+}
+
+.img-path{
+    width: 100%;
+
+}
+
+.grey-img {
+opacity: 0.45;
 }
 
 #playback {
@@ -475,4 +500,16 @@ button.submit-button {
 
 .overflow-x-hidden{
     overflow-x: hidden;
+}
+
+.view-form-btn{
+    top: 50%;
+    color: #4D4C4C;
+    width: 100%;
+    text-align: center;
+}
+
+#on-time-performance {
+    height: 400px;
+    width: 400px;
 }

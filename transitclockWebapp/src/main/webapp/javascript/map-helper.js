@@ -331,9 +331,15 @@ function routeConfigCallback(routesData, status) {
             var direction = route.direction[i];
             for (var j=0; j<direction.stop.length; ++j) {
                 var stop = direction.stop[j];
+                var stopOptions2 = JSON.parse(JSON.stringify(stopOptions));
                 var options = stop.minor ? minorStopOptions : stopOptions;
                 if(isRealTimePage){
-                    var options =  (stop.id == $("#stopsSearch").val())  ?  {"color":"#FF0000","opacity":1,"radius":3,"weight":2,"fillColor":"#FF0000","fillOpacity":0.6,"clickable":false} : stopOptions;
+                    stopOptions2.radius= 4;
+                    stopOptions2.color = '#'+route.color;
+                    stopOptions2.fillColor = '#'+route.textColor;
+
+                     options =  (stop.id == $("#stopsSearch").val())  ?
+                         {"color":"#FF0000","opacity":1,"radius":3,"weight":2,"fillColor":"#FF0000","fillOpacity":0.6,"clickable":false} : stopOptions2;
                 }
 
                 // Draw first non-minor stop differently to highlight it
@@ -375,7 +381,10 @@ function routeConfigCallback(routesData, status) {
             var shape = route.shape[i];
             var options = shape.minor ? minorShapeOptions : shapeOptions;
             if(isRealTimePage){
-                options = shapeOptions;
+                var stopOptions2 = JSON.parse(JSON.stringify(shapeOptions));
+                stopOptions2.color = '#'+route.color;
+                stopOptions2.fillColor = '#'+route.textColor;
+                options = stopOptions2;
             }
             var latLngs = [];
             for (var j=0; j<shape.loc.length; ++j) {
