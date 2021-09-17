@@ -119,6 +119,7 @@ button.submit-button {
     color: #000;
     background-color: #F0F0F0;
     border-color: #F0F0F0;
+    cursor: pointer;
 }
 
 .header-theme {
@@ -498,6 +499,12 @@ opacity: 0.45;
     bottom: 5%;
 }
 
+#playbackContainer  .image-container .img-thumbnail:hover {
+    border: 1px solid #CCC;
+    box-shadow: 1px 1px 5px #999;
+    cursor:pointer;
+}
+
 .overflow-x-hidden{
     overflow-x: hidden;
 }
@@ -512,4 +519,19 @@ opacity: 0.45;
 #on-time-performance {
     height: 400px;
     width: 400px;
+}
+
+label.btn.btn-outline-primary {
+    max-width: 50%;
+}
+
+.list-group-item.disabled, .list-group-item:disabled {
+opacity: 0.3;
+}
+
+.leaflet-popup-content {
+    margin: 0 auto;
+    border-radius: 12px;
+    padding: 5px;
+    border-color: transparent;
 }
