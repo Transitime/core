@@ -48,7 +48,7 @@ public interface VehiclesInterface extends Remote {
    * @throws RemoteException
    */
   public Collection<IpcActiveBlock> getActiveBlocksWithoutVehicles(
-     Collection<String> routeIds, int allowableBeforeTimeSecs)
+     Collection<String> routeIds, int allowableBeforeTimeSecs, boolean includeCanceledTrips)
      throws RemoteException;
 
   /**
@@ -64,7 +64,7 @@ public interface VehiclesInterface extends Remote {
    * @throws RemoteException
    */
   public Collection<IpcActiveBlock> getActiveBlocksAndVehiclesByRouteId(
-     String routeId, int allowableBeforeTimeSecs)
+     String routeId, int allowableBeforeTimeSecs, boolean includeCanceledTrips)
      throws RemoteException;
 
   /**
@@ -80,7 +80,7 @@ public interface VehiclesInterface extends Remote {
    * @throws RemoteException
    */
   public Collection<IpcActiveBlock> getActiveBlocksAndVehiclesByRouteName(
-     String routeName, int allowableBeforeTimeSecs)
+     String routeName, int allowableBeforeTimeSecs, boolean includeCanceledTrips)
      throws RemoteException;
     
     /**
