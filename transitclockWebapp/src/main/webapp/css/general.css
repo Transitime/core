@@ -135,6 +135,11 @@ input, select {
 	border-radius: 4px;
 }
 
+.ontimeColor {
+	background: #07D51D;
+	border-radius: 4px;
+}
+
 /* For tables showing data in reports */
 #dataTable {
 	margin-left: auto;

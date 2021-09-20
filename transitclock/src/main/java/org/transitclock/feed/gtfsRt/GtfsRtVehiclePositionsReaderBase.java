@@ -91,11 +91,9 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 	}
 
 	/**
-	 * Returns the vehicleID. Returns null if no VehicleDescription associated
-	 * with the vehicle or if no ID associated with the VehicleDescription.
-	 * 
-	 * If not vehicleId try label (VIA San Antonio Feed).
-	 * 
+	 * Returns the licensePlate. Returns the vehicle label if no license plate is found
+	 * otherwise returns null
+	 *
 	 * @param vehicle
 	 * @return vehicle ID or null if there isn't one
 	 */
