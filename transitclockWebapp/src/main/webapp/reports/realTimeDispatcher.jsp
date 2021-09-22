@@ -178,9 +178,15 @@
         $("#resultsTable").DataTable().ajax.reload();
     }
 
-    $('#vehiclesSearch').on( 'keyup', function () {
+
+    $("#vehiclesSearch").keydown(function(e){
+        if(e.which == 13) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
         $("#resultsTable").DataTable().columns( 0 ).search( this.value ).draw();
-    } );
+
+    });
 
     $('#assignedFilter').on( 'change', function () {
 

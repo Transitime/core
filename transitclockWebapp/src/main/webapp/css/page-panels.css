@@ -202,7 +202,7 @@ button.submit-button {
 }
 
 .leaflet-popup-content, .leaflet-popup-tip {
-    border: 1px solid #1E3F78;
+   /* border: 1px solid #1E3F78; */
 }
 
 .leaflet-popup-content-wrapper {
@@ -222,6 +222,10 @@ button.submit-button {
 }
 .leaflet-popup-content .card{
     border: none;
+}
+
+.leaflet-popup-tip-container{
+    margin-top: -1px;
 }
 
 .card-header{
@@ -253,7 +257,8 @@ button.submit-button {
 .leaflet-popup-content,
 .leaflet-popup-tip {
     background: white;
-    box-shadow: 0 3px 14px rgb(0 0 0 / 86%);
+    /*box-shadow: 0 3px 14px rgb(0 0 0 / 86%);*/
+    box-shadow: 0 3px 14px rgb(0 0 0 / 40%)
 }
 
 .select2-container--default.select2-container--focus .select2-selection--multiple {
@@ -531,7 +536,18 @@ opacity: 0.3;
 
 .leaflet-popup-content {
     margin: 0 auto;
-    border-radius: 12px;
-    padding: 5px;
+    border-radius: 8px;
+    padding: 2px;
     border-color: transparent;
+}
+
+.leaflet-popup-content .card-header:first-child {
+    border-top-right-radius: 6px;
+    border-top-left-radius: 6px;
+}
+
+#updated-time-holder {
+    font-size:10px;
+    padding-left: 10px;
+    margin-left:10px;
 }
