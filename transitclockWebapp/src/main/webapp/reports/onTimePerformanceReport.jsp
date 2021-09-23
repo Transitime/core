@@ -14,7 +14,7 @@
 <head>
     <%@include file="/template/includes.jsp" %>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-    <title>AVL Data Map</title>
+    <title>On Time Performance</title>
 
     <link rel="stylesheet" href="//unpkg.com/leaflet@0.7.3/dist/leaflet.css" />
     <script src="//unpkg.com/leaflet@0.7.3/dist/leaflet.js"></script>
@@ -48,7 +48,7 @@
     var request = {<%= WebUtils.getAjaxDataString(request) %>},
         contextPath = "<%= request.getContextPath() %>";
 </script>
-<body class="avl-page">
+<body>
 <%@include file="/template/header.jsp" %>
 <div class="panel split overflow-x-hidden">
     <div class="left-panel">

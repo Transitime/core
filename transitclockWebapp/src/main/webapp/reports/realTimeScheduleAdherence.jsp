@@ -43,16 +43,10 @@
             Schedule Adherence
         </h4>
         <form class="row" novalidate>
-            <div class="row">
-                <label class="col-sm-12 col-form-label">Routes</label>
 
-                <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
-                <jsp:include page="params/routeMultipleNoLabel.jsp" />
-            </div>
 
             <div class="row mb-0">
                 <label class="col-sm-12 col-form-label">Search</label>
-
             </div>
 
             <div class="row">
@@ -62,6 +56,13 @@
                 <div class="col-sm-3 pad-left-0">
                     <button class="btn btn-primary submit-button "  type="button" value="show" onclick="showVehicle()">Show</button>
                 </div>
+            </div>
+
+            <div class="row">
+                <label class="col-sm-12 col-form-label">Routes</label>
+
+                <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
+                <jsp:include page="params/routeMultipleNoLabel.jsp" />
             </div>
 
         </form>

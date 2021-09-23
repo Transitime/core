@@ -44,7 +44,7 @@
     <script src="<%= request.getContextPath() %>/maps/javascript/mapUiOptions.js"></script>
     <script src="<%= request.getContextPath() %>/map/javascript/animation.js"></script>
 </head>
-<body class="avl-page">
+<body>
 <%@include file="/template/header.jsp" %>
 <div class="panel split">
     <div class="left-panel">
@@ -74,9 +74,9 @@
         </form>
         <div class="list-group">
             <button class="list-group-item list-group-item-action"  id="submit" >Submit</button>
-            <button  class="list-group-item list-group-item-action secondary-btn">
+            <a  class="list-group-item list-group-item-action secondary-btn" id="exportData">
                 Export
-            </button>
+            </a>
         </div>
     </div>
     <div class="right-panel">

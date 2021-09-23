@@ -119,6 +119,7 @@ button.submit-button {
     color: #000;
     background-color: #F0F0F0;
     border-color: #F0F0F0;
+    cursor: pointer;
 }
 
 .header-theme {
@@ -201,7 +202,7 @@ button.submit-button {
 }
 
 .leaflet-popup-content, .leaflet-popup-tip {
-    border: 1px solid #1E3F78;
+   /* border: 1px solid #1E3F78; */
 }
 
 .leaflet-popup-content-wrapper {
@@ -221,6 +222,10 @@ button.submit-button {
 }
 .leaflet-popup-content .card{
     border: none;
+}
+
+.leaflet-popup-tip-container{
+    margin-top: -1px;
 }
 
 .card-header{
@@ -252,7 +257,8 @@ button.submit-button {
 .leaflet-popup-content,
 .leaflet-popup-tip {
     background: white;
-    box-shadow: 0 3px 14px rgb(0 0 0 / 86%);
+    /*box-shadow: 0 3px 14px rgb(0 0 0 / 86%);*/
+    box-shadow: 0 3px 14px rgb(0 0 0 / 40%)
 }
 
 .select2-container--default.select2-container--focus .select2-selection--multiple {
@@ -498,6 +504,12 @@ opacity: 0.45;
     bottom: 5%;
 }
 
+#playbackContainer  .image-container .img-thumbnail:hover {
+    border: 1px solid #CCC;
+    box-shadow: 1px 1px 5px #999;
+    cursor:pointer;
+}
+
 .overflow-x-hidden{
     overflow-x: hidden;
 }
@@ -512,4 +524,30 @@ opacity: 0.45;
 #on-time-performance {
     height: 400px;
     width: 400px;
+}
+
+label.btn.btn-outline-primary {
+    max-width: 50%;
+}
+
+.list-group-item.disabled, .list-group-item:disabled {
+opacity: 0.3;
+}
+
+.leaflet-popup-content {
+    margin: 0 auto;
+    border-radius: 8px;
+    padding: 2px;
+    border-color: transparent;
+}
+
+.leaflet-popup-content .card-header:first-child {
+    border-top-right-radius: 6px;
+    border-top-left-radius: 6px;
+}
+
+#updated-time-holder {
+    font-size:10px;
+    padding-left: 10px;
+    margin-left:10px;
 }

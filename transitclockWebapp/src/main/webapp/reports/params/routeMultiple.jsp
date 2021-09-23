@@ -14,8 +14,12 @@
 
 <script>
 
+    var isDisabled = $(".isAllRoutesDisabled");
     function formatRoute (route) {
         if (!route.id || route.id == " ") {
+            if(isDisabled && isDisabled.val() === 'true') {
+                return 'All Routes';
+            }
             return route.text;
         }
         return route.id;
@@ -29,6 +33,9 @@
             // So need to use a blank string that can be determined
             // to be empty when trimmed.
             var selectorData = [{id: ' ', text: 'All Routes'}];
+            if(isDisabled && isDisabled.val() === 'true'){
+                selectorData=[];
+            }
             for (var i in routes.routes) {
                 var route = routes.routes[i];
                 var name = route.shortName + " " + route.longName

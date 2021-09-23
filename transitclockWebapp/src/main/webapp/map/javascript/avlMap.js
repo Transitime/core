@@ -50,13 +50,14 @@ function drawAvlMarker(avl) {
 	
   	// Create popup with detailed info
 
-	var content = $("<div />");
-	var table = $("<table />").attr("class", "popupTable");
+	var content = $("<div />").attr("class","card");
+	content.append('<div class="card-header header-theme">Vehicle</div>')
+	var table = $("<div />").attr("class", "card-body");
 	
 	for (var i = 0; i < labels.length; i++) {
-		var label = $("<td />").attr("class", "popupTableLabel").text(labels[i] + ": ");
-		var value = $("<td />").text(avl[keys[i]]);
-		table.append( $("<tr />").append(label, value) )
+		var label = $("<b />").text(labels[i] + ": ");
+		var value = $("<div />").attr("class", "vehicle-value").text(avl[keys[i]]);
+		table.append( $("<div />").attr("class", "vehicle-item").append(label, value) )
 	}
 
 	// Links to schedule and google maps for vehicle
@@ -64,9 +65,9 @@ function drawAvlMarker(avl) {
 
 	var mapsLink = 'http://google.com/maps?q=loc:' + avl.lat + ',' + avl.lon
 
-	links.append( $("<a data-toggle='modal' href='#schedule-modal' style='padding-right:10px;vertical-align: middle' class='schedule-link' onclick='scheduleAjax(" + avl['tripId'] + "); return false;'>Schedule</a>"))
-	links.append( $("<div style='border-left:2px solid black;height:20px;display:inline-block;vertical-align:middle'></div>"))
-	links.append( $("<a href=" + mapsLink + " target='_blank' style='padding-left:10px;vertical-align:middle'>View Location in Google Maps</a>"))
+	links.append( $("<a data-toggle='modal' href='#schedule-modal' class='list-group-item list-group-item-action secondary-btn' onclick='scheduleAjax(" + avl['tripId'] + "); return false;'>Schedule</a>"))
+	// links.append( $("<div style='border-left:2px solid black;height:20px;display:inline-block;vertical-align:middle'></div>"))
+	links.append( $("<a href=" + mapsLink + " target='_blank' class='list-group-item list-group-item-action' >View Location in Google Maps</a>"))
 
 	content.append(table)
 	content.append(links)
@@ -159,14 +160,16 @@ function routeConfigCallback(data, status) {
 
   			// Create popup for stop marker
 
-  			var content = $("<table />").attr("class", "popupTable");
+  			var content = $("<div />").attr("class", "card");
   			var labels = ["Stop ID", "Name"], keys = ["id", "name"];
+  			content.append('<div class="card-header header-theme">Stop</div>')
+			var content2 = $("<div />").attr("class", "card-body");
 			for (var k = 0; k < labels.length; k++) {
-				var label = $("<td />").attr("class", "popupTableLabel").text(labels[k] + ": ");
-				var value = $("<td />").text(stop[keys[k]]);
-				content.append( $("<tr />").append(label, value) );
+				var label = $("<b />").text(labels[k] + ": ")
+				var value = $("<div />").attr("class","vehicle-value").text(stop[keys[k]]);
+				content2.append( $("<div />").attr("class", "vehicle-item").append(label, value) );
 			}
-  			
+			content.append(content2);
   			stopMarker.bindPopup(content[0]);
   		}
    	 }

@@ -226,8 +226,8 @@ function predictionCallback(preds, status) {
 
                         content += '<div class="each-prediction">'
                         content += '<div class="vehicle-image-detail"><img src="' + busIcon.options.iconUrl + '"  class="vehicle-icon-prediction"/>';
-                        content += '<span class="vehicle-id">' + eachPred.min  + ' minutes, </span></div>';
-                        content += '<span class="vehicle-time"> Vehicle ' + eachPred.vehicle + ' </span>';
+                        content += '<span class="vehicle-id" >' + eachPred.min  + ' minutes, </span></div>';
+                        content += '<a class="vehicle-time vehicle-clickable" data-vehicle-id="'+eachPred.vehicle+'" data-route-name="'+routeStopPreds.routeShortName+'"> Vehicle ' + eachPred.vehicle + ' </a>';
                         content += '</div>';
 
                     });
@@ -251,17 +251,9 @@ function predictionCallback(preds, status) {
     content += '</div>';
     predictionsPopup.setContent(content);
 
-    $(".eachDest-header",).on("click",function updateInputs(e){
-        e.preventDefault();
-        if(e.target) {
-            var routeValue = e.target.getAttribute("data-route-name");
-            var routeStopId = e.target.getAttribute("data-stop-id");
-            $("#route").val(routeValue).trigger("change");
-            $("input[name=liveMapRadio]")[0].click();
-            $("#search-realpage").val(routeStopId);
-            $(".submit-button").click();
-        }
-    });
+
+    vehicleClickInit();
+
 }
 
 /**
@@ -454,9 +446,9 @@ function getVehiclePopupContent(vehicleData) {
 
     content += "<b>Vehicle:</b> " + vehicleData.id  ||  'N/A' ;
 
-    if(!isRealTimePage){
+    // if(!isRealTimePage){
         content += (typeof vehicleData.updatedTime !== "undefined") ? "<span id='updated-time-holder' age='"+vehicleData.updatedTime+"'  time-initial='"+new Date().getTime()+"'><b>Updated:</b> "+vehicleData.updatedTime+" seconds ago</span>" : "";
-    }
+  //  }
 
     content += "</div>";
     content += '<div class="card-body">';
@@ -485,7 +477,7 @@ function getVehiclePopupContent(vehicleData) {
     }
 
     content += "<div class='vehicle-item'><b>Next Stop:</b><div class='vehicle-value'>" + (vehicleData.nextStopName ||  'N/A'  )+"</div></div>";
-    content += "<div class='vehicle-item'><b>Next Stop Id:</b><div class='vehicle-value'>" + (vehicleData.nextStopId  ||  'N/A' )+"</div></div>" ;
+    content += "<div class='vehicle-item'><b>Next Stop Id:</b><a class='vehicle-value eachDest-header' data-route-name='"+vehicleData.routeShortName+"' data-stop-id='"+vehicleData.nextStopId+"' >" + (vehicleData.nextStopId  ||  'N/A' )+"</a></div>" ;
     content += "<div class='vehicle-item'><b>In Layover:</b><div class='vehicle-value'>" + (vehicleData.layover ||  'N/A' ) +"</div></div>" ;
     content +=
         "<div class='vehicle-item'><b>Scheduled Departure:</b><div class='vehicle-value'>" + ( (typeof vehicleData.layover !== "undefined" && typeof vehicleData.layoverDepTime !== "undefined") ?
@@ -696,6 +688,7 @@ function openVehiclePopup(vehicleMarker) {
     vehicleMarker.popup = L.popup(vehiclePopupOptions, vehicleMarker)
         .setLatLng(latlng)
         .setContent(content).openOn(map);
+    vehicleClickInit();
 }
 
 /**
@@ -745,8 +738,35 @@ function updateVehicleMarker(vehicleMarker, vehicleData) {
             vehicleMarker.vehicleData.loc.lon,
             vehicleData.loc.lat, vehicleData.loc.lon);
     }
+    vehicleClickInit();
 }
 
+function vehicleClickInit(){
+    $(".eachDest-header",).off('click').on("click",function updateInputs(e){
+        e.preventDefault();
+        if(e.target) {
+            var routeValue = e.target.getAttribute("data-route-name");
+            var routeStopId = e.target.getAttribute("data-stop-id");
+            $("#route").val(routeValue).trigger("change");
+            $("input[name=liveMapRadio]")[0].click();
+            $("#search-realpage").val(routeStopId);
+            $(".submit-button").click();
+        }
+    });
+
+    $(".vehicle-clickable").off('click').on("click",function updateInputs(e){
+        e.preventDefault();
+        if(e.target) {
+            var routeValue = e.target.getAttribute("data-route-name");
+            var routeStopId = e.target.getAttribute("data-vehicle-id");
+            $("#route").val(routeValue).trigger("change");
+            $("input[name=liveMapRadio]")[1].click();
+            $("#search-realpage").val(routeStopId);
+            openVehiclePopup(getVehicleMarker(routeStopId));
+            // $(".submit-button").click();
+        }
+    });
+}
 /**
  * Reads in vehicle data obtained via AJAX. Called for each vehicle in API
  * whether vehicle changed or not.
@@ -956,8 +976,13 @@ function updateVehiclesUsingApiData() {
         url += "&s=" + getQueryVariable("s") + "&numPreds=2";
 
     // Handle being able to show unassigned vehicles
-    if (getQueryVariable("showUnassignedVehicles"))
+    if (getQueryVariable("showUnassignedVehicles")){
         url += "&r=";
+    }
+    /* else if(!$("#route").val()){
+        $("#route").val(" ").trigger("change");
+    } */
+
 
     // Use ajax() instead of getJSON() so that can set timeout since
     // will be polling vehicle info every 10 seconds and don't want there
