@@ -71,6 +71,7 @@ public class IpcPrediction implements Serializable {
 	// The time the AVL data was processed and the prediction was created.
 	private final long creationTime;
 	private final long tripStartEpochTime;
+	private final long tripStartDateTime;
 	private final boolean affectedByWaitStop;
 	private final String driverId;
 	private final short passengerCount;
@@ -159,7 +160,9 @@ public class IpcPrediction implements Serializable {
 	    this.tripStartEpochTime =
 	        Core.getInstance().getTime()
 	            .getEpochTime(trip.getStartTime(), currentTime);
-	    
+
+		this.tripStartDateTime = Core.getInstance().getTime().getTripStartDate(trip.getStartTime(), currentTime);
+
 	    this.affectedByWaitStop = affectedByWaitStop;
 	    this.driverId = avlReport.getDriverId();
 	    this.passengerCount = (short) avlReport.getPassengerCount();
@@ -182,7 +185,7 @@ public class IpcPrediction implements Serializable {
 			int gtfsStopSeq, String tripId, String tripPatternId, boolean isTripUnscheduled,
 			String blockId, long predictionTime, long actualPredictionTime,
 			boolean atEndOfTrip, boolean schedBasedPred, long avlTime,
-			long creationTime, long tripStartEpochTime,
+			long creationTime, long tripStartEpochTime, long tripStartDateTime,
 			boolean affectedByWaitStop, String driverId, short passengerCount,
 			float passengerFullness, boolean isDelayed,
 			boolean lateAndSubsequentTripSoMarkAsUncertain, boolean isArrival,  Integer delay,
@@ -205,6 +208,7 @@ public class IpcPrediction implements Serializable {
 		this.avlTime = avlTime;
 		this.creationTime = creationTime;
 		this.tripStartEpochTime = tripStartEpochTime;
+		this.tripStartDateTime = tripStartDateTime;
 		this.affectedByWaitStop = affectedByWaitStop;
 		this.driverId = driverId;
 		this.passengerCount = passengerCount;
@@ -242,6 +246,7 @@ public class IpcPrediction implements Serializable {
 		private long avlTime;
 		private long creationTime;
 		private long tripStartEpochTime;
+		private long tripStartDateTime;
 		private boolean affectedByWaitStop;
 		private String driverId;
 		private short passengerCount;
@@ -277,6 +282,7 @@ public class IpcPrediction implements Serializable {
 			this.avlTime = p.avlTime;
 			this.creationTime = p.creationTime;
 			this.tripStartEpochTime = p.tripStartEpochTime;
+			this.tripStartDateTime = p.tripStartDateTime;
 			this.affectedByWaitStop = p.affectedByWaitStop;
 			this.driverId = p.driverId;
 			this.passengerCount = p.passengerCount;
@@ -317,6 +323,7 @@ public class IpcPrediction implements Serializable {
 			stream.writeLong(avlTime);
 			stream.writeLong(creationTime);
 			stream.writeLong(tripStartEpochTime);
+			stream.writeLong(tripStartDateTime);
 			stream.writeBoolean(affectedByWaitStop);
 			stream.writeObject(driverId);
 			stream.writeShort(passengerCount);
@@ -363,6 +370,7 @@ public class IpcPrediction implements Serializable {
 			avlTime = stream.readLong();
 			creationTime = stream.readLong();
 			tripStartEpochTime = stream.readLong();
+			tripStartDateTime = stream.readLong();
 			affectedByWaitStop = stream.readBoolean();
 			driverId = (String) stream.readObject();
 			passengerCount = stream.readShort();
@@ -388,7 +396,7 @@ public class IpcPrediction implements Serializable {
 			return new IpcPrediction(vehicleId, routeId, stopId, gtfsStopSeq,
 					tripId, tripPatternId, isTripUnscheduled, blockId, predictionTime, 0,
 					atEndOfTrip, schedBasedPred, avlTime, creationTime,
-					tripStartEpochTime, affectedByWaitStop, driverId,
+					tripStartEpochTime, tripStartDateTime, affectedByWaitStop, driverId,
 					passengerCount, passengerFullness, isDelayed, lateAndSubsequentTripSoMarkAsUncertain,
 					isArrival, delay, freqStartTime, tripCounter,isCanceled);
 
@@ -432,6 +440,7 @@ public class IpcPrediction implements Serializable {
 				+ ", avlTime=" + Time.timeStrMsecNoTimeZone(avlTime)
 				+ ", createTime=" + Time.timeStrMsecNoTimeZone(creationTime)
 				+ ", tripStartEpochTime=" + Time.timeStrMsecNoTimeZone(tripStartEpochTime)
+				+ ", tripStartDateTime=" + Time.timeStrMsecNoTimeZone(tripStartDateTime)
 				+ ", atEndOfTrip=" + (atEndOfTrip ? "t" : "f")
 				+ ", waitStop="	+ (affectedByWaitStop ? "t" : "f")
 				+ (schedBasedPred ? ", schedBasedPred=t" : "")
@@ -513,7 +522,11 @@ public class IpcPrediction implements Serializable {
 	public long getTripStartEpochTime() {
 		return tripStartEpochTime;
 	}
-	
+
+	public long getTripStartDateTime() {
+		return tripStartDateTime;
+	}
+
 	/**
 	 * Returns the driver ID if it is available. Otherwise returns null.
 	 * 

@@ -149,10 +149,11 @@ public class GtfsRtTripFeed {
 
 			}
 
-			long tripStartEpochTime = firstPred.getTripStartEpochTime();
+			long tripStartDateTime = firstPred.getTripStartDateTime();
+
 			String tripStartDateStr =
-					gtfsRealtimeDateFormatter.format(new Date(
-							tripStartEpochTime));
+					gtfsRealtimeDateFormatter.format(new Date(tripStartDateTime));
+
 			tripDescriptor.setStartDate(tripStartDateStr);
 
 			// Set the relation between this trip and the static schedule. ADDED and CANCELED not supported. 
