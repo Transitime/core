@@ -418,9 +418,14 @@ button.submit-button {
 .green{
     color: #37E627;
 }
-
+.dark-green{
+    color:green;
+}
 .red{
    color: #E34B71;
+}
+.white{
+    color:white;
 }
 
 .blue{
@@ -550,4 +555,54 @@ opacity: 0.3;
     font-size:10px;
     padding-left: 10px;
     margin-left:10px;
+}
+
+.comparision-modal-popup .modal-body {
+    max-height: 70vh;
+    overflow: auto;
+}
+
+
+.comparision-modal-popup .modal-title{
+    background-color: #1E3F78;
+    color: white;
+    text-align: center;
+    padding: .5rem 1rem;
+    width: 100%;
+}
+
+.comparsion-button-list {
+    width: 100%;
+    z-index: 1;
+}
+
+.pad-rt-10{
+    padding-right: 10px;
+}
+
+.link{
+    cursor: pointer;
+}
+
+#avgRunTimeTop p,#avgRunTimeTop  a{
+    margin: 0;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+#avgRunTimeTop {
+    width: calc(100% - 100px);
+}
+
+.paramDetails span {
+    font-size: 15px;
+}
+
+.absolute-bottom-right{
+    top: 150px;
+    z-index: 1;
+    width: 250px;
+}
+.absolute-bottom-right i.bi-dash-lg:before{
+    font-size : 25px;
 }
