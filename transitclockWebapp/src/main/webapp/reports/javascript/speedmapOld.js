@@ -51,8 +51,8 @@ var stopOptions = {
     opacity: 1,
     radius: 4,
     weight: 2,
-    // fillColor: '#ffffff',
-    fillColor: '#D3D3D3',
+    fillColor: '#ffffff',
+    // fillColor: '#454442',
     fillOpacity: 1,
 };
 
@@ -114,7 +114,7 @@ function msToMinsSecs(milliseconds) {
     return minutes + ":" + seconds;
 }
 
-
+$("#route").attr("style", "width: 200px");
 
 $("#route").change(function() {
     $("#direction").removeAttr('disabled');
@@ -248,18 +248,10 @@ function speedsCallback(data) {
 
         var speedSegment = L.polyline(stopPath.latlngs, options).addTo(routeGroup);
 
+        var content = $("<table />").attr("class", "popupTable");
+        content.append( $("<tr />").append("<td>" + stopPath.speed + " mph </td>") );
 
-        var content = $("<div />").attr("class","card");
-        content.append('<div class="card-header header-theme">Speed</div>');
-
-
-        var table = $("<div />").attr("class", "card-body");
-
-        var label = $("<b />").text( "Speed: ");
-        var value = $("<div />").attr("class", "vehicle-value").text(stopPath.speed + " mph");
-        table.append( $("<div />").attr("class", "vehicle-item").append(label, value) )
-        content.append(table)
-        speedSegment.bindPopup(content[0], {className: 'vehicle-pop-up'});
+        speedSegment.bindPopup(content[0]);
     })
 }
 
@@ -274,12 +266,9 @@ function stopsCallback(data) {
         stopMarker.bringToFront();
 
         // Create popup for stop marker
-        var content = $("<div />").attr("class","card");
-        content.append('<div class="card-header header-theme">'+stop["stopName"]+'</div>')
-        var table = $("<div />").attr("class", "card-body");
 
-        //var content = $("<table />").attr("class", "popupTable");
-        var labels = ["ID", "Avg Dwell Time"], keys = ["stopId",  "avgDwellTime"];
+        var content = $("<table />").attr("class", "popupTable");
+        var labels = ["Stop ID", "Name", "Avg Dwell Time"], keys = ["stopId", "stopName", "avgDwellTime"];
         if (typeof stop['avgDwellTime'] == 'undefined') {
             stop['avgDwellTime'] = '';
         }
@@ -292,12 +281,11 @@ function stopsCallback(data) {
             stop['avgDwellTime'] = dwellTimeMinutes + ":" + dwellTimeSeconds;
         }
         for (var i = 0; i < labels.length; i++) {
-            var label = $("<b />").text(labels[i] + ": ");
-            var value = $("<div />").attr("class", "vehicle-value").text(stop[keys[i]]);
-            table.append( $("<div />").attr("class", "vehicle-item").append(label, value) )
+            var label = $("<td />").attr("class", "popupTableLabel").text(labels[i] + ": ");
+            var value = $("<td />").text(stop[keys[i]]);
+            content.append( $("<tr />").append(label, value) );
         }
-        content.append(table)
-        stopMarker.bindPopup(content[0], {className: 'vehicle-pop-up'});
+        stopMarker.bindPopup(content[0]);
     })
 
     resetDetail();
@@ -306,7 +294,7 @@ function stopsCallback(data) {
 $("#mainSubmit").click(function() {
     $("#mainSubmit").attr("disabled", "disabled");
     $("#mainSubmit").attr("value","loading...");
-    $("#dateRangePicker").val("Date range")
+    $("#flyoutDatepicker").val("Date range")
     $("#avgRunTimeComparison").html("");
     $("#runTimesFlyout").hide();
     $(".loader").show();
@@ -315,7 +303,7 @@ $("#mainSubmit").click(function() {
 
     request = {}
 
-    getParams("#beginDate");
+    getParams("#mainDatepicker");
 
     routeGroup.clearLayers();
     if (request.r != "") {
@@ -334,7 +322,7 @@ $("#mainSubmit").click(function() {
         dataType: "json",
         success: function(response) {
             speedsCallback(response);
-            $(".comparsion-button-list").removeClass("d-none");
+
             $.ajax({
                 url: apiUrlPrefix + "/report/speedmap/stops",
                 // Pass in query string parameters to page being requested
@@ -350,7 +338,7 @@ $("#mainSubmit").click(function() {
                     var beginDateString = beginDateArray.join("/");
                     var endDateString = endDateArray.join("/");
 
-                    var timeRange = request.beginTime + " <span>to</span> " + request.endTime;
+                    var timeRange = request.beginTime + " to " + request.endTime;
 
                     if (beginTime == "00:00:00" && endTime == "23:59:59") {
                         timeRange = "All times";
@@ -363,7 +351,7 @@ $("#mainSubmit").click(function() {
                     }
 
                     $(".paramDetails").each(function() {
-                        $(this).html("<p >Route " + request.r + " <span>to</span> " + request.headsign + " | " + beginDateString + " <span>to</span> " + endDateString + " | " + timeRange + " | " + serviceDayString + "</p>");
+                        $(this).html("<p style='font-size: 0.8em;'>Route " + request.r + " to " + request.headsign + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "</p>");
                     })
 
                     stopsCallback(response);
@@ -391,16 +379,16 @@ $("#mainSubmit").click(function() {
         traditional: true,
         dataType: "json",
         success: function (response) {
-            var compareLink = "<a id='compareLink' data-bs-toggle='modal' class='link white' data-bs-target='#runTimesFlyout' onclick='openFlyout()'>Compare</a>";
+            var compareLink = "<a id='compareLink' style='font-size: 0.8em; margin-bottom: 1em; color: blue; text-decoration: underline; cursor: pointer' onclick='openFlyout()'>Compare</a>";
 
             if (response.numberOfTrips == 0) {
-                $("#avgRunTimeTop").html("<div class='paramDetails'></div><p>No average run time data.</p>" + compareLink);
+                $("#avgRunTimeTop").html("<p style='font-size: 0.8em; margin-bottom: 0em;'>No average run time data.</p>" + compareLink);
             }
             else {
                 runTimesChart.data.datasets[0].data[0] = response.averageRunTime;
                 runTimesChart.update();
 
-                $("#avgRunTimeTop").html("<div class='paramDetails'></div><p>Average Trip Run Time: " + msToMinsSecs(response.averageRunTime) + "</p>" + compareLink);
+                $("#avgRunTimeTop").html("<p style='font-size: 0.8em; margin-bottom: 0em;'>Average Trip Run Time: " + msToMinsSecs(response.averageRunTime) + "</p>" + compareLink);
             }
         },
         error: function () {
@@ -410,7 +398,7 @@ $("#mainSubmit").click(function() {
 })
 
 function openFlyout() {
-    $("#avgRunTimeFlyout").html($("#avgRunTimeTop > p").html());
+    $("#avgRunTimeFlyout").html($("#avgRunTimeTop > p").html()).css("font-size", "0.8em");
     $("#runTimesFlyout").show();
 }
 
@@ -418,7 +406,7 @@ $("#runTimeSubmit").click(function() {
     $(".submit").attr("disabled", "disabled");
     $(".loader").show();
 
-    getParams("#dateRangePicker");
+    getParams("#flyoutDatepicker");
 
     $.ajax({
         url: apiUrlPrefix + "/report/speedmap/runTime",
@@ -465,7 +453,4 @@ function resetDetail(alertContent, isRemoveClass){
 
 }
 
-if(datePickerIntialization){
-    datePickerIntialization();
-}
-
+datePickerIntialization();
