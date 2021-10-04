@@ -43,11 +43,19 @@ var minorStopOptions = {
     clickable: false
 };
 
-var busIcon = L.icon({
+/*var busIcon = L.icon({
     iconUrl: '/web/maps/images/bus-24.png',
     iconRetinaUrl: 'images/bus-24@2x.png',
     iconSize: [24, 24],
     iconAnchor: [13, 12],
+    popupAnchor: [0, -12],
+});*/
+
+var busIcon = L.icon({
+    iconUrl: '/web/maps/images/bus-24.png',
+    iconRetinaUrl: 'images/bus-24@2x.png',
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
     popupAnchor: [0, -12],
 });
 
@@ -92,11 +100,20 @@ var layoverIcon = L.icon({
 	
 });
 
+/*
 var arrowIcon = L.icon({
 	iconUrl: '/web/maps/images/arrow.png',
 	iconSize: [30, 30],
 	iconAnchor: [15,15],
 });
+*/
+
+var arrowIcon = L.icon({
+    iconUrl: '/web/maps/images/arrow.png',
+    iconSize: [19, 48],
+    iconAnchor: [10,24],
+});
+
 
 var vehicleMarkerOptions = {
 	opacity: 1.0,

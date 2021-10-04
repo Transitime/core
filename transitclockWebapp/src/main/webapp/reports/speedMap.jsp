@@ -1,193 +1,188 @@
+<%@ page import="org.transitclock.utils.web.WebUtils" %>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
          pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<%@page import="org.transitclock.web.WebConfigParams"%>
+<%
+    String agencyId = request.getParameter("a");
+    if (agencyId == null || agencyId.isEmpty()) {
+        response.getWriter().write("You must specify agency in query string (e.g. ?a=mbta)");
+        return;
+    }
+%>
 <html>
 <head>
     <%@include file="/template/includes.jsp" %>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
     <title>Speed Map</title>
 
-    <!-- Load in Select2 files so can create fancy route selector -->
-    <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
-    <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
-
-
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
-    <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+    <link rel="stylesheet" href="//unpkg.com/leaflet@0.7.3/dist/leaflet.css" />
+    <script src="//unpkg.com/leaflet@0.7.3/dist/leaflet.js"></script>
+    <script src="<%= request.getContextPath() %>/javascript/jquery-dateFormat.min.js"></script>
 
     <script src="<%= request.getContextPath() %>/maps/javascript/leafletRotatedMarker.js"></script>
     <script src="<%= request.getContextPath() %>/maps/javascript/mapUiOptions.js"></script>
-    <link rel="stylesheet" type="text/css" href="../jquery.datepick.package-5.1.0/css/jquery.datepick.css">
 
-    <script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.plugin.js"></script>
-    <script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.datepick.js"></script>
+    <!-- Load in Select2 files so can create fancy selectors -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
 
     <link rel="stylesheet" href="<%= request.getContextPath() %>/maps/css/mapUi.css" />
-    <link rel="stylesheet" type="text/css" href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
-    <link href="params/reportParams.css" rel="stylesheet"/>
 
 
+    <%--        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>--%>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/page-panels.css">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
     <script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script>
-    <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
 
 </head>
-<body class="run-time-screen speed-map-page">
+<script>
+    var request = {<%= WebUtils.getAjaxDataString(request) %>},
+        contextPath = "<%= request.getContextPath() %>";
+</script>
+<body>
 <%@include file="/template/header.jsp" %>
-<div class="wrapper">
+<div class="panel split overflow-x-hidden">
+    <div class="left-panel">
+        <h4 class="page-title">
+            Speed Map
+        </h4>
+        <form class="row" novalidate>
 
-    <div class="paramsWrapper">
+            <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
 
-        <div id="paramsSidebar">
-            <div class="header-title">
-                Speed Map
-            </div>
+            <input type="hidden" name="allRoutesDisabled" value="no-auto-trigger-default" class="isAllRoutesDisabled">
+            <input type="hidden" name="date-range-picker" value="true" class="isDateRangePicker">
 
-            <div id="paramsFields">
-                <%-- For passing agency param to the report --%>
-                <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
+            <jsp:include page="params/routeAllOrSingleNew.jsp" />
 
-                <jsp:include page="params/routeAllOrSingle.jsp" />
-
-                <div class="param">
-                    <label for="direction">Direction:</label>
-                    <select id="direction" name="direction" disabled="true">
+            <div class="row">
+                <label class="col-sm-12 col-form-label">Direction</label>
+                <div class="col-sm-12">
+                    <select id="direction" name="direction" disabled="true" class="form-select">
 
                     </select>
                 </div>
 
+            </div>
 
-                <div class="param">
-                    <label for="mainDatepicker">Date:</label>
-                    <input type="text" id="mainDatepicker" class="date-picker-input" name="mainDatepicker"
-                           title="The range of dates that you want to examine data for.
-                                   <br><br> Begin date must be before the end date."
-                           value="Date range" style:/>
-                </div>
+            <jsp:include page="params/fromDateNumDaysTime.jsp" />
 
-                <div class="param">
-                    <label for="beginTime">Begin Time:</label>
-                    <input id="beginTime" name="beginTime" class="time-picker-input"
-                           title="Optional begin time of day to limit query to. Useful if
-                                    want to see result just for rush hour, for example. Leave blank
-                                    if want data for entire day.
-                                    <br/><br/>Format: hh:mm, as in '07:00' for 7AM."
-                           size="5"
-                           placeholder="(hh:mm)"
-                           value="" />
-                </div>
-
-                <div class="param">
-                    <label for="endTime">End Time:</label>
-                    <input id="endTime" name="endTime"  class="time-picker-input"
-                           title="Optional end time of day to limit query to. Useful if
-                                    want to see result just for rush hour, for example. Leave blank
-                                    if want data for entire day.
-                                    <br/><br/>Format: hh:mm, as in '09:00' for 9AM.
-                                    Use '23:59' for midnight."
-                           size="5"
-                           placeholder="(hh:mm)"
-                           value="" />
-                </div>
-
-                <div class="param">
-                    <label for="serviceDayType">Service Day:</label>
-                    <select id="serviceDayType" name="serviceDayType">
+            <div class="row">
+                <label class="col-sm-12 col-form-label">Service Day Type</label>
+                <div class="col-sm-12">
+                    <select id="serviceDayType" name="serviceDayType" class="form-select">
                         <option value="">All</option>
                         <option value="weekday">Weekday</option>
                         <option value="saturday">Saturday</option>
                         <option value="sunday">Sunday</option>
+                        <span class="select2-selection__arrow">
+											<b role="presentation"></b>
+										</span>
                     </select>
                 </div>
 
+            </div>
+            <div class="row">
+                <label class="col-sm-12 col-form-label">Speed Settings</label>
+            </div>
+            <div class="row">
+                <label class="col-sm-8 col-form-label"><i   class="bi bi-square-fill red pad-rt-10"></i>Low Speed (mph max)</label>
+                <div class="col-sm-4 pad-left-0">
+                    <input type="number"  class="form-control"  id="lowSpeedManual" name="lowSpeedManual" min="0" max="98" step="0.5" value="15" oninput="lowSpeedManual(this.value)" >
+                </div>
 
+            </div>
+            <div class="row">
+                <label class="col-sm-8 col-form-label"><i   class="bi bi-square-fill yellow pad-rt-10"></i>Mid Speed (mph max)</label>
+                <div class="col-sm-4 pad-left-0">
+                    <input type="number"  class="form-control"  id="midSpeedManual" name="midSpeedManual" min="1" max="99" step="0.5" value="25" oninput="midSpeedManual(this.value)">
+                </div>
 
-                <div id="speedParams">
-                    <div class = "param vertical">
-                        <div class="pair">
-                            <div class="speedLegend" style="background-color: red;"></div>
-                            <span>Low Speed (mph max)</span>
-                        </div>
-                        <div class="pair">
-                            <input id='lowSpeedSlider' name='lowSpeedSlider' type="range" min="0" max="98" step="0.1" value="0" oninput="lowSpeedSlider(this.value)">
-                            <input type="number" id="lowSpeedManual" name="lowSpeedManual" min="0" max="98" step="0.1" value="0" oninput="lowSpeedManual(this.value)">
-                        </div>
+            </div>
+            <div class="row">
+                <label class="col-sm-12 col-form-label"><i   class="bi bi-square-fill dark-green pad-rt-10"></i>High Speed (mph max)</label>
+
+            </div>
+
+        </form>
+        <div class="list-group">
+            <button class="list-group-item list-group-item-action"  id="mainSubmit">Submit</button>
+        </div>
+    </div>
+    <div class="right-panel position-relative">
+        <div class="list-group position-absolute comparsion-button-list d-none">
+            <div id="avgRunTimeTop" class="d-flex list-group-item list-group-item-action justify-content-between">No Routes</div>
+        </div>
+        <div class="map-legend-icons leaflet-popup-content absolute-bottom-right ">
+            <div class="card">
+                <%--                <div class="card-header header-theme">
+                                    <b>Schedule Marker Legend</b>
+                                </div>--%>
+
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex align-items-center">
+                            <i   class="bi bi-dash-lg red pad-rt-10"></i>  Low Speed (0 - 15 mph)
+
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i   class="bi bi-dash-lg yellow pad-rt-10"></i>  Mid Speed (15 - 25 mph)
+                        </li>
+                        <li class="list-group-item d-flex  align-items-center">
+                            <i   class="bi bi-dash-lg dark-green pad-rt-10"></i>  High Speed (> 25 mph)
+                        </li>
+                        <li class="list-group-item d-flex  align-items-center">
+                            <i   class="bi bi-hand-index"></i> Click segment to view speed
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="map"></div>
+
+        <div id="runTimesFlyout" class="modal fade comparision-modal-popup" >
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header align-items-center">
+                        <h5 class="modal-title" id="exampleModalLabel">Trip Run Time Comparison </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" id='closeFlyout' aria-label="Close"></button>
                     </div>
-                    <div class = "param vertical">
-                        <div class="pair">
-                            <div class="speedLegend" style="background-color: yellow;"></div>
-                            <span>Mid Speed (mph max)</span>
-                        </div>
-                        <div class="pair">
-                            <input id='midSpeedSlider' name='midSpeedSlider' type="range" min="1" max="99" step="0.1" value="10" oninput="midSpeedSlider(this.value)">
-                            <input type="number" id="midSpeedManual" name="midSpeedManual" min="1" max="99" step="0.1" value="10" oninput="midSpeedManual(this.value)">
+                    <div id="flyoutContents" class="modal-body">
 
+
+                        <div class="row">
+                            <div id="paramDetailsFlyout" ></div>
                         </div>
-                    </div>
-                    <div class = "param vertical">
-                        <div class="pair">
-                            <div class="speedLegend" style="background-color: green;"></div>
-                            <span>High Speed (mph max)</span>
+                        <div class="row">
+                            <div id="avgRunTimeFlyout"  ></div>
+                        </div>
+
+                        <jsp:include page="params/dateRangePicker.jsp" />
+                        <div class="list-group ">
+                            <button class="list-group-item list-group-item-action"   id="runTimeSubmit"  >Submit</button>
+                        </div>
+                        <div class="row">
+
+                            <canvas id="comparisonChart" height="400" ></canvas>
+
                         </div>
                     </div>
                 </div>
             </div>
-
-            <input type="button" id="mainSubmit" class="submit" value="Submit">
-
         </div>
 
     </div>
-
-    <div id="mainPage">
-
-        <div id="paramDetailsTop" class="paramDetails" style="height: 3%; float: left; margin-left: 20px; width: 60%;">
-            <p style='font-size: 0.8em;'></p>
-        </div>
-        <div id="avgRunTimeTop" class="avgRunTime" style="display: inline-block; float: right; margin-right: 20px; margin-bottom: 20px; width: 30%; text-align: right"></div>
-        <div id="runTimesFlyout" hidden="true">
-            <div id="flyoutContents" style="margin-right: 10px; margin-left: 20px; margin-top: 10px;">
-                <div id="runTimesHeader" style="text-align: left; vertical-align: middle; font-size: medium">
-                    Trip Run Time Comparison
-                    <button id='closeFlyout' type='button' style='float:right;'>&times;</button>
-                </div>
-                <div id="paramDetailsFlyout" class="paramDetails" style="margin-top: 20px; margin-bottom: 20px;"></div>
-                <div id="avgRunTimeFlyout" class="avgRunTime" style="margin-top: 20px; margin-bottom: 20px;"></div>
-
-
-
-                <div class="param">
-                    <label for="flyoutDatepicker">Date:</label>
-                    <input type="text" id="flyoutDatepicker" name="flyoutDatepicker"
-                           class="date-picker-input"
-                           title="The range of dates that you want to examine data for.
-                               <br><br> Begin date must be before the end date."
-                           size="18"
-                           value="Date range" />
-                </div>
-
-                <input type="button" id="runTimeSubmit" class="submit" value="Submit" style="margin-top: 20px; margin-bottom: 20px;">
-
-                <canvas id="comparisonChart" height="400" style="margin-top: 40px;"></canvas>
-            </div>
-        </div>
-        <div id="map" style="height: 90%; width: 90%; margin: auto;">
-            <div class="loader" hidden="true">
-                <div id="overlay"></div>
-                <div id="bars1">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-            </div>
-        </div>
-    </div>
-
+</div>
 </div>
 
-<script src="<%= request.getContextPath() %>/javascript/date-picker.js"></script>
+
 <script src="<%= request.getContextPath() %>/reports/javascript/speedmap.js"></script>
+
+</body>
+</html>

@@ -27,7 +27,7 @@
             // So need to use a blank string that can be determined
             // to be empty when trimmed.
             var selectorData = [{id: ' ', text: 'All Routes'}];
-            if(isDisabled && isDisabled.val() === 'true'){
+            if(isDisabled && isDisabled.val() === 'true' || isDisabled.val() === 'no-auto-trigger-default'){
                 selectorData=[];
             }
             for (var i in routes.routes) {
@@ -40,6 +40,7 @@
             // Configure the selector to be a select2 one that has
             // search capability
             $("#route").select2({
+                placeholder: "Select a Route",
                 data : selectorData})
                 // Need to reset tooltip after selector is used. Sheesh!
                 .on("select2:select", function(e) {
@@ -56,6 +57,8 @@
                 position: { my: "left+10 center", at: "right center" } });
             if(isDisabled && isDisabled.val() === 'true' && selectorData.length > 0){
                 $("#route").val(selectorData[0].id).trigger("change");
+            } else if(isDisabled && isDisabled.val() === 'no-auto-trigger-default' && selectorData.length > 0){
+                $("#route").val(-1).trigger("change")
             }
         });
 
