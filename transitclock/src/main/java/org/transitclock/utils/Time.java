@@ -486,14 +486,12 @@ public class Time {
 
 			// Handles cases where reference date is rolling over past midnight and seconds into day is < 4:00 or >= 24:00
 
-			//	If trip start time is greater than or equal to 24:00 then subtract hourAdjustment hours from referenceDate.
+			//	If trip start time is greater than or equal to 20:00 then subtract hourAdjustment hours from referenceDate.
 			//	The idea behind this is that if the referenceDate goes past midnight, we can still get the correct
 			//	start date by subtracting those hours hours.
-			if(hoursIntoDay >=24){
+			// Start from 20 instead of 24 to handle case where trip leaves past midnight but was scheduled to leave before midnight
+			if(hoursIntoDay >=20){
 				referenceDateTime -= hourAdjustment;
-			}
-			else if(hoursIntoDay == 23){
-				referenceDateTime -= minuteAdjustment;
 			}
 			// Handles case where reference date is before midnight and seconds into do for future stops is low
 			else if(hoursIntoDay < 4){
