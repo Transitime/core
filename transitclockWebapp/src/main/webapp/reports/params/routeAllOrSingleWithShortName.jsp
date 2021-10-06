@@ -14,7 +14,7 @@
 </style>
 
 <script>
-
+    var isDisabled = $(".isAllRoutesDisabled");
     $.getJSON(apiUrlPrefix + "/command/routes",
         function(routes) {
             // Generate list of routes for the selector.
@@ -23,6 +23,9 @@
             // So need to use a blank string that can be determined
             // to be empty when trimmed.
             var selectorData = [{id: ' ', text: 'All Routes'}];
+            if(isDisabled && isDisabled.val() === 'true'){
+                selectorData=[];
+            }
             for (var i in routes.routes) {
                 var route = routes.routes[i];
                 var name = route.shortName + " " + route.longName
@@ -33,6 +36,7 @@
             // Configure the selector to be a select2 one that has
             // search capability
             $("#route").select2({
+                placeholder: 'Select Routes',
                 data : selectorData})
                 // Need to reset tooltip after selector is used. Sheesh!
                 .on("select2:select", function(e) {

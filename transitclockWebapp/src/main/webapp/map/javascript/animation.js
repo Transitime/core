@@ -33,18 +33,52 @@ function avlAnimation(map, icon, clock) {
 		for (var i = 0; i < positions.length - 1; i++)
 			durations.push(positions[i+1].timestamp - positions[i].timestamp);
 
-		var popupContent = $("<div />");
+		var content = $("<div />").attr("class","card");
+		content.append('<div class="card-header header-theme">Vehicle</div>')
+
+		var label = $("<b />").text("Id: ");
+		var value = $("<div />").attr("class", "vehicle-value").text(data[0].vehicleId);
+
+		var table = $("<div />").attr("class", "card-body");
+		table.append( $("<div />").attr("class", "vehicle-item").append(label, value) )
+
+		var links = $("<div />")
+
+		links.append( $("<a href='#'  onclick='playAnimation(" + data[0].vehicleId + ")' class='list-group-item list-group-item-action' >Playback</a>"))
+
+
+		content.append(table)
+		content.append(links)
+
+		/* var popupContent = $("<div />");
 		var popupTable = $("<table />").attr("class", "popupTable");
 
 		var vehicleIdLabel = $("<td />").attr("class", "popupTableLabel").text("Vehicle ID: ");
 		var vehicleIdValue = $("<td />").text(data[0].vehicleId);
 		var playbackLink = $("<td><a href='#' onclick='playAnimation(" + data[0].vehicleId + ")'>Playback</a></td>");
+
 		popupTable.append( $("<tr />").append(vehicleIdLabel, vehicleIdValue) );
 		popupTable.append( $("<tr />").append(playbackLink));
-		popupContent.append(popupTable);
+		popupContent.append(popupTable); */
+
+		// Add a arrow to indicate the heading of the vehicle
+		var headingArrow = L.rotatedMarker(positions[0])
+			.setIcon(arrowIcon).addTo(map);
+
+		headingArrow.options.angle = data[0].heading;
+		headingArrow.setLatLng(positions[0]);
+		// If heading is NaN then don't show arrow at all
+		if (isNaN(parseFloat(data[0].heading))) {
+			headingArrow.setOpacity(0.0);
+		}
 		
-		sprite = L.marker(positions[0], {icon: icon}).bindPopup(popupContent[0]).addTo(map);
+		sprite = L.marker(positions[0], {icon: icon}).bindPopup(content[0]).addTo(map);
+		sprite.headingArrow = headingArrow;
+
 		clock.textContent = parseTime(elapsedTime);
+
+
+
 	}
 	
 	function tick() {

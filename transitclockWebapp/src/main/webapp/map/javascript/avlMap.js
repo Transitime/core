@@ -3,18 +3,18 @@
 var routeOptions = {
 	color: '#00ee00',
 	weight: 4,
-	opacity: 0.4,
+	opacity: 1,
 	lineJoin: 'round',
 	clickable: false
 };
 				
  var stopOptions = {
     color: '#006600',
-    opacity: 0.4,
+    opacity: 1,
     radius: 4,
     weight: 2,
     fillColor: '#006600',
-    fillOpacity: 0.3,
+    fillOpacity: 0.6,
 };
 
 var routePolylineOptions = {clickable: false, color: "#00f", opacity: 0.5, weight: 4};
@@ -143,26 +143,40 @@ function routeConfigCallback(data, status) {
 	// Draw the paths for the route
 
 	var route = data.routes[0];
+	var locsToFit = [];
+
 
 	for (var i=0; i<route.shape.length; ++i) {
 		var shape = route.shape[i];
-		L.polyline(shape.loc, routeOptions).addTo(routeGroup);
+
+		var routeOptions2 = JSON.parse(JSON.stringify(routeOptions));
+		routeOptions2.color = '#'+route.color;
+		routeOptions2.fillColor = '#'+route.textColor;
+
+		L.polyline(shape.loc, routeOptions2).addTo(routeGroup);
 	}
 
-  	// Draw stops for the route.
-  	for (var i=0; i<route.direction.length; ++i) {
-  		var direction = route.direction[i];
-  		for (var j=0; j<direction.stop.length; ++j) {
-  			var stop = direction.stop[j];
+	// Draw stops for the route.
+	for (var i=0; i<route.direction.length; ++i) {
+		var direction = route.direction[i];
+		for (var j=0; j<direction.stop.length; ++j) {
+			var stop = direction.stop[j];
 
-  			// Create the stop Marker
-  			var stopMarker = L.circleMarker([stop.lat,stop.lon], stopOptions).addTo(routeGroup);
+			var stopOptions2 = JSON.parse(JSON.stringify(stopOptions));
 
-  			// Create popup for stop marker
+			stopOptions2.radius= 4;
+			stopOptions2.color = '#'+route.color;
+			stopOptions2.fillColor = '#'+route.textColor;
 
-  			var content = $("<div />").attr("class", "card");
-  			var labels = ["Stop ID", "Name"], keys = ["id", "name"];
-  			content.append('<div class="card-header header-theme">Stop</div>')
+			locsToFit.push(L.latLng(stop.lat, stop.lon));
+			// Create the stop Marker
+			var stopMarker = L.circleMarker([stop.lat,stop.lon], stopOptions2).addTo(routeGroup);
+
+			// Create popup for stop marker
+
+			var content = $("<div />").attr("class", "card");
+			var labels = ["Stop ID"], keys = ["id"];
+			content.append('<div class="card-header header-theme">'+ stop["name"]+'</div>')
 			var content2 = $("<div />").attr("class", "card-body");
 			for (var k = 0; k < labels.length; k++) {
 				var label = $("<b />").text(labels[k] + ": ")
@@ -170,11 +184,15 @@ function routeConfigCallback(data, status) {
 				content2.append( $("<div />").attr("class", "vehicle-item").append(label, value) );
 			}
 			content.append(content2);
-  			stopMarker.bindPopup(content[0]);
-  		}
-   	 }
+			stopMarker.bindPopup(content[0]);
+		}
+	}
+
+	if (locsToFit.length > 0) {
+		map.fitBounds(locsToFit);
+	}
 }
-  
+
 // Data in vehicles will be available as CSV when you click the `export' link.
 // CSV should be the AVL CSV format used elsewhere in Transitime.
 // org.transitclock.avl.AvlCsvWriter writes the following header:
@@ -364,9 +382,12 @@ function drawRoute(route) {
 
 /* Animation controls */
 
-var busIcon =  L.icon({
-    iconUrl:  contextPath + "/reports/images/bus.png", 
-    iconSize: [25,25]
+var busIcon = L.icon({
+	iconUrl: '/web/maps/images/bus-24.png',
+	iconRetinaUrl: 'images/bus-24@2x.png',
+	iconSize: [24, 24],
+	iconAnchor: [12, 12],
+	popupAnchor: [0, -12],
 });
 
 var animation = avlAnimation(animationGroup, busIcon, $("#playbackTime")[0]);
