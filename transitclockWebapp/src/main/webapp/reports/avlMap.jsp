@@ -52,6 +52,7 @@
             AVL Data Map
         </h4>
         <form class="row" novalidate>
+            <input type="hidden" name="isAllRoutesDisabled"  class="isAllRoutesDisabled" value="true">
             <jsp:include page="params/routeAllOrSingleWithShortName.jsp" /> <br>
             <jsp:include page="params/vehicle.jsp" />
             <jsp:include page="params/fromDateNumDaysTime.jsp" />
