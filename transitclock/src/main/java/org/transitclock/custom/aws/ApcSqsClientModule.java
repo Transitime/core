@@ -73,6 +73,9 @@ public class ApcSqsClientModule extends Module {
   private static StringConfigValue snsArn =
           new StringConfigValue("transitclock.apc.snsArn", null, "The AWS SNS ARN to write to");
 
+  private static StringConfigValue snsRegion =
+          new StringConfigValue("transitclock.apc.snsRegion", "us-east-1", "The AWS region hosting the SNS topic");
+
   private static ClassConfigValue unmarshallerConfig =
           new ClassConfigValue("transitclock.apc.unmarshaller", SimpleApcMessageUnmarshaller.class,
                   "Implementation of ApcMessageUnmarshaller to perform " +
@@ -139,6 +142,7 @@ public class ApcSqsClientModule extends Module {
       try {
         logger.info("creating sns connection for archiving to ARN {}", snsArn.getValue());
         _sns = new AmazonSNSClient(new BasicAWSCredentials(snsKey.getValue(), snsSecret.getValue()));
+        _sns.setRegion(Region.getRegion(Regions.fromName(snsRegion.getValue())));
       } catch (Exception any) {
         // SNS topic failure is non-fatal
         logger.error("failed to create sns client: {}", any);
