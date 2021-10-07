@@ -99,6 +99,7 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
 
   @Override
   public PredictionResult getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
+    PredictionResult baseDwellTime = super.getStopTimeForPath(indices, avlReport, vehicleState);
     if (indices.atBeginningOfTrip() || indices.atEndOfTrip()) {
       logger.debug("returning base prediction for start/end of trip " + indices);
       return super.getStopTimeForPath(indices, avlReport, vehicleState);
@@ -171,7 +172,20 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     getMonitoring().averageMetric("PredictionApcProcessingTime", apcTimer.elapsedMsec());
     getMonitoring().averageMetric("PredictionApcPredictProcessingTime", predictTimer.elapsedMsec());
     ApcStopTimeCache.getInstance().put(indices, avlReport, vehicleState, new Double(result.getResult()).longValue());
+    logger.debug("METRIC,"
+            + new Date(avlReport.getTime()) + ","
+            + indices.getStopPath().getStopPathId() + ",base,"
+            + (int)baseDwellTime.getPrediction() + ",apcResult,"
+            + (int)result.getResult() + ",pctDiff,"
+            + percent(baseDwellTime.getPrediction(), result.getResult()) + ",index,"
+            + indices.getStopPath().toString());
     return new PredictionResult(new Double(result.getResult()).longValue(), Algorithm.APC_DWELL);
+  }
+
+  private String percent(long base, double result) {
+    if (result == 0.0) return "NaN";
+    int pct = (int) (100 * ((base - result) / result));
+    return String.valueOf(pct);
   }
 
   private PredictionResult getDefaultStopTime(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
