@@ -100,8 +100,8 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
   @Override
   public PredictionResult getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
     PredictionResult baseDwellTime = super.getStopTimeForPath(indices, avlReport, vehicleState);
-    if (indices.atBeginningOfTrip() || indices.atEndOfTrip()) {
-      logger.debug("returning base prediction for start/end of trip " + indices);
+    if (indices.atBeginningOfTrip() || indices.atEndOfTrip() || hasSlackTime(indices)) {
+      logger.debug("returning base prediction for start/end of trip or layover " + indices);
       return super.getStopTimeForPath(indices, avlReport, vehicleState);
     }
 
@@ -180,6 +180,15 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
             + percent(baseDwellTime.getPrediction(), result.getResult()) + ",index,"
             + indices.getStopPath().toString());
     return new PredictionResult(new Double(result.getResult()).longValue(), Algorithm.APC_DWELL);
+  }
+
+  // check if arrival and departures don't match denoting the stop has slack time
+  private boolean hasSlackTime(Indices indices) {
+    ScheduleTime st = indices.getScheduleTime();
+    if (st.getArrivalTime() != null && !st.getArrivalTime().equals(st.getDepartureTime())) {
+      return true;
+    }
+    return false;
   }
 
   private String percent(long base, double result) {
@@ -354,11 +363,9 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     ScheduleTime st = indices.getScheduleTime();
     if (st == null) return null;
     if (vehicleState == null) return null;
-    Integer scheduleTimeSeconds = indices.getScheduleTime().getArrivalTime();
-    if (scheduleTimeSeconds == null) scheduleTimeSeconds = indices.getScheduleTime().getTime();
 
     Long arrivalTime = Core.getInstance().getTime()
-            .getEpochTime(scheduleTimeSeconds
+            .getEpochTime(indices.getScheduleTime().getTime()
                     + vehicleState.getRealTimeSchedAdh().getTemporalDifference()/Time.MS_PER_SEC,
                     vehicleState.getAvlReport().getTime());
 
