@@ -325,14 +325,15 @@ function routeConfigCallback(routesData, status) {
                 var stop = direction.stop[j];
                 var stopOptions2 = JSON.parse(JSON.stringify(stopOptions));
                 var options = stop.minor ? minorStopOptions : stopOptions;
-                if(isRealTimePage){
+                // if(isRealTimePage){
                     stopOptions2.radius= 4;
+                    stopOptions2.fillOpacity= 1;
                     stopOptions2.color = '#'+route.color;
                     stopOptions2.fillColor = '#'+route.textColor;
 
                      options =  (stop.id == $("#stopsSearch").val())  ?
                          {"color":"#FF0000","opacity":1,"radius":3,"weight":2,"fillColor":"#FF0000","fillOpacity":0.6,"clickable":false} : stopOptions2;
-                }
+                // }
 
                 // Draw first non-minor stop differently to highlight it
                 /*
@@ -372,12 +373,12 @@ function routeConfigCallback(routesData, status) {
         for (var i=0; i<route.shape.length; ++i) {
             var shape = route.shape[i];
             var options = shape.minor ? minorShapeOptions : shapeOptions;
-            if(isRealTimePage){
+            // if(isRealTimePage){
                 var stopOptions2 = JSON.parse(JSON.stringify(shapeOptions));
                 stopOptions2.color = '#'+route.color;
                 stopOptions2.fillColor = '#'+route.textColor;
                 options = stopOptions2;
-            }
+            // }
             var latLngs = [];
             for (var j=0; j<shape.loc.length; ++j) {
                 var loc = shape.loc[j];
