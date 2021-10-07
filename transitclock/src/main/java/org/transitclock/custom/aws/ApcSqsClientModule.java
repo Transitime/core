@@ -246,7 +246,7 @@ public class ApcSqsClientModule extends Module {
     for (Message message : messages) {
       try {
         PublishRequest request = new PublishRequest();
-        request.setTopicArn(snsArn.getValue());
+        request.setTargetArn(snsArn.getValue());
         request.setMessage(_messageUnmarshaller.toString(message));
         _sns.publish(request);
       } catch (Exception any) {
