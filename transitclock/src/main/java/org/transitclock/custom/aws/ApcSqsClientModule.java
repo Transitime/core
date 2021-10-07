@@ -11,6 +11,7 @@ import com.amazonaws.services.sqs.AmazonSQSClient;
 import com.amazonaws.services.sqs.model.DeleteMessageRequest;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
@@ -130,6 +131,23 @@ public class ApcSqsClientModule extends Module {
     _sqs = new AmazonSQSClient(_sqsCredentials);
     Region defaultRegion = Region.getRegion(Regions.fromName(sqsRegion.getValue()));
     _sqs.setRegion(defaultRegion);
+
+    // now setup _sns if credentials present
+    if (!StringUtils.isEmpty(snsKey.getValue())
+            && !StringUtils.isEmpty(snsSecret.getValue())
+            && !StringUtils.isEmpty(snsArn.getValue())) {
+      try {
+        logger.info("creating sns connection for archiving to ARN {}", snsArn.getValue());
+        _sns = new AmazonSNSClient(new BasicAWSCredentials(snsKey.getValue(), snsSecret.getValue()));
+      } catch (Exception any) {
+        // SNS topic failure is non-fatal
+        logger.error("failed to create sns client: {}", any);
+        _sns = null;
+      }
+    } else {
+      logger.info("sns configuration not set, skipping.");
+    }
+
   }
 
   public void shutdown() {
@@ -228,7 +246,7 @@ public class ApcSqsClientModule extends Module {
         request.setMessage(_messageUnmarshaller.toString(message));
         _sns.publish(request);
       } catch (Exception any) {
-        logger.error("issue archving message {}: ", message, any);
+        logger.error("issue archiving message {}: ", message, any);
       }
     }
   }
