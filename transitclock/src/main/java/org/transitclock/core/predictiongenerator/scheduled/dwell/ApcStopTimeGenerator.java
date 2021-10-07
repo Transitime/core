@@ -340,9 +340,11 @@ public class ApcStopTimeGenerator extends KalmanPredictionGeneratorImpl {
     ScheduleTime st = indices.getScheduleTime();
     if (st == null) return null;
     if (vehicleState == null) return null;
+    Integer scheduleTimeSeconds = indices.getScheduleTime().getArrivalTime();
+    if (scheduleTimeSeconds == null) scheduleTimeSeconds = indices.getScheduleTime().getTime();
 
     Long arrivalTime = Core.getInstance().getTime()
-            .getEpochTime(indices.getScheduleTime().getTime()
+            .getEpochTime(scheduleTimeSeconds
                     + vehicleState.getRealTimeSchedAdh().getTemporalDifference()/Time.MS_PER_SEC,
                     vehicleState.getAvlReport().getTime());
 
