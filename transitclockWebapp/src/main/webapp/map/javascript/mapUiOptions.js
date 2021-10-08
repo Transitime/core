@@ -21,7 +21,7 @@ var stopOptions = {
     radius: 4,
     weight: 2,
     fillColor: '#006600',
-    fillOpacity: 0.6,
+    fillOpacity: 1,
 };
 
 var firstStopOptions = {
@@ -30,7 +30,7 @@ var firstStopOptions = {
     radius: 7,
     weight: 2,
     fillColor: '#ccffcc',
-    fillOpacity: 0.9,		
+    fillOpacity: 1,
 }
 
 var minorStopOptions = {
@@ -39,7 +39,7 @@ var minorStopOptions = {
     radius: 3,
     weight: 2,
     fillColor: '#006600',
-    fillOpacity: 0.2,
+    fillOpacity: 1,
 };
 
 var busIcon = L.icon({

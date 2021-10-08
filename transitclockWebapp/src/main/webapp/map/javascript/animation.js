@@ -71,7 +71,9 @@ function avlAnimation(map, icon, clock) {
 		if (isNaN(parseFloat(data[0].heading))) {
 			headingArrow.setOpacity(0.0);
 		}
-		
+
+		console.log('positions[currentIndex].heading', positions[0].heading)
+
 		sprite = L.marker(positions[0], {icon: icon}).bindPopup(content[0]).addTo(map);
 		sprite.headingArrow = headingArrow;
 
@@ -103,14 +105,22 @@ function avlAnimation(map, icon, clock) {
 				paused = true;
 				return;
 			}
-			
+			console.log('positions[currentIndex].heading', positions[currentIndex].heading)
 			sprite.setLatLng(positions[currentIndex])
+			sprite.headingArrow.options.angle = positions[currentIndex].heading;
+			sprite.headingArrow.setLatLng(positions[currentIndex]);
+			sprite.headingArrow.update();
+
 			sprite.update()
 			elapsedTime = positions[currentIndex].timestamp
 		}
 		else {
 			var pos = interpolatePosition(positions[currentIndex], positions[currentIndex+1], durations[currentIndex], lineDone)
 			sprite.setLatLng(pos)
+			console.log('positions[currentIndex].heading', positions[currentIndex].heading)
+			sprite.headingArrow.options.angle = positions[currentIndex].heading;
+			sprite.headingArrow.setLatLng(pos);
+			sprite.headingArrow.update();
 			sprite.update()
 			
 		}
@@ -207,6 +217,11 @@ function avlAnimation(map, icon, clock) {
 		// update GUI if tick won't.
 		if (paused) {
 			sprite.setLatLng(avl);
+			sprite.headingArrow.options.angle = positions[currentIndex].heading;
+			console.log('positions[currentIndex].heading', positions[currentIndex].heading)
+			sprite.headingArrow.setLatLng(avl);
+			sprite.headingArrow.update();
+
 			sprite.update();
 			clock.textContent = parseTime(elapsedTime);
 		}

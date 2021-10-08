@@ -14,7 +14,7 @@ var routeOptions = {
     radius: 4,
     weight: 2,
     fillColor: '#006600',
-    fillOpacity: 0.6,
+    fillOpacity: 1,
 };
 
 var routePolylineOptions = {clickable: false, color: "#00f", opacity: 0.5, weight: 4};
