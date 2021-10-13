@@ -29,7 +29,6 @@ public class Headway implements Serializable {
 	 */
 	private static final long serialVersionUID = -4561111910398287801L;
 
-	@Id 
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private long id;
 	
