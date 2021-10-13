@@ -18,6 +18,9 @@ if (agencyId == null || agencyId.isEmpty()) {
 <script type="text/javascript">
   var ALLOWABLE_EARLY_MSEC = <%= ScheduleAdherenceController.getScheduleEarlySeconds() %> * -1000;
   var ALLOWABLE_LATE_MSEC  = <%= ScheduleAdherenceController.getScheduleLateSeconds() %> * 1000;
+  var LICENSE_FILTER_LIST  = '<%= ScheduleAdherenceController.getLicenseFilterList() %>'.split(",");
+  var LICENSE_FILTER_SET  = new Set(LICENSE_FILTER_LIST);
+
 </script>
   <script src="<%= request.getContextPath() %>/javascript/active-blocks.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
