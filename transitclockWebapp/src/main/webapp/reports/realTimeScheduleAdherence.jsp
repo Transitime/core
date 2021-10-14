@@ -60,7 +60,7 @@
 
             <div class="row">
                 <label class="col-sm-12 col-form-label">Routes</label>
-
+                <input type="hidden" name="isAllRoutesDisabled"  class="isAllRoutesDisabled" value="true">
                 <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
                 <jsp:include page="params/routeMultipleNoLabel.jsp" />
             </div>
@@ -179,6 +179,7 @@
 
             $("#route").select2({
                 data : selectorData,
+                placeholder: "Select Routes",
                 templateSelection: formatRoute
             })
                 // Need to reset tooltip after selector is used. Sheesh!

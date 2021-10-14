@@ -57,7 +57,7 @@
             $( "#select2-route-container" ).tooltip({ content: configuredTitle,
                 position: { my: "left+10 center", at: "right center" } });
 
-
+            $("#route").val(' ').trigger("change");
         });
 
 </script>

@@ -1121,6 +1121,8 @@ function fetchRouteAll(){
                 }
                 else if (map && routeFeatureGroup) {
                     map.removeLayer(routeFeatureGroup);
+                    $(".select2-search__field").attr("placeholder","All Routes");
+                    $(".select2-search__field").css("width","100px");
                 }
 
                 // Reset the polling rate back down to minimum value since selecting new route
@@ -1143,7 +1145,8 @@ function fetchRouteAll(){
 
             $("#route").select2({
                 data : selectorData,
-                templateSelection: formatRoute
+                templateSelection: formatRoute,
+                placeholder: "All Routes",
             })
                 // Need to reset tooltip after selector is used. Sheesh!
                 .on("select2:select", selectUnSelectCallBack)
