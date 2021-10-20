@@ -102,23 +102,23 @@
             <div class="card">
 
                 <div class="card-body">
-                    <b>AVL Marker Legend</b>
+<%--                    <b>AVL Marker Legend</b>--%>
                     <ul class="list-group">
                         <li class="list-group-item d-flex align-items-center">
                             <i class="bi bi-triangle-fill green"></i>
-                             &nbsp; On Time
+                             &nbsp;= On Time
                         </li>
                         <li class="list-group-item d-flex align-items-center">
                             <i class="bi bi-triangle-fill yellow"></i>
-                             &nbsp; Late
+                             &nbsp;= Late
                         </li>
                         <li class="list-group-item d-flex  align-items-center">
                             <i class="bi bi-triangle-fill red"></i>
-                             &nbsp; Early
+                             &nbsp;= Early
                         </li>
                         <li class="list-group-item d-flex  align-items-center">
                             <i class="bi bi-triangle-fill blue"></i>
-                             &nbsp; No Data
+                             &nbsp;= No Data
                         </li>
                     </ul>
                 </div>

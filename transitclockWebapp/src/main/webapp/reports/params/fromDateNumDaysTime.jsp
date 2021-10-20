@@ -23,7 +23,7 @@
         yearFormat = 'YY-MM-DD';
     }
     jQueryLatest(function() {
-        jQueryLatest('#beginDate').daterangepicker({
+        jQueryLatest('.beginDate').daterangepicker({
             singleDatePicker: singleDatePicker,
             showDropdowns: singleDatePicker,
             minYear: 1901,
@@ -87,7 +87,7 @@
     <label class="col-sm-12 col-form-label">Date</label>
     <div class="col-sm-12 d-flex justify-content-between date-icon-wrapper align-items-center">
 
-    <input type="text" id="beginDate" name="beginDate" class="form-control"
+    <input type="text" id="beginDate" name="beginDate" class="form-control beginDate"
            title="The first day of the range you want to examine data for.
     	<br><br> Begin date must be before the end date." />
         <i class="bi bi-calendar3 calendar-icon"></i>
@@ -95,7 +95,7 @@
 </div>
 
 
-<div class="row  align-items-center">
+<div class="row  align-items-center time-place-holder">
     <label class="time-label col-form-label"  for="beginTime">Begin Time</label>
 
     <input type="text" class="form-control time-input time-input-box"

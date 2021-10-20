@@ -90,13 +90,15 @@
                 <button  class="list-group-item list-group-item-action">
                     Live Map View
                 </button>
-                <a  class="list-group-item list-group-item-action secondary-btn"
-                    href="realTimeDispatcher.jsp?a=<%= agencyId %>" >
-                    Dispatcher View
-                </a>
+
                 <a  class="list-group-item list-group-item-action secondary-btn"
                     href="realTimeScheduleAdherence.jsp?a=<%= agencyId %>" >
                     Schedule Adherence View
+                </a>
+
+                <a  class="list-group-item list-group-item-action secondary-btn"
+                    href="realTimeDispatcher.jsp?a=<%= agencyId %>" >
+                    Dispatcher View
                 </a>
             </div>
         </div>

@@ -136,7 +136,7 @@
                             <i   class="bi bi-dash-lg dark-green pad-rt-10"></i>  High Speed (> 25 mph)
                         </li>
                         <li class="list-group-item d-flex  align-items-center">
-                            <i   class="bi bi-hand-index"></i> Click segment to view speed
+                            <i   class="bi bi-hand-index-thumb-fill white"></i> <span class="legend-label">Click segment to view speed</span>
                         </li>
                     </ul>
                 </div>

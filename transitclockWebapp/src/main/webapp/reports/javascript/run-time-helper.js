@@ -21,7 +21,11 @@ Chart.plugins.register({
                         ctx.fillText(data + "%", bar._model.x - ((bar._model.x - bar._model.base) / 2), bar._model.y + 5);
                     }
                 } else {
-                    ctx.fillText(data, bar._model.x - ((bar._model.x - bar._model.base) / 2), bar._model.y + 5);
+                    if(chart.config.type !== 'bar'){
+                        ctx.fillText(data, bar._model.x - ((bar._model.x - bar._model.base) / 2), bar._model.y + 5);
+                    }
+
+
                 }
                 ctx.restore(); //<- restore canvas state
             }))
@@ -165,7 +169,7 @@ function getDefaultChartOptions(options){
 
     var canvas = $("#visualizationCanvas");
     var barGraph = new Chart(canvas, {
-        type: 'horizontalBar',
+        type: options.type || 'horizontalBar',
         data: {},
         options: {
             showPercentage: options && options.showPercentage,

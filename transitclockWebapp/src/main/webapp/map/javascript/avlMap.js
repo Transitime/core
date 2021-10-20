@@ -135,13 +135,21 @@ function processAvlCallback(jsonData) {
 	return vehicles;
 }
 
+function routeConfigCallback(data, status) {
+	// Draw the paths for the route
+	if (map._loaded) {
+		routeConfigCallback2(data, status);
+	} else{
+		map.on("load",  routeConfigCallback2(data, status));
+	}
+}
 
 /**
  * Reads in route data obtained via AJAX and draws route and stops on map.
  */
-function routeConfigCallback(data, status) {
-	// Draw the paths for the route
 
+function routeConfigCallback2(data, status) {
+	// Draw the paths for the route
 	var route = data.routes[0];
 	var locsToFit = [];
 
@@ -283,6 +291,10 @@ else {
 	// set beginDate and endDate to defaults
 	request.beginDate = $("#beginDate").val()
 	request.numDays = $("#numDays").val()
+	if($("#route").val())
+	{
+		drawRoute($("#route").val());
+	}
 }
 
 // draw route data when dropdown is selected

@@ -5,6 +5,10 @@ form >div {
     margin-bottom: 20px;
     padding-right: 0;
 }
+form.no-margin >div {
+    margin-bottom: 0px;
+}
+
 
 h4{
     font-weight: normal;
@@ -304,13 +308,18 @@ button.submit-button {
     top: 85px;
     right: 20px;
     width: 200px;
-    background: #e8e8e89e;
+    background: #e8e8e8ab;
     border: 1px solid #FFFFFF;
     border-radius: 5px;
     -webkit-box-shadow: 0px 0px 4px 0px rgb(105 105 105 / 50%);
     -moz-box-shadow: 0px 0px 4px 0px rgba(105,105,105,0.5);
     box-shadow: 0px 0px 4px 0px rgb(105 105 105 / 50%);
 
+}
+
+.legend-label{
+    font-size: 0.90em;
+    padding-left: 7px;
 }
 
 .map-legend-icons  .badge {
@@ -605,4 +614,34 @@ opacity: 0.3;
 }
 .absolute-bottom-right i.bi-dash-lg:before{
     font-size : 25px;
+}
+
+.comparision{
+    padding:0;
+    margin:0;
+}
+
+.visualization-container {
+    margin-top: 80px;
+}
+
+.comparision-label-container label{
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 18px;
+    color: #1E3F78;
+}
+
+.comparision .time-place-holder, .comparision  {
+    margin-top: 10px;
+}
+
+
+.no-margin-all{
+    margin: 0;
+}
+
+.comparision-runTimeVisualization{
+    width: 90%;
+    margin: auto;
 }
