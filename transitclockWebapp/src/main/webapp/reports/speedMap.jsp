@@ -126,17 +126,19 @@
                 <div class="card-body">
                     <ul class="list-group">
                         <li class="list-group-item d-flex align-items-center">
-                            <i   class="bi bi-dash-lg red pad-rt-10"></i>  Low Speed (0 - 15 mph)
+                            <i   class="bi bi-dash-lg red pad-rt-10"></i>  <span class="legend-label" id="low-speed-label"> Low Speed (0 - 15 mph)</span>
 
                         </li>
                         <li class="list-group-item d-flex align-items-center">
-                            <i   class="bi bi-dash-lg yellow pad-rt-10"></i>  Mid Speed (15 - 25 mph)
+                            <i   class="bi bi-dash-lg yellow pad-rt-10"></i>   <span class="legend-label" id="mid-speed-label"> Mid Speed (15 - 25 mph)</span>
                         </li>
                         <li class="list-group-item d-flex  align-items-center">
-                            <i   class="bi bi-dash-lg dark-green pad-rt-10"></i>  High Speed (> 25 mph)
+                            <i   class="bi bi-dash-lg dark-green pad-rt-10"></i>  <span class="legend-label" id="high-speed-label"> High Speed (> 25 mph)</span>
                         </li>
                         <li class="list-group-item d-flex  align-items-center">
-                            <i   class="bi bi-hand-index-thumb-fill white"></i> <span class="legend-label">Click segment to view speed</span>
+                            <img src="images/click_icon.png" alt="hand-pointer" class="hand-pointer-img">
+<%--                            <i   class="bi bi-hand-index-thumb white"></i> --%>
+                                <span class="legend-label">Click segment to view speed</span>
                         </li>
                     </ul>
                 </div>
