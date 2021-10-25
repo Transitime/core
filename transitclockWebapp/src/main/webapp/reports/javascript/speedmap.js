@@ -325,6 +325,13 @@ $("#mainSubmit").click(function() {
 
     setTimeout(function(){ map.invalidateSize(), map.setZoom(14)}, 500);
 
+    var lowSpeed = parseFloat($("#lowSpeedManual").val());
+    var midSpeed = parseFloat($("#midSpeedManual").val())
+
+    $("#low-speed-label").html("Low Speed (0 - "+lowSpeed+" mph)")
+    $("#mid-speed-label").html("Mid Speed ("+lowSpeed+" - "+midSpeed+" mph)")
+    $("#high-speed-label").html("High Speed (> "+midSpeed+" mph)")
+
     $.ajax({
         url: apiUrlPrefix + "/report/speedmap/stopPathsSpeed",
         // Pass in query string parameters to page being requested

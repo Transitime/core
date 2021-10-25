@@ -361,13 +361,18 @@ function drawAvlData() {
             $("#submit").removeAttr("disabled");
 	    	vehicleGroup.clearLayers();
 	    	var vehicles = processAvlCallback(resp);
-	    	// connect export to link to csv creation.
-	    	createExport(vehicles);
+	    	if(vehicles.length){
+				// connect export to link to csv creation.
+				createExport(vehicles);
+			}
+
 
 	    	for (i in animations) {
 	    		animations[i].removeIcon();
+
 			}
 	    	animations = {};
+			$("img.leaflet-clickable").remove()
 	    	if (!allVehiclesRequested() && vehicles.length)
 	    		prepareAnimations(vehicles); // only animate first vehicle returned.
 
