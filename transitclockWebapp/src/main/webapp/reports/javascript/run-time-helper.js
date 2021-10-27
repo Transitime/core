@@ -169,7 +169,7 @@ function getDefaultChartOptions(options){
 
     var canvas = $("#visualizationCanvas");
     var barGraph = new Chart(canvas, {
-        type: options.type || 'horizontalBar',
+        type: options && options.type || 'horizontalBar',
         data: {},
         options: {
             showPercentage: options && options.showPercentage,
@@ -356,7 +356,15 @@ function updateSummaryTable(summary){
     tableTD += "<td>"+avgFixed+"</td>";
     tableTD += "<td>"+avgVar+"</td>";
     tableTD += "<td>"+avgDwell+"</td>";
-    $(".average-time-details").html(tableTD);
+    if($(".average-time-details").length > 0)
+    {
+        $(".average-time-details").html(tableTD);
+    }   else {
+        $("#avg-run-time").html(avgRunTime);
+        $("#fixed-time").html(avgFixed);
+        $("#variable-time").html(avgVar);
+        $("#dwell-time").html(avgDwell);
+    }
 }
 
 function updateParamDetails(route, headsign, tripPattern, beginDateString, endDateString, timeRange, serviceDayString, showTrip){

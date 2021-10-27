@@ -5,6 +5,7 @@
     $(".individual-route-only").hide();
     $( "#run-time-tabs" ).tabs();
     $(".route-settings").hide();
+    $("#timePointsOnly").trigger("click");
 
     $("#route").change(function () {
         if ($("#route").val().trim() != "") {
@@ -209,7 +210,7 @@
 
         var tableTD = generatePercentileTable(tripsDisplayData, formattedScheduled.minsData, formattedRunTimeTrips);
 
-        var percentileSelect = $('<select id="percentile-select-box" name="percentileSelect"></select>');
+        var percentileSelect = $('<select id="percentile-select-box" name="percentileSelect" class="form-select"></select>');
         percentileSelectOptions[percentileSelectOptions.length-1] = {
             value: "99",
             name: "99%"
@@ -222,14 +223,18 @@
         });
 
         percentileSelect.append( '<span class="select2-selection__arrow"><b role="presentation"></b></span>');
-        $("#percentile-select-container").append('<label for="percentileSelect">Percentile</label>');
-        $("#percentile-select-container").append(percentileSelect);
+        var percentileSelectContainer = $('<div class="col-sm-1"></div>');
+
+        $("#percentile-select-container").append('<label for="percentileSelect" class="col-sm-1">Percentile : </label>');
+        $(percentileSelectContainer).append(percentileSelect);
+        $("#percentile-select-container").append(percentileSelectContainer);
+        $("#percentile-select-container").append('<label for="percentileSelect2" class="col-sm-6">Displays the nth percentile run time</label>');
 
         $("#percentile-select-box").val("50");
         $("#percentile-select-box").change(function () {
             var tableTD ;
 
-            if ($("#percentile-select-box").val().trim() != "") {
+            if ($("#percentile-select-box").val().trim() !== "") {
 
                 var valuePercentage = $("#percentile-select-box").val().trim();
                 var formattedRunTimeTrips = generateRunTimes(tripRunTimes, valuePercentage );
@@ -255,7 +260,7 @@
     function getParams() {
         var datepicker, serviceTypeSelector;
 
-        datepicker = "datepicker";
+        datepicker = "beginDate";
         serviceTypeSelector = "serviceDayType";
 
         if ($("#" + datepicker).val() == "Date range") {
@@ -414,9 +419,25 @@
                     resetDisable();
                     alert("No run time information available for selected parameters.");
                 }else if(response.data && (response.data.summary || response.data.routes)) {
-                    updateParamDetails(request.r, request.headsign, request.tripPattern, beginDateString, endDateString,
-                        timeRange, serviceDayString, true);
-                
+                    /*updateParamDetails(request.r, request.headsign, request.tripPattern, beginDateString, endDateString,
+                        timeRange, serviceDayString, true);*/
+                    var selectedRoute = "All routes";
+                    if(request.r){
+                        for( var i = 0; i < route.options.length; i++){
+                            var eachOption = route.options[i];
+                            if(request.r === eachOption.value){
+                                selectedRoute = eachOption.text;
+                            }
+                        }
+                    }
+
+                    var selectedDate = beginDateString + " - " + endDateString;
+                    var contentTripHeader = "<div class='route-time-analysis-header-param'>Analysis Details :  "+selectedRoute+"</div>";
+                    contentTripHeader += "<div class='route-time-analysis-header-param'>Date : "+selectedDate+"</div>";
+                    contentTripHeader += "<div class='route-time-analysis-header-param'>Time : "+timeRange+"</div>";
+
+                    $(".route-time-analysis-header").html(contentTripHeader);
+
                     if(response.data.summary){
                         $(".all-routes").hide();
                         $(".individual-route").show();
@@ -482,9 +503,8 @@
 
             if(response.data.trips && response.data.trips.length ){
 
-                var tripSelectBox = $('<select id="trips-select-box" name="tripBoxType"><option value="">All Trips</option></select>');
+                var tripSelectBox = $('<select id="trips-select-box" class="form-select col-sm-8" name="tripBoxType"><option value="">All Trips</option></select>');
                 var tripsDisplayData = getTripsDisplayData(response.data.trips);
-
                 tripsDisplayData.tripVal.forEach(function (eachTrip, i) {
                     var option = $('<option></option>');
                     option.attr('value', tripsDisplayData.tripVal[i]);
@@ -493,10 +513,20 @@
                 });
 
                 tripSelectBox.append( '<span class="select2-selection__arrow"><b role="presentation"></b></span>');
+                var tripSelectBoxContainer = $('<div class="trip-select-box-container"><h3>Component Visulization</h3></div>');
 
+                var tripSelectBoxContainerChild = $('<div class="row flex-nowrap align-items-center"></div>');
+                var tripSelectBoxContainerChild2 = $('<div class="col-sm-2"></div>');
+
+                tripSelectBoxContainerChild2.append(tripSelectBox);
+                tripSelectBoxContainerChild.append(tripSelectBoxContainerChild2)
+                tripSelectBoxContainerChild.append('<label for="tripBoxType" id="visualization-container-header" class="col-sm-4">Trip Run Times</label>');
+                tripSelectBoxContainer.append(tripSelectBoxContainerChild);
                 $("#trips-container").html("");
-                $("#trips-container").append('<h3 for="tripBoxType" id="visualization-container-header">Trip Run Times</h3>');
-                $("#trips-container").append(tripSelectBox);
+
+                $("#trips-container").append(tripSelectBoxContainer);
+
+               //  $("#trips-container").append('<label for="tripBoxType" id="visualization-container-header" class="col-sm-4">Trip Run Times</label>');
 
                 $("#trips-select-box").change(function () {
 
