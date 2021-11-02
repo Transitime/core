@@ -12,6 +12,45 @@ function avlAnimation(map, icon, clock) {
 	
 	// create icon for animation and initialize values
 	// positions is an array of position values: { lat, lon, timestamp }
+	function popupData(data){
+		var avl = data;
+		var labels = ["Vehicle", "GPS Time", "Time Proc", "Lat/Lon", "Speed", "Heading", "Assignment ID", "Route", "Headsign", "Schedule Adherence", "OTP", "Headway Adherence"],
+			keys = ["vehicleId", "time", "timeProcessed", "latlon", "niceSpeed", "heading", "assignmentId", "routeShortName", "headsign", "schedAdh", "otp", "headway"];
+
+		var content = $("<div />").attr("class","card");
+		content.append('<div class="card-header header-theme">Vehicle</div>')
+		var table = $("<div />").attr("class", "card-body");
+
+		for (var i = 0; i < labels.length; i++) {
+			var label = $("<b />").text(labels[i] + ": ");
+			var value = $("<div />").attr("class", "vehicle-value").text('N/A');
+			if(avl[keys[i]]){
+				value = $("<div />").attr("class", "vehicle-value").text(avl[keys[i]]);
+			}
+
+
+			table.append( $("<div />").attr("class", "vehicle-item").append(label, value) )
+		}
+
+		// Links to schedule and google maps for vehicle
+		var links = $("<div />")
+
+		var mapsLink = 'http://google.com/maps?q=loc:' + avl.lat + ',' + avl.lon
+
+		links.append( $("<a data-toggle='modal' href='#schedule-modal' class='list-group-item list-group-item-action secondary-btn' onclick='scheduleAjax(" + avl['tripId'] + "); return false;'>Schedule</a>"))
+		// links.append( $("<div style='border-left:2px solid black;height:20px;display:inline-block;vertical-align:middle'></div>"))
+		links.append( $("<a href=" + mapsLink + " target='_blank' class='list-group-item list-group-item-action secondary-btn' >View Location in Google Maps</a>"))
+
+		var links2 = $("<div />")
+
+		links2.append( $("<a href='#'  id='" + avl.vehicleId + "' onclick='playAnimation(" + avl.vehicleId + ")' class='list-group-item list-group-item-action play-back-popup-btn' >Hide Other Vehicles</a>"))
+
+		content.append(table)
+		content.append(links)
+		content.append(links2)
+		return content;
+	}
+
 	function animation(data) {
 		
 		positions = data
@@ -33,8 +72,11 @@ function avlAnimation(map, icon, clock) {
 		for (var i = 0; i < positions.length - 1; i++)
 			durations.push(positions[i+1].timestamp - positions[i].timestamp);
 
-		var content = $("<div />").attr("class","card");
+		/*var content = $("<div />").attr("class","card");
 		content.append('<div class="card-header header-theme">Vehicle</div>')
+
+
+
 
 		var label = $("<b />").text("Id: ");
 		var value = $("<div />").attr("class", "vehicle-value").text(data[0].vehicleId);
@@ -44,12 +86,13 @@ function avlAnimation(map, icon, clock) {
 
 		var links = $("<div />")
 
-		links.append( $("<a href='#'  onclick='playAnimation(" + data[0].vehicleId + ")' class='list-group-item list-group-item-action' >Playback</a>"))
+		links.append( $("<a href='#'  id='" + data[0].vehicleId + "' onclick='playAnimation(" + data[0].vehicleId + ")' class='list-group-item list-group-item-action play-back-popup-btn' >Hide Other Vehicles</a>"))
 
 
 		content.append(table)
 		content.append(links)
-
+*/
+		var content = popupData(data[0]);
 		/* var popupContent = $("<div />");
 		var popupTable = $("<table />").attr("class", "popupTable");
 
@@ -77,9 +120,8 @@ function avlAnimation(map, icon, clock) {
 		sprite = L.marker(positions[0], {icon: icon}).bindPopup(content[0]).addTo(map);
 		sprite.headingArrow = headingArrow;
 
+		sprite.setZIndexOffset(400)
 		clock.textContent = parseTime(elapsedTime);
-
-
 
 	}
 	
@@ -195,12 +237,26 @@ function avlAnimation(map, icon, clock) {
 	// clean up icon
     animation.removeIcon = function() {
         // remove old sprite.
-        if (sprite)
-            map.removeLayer(sprite);
+        if (sprite){
+			map.removeLayer(sprite.headingArrow);
+			map.removeLayer(sprite);
+		}
+
     }
+
+	// clean up icon
+	animation.setOpacityIcon = function(value) {
+		// remove old sprite.
+		if (sprite){
+			sprite.setOpacity(value);
+			sprite.headingArrow.setOpacity(value);
+		}
+
+	}
 
     animation.addIcon = function() {
 		map.addLayer(sprite);
+		map.addLayer(sprite.headingArrow);
 	}
 		
 	function updateToIndex(i) {

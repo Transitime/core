@@ -56,7 +56,10 @@ function drawAvlMarker(avl) {
 	
 	for (var i = 0; i < labels.length; i++) {
 		var label = $("<b />").text(labels[i] + ": ");
-		var value = $("<div />").attr("class", "vehicle-value").text(avl[keys[i]]);
+		var value = $("<div />").attr("class", "vehicle-value").text('N/A');
+		if(avl[keys[i]]){
+			value = $("<div />").attr("class", "vehicle-value").text(avl[keys[i]]);
+		}
 		table.append( $("<div />").attr("class", "vehicle-item").append(label, value) )
 	}
 
@@ -325,12 +328,17 @@ $("#submit").on("click", function() {
     request.r = $("#route").val();
     request.includeHeadway = "true";
 
-    var askConfirm = allVehiclesRequested() && (request.r == "All Routes" || request.r ==" ");
+    var askConfirm = allVehiclesRequested() && (request.r == "All Routes" || request.r ==" " );
     var confirmYes = false;
     if (askConfirm) {
         confirmYes = confirm('Are you sure you want All Vehicles and All Routes?');
     }
 
+    if(!request.r){
+    	$("#route-error-display").removeClass("d-none")
+    	return true;
+	}
+	$("#route-error-display").addClass("d-none")
     //go ahead if no confirm needed or if the confirm was a yes
     if (!askConfirm || confirmYes) {
 		// Clear existing layer and draw new objects on map.
@@ -444,24 +452,34 @@ function playAnimations() {
 			animations[i].pause();
 		}
 
+		$(".play-back-popup-btn").html("Hide Other Vehicles");
 		$("#playbackPlay").attr("src", playButton);
 	}
 	else { // need to start it
 		for (i in animations) {
 			animations[i].start();
 		}
+
+			$(".play-back-popup-btn").html("Show Other Vehicles");
+
 		$("#playbackPlay").attr("src", pauseButton);
 	}
 }
 
 function playAnimation(vehicleId) {
 	for (i in animations) {
-		if (i != vehicleId) {
-			animations[i].removeIcon();
+		if (!animation.paused()) {
+			// animations[i].addIcon();
+			animations[i].setOpacityIcon(1);
+		} else{
+			if (i != vehicleId) {
+				// animations[i].removeIcon();
+				animations[i].setOpacityIcon(0.5);
+			}
 		}
 	}
 
-	playAnimations();
+	playAnimations(vehicleId);
 }
 
 $("#playbackNext").on("click", function() {
