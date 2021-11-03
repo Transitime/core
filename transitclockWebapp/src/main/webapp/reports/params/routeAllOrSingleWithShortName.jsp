@@ -72,5 +72,6 @@
       		   indeed reads in data for all routes which means it could be
       		   somewhat slow." ></select>
     </div>
+    <label id="route-error-display" class="col-sm-12 col-form-label d-none red">Please select a route</label>
 </div>
 

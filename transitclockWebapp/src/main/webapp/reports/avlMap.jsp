@@ -53,7 +53,9 @@
         </h4>
         <form class="row" novalidate>
             <input type="hidden" name="isAllRoutesDisabled"  class="isAllRoutesDisabled" value="true">
-            <jsp:include page="params/routeAllOrSingleWithShortName.jsp" /> <br>
+            <jsp:include page="params/routeAllOrSingleWithShortName.jsp" />
+
+            <br>
             <jsp:include page="params/vehicle.jsp" />
             <jsp:include page="params/fromDateNumDaysTime.jsp" />
 
@@ -87,11 +89,11 @@
             <div id="playback">
 
         <div class="image-container">
-            <img src="<%= request.getContextPath() %>/reports/images/playback/media-seek-forward.svg" id="playbackPrev"  class="img-thumbnail reverse"/>
-            <img src="<%= request.getContextPath() %>/reports/images/playback/media-skip-forward.svg" id="playbackRew"  class="img-thumbnail reverse"/>
-            <img src="<%= request.getContextPath() %>/reports/images/playback/media-playback-start.svg" id="playbackPlay"  class="img-thumbnail pause-custom"/>
-            <img src="<%= request.getContextPath() %>/reports/images/playback/media-skip-forward.svg" id="playbackFF"  class="img-thumbnail"/>
-            <img src="<%= request.getContextPath() %>/reports/images/playback/media-seek-forward.svg" id="playbackNext"  class="img-thumbnail"/>
+            <img src="<%= request.getContextPath() %>/reports/images/playback/media-seek-forward.svg" id="playbackPrev"  title="Go Back 15 sec " class="img-thumbnail reverse"/>
+            <img src="<%= request.getContextPath() %>/reports/images/playback/media-skip-forward.svg" id="playbackRew"  title="Decrease Playback Speed" class="img-thumbnail reverse"/>
+            <img src="<%= request.getContextPath() %>/reports/images/playback/media-playback-start.svg" id="playbackPlay"  title="Start / Pause Vehicle Playback" class="img-thumbnail pause-custom"/>
+            <img src="<%= request.getContextPath() %>/reports/images/playback/media-skip-forward.svg" id="playbackFF" title="Increase Playback Speed" class="img-thumbnail"/>
+            <img src="<%= request.getContextPath() %>/reports/images/playback/media-seek-forward.svg" id="playbackNext" title="Skip Ahead 15 sec"  class="img-thumbnail"/>
         </div>
                 <div><span id="playbackRate">1X</span></div>
                 <div><span id="playbackTime">00:00:00</span></div>
