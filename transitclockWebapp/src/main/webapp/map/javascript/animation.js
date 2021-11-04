@@ -153,6 +153,7 @@ function avlAnimation(map, icon, clock) {
 			sprite.headingArrow.setLatLng(positions[currentIndex]);
 			sprite.headingArrow.update();
 
+			sprite._popup.setContent(popupData(positions[currentIndex])[0]);
 			sprite.update()
 			elapsedTime = positions[currentIndex].timestamp
 		}
@@ -162,6 +163,7 @@ function avlAnimation(map, icon, clock) {
 			console.log('positions[currentIndex].heading', positions[currentIndex].heading)
 			sprite.headingArrow.options.angle = positions[currentIndex].heading;
 			sprite.headingArrow.setLatLng(pos);
+			sprite._popup.setContent(popupData(positions[currentIndex])[0]);
 			sprite.headingArrow.update();
 			sprite.update()
 			
@@ -251,6 +253,15 @@ function avlAnimation(map, icon, clock) {
 			sprite.setOpacity(value);
 			sprite.headingArrow.setOpacity(value);
 		}
+		if(value === 1){
+			// sprite.setZIndexOffset(400)
+			sprite._zIndex = 400
+		} else{
+			// sprite.setZIndexOffset(200)
+			sprite._zIndex = 200
+		}
+
+		sprite.update();
 
 	}
 
@@ -273,6 +284,7 @@ function avlAnimation(map, icon, clock) {
 		// update GUI if tick won't.
 		if (paused) {
 			sprite.setLatLng(avl);
+
 			sprite.headingArrow.options.angle = positions[currentIndex].heading;
 			console.log('positions[currentIndex].heading', positions[currentIndex].heading)
 			sprite.headingArrow.setLatLng(avl);

@@ -355,6 +355,7 @@ function allVehiclesRequested() {
 function drawAvlData() {
 
     $("#submit").attr("disabled","disabled");
+	$("#exportData").addClass("d-none")
 	$.ajax({
 	  	// The page being requested
 	    url: contextPath + "/reports/avlJsonData.jsp",
@@ -372,6 +373,8 @@ function drawAvlData() {
 	    	if(vehicles.length){
 				// connect export to link to csv creation.
 				createExport(vehicles);
+
+				$("#exportData").removeClass("d-none")
 			}
 
 
@@ -474,7 +477,7 @@ function playAnimation(vehicleId) {
 		} else{
 			if (i != vehicleId) {
 				// animations[i].removeIcon();
-				animations[i].setOpacityIcon(0.5);
+				animations[i].setOpacityIcon(0.3);
 			}
 		}
 	}
