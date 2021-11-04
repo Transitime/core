@@ -159,9 +159,9 @@
   var busIcon = L.icon({
 		    iconUrl: 'images/bus-24.png',
 		    iconRetinaUrl: 'images/bus-24@2x.png',
-		    iconSize: [24, 24],
-		    iconAnchor: [13, 12],
-		    popupAnchor: [0, -12],
+		    iconSize: [25, 25],
+		    iconAnchor: [13, 13],
+		    popupAnchor: [0, -13],
 		});
 
   //Specifies how the blue dot indicating user position looks. Dark blue circle.
