@@ -77,7 +77,7 @@
         </form>
         <div class="list-group">
             <button class="list-group-item list-group-item-action"  id="submit" >Submit</button>
-            <a  class="list-group-item list-group-item-action secondary-btn" id="exportData">
+            <a  class="list-group-item list-group-item-action secondary-btn d-none " id="exportData">
                 Export
             </a>
         </div>
