@@ -223,12 +223,12 @@
         });
 
         percentileSelect.append( '<span class="select2-selection__arrow"><b role="presentation"></b></span>');
-        var percentileSelectContainer = $('<div class="col-sm-1"></div>');
+        var percentileSelectContainer = $('<div class="percentileSelect"></div>');
 
-        $("#percentile-select-container").append('<label for="percentileSelect" class="col-sm-1">Percentile : </label>');
+        $("#percentile-select-container").append('<label for="percentileSelect" class="percentileLabel">Percentile : </label>');
         $(percentileSelectContainer).append(percentileSelect);
         $("#percentile-select-container").append(percentileSelectContainer);
-        $("#percentile-select-container").append('<label for="percentileSelect2" class="col-sm-6">Displays the nth percentile run time</label>');
+        $("#percentile-select-container").append('<label for="percentileSelect2" class="percentileLabel2">Average Run Time for <span id="n-th-percentile">50th</span> percentile</label>');
 
         $("#percentile-select-box").val("50");
         $("#percentile-select-box").change(function () {
@@ -237,6 +237,8 @@
             if ($("#percentile-select-box").val().trim() !== "") {
 
                 var valuePercentage = $("#percentile-select-box").val().trim();
+
+                $("#n-th-percentile").html(valuePercentage+"th");
                 var formattedRunTimeTrips = generateRunTimes(tripRunTimes, valuePercentage );
 
                 tableTD = generatePercentileTable(tripsDisplayData, formattedScheduled.minsData, formattedRunTimeTrips);
@@ -513,14 +515,14 @@
                 });
 
                 tripSelectBox.append( '<span class="select2-selection__arrow"><b role="presentation"></b></span>');
-                var tripSelectBoxContainer = $('<div class="trip-select-box-container"><h3>Component Visulization</h3></div>');
+                var tripSelectBoxContainer = $('<div class="trip-select-box-container"><h3>Component Visualization</h3></div>');
 
                 var tripSelectBoxContainerChild = $('<div class="row flex-nowrap align-items-center"></div>');
                 var tripSelectBoxContainerChild2 = $('<div class="col-sm-2"></div>');
 
                 tripSelectBoxContainerChild2.append(tripSelectBox);
                 tripSelectBoxContainerChild.append(tripSelectBoxContainerChild2)
-                tripSelectBoxContainerChild.append('<label for="tripBoxType" id="visualization-container-header" class="col-sm-4">Trip Run Times</label>');
+                tripSelectBoxContainerChild.append('<label for="tripBoxType" id="visualization-container-header" class="col-sm-4 d-none">Trip Run Times</label>');
                 tripSelectBoxContainer.append(tripSelectBoxContainerChild);
                 $("#trips-container").html("");
 
@@ -581,6 +583,7 @@
         var barGraph = getDefaultChartOptions();
         var datasets = getFixedVariableDwellDataSet(response.data.fixed,response.data.variable,response.data.dwell);
         var labels = response.data.stopNames;
+        var labelValue= "Timepoint Run Times For Trip";
         if(isRoute){
             datasets = [].concat(datasets,[{
                 type: "scatter",
@@ -601,6 +604,8 @@
                 // yAxisId: "icons"
             }]);
             labels = response.data.trips;
+            labelValue= "Aggregate Run Times For All Trips";
+
         }
         barGraph.data = {
             datasets: datasets,
@@ -609,7 +614,7 @@
 
         barGraph.options.scales.xAxes[0].ticks.max = calculateMaxMins(highestPoints);
         barGraph.options.scales.xAxes[1].ticks.max = calculateMaxMins(highestPoints);
-
+    $("#heading-canvas").html(labelValue);
         barGraph.update();
     }
 

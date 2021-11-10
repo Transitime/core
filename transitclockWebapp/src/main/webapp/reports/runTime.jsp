@@ -118,8 +118,10 @@
     </div>
 </div>
 <div class="right-panel position-relative">
-    <div class="list-group comparsion-button-list m-bt-0 ">
-        <div id="paramDetails" class=" route-time-analysis-header d-flex list-group-item list-group-item-action justify-content-between">No Routes</div>
+    <div class="list-group comparsion-button-list m-bt-0 row">
+        <div class="col-xs-12">
+            <div id="paramDetails" class=" route-time-analysis-header bg-65 d-flex list-group-item list-group-item-action justify-content-between">No Routes</div>
+        </div
     </div>
 
 
@@ -135,24 +137,24 @@
             </ul>
 
             <div id="component">
-                <div id="mainResults">
+                <div id="mainResults" class="m-bt-20">
                     <div class="individual-route">
                         <h3>Summary Statistics</h3>
                         <div class="row flex-nowrap m-bt-10 run-time-vairables">
-                            <div >Average run time :</div>
+                            <div >Average Run time :</div>
                             <div id="avg-run-time"></div>
                         </div>
                         <div class="row flex-nowrap run-time-vairables m-bt-10">
                             <div class="d-flex flex-wrap">
-                                <label >Fixed :</label>
+                                <label >Fixed <i class="bi bi-info-circle" data-bs-toggle="tool-tip" title="Fixed Content" type="button"></i> :</label>
                                 <div id="fixed-time" ></div>
                             </div>
                             <div class="d-flex flex-wrap">
-                                <label>Variable :</label>
+                                <label>Variable <i class="bi bi-info-circle" data-bs-toggle="tool-tip" title="Variable Content" type="button"></i> :</label>
                                 <div id="variable-time" ></div>
                             </div>
                             <div class="d-flex flex-wrap">
-                                <label >Dwell :</label>
+                                <label >Dwell <i class="bi bi-info-circle" data-bs-toggle="tool-tip" title="Dwell Content" type="button"></i> :</label>
                                 <div id="dwell-time" ></div>
                             </div>
                         </div>
@@ -163,9 +165,10 @@
                     <div class="row align-items-center" id="trips-container"></div>
                 </div>
                 <div class="all-routes" >
-                    <h3 id="visualization-container-header">Route RunTime Performance</h3>
+                    <h3 id="visualization-container-header">Route Run Time Performance</h3>
                 </div>
                 <div class="visualization-container m-tp-0">
+                    <label class="d-flex align-items-center justify-content-center" id="heading-canvas"> Aggregate Run Times for all trips</label>
                     <div id="runTimeVisualization" ></div>
                 </div>
                 <br>
@@ -173,19 +176,22 @@
             </div>
 
             <div id="percentage" class="only-individual-route">
-                <div class="percentile-select-container row align-items-center m-bt-10" id="percentile-select-container"></div>
+                <div class="percentile-select-container row align-items-center m-bt-20" id="percentile-select-container"></div>
 
 
                 <!--<h3>Trip Run Time For Percentile</h3> -->
+                <div class="row m-bt-10">
+                    <div class="col-sm-6">
+                    <label>All trips average : <span id="percentile-summary-content"></span></label>
+                </div>
+                </div>
                 <div class="row">
                     <div class="col-sm-6">
                         <table class="table table-bordered percentile-summary-details">
 
                         </table>
                     </div>
-                    <div class="col-sm-6">
-                        <label>All trips average : <span id="percentile-summary-content"></span></label>
-                    </div>
+
                 </div>
             </div>
 
