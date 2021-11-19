@@ -21,6 +21,11 @@ import java.text.DecimalFormat;
 import org.transitclock.db.structs.Location;
 import org.transitclock.db.structs.Vector;
 
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
+
 /**
  * Some possibly handle geometric conversions.
  * 
@@ -166,6 +171,25 @@ public class Geo {
 		double d = RADIUS_OF_EARTH_IN_METERS * c;
 		
 		return d;
+	}
+
+	public static double distanceGreatCircle(Location l1, Location l2) {
+		double lat1 = Math.toRadians(l1.getLat());
+		double lon1 = Math.toRadians(l1.getLon());
+		double lat2 = Math.toRadians(l2.getLat());
+		double lon2 = Math.toRadians(l2.getLon());
+		double deltaLon = lon2 - lon1;
+
+		double y = sqrt(p2(cos(lat2) * sin(deltaLon))
+						+ p2(cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(deltaLon)));
+		double x = sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(deltaLon);
+		double radius = 6371.01 * 1000; // radius of earth in meters
+		return radius * atan2(y, x);
+
+	}
+
+	private static final double p2(double a) {
+		return a * a;
 	}
 	
 	/**

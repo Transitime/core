@@ -216,6 +216,7 @@ public class StopPathProcessor {
 	private static class BestMatch {
 		public Vector shapeVector;
 		public double totalDistanceAlongShape;
+		public double distanceExamined;
 		int shapeIndex;
 		double stopToShapeDistance;
 		double distanceAlongShape;
@@ -455,7 +456,7 @@ public class StopPathProcessor {
 		bestMatch.stopIndex = stopIndex;
 		boolean exceededDistance = false;
 
-		double distanceAlongShapesExamined = previousMatch.totalDistanceAlongShape;
+		double distanceAlongShapesExamined = previousMatch.distanceExamined;
 
 		for (int shapeIndex = previousMatch.shapeIndex;
 				 shapeIndex < shapeLocs.size()-1;
@@ -465,24 +466,28 @@ public class StopPathProcessor {
 			Location loc1 = shapeLocs.get(shapeIndex + 1);
 			Vector shapeVector = new Vector(loc0, loc1);
 
-			double closestShapeDistanceTravelled = Math.abs((shapeDistanceTravelled - distanceAlongShapesExamined));
-			if (closestShapeDistanceTravelled < minDistanceToShapeDistanceTravelled) {
-				minDistanceToShapeDistanceTravelled = closestShapeDistanceTravelled;
+			distanceAlongShapesExamined += shapeVector.lengthExact();
+			double closestSnappingDistance = stop.getLoc().distance(shapeVector);
+			if (closestSnappingDistance < minDistanceToShapeDistanceTravelled) {
+				minDistanceToShapeDistanceTravelled = closestSnappingDistance;
 				bestMatch.distanceAlongShape = stop.getLoc().matchDistanceAlongVector(shapeVector);
-				bestMatch.stopToShapeDistance = stop.getLoc().distance(shapeVector);
+				bestMatch.stopToShapeDistance = closestSnappingDistance;
 				bestMatch.shapeVector = shapeVector;
 				bestMatch.shapeIndex = shapeIndex;
 				bestMatch.matchLocation = shapeVector.locAlongVector(bestMatch.distanceAlongShape);
 				// allow the path to be considered again
-				bestMatch.totalDistanceAlongShape = distanceAlongShapesExamined/* - shapeVector.length();*/;
+				bestMatch.totalDistanceAlongShape
+								= distanceAlongShapesExamined - shapeVector.length() + bestMatch.distanceAlongShape;
+				bestMatch.distanceExamined = distanceAlongShapesExamined - shapeVector.lengthExact();
 			}
 
-			distanceAlongShapesExamined += shapeVector.length();
+
 			if (exceededDistance) {
 				// no need to look any further
 				break;
 			}
-			if (distanceAlongShapesExamined > shapeDistanceTravelled) {
+			// allow for some overrun in segments as small errors accumulate
+			if (distanceAlongShapesExamined > shapeDistanceTravelled + 200) {
 				exceededDistance = true;
 			}
 		}

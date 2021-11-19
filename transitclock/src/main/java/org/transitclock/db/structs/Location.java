@@ -117,6 +117,10 @@ public class Location implements Serializable {
 	public double distance(Location l2) {
 		return Geo.distance(this, l2);
 	}
+
+	public double distanceExact(Location l2) {
+		return Geo.distanceGreatCircle(this, l2);
+	}
 	
 	/**
 	 * Returns distance in meters between location and the 
