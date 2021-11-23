@@ -307,6 +307,10 @@ button.submit-button {
     background-color: #656565;
 }
 
+.bg-secondary-light{
+    background-color: #e5e5e5;
+}
+
 #paramDetails{
     padding: .8rem;
     margin-bottom: 10px;
@@ -765,4 +769,21 @@ opacity: 0.3;
 
 #n-th-percentile {
     padding: 0px 4px;
+}
+
+.pl-10{
+    padding-left: 10px;
+}
+td.late{
+    background-color:#E6D83E;
+}
+td.early{
+    background-color: #E34B71;
+}
+td.ontime{
+    background-color:#37E627;
+}
+
+.color-legend-block {
+    padding: 10px;
 }
