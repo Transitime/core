@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.db.structs.Location;
 import org.transitclock.db.structs.Stop;
 import org.transitclock.db.structs.StopPath;
@@ -32,6 +33,7 @@ import org.transitclock.db.structs.TripPattern;
 import org.transitclock.db.structs.Vector;
 import org.transitclock.gtfs.gtfsStructs.GtfsShape;
 import org.transitclock.gtfs.gtfsStructs.GtfsStopTime;
+import org.transitclock.utils.DistanceConverter;
 import org.transitclock.utils.Geo;
 import org.transitclock.utils.IntervalTimer;
 
@@ -56,6 +58,16 @@ public class StopPathProcessor {
 	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(StopPathProcessor.class);
+
+	private static Boolean shapeDistTraveledUsesKm(){
+		return shapeDistTraveledUsesKm.getValue();
+	}
+	private static BooleanConfigValue shapeDistTraveledUsesKm =
+			new BooleanConfigValue(
+					"transitclock.gtfs.shapeDistTraveledUsesKm",
+					false,
+					"Set to true if the shapeDistanceTraveled units are km. This is necessary" +
+							"for proper stop to shape snapping calculation.");
 
 	/********************** Member Functions **************************/
 
@@ -765,11 +777,12 @@ public class StopPathProcessor {
 				List<Double> distancesAlongShape = new ArrayList<>();
 				String tripId = tripPattern.getTrips().get(0).getId();
 				List<GtfsStopTime> gtfsStopTimes = this.gtfsStopTimesForTripMap.get(tripId);
+
 				if (gtfsStopTimes != null) {
 					// if we have stop_time's shape_dist_traveled use it to
 					// do better snapping of stops to shapes
 					for (GtfsStopTime st : gtfsStopTimes) {
-						distancesAlongShape.add(st.getShapeDistTraveled());
+						distancesAlongShape.add(getShapeDistTraveledAsMeters(st.getShapeDistTraveled()));
 					}
 				} else {
 					// we fall back to traditional snapping which is known to have issue
@@ -785,6 +798,13 @@ public class StopPathProcessor {
 		logger.info("Finished processing and filtering path segment data. " +
 				"Took {} msec.",
 				timer.elapsedMsec());		
+	}
+
+	private Double getShapeDistTraveledAsMeters(Double shapeDistTraveled){
+		if(shapeDistTraveledUsesKm()){
+			return DistanceConverter.kmToMeters(shapeDistTraveled);
+		}
+		return shapeDistTraveled;
 	}
 	
 }
