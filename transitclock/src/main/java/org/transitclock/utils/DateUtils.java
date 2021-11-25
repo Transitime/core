@@ -66,11 +66,10 @@ public class DateUtils {
   }
 
   public static Date getPreviousDayForArrivalTime(Date arrivalTime, boolean isHoliday) {
-    CalendarType currentType = getTypeForDate(arrivalTime);
+    CalendarType currentType = getTypeForDate(arrivalTime, isHoliday);
 
     Date previousDay = addDays(arrivalTime, -1);
-    while (!getTypeForDate(previousDay).equals(currentType)
-        || (isHoliday && !CalendarType.SUNDAY.equals(currentType))) {
+    while (!getTypeForDate(previousDay).equals(currentType)) {
       previousDay = org.apache.commons.lang3.time.DateUtils.addDays(previousDay, -1);
     }
     return previousDay;
@@ -84,6 +83,19 @@ public class DateUtils {
     Calendar instance = Calendar.getInstance();
     instance.setTime(instanceTime);
     if (Calendar.SUNDAY == (instance.get(Calendar.DAY_OF_WEEK))) {
+      return CalendarType.SUNDAY;
+    }
+    if (Calendar.SATURDAY == (instance.get(Calendar.DAY_OF_WEEK))) {
+      return CalendarType.SATURDAY;
+    }
+    return CalendarType.WEEKDAY;
+  }
+
+  // special case of get getType matching holidays to sundays
+  public static CalendarType getTypeForDate(Date instanceTime, boolean isHoliday) {
+    Calendar instance = Calendar.getInstance();
+    instance.setTime(instanceTime);
+    if (Calendar.SUNDAY == (instance.get(Calendar.DAY_OF_WEEK)) || isHoliday) {
       return CalendarType.SUNDAY;
     }
     if (Calendar.SATURDAY == (instance.get(Calendar.DAY_OF_WEEK))) {
