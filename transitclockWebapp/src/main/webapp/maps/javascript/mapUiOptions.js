@@ -43,17 +43,17 @@ var minorStopOptions = {
     clickable: false
 };
 
-/*var busIcon = L.icon({
-    iconUrl: '/web/maps/images/bus-24.png',
-    iconRetinaUrl: 'images/bus-24@2x.png',
-    iconSize: [24, 24],
-    iconAnchor: [13, 12],
-    popupAnchor: [0, -12],
-});*/
-
 var busIcon = L.icon({
     iconUrl: '/web/maps/images/bus-24.png',
-    iconRetinaUrl: 'images/bus-24@2x.png',
+    iconRetinaUrl: '/web/maps/images/bus-24.png',
+    iconSize: [25, 25],
+    iconAnchor: [13, 13],
+    popupAnchor: [0, -13],
+});
+
+var busBullet = L.icon({
+    iconUrl: '/web/maps/images/bus-bullet.png',
+    iconRetinaUrl: '/web/maps/images/bus-bullet.png',
     iconSize: [25, 25],
     iconAnchor: [13, 13],
     popupAnchor: [0, -13],

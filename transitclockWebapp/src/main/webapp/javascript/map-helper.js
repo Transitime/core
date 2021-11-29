@@ -225,7 +225,7 @@ function predictionCallback(preds, status) {
                         }
 
                         content += '<div class="each-prediction">'
-                        content += '<div class="vehicle-image-detail"><img src="' + busIcon.options.iconUrl + '"  class="vehicle-icon-prediction"/>';
+                        content += '<div class="vehicle-image-detail"><img src="' + busBullet.options.iconUrl + '"  class="vehicle-icon-prediction"/>';
                         content += '<span class="vehicle-id" >' + eachPred.min  + ' minutes, </span></div>';
                         content += '<a class="vehicle-time vehicle-clickable" data-vehicle-id="'+eachPred.vehicle+'" data-route-name="'+routeStopPreds.routeShortName+'"> Vehicle ' + eachPred.vehicle + ' </a>';
                         content += '</div>';
