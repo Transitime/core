@@ -34,27 +34,12 @@ import java.util.List;
  * @author SkiBu Smith
  *
  */
-public class PredAccuracyFiveBucketQuery extends PredictionAccuracyQuery {
+public class PredAccuracyFiveBucketQuery extends PredictionAccuracyBucketQuery {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(PredAccuracyFiveBucketQuery.class);
 
 	/********************** Member Functions **************************/
-
-	/**
-	 * Creates connection to database.
-	 *
-	 * @param dbType
-	 * @param dbHost
-	 * @param dbName
-	 * @param dbUserName
-	 * @param dbPassword
-	 * @throws SQLException
-	 */
-	public PredAccuracyFiveBucketQuery(String dbType, String dbHost, String dbName,
-                                       String dbUserName, String dbPassword) throws SQLException {
-		super(dbType, dbHost, dbName, dbUserName, dbPassword);
-	}
 
 	/**
 	 * Creates connection to database specified by the agencyId.
@@ -73,11 +58,8 @@ public class PredAccuracyFiveBucketQuery extends PredictionAccuracyQuery {
 	 * column but doesn't actually contain the data itself.
 	 * 
 	 * @param builder
-	 * @param maxEarlySec
-	 * @param maxLateSec
 	 */
-	private void addCols(ChartJsonBuilder builder, Integer[] maxEarlySec,
-						 Integer[] maxLateSec) {
+	private void addCols(ChartJsonBuilder builder) {
 		if (map.isEmpty()) {
 			logger.error("Called PredAccuracyStackQuery.addCols() but there "
 					+ "is no data in the map.");
@@ -101,7 +83,8 @@ public class PredAccuracyFiveBucketQuery extends PredictionAccuracyQuery {
 	 * @param maxEarlySecs
 	 * @param maxLateSecs
 	 */
-	private void addRows(ChartJsonBuilder builder, Integer[] maxEarlySecs, Integer[] maxLateSecs) {
+	private void addRows(ChartJsonBuilder builder, Double[] maxEarlySecs, Double[] maxLateSecs,
+						 Integer[] minHorizon, Integer[] maxHorizon) {
 		if (map.isEmpty()) {
 			logger.error("Called PredAccuracyStackQuery.getCols() but there "
 					+ "is no data in the map.");
@@ -114,9 +97,9 @@ public class PredAccuracyFiveBucketQuery extends PredictionAccuracyQuery {
 			dataForSource = map.get(source);
 		}
 
-		int maxEarlySec;
-		int maxLateSec;
-		Integer predBucketSecs;
+		double maxEarlySec;
+		double maxLateSec;
+		String predBucketMinutes;
 		DecimalFormat df = new DecimalFormat("#.#");
 
 		// For each prediction length bucket...
@@ -124,10 +107,10 @@ public class PredAccuracyFiveBucketQuery extends PredictionAccuracyQuery {
 
 			maxEarlySec = maxEarlySecs[predBucketIdx];
 			maxLateSec = maxLateSecs[predBucketIdx];
-			predBucketSecs = getPredictionBucketSecs(predBucketIdx);
+			predBucketMinutes = getPredictionHorizonLabel(predBucketIdx, minHorizon, maxHorizon);
 
-			if(predBucketSecs == null){
-				logger.error("predBucketSecs is null", predBucketSecs);
+			if(predBucketMinutes == null){
+				logger.error("predBucketSecs is null", predBucketMinutes);
 				continue;
 			}
 
@@ -161,7 +144,7 @@ public class PredAccuracyFiveBucketQuery extends PredictionAccuracyQuery {
 			String maxLateSecAsMinStr = "( > +" + df.format((double)maxLateSec / 60.0) + " min)";
 
 			RowBuilder rowBuilder = builder.newRow();
-			rowBuilder.addRowElement(predBucketSecs);
+			rowBuilder.addRowElement(predBucketMinutes);
 
 			rowBuilder.addRowElement(tooEarlyPercentage);
 			rowBuilder.addRowElement("Too Early " + maxEarlySecAsMinStr + ": " + tooEarly + " points, "
@@ -180,15 +163,14 @@ public class PredAccuracyFiveBucketQuery extends PredictionAccuracyQuery {
 		}
 	}
 
-	private Integer getPredictionBucketSecs(int idx){
-		switch (idx) {
-			case 0: return 1;
-			case 1: return 5;
-			case 2: return 10;
-			case 3: return 15;
-			case 4: return 20;
-			default: return null;
+	private String getPredictionHorizonLabel(int idx, Integer[] minHorizon, Integer[] maxHorizon){
+		String label = null;
+		try{
+			label = (minHorizon[idx] / 60) + " - " + (maxHorizon[idx] / 60);
+		} catch (Exception e){
+			logger.error("Unable to get prediction horizon label", e);
 		}
+		return label;
 	}
 
 	/**
@@ -231,11 +213,12 @@ public class PredAccuracyFiveBucketQuery extends PredictionAccuracyQuery {
 	 */
 	public String getJson(String beginDateStr, String numDays,
 			String beginTimeStr, String endTimeStr, String routeIds[], String stopIds[],
-			String predSource, String predType, Integer[] maxEarlySec, Integer[] maxLateSec)
+			String predSource, String predType, Double[] maxEarlySec, Double[] maxLateSec,
+		    Integer[] minHorizon, Integer[] maxHorizon)
 			throws SQLException, ParseException {
 		// Actually perform the query
-		doBucketQuery(beginDateStr, numDays, beginTimeStr, endTimeStr, routeIds, stopIds,
-				predSource, predType);
+		doQuery(beginDateStr, numDays, beginTimeStr, endTimeStr, routeIds, stopIds,
+				predSource, predType, minHorizon, maxHorizon);
 
 		// If query returned no data then simply return null so that
 		// can easily see that there is a problem
@@ -244,8 +227,8 @@ public class PredAccuracyFiveBucketQuery extends PredictionAccuracyQuery {
 		}
 
 		ChartJsonBuilder builder = new ChartJsonBuilder();
-		addCols(builder, maxEarlySec, maxLateSec);
-		addRows(builder, maxEarlySec, maxLateSec);
+		addCols(builder);
+		addRows(builder, maxEarlySec, maxLateSec, minHorizon, maxHorizon);
 
 		String jsonString = builder.getJson();
 		return jsonString;

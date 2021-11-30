@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.core.BlocksInfo;
 import org.transitclock.core.dataCache.VehicleDataCache;
+import org.transitclock.core.dataCache.canceledTrip.CanceledTripCache;
 import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.Route;
@@ -335,7 +336,7 @@ public class VehiclesServer extends AbstractServer
      */
     @Override
     public Collection<IpcActiveBlock> getActiveBlocksWithoutVehicles(
-            Collection<String> routeIds, int allowableBeforeTimeSecs)
+            Collection<String> routeIds, int allowableBeforeTimeSecs, boolean includeCanceledTrips)
             throws RemoteException {
         // List of data to be returned
         List<IpcActiveBlock> results =
@@ -354,6 +355,11 @@ public class VehiclesServer extends AbstractServer
 
                 // Create and add the IpcActiveBlock, skipping the slow vehicle fetching
                 Trip tripForSorting = block.getTrip(activeTripIndex);
+
+                if(!includeCanceledTrips && CanceledTripCache.getInstance().isCanceled(tripForSorting.getId())){
+                	continue;
+				}
+
                 IpcActiveBlock ipcBlockAndVehicle =
                         new IpcActiveBlock(ipcBlock, activeTripIndex,
                                 new ArrayList<IpcVehicle>(), tripForSorting);
@@ -375,12 +381,12 @@ public class VehiclesServer extends AbstractServer
      */
     @Override
     public Collection<IpcActiveBlock> getActiveBlocksAndVehiclesByRouteId(
-            String routeId, int allowableBeforeTimeSecs)
+            String routeId, int allowableBeforeTimeSecs, boolean includeCanceledTrips)
             throws RemoteException {
 
         Collection<String> routeIds = new ArrayList<>();
         routeIds.add(routeId);
-        return getActiveBlocksAndVehiclesByRouteId(routeIds, allowableBeforeTimeSecs);
+        return getActiveBlocksAndVehiclesByRouteId(routeIds, allowableBeforeTimeSecs, includeCanceledTrips);
     }
     
     /* (non-Javadoc)
@@ -388,7 +394,7 @@ public class VehiclesServer extends AbstractServer
      */
     @Override
     public Collection<IpcActiveBlock> getActiveBlocksAndVehiclesByRouteName(
-            String routeName, int allowableBeforeTimeSecs)
+            String routeName, int allowableBeforeTimeSecs, boolean includeCanceledTrips)
             throws RemoteException {
 
         Session session = HibernateUtils.getSession();
@@ -398,11 +404,11 @@ public class VehiclesServer extends AbstractServer
         List<String> routeIds = criteria.list();
         session.close();
         
-        return getActiveBlocksAndVehiclesByRouteId(routeIds, allowableBeforeTimeSecs);
+        return getActiveBlocksAndVehiclesByRouteId(routeIds, allowableBeforeTimeSecs, includeCanceledTrips);
     }
     
     private Collection<IpcActiveBlock> getActiveBlocksAndVehiclesByRouteId(
-        Collection<String> routeIds, int allowableBeforeTimeSecs)
+        Collection<String> routeIds, int allowableBeforeTimeSecs, boolean includeCanceledTrips)
         throws RemoteException {
 
       // List of data to be returned

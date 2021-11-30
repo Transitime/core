@@ -225,7 +225,7 @@ function predictionCallback(preds, status) {
                         }
 
                         content += '<div class="each-prediction">'
-                        content += '<div class="vehicle-image-detail"><img src="' + busIcon.options.iconUrl + '"  class="vehicle-icon-prediction"/>';
+                        content += '<div class="vehicle-image-detail"><img src="' + busBullet.options.iconUrl + '"  class="vehicle-icon-prediction"/>';
                         content += '<span class="vehicle-id" >' + eachPred.min  + ' minutes, </span></div>';
                         content += '<a class="vehicle-time vehicle-clickable" data-vehicle-id="'+eachPred.vehicle+'" data-route-name="'+routeStopPreds.routeShortName+'"> Vehicle ' + eachPred.vehicle + ' </a>';
                         content += '</div>';
@@ -456,7 +456,7 @@ function getVehiclePopupContent(vehicleData) {
     content += "<div class='vehicle-item'><b>Route: </b><div class='vehicle-value'>" + (vehicleData.routeShortName ||   'Unassigned' ) +"</div></div>" ;
     content +=
         "<div class='vehicle-item'><b>To:</b><div class='vehicle-value'>" + (
-        (typeof vehicleData.headsign !== "undefined" && typeof vehicleData.direction !== "undefined")  ?  vehicleData.headsign + " (" + vehicleData.direction + ") ": 'Unassigned' )+ "</div></div>";
+            (typeof vehicleData.headsign !== "undefined" && typeof vehicleData.direction !== "undefined")  ?  vehicleData.headsign + " (" + vehicleData.direction + ") ": 'Unassigned' )+ "</div></div>";
 
     if(typeof vehicleData.loc !== "undefined") {
         content += vehicleData.loc.speed ? "<div class='vehicle-item'><b>Speed:</b><div class='vehicle-value'>" + formatSpeed(vehicleData.loc.speed)+"</div></div>" : "";
@@ -471,7 +471,7 @@ function getVehiclePopupContent(vehicleData) {
 
     content +=
         "<div class='vehicle-item'><b>Headway:</b><div class='vehicle-value'>" + ((typeof vehicleData.headway !== "undefined" && vehicleData.headway > -1 )?
-            msToHMS(vehicleData.headway)  : 'N/A'  )+"</div></div>" ;
+        msToHMS(vehicleData.headway)  : 'N/A'  )+"</div></div>" ;
 
     if(!isRealTimePage){
         content += "<div class='vehicle-item'><b>Schedule Adherence:</b><div class='vehicle-value'>" + (vehicleData.isScheduledService ? vehicleData.schAdhStr : 'N/A') +"</div></div>" ;
@@ -482,7 +482,7 @@ function getVehiclePopupContent(vehicleData) {
     content += "<div class='vehicle-item'><b>In Layover:</b><div class='vehicle-value'>" + (vehicleData.layover ||  'N/A' ) +"</div></div>" ;
     content +=
         "<div class='vehicle-item'><b>Scheduled Departure:</b><div class='vehicle-value'>" + ( (typeof vehicleData.layover !== "undefined" && typeof vehicleData.layoverDepTime !== "undefined") ?
-            dateFormat(vehicleData.layoverDepTime)  : 'N/A' )  +"</div></div>";
+        dateFormat(vehicleData.layoverDepTime)  : 'N/A' )  +"</div></div>";
     content += "<div class='vehicle-item'><b>Driver:</b><div class='vehicle-value'>" + (vehicleData.driver  || 'N/A' )+"</div></div>" ;
 
     content += "</div>";

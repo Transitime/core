@@ -51,15 +51,15 @@
 
         <div class="param, bucketParam">
             <fieldset>
-                <legend> 1 Minute Bucket</legend>
+                <legend>0-3 Minute Bucket</legend>
                 <div class="multiAllowableSec">
                     <label class="bucketLabel" for="allowableEarly1">Allowable Early:</label>
                     <input id="allowableEarly1" name="allowableEarly1"
                            title="How early a vehicle can arrive compared to the prediction
             and still be acceptable. Must be a positive number to indicate
             early."
-                           value="0.0"
-                           step="0.1"
+                           value="1.0"
+                           step="0.5"
                            placeholder="minute"
                            type="number"
                     />
@@ -68,23 +68,23 @@
                     <label class="bucketLabel" for="allowableLate1">Allowable Late:</label>
                     <input id="allowableLate1" name="allowableLate1"
                            title="How late a vehicle can arrive compared to the prediction and still be acceptable. Must be a positive number to indicate late."
-                           value="2.0"
-                           step="0.1"
+                           value="1.0"
+                           step="0.5"
                            placeholder="minute"
                            type="number"
                     />
                 </div>
             </fieldset>
             <fieldset>
-                <legend>5 Minute Bucket</legend>
+                <legend>3-6 Minute Bucket</legend>
                 <div class="multiAllowableSec">
                     <label class="bucketLabel" for="allowableEarly2">Allowable Early:</label>
                     <input id="allowableEarly2" name="allowableEarly2"
                            title="How early a vehicle can arrive compared to the prediction
             and still be acceptable. Must be a positive number to indicate
             early."
-                           value="1.0"
-                           step="0.1"
+                           value="1.5"
+                           step="0.5"
                            placeholder="minute"
                            type="number"
                     />
@@ -94,7 +94,7 @@
                     <input id="allowableLate2" name="allowableLate2"
                            title="How late a vehicle can arrive compared to the prediction and still be acceptable. Must be a positive number to indicate late."
                            value="2.0"
-                           step="0.1"
+                           step="0.5"
                            type="number"
                            placeholder="minute"
                     />
@@ -102,15 +102,15 @@
                 </div>
             </fieldset>
             <fieldset>
-                <legend>10 Minute Bucket</legend>
+                <legend>6-12 Minute Bucket</legend>
                 <div class="multiAllowableSec">
                     <label class="bucketLabel" for="allowableEarly3">Allowable Early:</label>
                     <input id="allowableEarly3" name="allowableEarly3"
                            title="How early a vehicle can arrive compared to the prediction
             and still be acceptable. Must be a positive number to indicate
             early."
-                           value="2.0"
-                           step="0.1"
+                           value="2.5"
+                           step="0.5"
                            placeholder="minute"
                            type="number"
                     />
@@ -119,8 +119,8 @@
                     <label class="bucketLabel" for="allowableLate3">Allowable Late:</label>
                     <input id="allowableLate3" name="allowableLate3"
                            title="How late a vehicle can arrive compared to the prediction and still be acceptable. Must be a positive number to indicate late."
-                           value="3.0"
-                           step="0.1"
+                           value="3.5"
+                           step="0.5"
                            type="number"
                            placeholder="minute"
                     />
@@ -128,15 +128,15 @@
                 </div>
             </fieldset>
             <fieldset>
-                <legend>15 Minute Bucket</legend>
+                <legend>12 - 20 Minute Bucket</legend>
                 <div class="multiAllowableSec">
                     <label class="bucketLabel" for="allowableEarly4">Allowable Early:</label>
                     <input id="allowableEarly4" name="allowableEarly4"
                            title="How early a vehicle can arrive compared to the prediction
             and still be acceptable. Must be a positive number to indicate
             early."
-                           value="2.0"
-                           step="0.1"
+                           value="4.0"
+                           step="0.5"
                            type="number"
                            placeholder="minute"
                     />
@@ -145,8 +145,8 @@
                     <label class="bucketLabel" for="allowableLate4">Allowable Late:</label>
                     <input id="allowableLate4" name="allowableLate4"
                            title="How late a vehicle can arrive compared to the prediction and still be acceptable. Must be a positive number to indicate late."
-                           value="3.0"
-                           step="0.1"
+                           value="6.0"
+                           step="0.5"
                            type="number"
                            placeholder="minute"
                     />
@@ -154,27 +154,27 @@
                 </div>
             </fieldset>
             <fieldset>
-                <legend>20 Minute Bucket</legend>
+                <legend>20 - 30 Minute Bucket</legend>
                 <div class="multiAllowableSec">
                     <label class="bucketLabel" for="allowableEarly5">Allowable Early:</label>
                     <input id="allowableEarly5" name="allowableEarly5"
                            title="How early a vehicle can arrive compared to the prediction
             and still be acceptable. Must be a positive number to indicate
             early."
-                           value="2.0"
-                           placeholder="minute"
-                           step="0.1"
+                           value="4.0"
+                           step="0.5"
                            type="number"
+                           placeholder="minute"
                     />
                 </div>
                 <div class="multiAllowableSec">
-                    <label class="bucketLabel" for="allowableLate6">Allowable Late:</label>
-                    <input id="allowableLate6" name="allowableLate6"
+                    <label class="bucketLabel" for="allowableLate5">Allowable Late:</label>
+                    <input id="allowableLate5" name="allowableLate5"
                            title="How late a vehicle can arrive compared to the prediction and still be acceptable. Must be a positive number to indicate late."
-                           value="4.0"
-                           step="0.1"
-                           placeholder="minute"
+                           value="6.0"
+                           step="0.5"
                            type="number"
+                           placeholder="minute"
                     />
                 </div>
             </fieldset>

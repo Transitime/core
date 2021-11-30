@@ -43,20 +43,20 @@ var minorStopOptions = {
     clickable: false
 };
 
-/*var busIcon = L.icon({
-    iconUrl: '/web/maps/images/bus-24.png',
-    iconRetinaUrl: 'images/bus-24@2x.png',
-    iconSize: [24, 24],
-    iconAnchor: [13, 12],
-    popupAnchor: [0, -12],
-});*/
-
 var busIcon = L.icon({
     iconUrl: '/web/maps/images/bus-24.png',
-    iconRetinaUrl: 'images/bus-24@2x.png',
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-    popupAnchor: [0, -12],
+    iconRetinaUrl: '/web/maps/images/bus-24.png',
+    iconSize: [25, 25],
+    iconAnchor: [13, 13],
+    popupAnchor: [0, -13],
+});
+
+var busBullet = L.icon({
+    iconUrl: '/web/maps/images/bus-bullet.png',
+    iconRetinaUrl: '/web/maps/images/bus-bullet.png',
+    iconSize: [25, 25],
+    iconAnchor: [13, 13],
+    popupAnchor: [0, -13],
 });
 
 var streetcarIcon = L.icon({
@@ -130,28 +130,28 @@ var minorVehicleMarkerOptions = {
 var vehicleMarkerBackgroundOptions = {
     radius: 12,
     weight: 0,
-    fillColor: '#ffffff',
+    fillColor: '#1e3f78',
     fillOpacity: 1.0,				
 };
 
 var secondaryVehicleMarkerBackgroundOptions = {
     radius: 12,
     weight: 0,
-    fillColor: '#ffffff',
+    fillColor: '#1e3f78',
     fillOpacity: 0.80,				
 };
 
 var minorVehicleMarkerBackgroundOptions = {
     radius: 12,
     weight: 0,
-    fillColor: '#ffffff',
+    fillColor: '#1e3f78',
     fillOpacity: 0.3,				
 };
 
 var unassignedVehicleMarkerBackgroundOptions = {
-	    radius: 10,
+	    radius: 12,
 	    weight: 0,
-	    fillColor: '#ffffff',
+	    fillColor: '#1e3f78',
 	    fillOpacity: 0.6,				
 };
 

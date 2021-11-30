@@ -44,8 +44,8 @@ import org.transitclock.db.hibernate.HibernateUtils;
 @Entity 
 @DynamicUpdate 
 @Table(name="VehicleStates",
-       indexes = { @Index(name="VehicleStateAvlTimeIndex", 
-                          columnList="avlTime" ) } )
+       indexes = { @Index(name="VehicleStateAvlTimeIndex", columnList="avlTime" ),
+			   		@Index(name="VehicleStateRouteIndex", columnList="routeShortName" )} )
 public class VehicleState implements Serializable {
 	// vehicleId is an @Id since might get multiple AVL reports
 	// for different vehicles with the same avlTime but need a unique

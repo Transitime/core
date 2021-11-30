@@ -63,7 +63,11 @@ public class Vector implements Serializable {
 	public double length() {
 		return l1.distance(l2);
 	}
-	
+
+	public double lengthExact() {
+		return l1.distanceExact(l2);
+	}
+
 	/**
 	 * Determines the distance between a location and this vector. 
 	 * Looks for a line between the location that is orthogonal

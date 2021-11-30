@@ -202,6 +202,7 @@ function baseHandleAjaxData(routes, removeAll) {
                     "<tr id='" + blockElementId + "'>" +
                     " <td class='blockLabel'>Vehicle:</td><td id='vehiclesForBlock'></td>" +
                     " <td class='blockLabel'>Adh:</td><td id='vehicleSchedAdh'></td>" +
+                    " <td class='blockLabel'>License:</td><td id='vehicleLicense'></td>" +
                     "</tr>");
             }
             /* this is to escape . and :  characters */
@@ -277,9 +278,17 @@ function baseHandleAjaxData(routes, removeAll) {
                 vehiclesValueElement.addClass("problemColor");
             }
 
+            var vehiclesLicenseElement = $("#" + routeElementId + " #" + blockElementId + " #vehicleLicense");
+            var licensePlateStr = "-";
+
             var vehiclesSchedAdhElement = $("#" + routeElementId + " #" + blockElementId + " #vehicleSchedAdh");
             var schAdhStr = "-";
             if (blockData.vehicle.length > 0) {
+                if(LICENSE_FILTER_SET.size > 0 && LICENSE_FILTER_SET.has(blockData.vehicle[0].licensePlate)){
+                    licensePlateStr = blockData.vehicle[0].licensePlate;
+                    vehiclesLicenseElement.addClass("ontimeColor");
+                }
+
                 schAdhStr = blockData.vehicle[0].schAdhStr;
                 if (blockData.vehicle[0].schAdh < -ALLOWABLE_LATE_MSEC) {
                     ++totalLate;
@@ -291,7 +300,9 @@ function baseHandleAjaxData(routes, removeAll) {
                     ++totalOnTime;
                     vehiclesSchedAdhElement.removeClass("lateColor earlyColor");
                 }
+                schAdhStr = blockData.vehicle[0].schAdhStr;
             }
+            vehiclesLicenseElement.text(licensePlateStr);
             vehiclesSchedAdhElement.text(schAdhStr);
         } // Done with each block for the route
     } // Done with each route

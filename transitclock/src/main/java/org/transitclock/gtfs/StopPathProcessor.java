@@ -23,14 +23,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.amazonaws.services.kinesis.model.InvalidArgumentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.config.BooleanConfigValue;
+import org.transitclock.config.StringConfigValue;
 import org.transitclock.db.structs.Location;
 import org.transitclock.db.structs.Stop;
 import org.transitclock.db.structs.StopPath;
 import org.transitclock.db.structs.TripPattern;
 import org.transitclock.db.structs.Vector;
 import org.transitclock.gtfs.gtfsStructs.GtfsShape;
+import org.transitclock.gtfs.gtfsStructs.GtfsStopTime;
+import org.transitclock.utils.DistanceConverter;
+import org.transitclock.utils.DistanceType;
 import org.transitclock.utils.Geo;
 import org.transitclock.utils.IntervalTimer;
 
@@ -47,6 +53,7 @@ public class StopPathProcessor {
 	private final Map<String, List<GtfsShape>> gtfsShapesMap;  // Keyed on shapeId
 	private final Map<String, Stop> stopsMap;
 	private final Collection<TripPattern> tripPatterns;
+	private final Map<String, List<GtfsStopTime>> gtfsStopTimesForTripMap;
 	private final double offsetDistance;
 	private final double maxStopToPathDistance;
 	private final double maxDistanceForEliminatingVertices;
@@ -54,6 +61,16 @@ public class StopPathProcessor {
 	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(StopPathProcessor.class);
+
+	private static DistanceType shapeDistTraveledUnitType(){
+		return DistanceType.valueOfLabel(shapeDistTraveledUnitType.getValue());
+	}
+	private static StringConfigValue shapeDistTraveledUnitType =
+			new StringConfigValue(
+					"transitclock.gtfs.shapeDistTraveledUnitType",
+					"METER",
+					"Specify the unit type used by shapeDistanceTraveled. Can be set to METER, KM, FOOT, MILE," +
+							"YARD, or FURLONG");
 
 	/********************** Member Functions **************************/
 
@@ -63,6 +80,7 @@ public class StopPathProcessor {
 	 * @param gtfsShapes
 	 * @param stopsMap
 	 * @param tripPatterns
+	 * @param gtfsStopTimesForTripMap stop_time for shape_dist_traveled if present
 	 * @param offsetDistance
 	 *            How much to the right the stopPaths should be offset. If
 	 *            negative then the stopPaths are offset to the left. If 0.0
@@ -70,15 +88,12 @@ public class StopPathProcessor {
 	 * @param maxStopToPathDistance
 	 * @param maxDistanceForEliminatingVertices
 	 *            For getting rid of really small segments
-	 * @param Indicates
-	 *            that shouldn't use the shape before the first stop of the
-	 *            trip. This can be useful because sometimes a single shape is
-	 *            used for multiple trip patterns or the shapes simply have some
-	 *            problem points at the beginning (like sfmta 21-Hayes.
+	 * @param trimPathBeforeFirstStopOfTrip
 	 */
 	public StopPathProcessor(Collection<GtfsShape> gtfsShapes, 
 			Map<String, Stop> stopsMap, 
 			Collection<TripPattern> tripPatterns,
+		  Map<String, List<GtfsStopTime>> gtfsStopTimesForTripMap,
 			double offsetDistance,
 			double maxStopToPathDistance,
 			double maxDistanceForEliminatingVertices,
@@ -86,6 +101,7 @@ public class StopPathProcessor {
 		// Create a GtfsShapes Map where can look up
 		// GtfsShapes by shapeId.
 		gtfsShapesMap = new HashMap<String, List<GtfsShape>>(gtfsShapes.size());
+		this.gtfsStopTimesForTripMap = gtfsStopTimesForTripMap;
 		for (GtfsShape gtfsShape : gtfsShapes) {
 			String shapeIdKey = gtfsShape.getShapeId();
 			List<GtfsShape> shapesList = gtfsShapesMap.get(shapeIdKey);
@@ -213,10 +229,16 @@ public class StopPathProcessor {
 	}
 
 	private static class BestMatch {
+		public Vector shapeVector;
+		public double totalDistanceAlongShape;
+		public double distanceExamined;
 		int shapeIndex;
 		double stopToShapeDistance;
 		double distanceAlongShape;
 		Location matchLocation;
+		TripPattern tripPattern;
+		int stopIndex;
+		Stop stop;
 		
 		@Override
 		public String toString() {
@@ -235,18 +257,29 @@ public class StopPathProcessor {
 	 * 
 	 * @param tripPattern
 	 * @param stopIndex
-	 * @param previousShapeIndex
-	 * @param previousDistanceAlongShape
 	 * @param shapeLocs
+	 * @param shapeDistanceTravelled
 	 * @return The BestMatch indicating best match of stop to shape.
 	 */
 	private BestMatch determineBestMatch(TripPattern tripPattern,
-			int stopIndex, int previousShapeIndex,
-			double previousDistanceAlongShape, List<Location> shapeLocs) {
-		// Value to be returned
-		BestMatch bestMatch = null;
-		
-		// Determine the stop for the trip pattern
+																			 int stopIndex,
+																			 BestMatch previousMatch,
+																			 List<Location> shapeLocs,
+																			 Double shapeDistanceTravelled) {
+
+		// try to snap based on shape distance first
+		BestMatch bestMatch = determineBestMatchFromShapeDistanceTravelled(tripPattern,
+						stopIndex, previousMatch, shapeLocs, shapeDistanceTravelled);
+
+		if (bestMatch != null) {
+			// if that worked log/validate the results
+			validateBestMatch(bestMatch);
+			return bestMatch;
+		}
+
+		// shape_dist_traveled wasn't set, fall back to traditional snapping
+		// NOTE: this has issues with loops and with S-shapes between
+		// stops that are close together
 		String stopId = tripPattern.getStopId(stopIndex);
 		Stop stop = stopsMap.get(stopId);
 		
@@ -276,8 +309,8 @@ public class StopPathProcessor {
 		// at enough shapes. Need to start at -previousDistanceAlongShape so
 		// when add in length of current vector it indeed shows how
 		// far along shapes been looking to match current stop.
-		double distanceAlongShapesExamined = -previousDistanceAlongShape;
-		for (int shapeIndex = previousShapeIndex; 
+		double distanceAlongShapesExamined = -previousMatch.distanceAlongShape;
+		for (int shapeIndex = previousMatch.shapeIndex;
 			 shapeIndex < shapeLocs.size()-1; 
 			 ++shapeIndex) {
 			// Determine Vector that connects the points for this shape 
@@ -288,7 +321,7 @@ public class StopPathProcessor {
 			// Determine distance of stop to the current shape
 			double stopToShapeDistance = stop.getLoc().distance(shapeVector);
 			
-			// If this is the best fit so far, but 
+			// If this is the best fit so far, but
 			// If this is the best fit so far, remember such.
 			// The 0.0001 is to make sure that don't think found 
 			// a better match when actually it is the same, but
@@ -317,11 +350,15 @@ public class StopPathProcessor {
 					bestMatch.stopToShapeDistance = stopToShapeDistance;
 					bestMatch.shapeIndex = shapeIndex;
 					bestMatch.matchLocation =
-							shapeVector
-									.locAlongVector(bestMatch.distanceAlongShape);
+									shapeVector
+													.locAlongVector(bestMatch.distanceAlongShape);
+					bestMatch.tripPattern = tripPattern;
+					bestMatch.stop = stop;
+					bestMatch.stopIndex = stopIndex;
+					bestMatch.totalDistanceAlongShape = distanceAlongShapesExamined;
 				}
 			}
-			
+
 			// Keep track of how far along the shapes have examined. If
 			// have looked for much further than the distance between the
 			// stops then have looked far enough. Don't want to look too
@@ -335,10 +372,24 @@ public class StopPathProcessor {
 			// the distance along the shape is 760m. Therefore need to be 
 			// pretty generous to correctly find the 43rd Ave & Clement stop.
 			distanceAlongShapesExamined += shapeVector.length();
-			if (distanceAlongShapesExamined > 3.0 * distanceBetweenStopsAsCrowFlies + 600.0)
-				break;				
+			if (distanceAlongShapesExamined > 3.0 * distanceBetweenStopsAsCrowFlies + 600.0) {
+				// if we have a bad match, we could look further
+				// but at the risk of worsening the loop snapping behaviour
+				// instead make sure GTFS has stoptimes.shape_dist_traveled
+				// and this code path will not be used
+				break;
+			}
 		} // End of for each shape (finding best match)
-		
+
+
+		validateBestMatch(bestMatch);
+
+		// Return results
+		return bestMatch;
+	}
+
+	private void validateBestMatch(BestMatch bestMatch) {
+		if (bestMatch == null) return;
 		// Now have the best match of the stop to a shape.
 		// If stop really far away from path log an warning
 		// but still use the match. Logging a warning instead
@@ -346,93 +397,177 @@ public class StopPathProcessor {
 		// create appropriate path by using the stop location.
 		// This means that most of the time this will be adequate
 		// so not a fatal error.
-		if (bestStopToShapeDistance > maxStopToPathDistance) {
-			if (bestStopToShapeDistance < 250.0) {
-				logger.warn("Stop {} (stop_id={}) at lat={} lon={} for " + 
-						"route_id={} route_short_name={} "
-						+ "stop_sequence={} is located {} away " +
-						"from the shapes for shape_id={}. This is " +
-						"further than allowed distance of {} and means " +
-						"that either the location of the stop needs to " +
-						"be improved, the stop is out of sequence, the " +
-						"stop should not be included for the trips in " +
-						"stop_times.txt, or the shape needs to be " +
-						"improved. The stop path will be modified to go "
-						+ "through the stop, which can make the stop path "
-						+ "looked jagged and incorrect. {}",
-						stop.getName(), 
-						stop.getId(),  
-						Geo.format(stop.getLoc().getLat()), 
-						Geo.format(stop.getLoc().getLon()),
-						tripPattern.getRouteId(), 
-						tripPattern.getRouteShortName(),
-						stopIndex+1,
-						Geo.distanceFormat(bestStopToShapeDistance),
-						tripPattern.getShapeId(),
-						Geo.distanceFormat(maxStopToPathDistance),
-						tripPattern.toStringListingTripIds() );
+		if (bestMatch.stopToShapeDistance > maxStopToPathDistance) {
+			if (bestMatch.stopToShapeDistance < 250.0) {
+				logger.warn("Stop {} (stop_id={}) at lat={} lon={} for " +
+												"route_id={} route_short_name={} "
+												+ "stop_sequence={} is located {} away " +
+												"from the shapes for shape_id={}. This is " +
+												"further than allowed distance of {} and means " +
+												"that either the location of the stop needs to " +
+												"be improved, the stop is out of sequence, the " +
+												"stop should not be included for the trips in " +
+												"stop_times.txt, or the shape needs to be " +
+												"improved. The stop path will be modified to go "
+												+ "through the stop, which can make the stop path "
+												+ "looked jagged and incorrect. {}",
+								bestMatch.stop.getName(),
+								bestMatch.stop.getId(),
+								Geo.format(bestMatch.stop.getLoc().getLat()),
+								Geo.format(bestMatch.stop.getLoc().getLon()),
+								bestMatch.tripPattern.getRouteId(),
+								bestMatch.tripPattern.getRouteShortName(),
+								bestMatch.stopIndex+1,
+								Geo.distanceFormat(bestMatch.stopToShapeDistance),
+								bestMatch.tripPattern.getShapeId(),
+								Geo.distanceFormat(maxStopToPathDistance),
+								bestMatch.tripPattern.toStringListingTripIds() );
 			} else {
-				// Really far off so mark it as an error and use a stronger 
+				// Really far off so mark it as an error and use a stronger
 				// message
-				logger.error("Stop {} (stop_id={}) at lat={} lon={} for " + 
-						"route_id={} route_short_name={} "
-						+ "stop_sequence={} is located {} away " +
-						"from the shapes for shape_id={}. This is MUCH " +
-						"further than allowed distance of {} and means " +
-						"that either the location of the stop needs to " +
-						"be improved, the stop is out of sequence, the " +
-						"stop should not be included for the trips in " +
-						"stop_times.txt, or the shape needs to be " +
-						"improved. The stop path will be modified to go "
-						+ "through the stop, which can make the stop path "
-						+ "looked jagged and incorrect. {}",
-						stop.getName(), 
-						stop.getId(),  
-						Geo.format(stop.getLoc().getLat()), 
-						Geo.format(stop.getLoc().getLon()),
-						tripPattern.getRouteId(),  
-						tripPattern.getRouteShortName(),
-						stopIndex+1,
-						Geo.distanceFormat(bestStopToShapeDistance),
-						tripPattern.getShapeId(),
-						Geo.distanceFormat(maxStopToPathDistance),
-						tripPattern.toStringListingTripIds() );
+				logger.error("Stop {} (stop_id={}) at lat={} lon={} for " +
+												"route_id={} route_short_name={} "
+												+ "stop_sequence={} is located {} away " +
+												"from the shapes for shape_id={}. This is MUCH " +
+												"further than allowed distance of {} and means " +
+												"that either the location of the stop needs to " +
+												"be improved, the stop is out of sequence, the " +
+												"stop should not be included for the trips in " +
+												"stop_times.txt, or the shape needs to be " +
+												"improved. The stop path will be modified to go "
+												+ "through the stop, which can make the stop path "
+												+ "looked jagged and incorrect. {}",
+								bestMatch.stop.getName(),
+								bestMatch.stop.getId(),
+								Geo.format(bestMatch.stop.getLoc().getLat()),
+								Geo.format(bestMatch.stop.getLoc().getLon()),
+								bestMatch.tripPattern.getRouteId(),
+								bestMatch.tripPattern.getRouteShortName(),
+								bestMatch.stopIndex+1,
+								Geo.distanceFormat(bestMatch.stopToShapeDistance),
+								bestMatch.tripPattern.getShapeId(),
+								Geo.distanceFormat(maxStopToPathDistance),
+								bestMatch.tripPattern.toStringListingTripIds() );
 			}
 		}
-		
-		// Return results
-		return bestMatch;
+
 	}
-	
+
+	// if the shape_dist_traveled is populated use it instead of heuristic
+	private BestMatch determineBestMatchFromShapeDistanceTravelled(TripPattern tripPattern, int stopIndex,
+																																 BestMatch previousMatch,
+																																 List<Location> shapeLocs,
+																																 Double shapeDistanceTravelled) {
+
+		if (shapeDistanceTravelled == null) return null;
+
+		// Determine the stop for the trip pattern
+		String stopId = tripPattern.getStopId(stopIndex);
+		Stop stop = stopsMap.get(stopId);
+		Double minDistanceToShapeDistanceTravelled = Double.MAX_VALUE;
+		BestMatch bestMatch = new BestMatch();
+		bestMatch.tripPattern = tripPattern;
+		bestMatch.stop = stop;
+		bestMatch.stopIndex = stopIndex;
+		boolean exceededDistance = false;
+
+		double distanceAlongShapesExamined = previousMatch.distanceExamined;
+
+		for (int shapeIndex = previousMatch.shapeIndex;
+				 shapeIndex < shapeLocs.size()-1;
+				 ++shapeIndex) {
+			// Determine Vector that connects the points for this shape
+			Location loc0 = shapeLocs.get(shapeIndex);
+			Location loc1 = shapeLocs.get(shapeIndex + 1);
+			Vector shapeVector = new Vector(loc0, loc1);
+
+			distanceAlongShapesExamined += shapeVector.lengthExact();
+			double closestSnappingDistance = stop.getLoc().distance(shapeVector);
+			if (closestSnappingDistance < minDistanceToShapeDistanceTravelled) {
+				minDistanceToShapeDistanceTravelled = closestSnappingDistance;
+				bestMatch.distanceAlongShape = stop.getLoc().matchDistanceAlongVector(shapeVector);
+				bestMatch.stopToShapeDistance = closestSnappingDistance;
+				bestMatch.shapeVector = shapeVector;
+				bestMatch.shapeIndex = shapeIndex;
+				bestMatch.matchLocation = shapeVector.locAlongVector(bestMatch.distanceAlongShape);
+				// allow the path to be considered again
+				bestMatch.totalDistanceAlongShape
+								= distanceAlongShapesExamined - shapeVector.length() + bestMatch.distanceAlongShape;
+				bestMatch.distanceExamined = distanceAlongShapesExamined - shapeVector.lengthExact();
+			}
+
+
+			if (exceededDistance) {
+				// no need to look any further
+				break;
+			}
+			// allow for some overrun in segments as small errors accumulate
+			if (distanceAlongShapesExamined > shapeDistanceTravelled + 200) {
+				exceededDistance = true;
+			}
+		}
+
+		if (bestMatch.stopToShapeDistance > 250 && logger.isDebugEnabled()) {
+			// the snapping was poor, create a link that visualizes the issue
+			String url = "http://developer.onebusaway.org/maps/debug.html?polyline="
+							+ debugShapeVector(bestMatch.shapeVector) + "&points=" + debugStopLoc(stop);
+			String shapeUrl = "http://developer.onebusaway.org/maps/debug.html?polyline="
+							+ debugShape(shapeLocs) + "&points=" + debugStopLoc(stop);
+			logger.info("bad match at url=" + url
+			+ "\nfor shape=" + shapeUrl);
+		}
+		if (minDistanceToShapeDistanceTravelled < Double.MAX_VALUE) {
+			return bestMatch;
+		}
+		// something went wrong and no match occurred
+		// fall back to traditional heuristic
+		return null;
+	}
+
+	private String debugShape(List<Location> shapeLocs) {
+		StringBuffer sb = new StringBuffer();
+		for (Location l : shapeLocs) {
+			sb.append(l.getLat()).append("%2C").append(l.getLon()).append("%20");
+		}
+		return sb.substring(0, sb.length()-3);
+	}
+
+	private String debugStopLoc(Stop stop) {
+		return stop.getLoc().getLat() + "%2C" + stop.getLoc().getLon();
+	}
+
+	private String debugShapeVector(Vector v) {
+		return v.getL1().getLat() + "%2C" + v.getL1().getLon()
+						+ "%20" + v.getL2().getLat() + "%2C" + v.getL2().getLon();
+	}
+
 	/**
 	 * For the trip pattern, goes through the stops and matches them to the
 	 * shapes from the shapes.txt file. StopPath segments are created for each
 	 * stop and the TripPattern is updated accordingly.
-	 * 
 	 * @param shapeLocs
 	 *            List of Locations that represent the shapes that matching the
 	 *            stops to.
-	 * @param stopIdsForTripPattern
-	 *            List of IDs of the stops that need to match to shapes.
+	 * @param distancesAlongShape
 	 * @param tripPattern
 	 *            so can get routeId, tripPatternId, and shapeId when creating
-	 *            the actual StopPath objects.
 	 */
 	private void determinePathSegmentsMatchingStopsToShapes(
-			List<Location> shapeLocs, TripPattern tripPattern) {
+					List<Location> shapeLocs, List<Double> distancesAlongShape, TripPattern tripPattern) {
 		int previousShapeIndex = 0;
-		// How far into the segment the previous match was
-		double previousDistanceAlongShape = 0.0; 
 		Location previousLocation = null;
 		int numberOfStopsTooFarAway = 0;
-		
+		BestMatch previousMatch = new BestMatch();
+		previousMatch.shapeIndex = 0;
+		previousMatch.distanceAlongShape = 0;
 		// For each stop for the trip pattern...
 		for (int stopIndex = 0; 
 				stopIndex < tripPattern.getStopPaths().size(); 
 				++stopIndex) {
 			// Determine which shape the stop matches to
 			BestMatch bestMatch = determineBestMatch(tripPattern, stopIndex,
-					previousShapeIndex, previousDistanceAlongShape, shapeLocs);
+					previousMatch, shapeLocs, distancesAlongShape.get(stopIndex));
+			previousMatch = bestMatch;
 
 			// Keep track of how many stops too far away from path so can log
 			// the number for the entire system
@@ -507,7 +642,6 @@ public class StopPathProcessor {
 			
 			// Prepare for looking at next stop
 			previousShapeIndex = bestMatch.shapeIndex;
-			previousDistanceAlongShape = bestMatch.distanceAlongShape;
 		} // End of for each stop for the trip pattern		
 		
 		// If there errors with stops being too far away from the stopPaths then
@@ -643,9 +777,23 @@ public class StopPathProcessor {
 				// centerline data.
 				List<Location> offsetLocations = 
 						getOffsetLocations(gtfsShapesMap.get(shapeId));
-						
+				List<Double> distancesAlongShape = new ArrayList<>();
+				String tripId = tripPattern.getTrips().get(0).getId();
+				List<GtfsStopTime> gtfsStopTimes = this.gtfsStopTimesForTripMap.get(tripId);
+
+				if (gtfsStopTimes != null) {
+					// if we have stop_time's shape_dist_traveled use it to
+					// do better snapping of stops to shapes
+					DistanceType distanceType = shapeDistTraveledUnitType();
+					for (GtfsStopTime st : gtfsStopTimes) {
+						distancesAlongShape.add(distanceType.convertDistanceToMeters(st.getShapeDistTraveled()));
+					}
+				} else {
+					// we fall back to traditional snapping which is known to have issue
+					logger.info("missing shape_dist_travelled for trip {}", tripId);
+				}
 				// Create stopPaths by finding best match to shapes
-				determinePathSegmentsMatchingStopsToShapes(offsetLocations, 
+				determinePathSegmentsMatchingStopsToShapes(offsetLocations, distancesAlongShape,
 						tripPattern);
 			}
 		}

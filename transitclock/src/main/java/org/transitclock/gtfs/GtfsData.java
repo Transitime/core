@@ -1836,6 +1836,7 @@ public class GtfsData {
 						Collections.unmodifiableCollection(gtfsShapes), 
 						Collections.unmodifiableMap(stopsMap), 
 						Collections.unmodifiableCollection(tripPatternMap.values()),
+						Collections.unmodifiableMap(gtfsStopTimesForTripMap),
 						pathOffsetDistance,
 						maxStopToPathDistance, 
 						maxDistanceForEliminatingVertices,

@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.config.StringConfigValue;
 import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.utils.Time;
@@ -67,6 +68,14 @@ public class ScheduleAdherenceController {
 	 public static int getScheduleLateSeconds() {
 	    return scheduleLateSeconds.getValue();
 	  }
+
+	private static StringConfigValue licenseFilterList =
+			new StringConfigValue("transitclock.web.licenseFilter", "",
+					"Only show licenses that match specific values. Values separated by comma.");
+
+	public static String getLicenseFilterList() {
+		return licenseFilterList.getValue();
+	}
 	 
 	 private static BooleanConfigValue usePredictionLimits =
 	     new BooleanConfigValue("transitme.web.userPredictionLimits", 

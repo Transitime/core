@@ -115,10 +115,11 @@ function avlAnimation(map, icon, clock) {
 		if (isNaN(parseFloat(data[0].heading))) {
 			headingArrow.setOpacity(0.0);
 		}
-		var vehicleBackground = L.circleMarker(positions[0],
+
+    var vehicleBackground = L.circleMarker(positions[0],
 			getVehicleMarkerBackgroundOptions(data[0])).addTo(
 			map);
-		console.log('positions[currentIndex].heading', positions[0].heading)
+		//console.log('positions[currentIndex].heading', positions[0].heading)
 
 		sprite = L.marker(positions[0], {icon: icon}).bindPopup(content[0]).addTo(map);
 		sprite.headingArrow = headingArrow;
@@ -174,7 +175,7 @@ function avlAnimation(map, icon, clock) {
 				paused = true;
 				return;
 			}
-			console.log('positions[currentIndex].heading', positions[currentIndex].heading)
+			//console.log('positions[currentIndex].heading', positions[currentIndex].heading)
 			sprite.setLatLng(positions[currentIndex])
 			sprite.headingArrow.options.angle = positions[currentIndex].heading;
 			sprite.headingArrow.setLatLng(positions[currentIndex]);
@@ -191,7 +192,7 @@ function avlAnimation(map, icon, clock) {
 		else {
 			var pos = interpolatePosition(positions[currentIndex], positions[currentIndex+1], durations[currentIndex], lineDone)
 			sprite.setLatLng(pos)
-			console.log('positions[currentIndex].heading', positions[currentIndex].heading)
+			//console.log('positions[currentIndex].heading', positions[currentIndex].heading)
 			sprite.headingArrow.options.angle = positions[currentIndex].heading;
 			sprite.headingArrow.setLatLng(pos);
 			sprite._popup.setContent(popupData(positions[currentIndex])[0]);
@@ -267,7 +268,7 @@ function avlAnimation(map, icon, clock) {
 			nextIndex++;
 		}
 		updateToIndex(nextIndex);
-		console.log(nextIndex)
+		//console.log(nextIndex)
 	}
 
 
@@ -321,7 +322,7 @@ function avlAnimation(map, icon, clock) {
 			sprite.setLatLng(avl);
 
 			sprite.headingArrow.options.angle = positions[currentIndex].heading;
-			console.log('positions[currentIndex].heading', positions[currentIndex].heading)
+			//console.log('positions[currentIndex].heading', positions[currentIndex].heading)
 			sprite.headingArrow.setLatLng(avl);
 			sprite.headingArrow.update();
 

@@ -1272,7 +1272,9 @@ public class TransitimeApi {
             		+ "time minus allowableBeforeTimeSecs and the block end time")
             @QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs,
 			@Parameter(description="if set, formats speed to the specified format (MS,KM,MPH)")
-			@QueryParam(value = "speedFormat") @DefaultValue("MS") String speedFormat)
+			@QueryParam(value = "speedFormat") @DefaultValue("MS") String speedFormat,
+			@Parameter(description="if set, excludes blocks with canceled trips from list of results")
+			@QueryParam(value = "includeCanceledTrips") @DefaultValue("false") boolean includeCanceledTrips)
             throws WebApplicationException {
 
         // Make sure request is valid
@@ -1284,7 +1286,7 @@ public class TransitimeApi {
                     stdParameters.getVehiclesInterface();
             Collection<IpcActiveBlock> activeBlocks = vehiclesInterface
                     .getActiveBlocksWithoutVehicles(routesIdOrShortNames,
-                            allowableBeforeTimeSecs);
+                            allowableBeforeTimeSecs, includeCanceledTrips);
 
 			SpeedFormat speedFormatEnum = SpeedFormat.valueOf(speedFormat.toUpperCase());
 
@@ -1314,7 +1316,9 @@ public class TransitimeApi {
             @Parameter(description="A block will be active if the time is between the block start time minus allowableBeforeTimeSecs and the block end time")
             @QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs,
 			@Parameter(description="if set, formats speed to the specified format (MS,KM,MPH)")
-			@QueryParam(value = "speedFormat") @DefaultValue("MS") String speedFormat)
+			@QueryParam(value = "speedFormat") @DefaultValue("MS") String speedFormat,
+			@Parameter(description="if set, excludes blocks with canceled trips from list of results")
+			@QueryParam(value = "includeCanceledTrips") @DefaultValue("false") boolean includeCanceledTrips)
             throws WebApplicationException {
 
         // Make sure request is valid
@@ -1326,7 +1330,7 @@ public class TransitimeApi {
                     stdParameters.getVehiclesInterface();
             Collection<IpcActiveBlock> activeBlocks = vehiclesInterface
                     .getActiveBlocksAndVehiclesByRouteId(routesIdOrShortName,
-                            allowableBeforeTimeSecs);
+                            allowableBeforeTimeSecs, includeCanceledTrips);
 
 			SpeedFormat speedFormatEnum = SpeedFormat.valueOf(speedFormat.toUpperCase());
 
@@ -1354,7 +1358,9 @@ public class TransitimeApi {
             @Parameter(description="A block will be active if the time is between the block start time minus allowableBeforeTimeSecs and the block end time")
             @QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs,
 			@Parameter(description="if set, formats speed to the specified format (MS,KM,MPH)")
-			@QueryParam(value = "speedFormat") @DefaultValue("MS") String speedFormat)
+			@QueryParam(value = "speedFormat") @DefaultValue("MS") String speedFormat,
+			@Parameter(description="if set, excludes blocks with canceled trips from list of results")
+			@QueryParam(value = "includeCanceledTrips") @DefaultValue("false") boolean includeCanceledTrips)
             throws WebApplicationException {
    // Make sure request is valid
       stdParameters.validate();
@@ -1365,7 +1371,7 @@ public class TransitimeApi {
                   stdParameters.getVehiclesInterface();
           Collection<IpcActiveBlock> activeBlocks = vehiclesInterface
                   .getActiveBlocksAndVehiclesByRouteName(routeName,
-                          allowableBeforeTimeSecs);
+                          allowableBeforeTimeSecs, includeCanceledTrips);
 
 		  SpeedFormat speedFormatEnum = SpeedFormat.valueOf(speedFormat.toUpperCase());
 

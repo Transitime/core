@@ -29,7 +29,6 @@ public class Headway implements Serializable {
 	 */
 	private static final long serialVersionUID = -4561111910398287801L;
 
-	@Id 
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private long id;
 	
@@ -56,6 +55,7 @@ public class Headway implements Serializable {
 	private int numVehicles;
 
 	// The time the AVL data was processed and the headway was created.
+	@Id
 	@Column	
 	@Temporal(TemporalType.TIMESTAMP)
 	private  Date creationTime;
