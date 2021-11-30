@@ -9,7 +9,8 @@ function avlAnimation(map, icon, clock) {
 		lastTime, lineDone, paused, durations, sprite, positions, end;
 	
 	var ready = false;
-	
+
+
 	// create icon for animation and initialize values
 	// positions is an array of position values: { lat, lon, timestamp }
 	function popupData(data){
@@ -114,17 +115,43 @@ function avlAnimation(map, icon, clock) {
 		if (isNaN(parseFloat(data[0].heading))) {
 			headingArrow.setOpacity(0.0);
 		}
-
+		var vehicleBackground = L.circleMarker(positions[0],
+			getVehicleMarkerBackgroundOptions(data[0])).addTo(
+			map);
 		console.log('positions[currentIndex].heading', positions[0].heading)
 
 		sprite = L.marker(positions[0], {icon: icon}).bindPopup(content[0]).addTo(map);
 		sprite.headingArrow = headingArrow;
-
+		sprite.background = vehicleBackground;
 		sprite.setZIndexOffset(400)
 		clock.textContent = parseTime(elapsedTime);
 
+
+
 	}
-	
+
+	/**
+	 * Determines options for drawing the vehicle background circle based on uiType
+	 */
+	function getVehicleMarkerBackgroundOptions(vehicleData) {
+		// Handle unassigned vehicles
+		var vehicleMarkerBackgroundOptions = {
+			radius: 13,
+			weight: 0,
+			fillColor: '#1E3F78',
+			fillOpacity: 0.5,
+		};
+
+		if (vehicleData.otp === "on-time")
+			vehicleMarkerBackgroundOptions.fillColor = '#37E627';
+		else if (vehicleData.otp === "early")
+			vehicleMarkerBackgroundOptions.fillColor = '#E34B71';
+		else if (vehicleData.otp === "late")
+			vehicleMarkerBackgroundOptions.fillColor = '#E6D83E'
+
+		return vehicleMarkerBackgroundOptions;
+	}
+
 	function tick() {
 		var now = Date.now(),
 			delta = now - lastTime;
@@ -154,6 +181,10 @@ function avlAnimation(map, icon, clock) {
 			sprite.headingArrow.update();
 
 			sprite._popup.setContent(popupData(positions[currentIndex])[0]);
+			sprite.background.setLatLng(positions[currentIndex])
+			sprite.background.options.fillColor= getVehicleMarkerBackgroundOptions(positions[currentIndex]).fillColor;
+			sprite.background._updateStyle();
+
 			sprite.update()
 			elapsedTime = positions[currentIndex].timestamp
 		}
@@ -165,6 +196,10 @@ function avlAnimation(map, icon, clock) {
 			sprite.headingArrow.setLatLng(pos);
 			sprite._popup.setContent(popupData(positions[currentIndex])[0]);
 			sprite.headingArrow.update();
+
+			sprite.background.setLatLng(pos);
+			sprite.background.options.fillColor= getVehicleMarkerBackgroundOptions(positions[currentIndex]).fillColor;
+			sprite.background._updateStyle()
 			sprite.update()
 			
 		}
@@ -289,6 +324,10 @@ function avlAnimation(map, icon, clock) {
 			console.log('positions[currentIndex].heading', positions[currentIndex].heading)
 			sprite.headingArrow.setLatLng(avl);
 			sprite.headingArrow.update();
+
+			sprite.background.setLatLng(positions[currentIndex])
+			sprite.background.options.fillColor= getVehicleMarkerBackgroundOptions(positions[currentIndex]).fillColor;
+			sprite.background._updateStyle();
 
 			sprite.update();
 			clock.textContent = parseTime(elapsedTime);
