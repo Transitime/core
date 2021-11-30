@@ -121,7 +121,7 @@
     <div class="list-group comparsion-button-list m-bt-0 row">
         <div class="col-xs-12">
             <div id="paramDetails" class=" route-time-analysis-header bg-65 d-flex list-group-item list-group-item-action justify-content-between">No Routes</div>
-        </div
+        </div>
     </div>
 
 
