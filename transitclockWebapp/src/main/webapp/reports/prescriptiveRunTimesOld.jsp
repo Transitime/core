@@ -1,167 +1,141 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-         pageEncoding="ISO-8859-1"%>
+         pageEncoding="ISO-8859-1" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<%@page import="org.transitclock.web.WebConfigParams"%>
-<%
-    String agencyId = request.getParameter("a");
-    if (agencyId == null || agencyId.isEmpty()) {
-        response.getWriter().write("You must specify agency in query string (e.g. ?a=mbta)");
-        return;
-    }
-%>
 <html>
 <head>
     <%@include file="/template/includes.jsp" %>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-    <title>Prescriptive Run Times</title>
+    <title>Run Time Analysis</title>
 
-    <link rel="stylesheet" href="//unpkg.com/leaflet@0.7.3/dist/leaflet.css" />
-    <script src="//unpkg.com/leaflet@0.7.3/dist/leaflet.js"></script>
-    <script src="<%= request.getContextPath() %>/javascript/jquery-dateFormat.min.js"></script>
-
-    <script src="<%= request.getContextPath() %>/maps/javascript/leafletRotatedMarker.js"></script>
-    <script src="<%= request.getContextPath() %>/maps/javascript/mapUiOptions.js"></script>
-
-    <!-- Load in Select2 files so can create fancy selectors -->
-    <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
-
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/maps/css/mapUi.css" />
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
-
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
-
-
-    <%--        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>--%>
-    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/page-panels.css">
-    <title>Prescriptive Run Times</title>
+    <!-- Load in Select2 files so can create fancy route selector -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="../jquery.datepick.package-5.1.0/css/jquery.datepick.css" />
+    <link rel="stylesheet" type="text/css"  href="../javascript/jquery-timepicker/jquery.timepicker.css"/>
+    <link href="params/reportParams.css" rel="stylesheet"/>
 </head>
-<body class="real-time-live-map">
+
+<body class="run-time-screen">
 <%@include file="/template/header.jsp" %>
-<div class="panel split">
-    <div class="left-panel">
-        <h4 class="page-title">
-            Prescriptive Run Times
-        </h4>
-        <input type="hidden" name="isAllRoutesDisabled"  class="isAllRoutesDisabled" value="true">
-        <form class="row" novalidate>
-            <jsp:include page="params/routeAllOrSingleNew.jsp" />
+<div class="wrapper">
+    <div class="paramsWrapper">
+        <div id="paramsSidebar">
+            <div class="header-title">
+                Prescriptive Run Times
+            </div>
+            <input type="hidden" name="isAllRoutesDisabled"  class="isAllRoutesDisabled" value="true">
+            <div id="paramsFields">
+                <%-- For passing agency param to the report --%>
+                <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
 
-            <div class="row">
-                <label class="col-sm-12 col-form-label">Direction</label>
-                <div class="col-sm-12">
-                    <select id="direction" name="direction" disabled="true" class="form-select">
+                <jsp:include page="params/routeAllOrSingle.jsp"/>
 
-                    </select>
+                <div class="param individual-route-only">
+                    <label for="direction">Direction:</label>
+                    <select id="direction" name="direction" disabled="true"></select>
+                </div>
+                <div class="param individual-route-only">
+                    <label for="tripPattern">Trip Pattern:</label>
+                    <select id="tripPattern" name="tripPattern" disabled="true"></select>
                 </div>
 
-            </div>
-
-            <div class="row">
-                <label class="col-sm-12 col-form-label">Trip Pattern</label>
-                <div class="col-sm-12">
-                    <select id="tripPattern" name="tripPattern" disabled="true" class="form-select">
-
-                    </select>
-                </div>
-            </div>
-
-            <div class="row">
-                <label class="col-sm-12 col-form-label">Service Day Type</label>
-                <div class="col-sm-12">
-                    <select id="serviceDayType" name="serviceDayType" class="form-select">
+                <div class="param">
+                    <label for="serviceDayType">Service Day:</label>
+                    <select id="serviceDayType" name="serviceDayType">
                         <option value="weekday">Weekday</option>
                         <option value="saturday">Saturday</option>
                         <option value="sunday">Sunday</option>
                         <span class="select2-selection__arrow">
-											<b role="presentation"></b>
-										</span>
+                                <b role="presentation"></b>
+                        </span>
                     </select>
                 </div>
 
-            </div>
-
-            <div class="row">
-                <label class="col-sm-12 col-form-label">Time Band</label>
-                <div class="col-sm-12">
-                    <select id="timeband" name="timeband" class="form-select">
-                    </select>
+                <div class="param">
+                    <label for="timeband">Time Band:</label>
+                    <select id="timeband" name="timeband"></select>
                 </div>
-
+            </div>
+            <div class="submitDiv">
+                <button id="submit" class="submit">Analyze</button>
             </div>
 
 
-
-
-        </form>
-        <div class="list-group">
-            <button class="list-group-item list-group-item-action"  id="submit" >Submit</button>
         </div>
     </div>
-    <div class="right-panel position-relative  no-borders ">
-        <div class="image-container full-width-image d-flex justify-content-center grey-bg">
-            <div class="position-relative d-flex justify-content-centerd-flex justify-content-center align-items-center img-path">
-                <img src="<%= request.getContextPath() %>/reports/images/ontime.png" id="on-time-performance"  class="img-fluid grey-img"/>
-                <h1 class=" position-absolute view-form-btn"   >Submit Form to View Data</h1>
-            </div>
-        </div>
-        <div class="d-flex pl-10 flex-column box-shadow">
-            <div class="list-group comparsion-button-list m-bt-0 row toggle-chart ">
-            <div class="col-xs-12">
-                <div id="paramDetails"  class="param-detail-content  route-time-analysis-header bg-65 d-flex list-group-item list-group-item-action justify-content-between">No Routes</div>
-            </div>
-        </div>
 
-            <div class="row toggle-chart">
-                <div class="col-sm-6">
-                    <table class="table table-bordered">
-                        <tbody><tr>
-                            <th>Average</th>
-                            <th>Fixed</th>
-                            <th>Variable</th>
-                            <th>Dwell</th>
-                        </tr>
-                        <tr class="average-time-details"></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="row toggle-chart">
-                <h5>Trip Run Time Summary</h5>
-            </div>
-            <div class="row toggle-chart">
-                <div class="col-sm-6 adjustment-details inner-flex">
 
+    <div id="mainPage" class="scrollable-element inner-spacing">
+        <div id="overlay"></div>
+        <div id="bars1">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div id="perceptive-header-container" class="param-detail-content"> </div>
+        <div class="perceptive-summary-container">
+            <div class="individual-route">
+                <h3>Trip Run Time Summary</h3>
+                <table class="border-table">
+                    <tbody><tr>
+                        <th>Average</th>
+                        <th>Fixed</th>
+                        <th>Variable</th>
+                        <th>Dwell</th>
+                    </tr>
+                    <tr class="average-time-details"></tr>
+                    </tbody></table>
+            </div>
+
+        </div>
+        <div class="perceptive-table-container">
+            <div class="perceptive-table-flex">
+
+                <div class="adjustment-details inner-flex">
 
                 </div>
-                <div class="col-sm-3">
 
-                    <label class="col-sm-12 col-form-label m-bt-20">OTP (current) <span  class="fw-light" id="current_otp"></span></label>
-                    <label class="col-sm-12 col-form-label bg-secondary-light m-bt-20 ">OTP (predicted) <span  class="fw-light" id="expected_otp"></span></label>
-                    <h6 class="col-sm-12">Actual Performance</h6>
-                    <div class="col-sm-12 legend-container d-flex flex-row">
-                        <div class="color-legend-block bg-red">Short</div>
-                        <div class="color-legend-block bg-green">Good</div>
-                        <div class="color-legend-block bg-yellow">Long</div>
+                <div class=" inner-flex button-adjustment-details">
+                    <div class="otp-containers">
+                        <div class="otp-content otp-secondary">
+                            <span>OTP (current)</span>
+                            <span id="current_otp"></span>
+                        </div>
+                        <div class="otp-content otp-primary">
+                            <span>OTP (predicted)</span>
+                            <span id="expected_otp"></span>
+                        </div>
+                    </div>
+                    <div class="table-description-container">
+                        <h6>Actual Performance</h6>
+                        <div class="legend-container">
+                            <div class="color-legend-block early">Short</div>
+                            <div class="color-legend-block ontime">Good</div>
+                            <div class="color-legend-block late">Long</div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-sm-2">
-                    <div class="list-group">
-                        <button class="list-group-item list-group-item-action gtfs-submit " >Export to GTFS</button>
-                    </div>
+                <div class=" inner-flex export-container">
+                    <button class="gtfs-submit ">Export to GTFS</button>
                 </div>
+
             </div>
         </div>
-
     </div>
 </div>
-</div>
 
+<script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
+<script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.plugin.js"></script>
+<script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.datepick.js"></script>
+<script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-chart-box-and-violin-plot/2.4.0/Chart.BoxPlot.js"></script>
 <script type="text/javascript" src="javascript/run-time-helper.js"> </script>
+</body>
+</html>
+
 <script>
 
     var stops = {};
@@ -224,7 +198,7 @@
     })
 
     var highestPoints = [];
-    $(".toggle-chart").addClass("d-none");
+
     $("#submit").click(function () {
 
         $("#submit").attr("disabled", "disabled");
@@ -253,8 +227,6 @@
                     var adjustmentsSuccess = response.adjustments && response.adjustments.length > 0;
                     var summarySuccess = response.summary && response.summary.avgRunTime;
 
-                    $(".toggle-chart").removeClass("d-none");
-                    $(".image-container").addClass("d-none");
                     if(adjustmentsSuccess && summarySuccess){
                         generateAverageRunTimesTable(request, response);
                         generatePrescriptiveRunTimesTable(response);
@@ -296,32 +268,15 @@
         if (serviceDayString == "") {
             serviceDayString = "All days";
         }
-        var selectedRoute = "All routes";
-        if(request.r){
-            for( var i = 0; i < route.options.length; i++){
-                var eachOption = route.options[i];
-                if(request.r === eachOption.value){
-                    selectedRoute = eachOption.text;
-                }
-            }
-        }
-
         var timeRange = request.beginTime + " to " + request.endTime;
-        var selectedDate = beginDateString + " - " + endDateString;
-        var contentTripHeader = "<div class='route-time-analysis-header-param'>Analysis Details :  "+selectedRoute+"</div>";
-        contentTripHeader += "<div class='route-time-analysis-header-param'>Date : "+selectedDate+"</div>";
-        contentTripHeader += "<div class='route-time-analysis-header-param'>Time : "+timeRange+"</div>";
-        contentTripHeader += "<div class='route-time-analysis-header-param'>Service Day : "+serviceDayString.toUpperCase()+"</div>";
 
-        $(".route-time-analysis-header").html(contentTripHeader);
-
-        /*updateParamDetails(request.r, request.headsign, request.tripPattern, beginDateString, endDateString,
-            timeRange, serviceDayString, false);*/
+        updateParamDetails(request.r, request.headsign, request.tripPattern, beginDateString, endDateString,
+            timeRange, serviceDayString, false);
         updateSummaryTable(response.summary)
     }
 
     function generatePrescriptiveRunTimesTable(response){
-        var currentTable = '<table class="table table-bordered">';
+        var currentTable = '<table class="border-table">';
         currentTable += '<tbody><tr><th>Stop</th><th>Scheduled</th><th>Adjustment</th></tr>';
 
         var totalScheduleMin = 0;
@@ -383,11 +338,11 @@
         var lastDay = new Date();
 
         params.beginDate =  firstDay.getFullYear() + "-"
-            + (firstDay.getMonth() < 9 ? "0" + (firstDay.getMonth() + 1) : (firstDay.getMonth() + 1))
+            + (firstDay.getMonth() <= 10 ? "0" + (firstDay.getMonth() + 1) : (firstDay.getMonth() + 1))
             + "-" + (firstDay.getDate() < 10 ? "0" + firstDay.getDate() : firstDay.getDate());
 
         params.endDate =  lastDay.getFullYear() + "-"
-            + (lastDay.getMonth() < 9 ? "0" + (lastDay.getMonth() + 1) : (lastDay.getMonth() + 1))
+            + (lastDay.getMonth() <= 10 ? "0" + (lastDay.getMonth() + 1) : (lastDay.getMonth() + 1))
             + "-" + (lastDay.getDate() < 10 ? "0" + lastDay.getDate() : lastDay.getDate());
 
 
@@ -461,5 +416,3 @@
     }
 
 </script>
-
-</body>
