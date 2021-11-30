@@ -304,6 +304,11 @@ public class VehiclesServer extends AbstractServer
 			
 			// Create and add the IpcActiveBlock
 			Trip tripForSorting = block.getTrip(activeTripIndex);
+
+			if(CanceledTripCache.getInstance().isCanceled(tripForSorting.getId())){
+				continue;
+			}
+
 			IpcActiveBlock ipcBlockAndVehicle =
 					new IpcActiveBlock(ipcBlock, activeTripIndex,
 							ipcVehiclesForBlock, tripForSorting);
@@ -327,8 +332,25 @@ public class VehiclesServer extends AbstractServer
     List<Block> blocks =
         BlocksInfo.getCurrentlyActiveBlocks(routeIds, null,
             allowableBeforeTimeSecs, -1);
+
+	List<Block> filteredBlocks = new ArrayList<>();
+
+  	// For each active block determine associated active trip
+  	for (Block block : blocks) {
+		try{
+			  int activeTripIndex = block.activeTripIndex(new Date(), allowableBeforeTimeSecs);
+			  Trip trip = block.getTrip(activeTripIndex);
+
+			  if(CanceledTripCache.getInstance().isCanceled(trip.getId())){
+				  continue;
+			  }
+			  filteredBlocks.add(block);
+		  } catch (Exception e){
+			  logger.warn("Error while fetching active blocks data (probably hibernate still loading data): " + e.getMessage());
+		}
+  	}
     
-    return blocks.size();
+    return filteredBlocks.size();
   }
   
     /* (non-Javadoc)
@@ -336,7 +358,7 @@ public class VehiclesServer extends AbstractServer
      */
     @Override
     public Collection<IpcActiveBlock> getActiveBlocksWithoutVehicles(
-            Collection<String> routeIds, int allowableBeforeTimeSecs, boolean includeCanceledTrips)
+            Collection<String> routeIds, int allowableBeforeTimeSecs)
             throws RemoteException {
         // List of data to be returned
         List<IpcActiveBlock> results =
@@ -356,7 +378,7 @@ public class VehiclesServer extends AbstractServer
                 // Create and add the IpcActiveBlock, skipping the slow vehicle fetching
                 Trip tripForSorting = block.getTrip(activeTripIndex);
 
-                if(!includeCanceledTrips && CanceledTripCache.getInstance().isCanceled(tripForSorting.getId())){
+                if(CanceledTripCache.getInstance().isCanceled(tripForSorting.getId())){
                 	continue;
 				}
 
@@ -381,12 +403,12 @@ public class VehiclesServer extends AbstractServer
      */
     @Override
     public Collection<IpcActiveBlock> getActiveBlocksAndVehiclesByRouteId(
-            String routeId, int allowableBeforeTimeSecs, boolean includeCanceledTrips)
+            String routeId, int allowableBeforeTimeSecs)
             throws RemoteException {
 
         Collection<String> routeIds = new ArrayList<>();
         routeIds.add(routeId);
-        return getActiveBlocksAndVehiclesByRouteId(routeIds, allowableBeforeTimeSecs, includeCanceledTrips);
+        return getActiveBlocksAndVehiclesByRouteId(routeIds, allowableBeforeTimeSecs);
     }
     
     /* (non-Javadoc)
@@ -394,7 +416,7 @@ public class VehiclesServer extends AbstractServer
      */
     @Override
     public Collection<IpcActiveBlock> getActiveBlocksAndVehiclesByRouteName(
-            String routeName, int allowableBeforeTimeSecs, boolean includeCanceledTrips)
+            String routeName, int allowableBeforeTimeSecs)
             throws RemoteException {
 
         Session session = HibernateUtils.getSession();
@@ -404,11 +426,11 @@ public class VehiclesServer extends AbstractServer
         List<String> routeIds = criteria.list();
         session.close();
         
-        return getActiveBlocksAndVehiclesByRouteId(routeIds, allowableBeforeTimeSecs, includeCanceledTrips);
+        return getActiveBlocksAndVehiclesByRouteId(routeIds, allowableBeforeTimeSecs);
     }
     
     private Collection<IpcActiveBlock> getActiveBlocksAndVehiclesByRouteId(
-        Collection<String> routeIds, int allowableBeforeTimeSecs, boolean includeCanceledTrips)
+        Collection<String> routeIds, int allowableBeforeTimeSecs)
         throws RemoteException {
 
       // List of data to be returned
@@ -430,6 +452,10 @@ public class VehiclesServer extends AbstractServer
                   allowableBeforeTimeSecs);
   
           Trip tripForSorting = block.getTrip(activeTripIndex);
+
+          if(CanceledTripCache.getInstance().isCanceled(tripForSorting.getId())){
+          	continue;
+		  }
           
           // Check that block's active trip is for the specified route
           // (Otherwise, could be a past or future trip)

@@ -1286,7 +1286,7 @@ public class TransitimeApi {
                     stdParameters.getVehiclesInterface();
             Collection<IpcActiveBlock> activeBlocks = vehiclesInterface
                     .getActiveBlocksWithoutVehicles(routesIdOrShortNames,
-                            allowableBeforeTimeSecs, includeCanceledTrips);
+                            allowableBeforeTimeSecs);
 
 			SpeedFormat speedFormatEnum = SpeedFormat.valueOf(speedFormat.toUpperCase());
 
@@ -1330,7 +1330,7 @@ public class TransitimeApi {
                     stdParameters.getVehiclesInterface();
             Collection<IpcActiveBlock> activeBlocks = vehiclesInterface
                     .getActiveBlocksAndVehiclesByRouteId(routesIdOrShortName,
-                            allowableBeforeTimeSecs, includeCanceledTrips);
+                            allowableBeforeTimeSecs);
 
 			SpeedFormat speedFormatEnum = SpeedFormat.valueOf(speedFormat.toUpperCase());
 
@@ -1371,7 +1371,7 @@ public class TransitimeApi {
                   stdParameters.getVehiclesInterface();
           Collection<IpcActiveBlock> activeBlocks = vehiclesInterface
                   .getActiveBlocksAndVehiclesByRouteName(routeName,
-                          allowableBeforeTimeSecs, includeCanceledTrips);
+                          allowableBeforeTimeSecs);
 
 		  SpeedFormat speedFormatEnum = SpeedFormat.valueOf(speedFormat.toUpperCase());
 

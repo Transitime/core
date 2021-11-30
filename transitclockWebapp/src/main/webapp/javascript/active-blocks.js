@@ -349,7 +349,7 @@ function updateFooter(total) {
         $("#percentWithVehiclesValue").removeClass("problemColor");
     }
 
-    var percentageLate = 100.0 * total.late / total.blocks;
+    var percentageLate = 100.0 * total.late / totalVehicles;
     $("#percentLateValue").text(percentageLate.toFixed(0) + "%");
     if (percentageLate > 10.0) {
         $("#percentLateValue").addClass("lateColor");
@@ -357,10 +357,10 @@ function updateFooter(total) {
         $("#percentLateValue").removeClass("lateColor");
     }
 
-    var percentageOnTime = 100.0 * total.ontime / total.blocks;
+    var percentageOnTime = 100.0 * total.ontime / totalVehicles;
     $("#percentOnTimeValue").text(percentageOnTime.toFixed(0) + "%");
 
-    var percentageEarly = 100.0 * total.early / total.blocks;
+    var percentageEarly = 100.0 * total.early / totalVehicles;
     $("#percentEarlyValue").text(percentageEarly.toFixed(0) + "%");
     if (percentageEarly > 10.0) {
         $("#percentLateValue").addClass("earlyColor");
