@@ -1274,7 +1274,7 @@ public class TransitimeApi {
 			@Parameter(description="if set, formats speed to the specified format (MS,KM,MPH)")
 			@QueryParam(value = "speedFormat") @DefaultValue("MS") String speedFormat,
 			@Parameter(description="if set, excludes blocks with canceled trips from list of results")
-			@QueryParam(value = "includeCanceledTrips") @DefaultValue("false") boolean includeCanceledTrips)
+			@QueryParam(value = "removeBlocksWithCanceledTrips") @DefaultValue("true") boolean removeBlocksWithCanceledTrips)
             throws WebApplicationException {
 
         // Make sure request is valid
@@ -1286,7 +1286,7 @@ public class TransitimeApi {
                     stdParameters.getVehiclesInterface();
             Collection<IpcActiveBlock> activeBlocks = vehiclesInterface
                     .getActiveBlocksWithoutVehicles(routesIdOrShortNames,
-                            allowableBeforeTimeSecs);
+                            allowableBeforeTimeSecs, removeBlocksWithCanceledTrips);
 
 			SpeedFormat speedFormatEnum = SpeedFormat.valueOf(speedFormat.toUpperCase());
 

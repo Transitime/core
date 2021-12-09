@@ -48,7 +48,7 @@ public interface VehiclesInterface extends Remote {
    * @throws RemoteException
    */
   public Collection<IpcActiveBlock> getActiveBlocksWithoutVehicles(
-     Collection<String> routeIds, int allowableBeforeTimeSecs)
+     Collection<String> routeIds, int allowableBeforeTimeSecs, boolean removeBlocksWithCanceledTrips)
      throws RemoteException;
 
   /**

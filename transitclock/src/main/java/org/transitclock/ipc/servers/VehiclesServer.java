@@ -358,7 +358,7 @@ public class VehiclesServer extends AbstractServer
      */
     @Override
     public Collection<IpcActiveBlock> getActiveBlocksWithoutVehicles(
-            Collection<String> routeIds, int allowableBeforeTimeSecs)
+            Collection<String> routeIds, int allowableBeforeTimeSecs, boolean removeBlocksWithCanceledTrips)
             throws RemoteException {
         // List of data to be returned
         List<IpcActiveBlock> results =
@@ -378,7 +378,7 @@ public class VehiclesServer extends AbstractServer
                 // Create and add the IpcActiveBlock, skipping the slow vehicle fetching
                 Trip tripForSorting = block.getTrip(activeTripIndex);
 
-                if(CanceledTripCache.getInstance().isCanceled(tripForSorting.getId())){
+                if(removeBlocksWithCanceledTrips && CanceledTripCache.getInstance().isCanceled(tripForSorting.getId())){
                 	continue;
 				}
 
