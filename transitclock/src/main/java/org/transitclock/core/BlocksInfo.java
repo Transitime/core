@@ -17,16 +17,13 @@
 
 package org.transitclock.core;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.transitclock.applications.Core;
 import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.core.predictiongenerator.kalman.TripSegment;
 import org.transitclock.db.structs.Block;
+import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.utils.Time;
 
@@ -126,36 +123,13 @@ public class BlocksInfo {
 		Core core = Core.getInstance();
 		if (core == null)
 			return activeBlocks;
-		
-		// Determine which service IDs are currently active
-		Set<String> serviceIds = new HashSet<String>();
-		long now = core.getSystemTime();
-		List<String> currentServiceIds = 
-				core.getServiceUtils().getServiceIdsForDay(now);
-		serviceIds.addAll(currentServiceIds);
-		
-		// If current time is just a couple of hours after midnight then need
-		// to also look at service IDs for previous day as well since a block
-		// from the previous day might still be running after midnight.
-		int secsInDayForAvlReport = 
-				Core.getInstance().getTime().getSecondsIntoDay(now);
-		if (secsInDayForAvlReport < 4 * Time.HOUR_IN_SECS) {
-			List<String> previousDayServiceIds =
-					core.getServiceUtils().getServiceIdsForDay(
-							now - Time.DAY_IN_MSECS);
-			serviceIds.addAll(previousDayServiceIds);
-		}
 
-		// If current time is just before midnight then need to also look at
-		// service IDs from the next day since a block might start soon after
-		// midnight.
-		if (secsInDayForAvlReport > Time.DAY_IN_SECS - allowableBeforeTimeSecs) {
-			List<String> nextDayServiceIds =
-					core.getServiceUtils().getServiceIdsForDay(
-							now + Time.DAY_IN_MSECS);
-			serviceIds.addAll(nextDayServiceIds);
-		}
-		
+		long now = core.getSystemTime();
+		int secsInDayForAvlReport = core.getTime().getSecondsIntoDay(now);
+
+		// Determine which service IDs are currently active
+		Set<String> serviceIds = getAllServiceIds(now, secsInDayForAvlReport, allowableBeforeTimeSecs);
+
 		// For each service ID ...
 		for (String serviceId : serviceIds) {
 			DbConfig dbConfig = core.getDbConfig();
@@ -194,4 +168,101 @@ public class BlocksInfo {
 		// Done!
 		return activeBlocks;
 	}
+
+	public static List<Trip> getCurrentlyActiveTrips(
+			Collection<String> routeIds, Set<String> tripIdsToIgnore,
+			int allowableBeforeTimeSecs, int allowableAfterStartTimeSecs) {
+		// The list to be returned
+		List<Trip> activeTrips = new ArrayList<>(30000);
+
+		Core core = Core.getInstance();
+		if (core == null)
+			return activeTrips;
+
+		long now = core.getSystemTime();
+		int secsInDayForAvlReport = core.getTime().getSecondsIntoDay(now);
+
+		// Determine which service IDs are currently active
+		Set<String> serviceIds = getAllServiceIds(now, secsInDayForAvlReport, allowableBeforeTimeSecs);
+
+		// For each service ID ...
+		for (String serviceId : serviceIds) {
+			DbConfig dbConfig = core.getDbConfig();
+			Collection<Block> blocks = dbConfig.getBlocks(serviceId);
+
+			// If the block is about to be or currently active then
+			// add it to the list to be returned
+			for (Block block : blocks) {
+				// If this is a block to ignore then simply continue to the
+				// next one
+
+				int activeTripIndex = block.activeTripIndex(new Date(),
+						allowableBeforeTimeSecs);
+
+
+				// Create and add the IpcActiveBlock, skipping the slow vehicle fetching
+				Trip activeTrip = block.getTrip(activeTripIndex);
+
+
+				// Determine if block is for specified route. If routeIds is
+				// null then interested in all routes
+				boolean forSpecifiedRoute = true;
+				if (routeIds != null && !routeIds.isEmpty()) {
+					forSpecifiedRoute = false;
+					for (String routeId : routeIds) {
+						if (activeTrip.getRouteId().equals(routeId)) {
+							activeTrips.add(activeTrip);
+						}
+					}
+				} else{
+					activeTrips.add(activeTrip);
+				}
+			}
+		}
+
+		return activeTrips;
+	}
+
+	private static Set<String> getAllServiceIds(long systemTime, long secondsIntoDay, long allowableBeforeTimeSecs){
+		Set<String> serviceIds = new HashSet<String>();
+		serviceIds.addAll(getCurrentDayServiceIds(systemTime));
+		serviceIds.addAll(getPreviousDayServiceIds(systemTime, secondsIntoDay));
+		serviceIds.addAll(getNextDayServiceIds(systemTime, secondsIntoDay, allowableBeforeTimeSecs));
+		return serviceIds;
+	}
+
+	// If current time is just a couple of hours after midnight then need
+	// to also look at service IDs for previous day as well since a block
+	// from the previous day might still be running after midnight.
+	private static List<String> getCurrentDayServiceIds(long systemTime){
+		// Determine which service IDs are currently active
+		List<String> currentServiceIds =
+				Core.getInstance().getServiceUtils().getServiceIdsForDay(systemTime);
+		return currentServiceIds;
+	}
+
+	private static List<String> getPreviousDayServiceIds(long systemTime, long secondsIntoDay){
+		if (secondsIntoDay < 4 * Time.HOUR_IN_SECS) {
+			List<String> previousDayServiceIds =
+					Core.getInstance().getServiceUtils().getServiceIdsForDay(
+							systemTime - Time.DAY_IN_MSECS);
+			return previousDayServiceIds;
+		}
+		return Collections.EMPTY_LIST;
+	}
+
+	// If current time is just before midnight then need to also look at
+	// service IDs from the next day since a block might start soon after
+	// midnight.
+	private static List<String> getNextDayServiceIds(long systemTime, long secondsIntoDay, long allowableBeforeTimeSecs){
+		if (secondsIntoDay > Time.DAY_IN_SECS - allowableBeforeTimeSecs) {
+			List<String> nextDayServiceIds =
+					Core.getInstance().getServiceUtils().getServiceIdsForDay(
+							systemTime + Time.DAY_IN_MSECS);
+			return nextDayServiceIds;
+		}
+		return Collections.EMPTY_LIST;
+	}
+
+
 }
