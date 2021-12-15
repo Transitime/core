@@ -246,11 +246,14 @@
 			<scope>test</scope>
 		</dependency>
 		<!-- Used for reflection to find classes in package -->
+		
+		<!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
 		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>18.0</version>
+	    	<groupId>com.google.guava</groupId>
+	    	<artifactId>guava</artifactId>
+	    	<version>30.1.1-jre</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.ehcache</groupId>
 			<artifactId>ehcache</artifactId>
