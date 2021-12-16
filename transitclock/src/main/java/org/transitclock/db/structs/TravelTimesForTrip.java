@@ -176,7 +176,7 @@ public class TravelTimesForTrip implements Serializable {
 		int rowsUpdated = session.
 				createSQLQuery("DELETE "
 						+ " FROM TravelTimesForTrip_to_TravelTimesForPath_joinTable "
-						+ "WHERE TravelTimesForTrips_id IN "
+						+ "WHERE TravelTimesForTrip_id IN "
 						+ "  (SELECT id " 
                         + "     FROM TravelTimesForTrips "
                         + "    WHERE configRev=" + configRev 
