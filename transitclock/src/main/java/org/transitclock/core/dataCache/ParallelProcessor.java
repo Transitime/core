@@ -24,8 +24,8 @@ import java.util.concurrent.Callable;
 public class ParallelProcessor {
 
     public static IntegerConfigValue parallelThreads = new IntegerConfigValue("transitclock.core.parallelThreads",
-            -1,
-            "Number of threads to run in parallel for cache loading.  -1 is use all cpus, 1 is no parallelism at all");
+            Runtime.getRuntime().availableProcessors(),
+            "Number of threads to run in parallel for cache loading.  Default uses all cpu, 1 is no parallelism at all");
     private static final Logger logger = LoggerFactory
             .getLogger(ParallelProcessor.class);
 
