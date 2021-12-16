@@ -67,7 +67,17 @@ public class TripPattern implements Serializable, Lifecycle {
 	// Paths are automatically stored.
 	@OneToMany(fetch=FetchType.LAZY)
 	@Cascade({CascadeType.SAVE_UPDATE})
-	@JoinTable(name="TripPattern_to_Path_joinTable")
+	@JoinTable(name="TripPattern_to_Path_joinTable",
+			joinColumns= {
+					@JoinColumn(name="trippattern_id", referencedColumnName="id"),
+					@JoinColumn(name="trippatterns_configrev", referencedColumnName="configrev")
+					},
+            inverseJoinColumns= {
+            		@JoinColumn(name="stoppaths_trippatternid", referencedColumnName="trippatternid"),
+            		@JoinColumn(name="stoppaths_stoppathid", referencedColumnName="stoppathid"),
+            		@JoinColumn(name="stoppaths_configrev", referencedColumnName="configRev")
+            		})
+	
 	@OrderColumn( name="listIndex")
 	final protected List<StopPath> stopPaths;
 	
@@ -259,7 +269,7 @@ public class TripPattern implements Serializable, Lifecycle {
 		int rowsUpdated = 0;
 		rowsUpdated += session.
 				createSQLQuery("DELETE FROM TripPattern_to_Path_joinTable "
-						+ "WHERE TripPattern_configRev=" + configRev).
+						+ "WHERE TripPatterns_configRev=" + configRev).
 				executeUpdate();
 		rowsUpdated += session.
 				createSQLQuery("DELETE FROM StopPaths WHERE configRev=" 
