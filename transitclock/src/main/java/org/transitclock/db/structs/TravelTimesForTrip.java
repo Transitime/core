@@ -28,7 +28,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OrderColumn;
@@ -101,11 +100,10 @@ public class TravelTimesForTrip implements Serializable {
 	// on schedule.
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String tripCreatedForId;
-	
-	@ManyToMany(fetch=FetchType.EAGER)
-	@JoinTable(name="TravelTimesForTrip_to_TravelTimesForPath_joinTable",
-			joinColumns=@JoinColumn(name="traveltimesfortrips_id", referencedColumnName="id"),
-            inverseJoinColumns=@JoinColumn(name="traveltimesforstoppaths_id", referencedColumnName="id"))
+
+	// Load EAGERly for AVLExecutor thread safety/concurrency performance
+	@ManyToMany(fetch=FetchType.LAZY)
+	@JoinTable(name="TravelTimesForTrip_to_TravelTimesForPath_joinTable")
 	@Cascade({CascadeType.SAVE_UPDATE})
 	@OrderColumn(name="listIndex")
 	private final List<TravelTimesForStopPath> travelTimesForStopPaths = 
@@ -178,7 +176,7 @@ public class TravelTimesForTrip implements Serializable {
 		int rowsUpdated = session.
 				createSQLQuery("DELETE "
 						+ " FROM TravelTimesForTrip_to_TravelTimesForPath_joinTable "
-						+ "WHERE TravelTimesForTrips_id IN "
+						+ "WHERE TravelTimesForTrip_id IN "
 						+ "  (SELECT id " 
                         + "     FROM TravelTimesForTrips "
                         + "    WHERE configRev=" + configRev 
