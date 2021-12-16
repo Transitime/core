@@ -68,7 +68,7 @@ import com.google.common.reflect.ClassPath;
  *
  */
 public class SchemaGenerator {
-	private final Configuration cfg;
+	
 	private final String packageName;
 	private final String outputDirectory;
 	
@@ -96,8 +96,7 @@ public class SchemaGenerator {
 
 	@SuppressWarnings("unchecked")
 	public SchemaGenerator(String packageName, String outputDirectory) throws Exception {
-		this.cfg = new Configuration();
-		this.cfg.setProperty("hibernate.hbm2ddl.auto", "create");
+		
 
 		for (Class<Object> clazz : getClasses(packageName)) {
 			this.cfg.addAnnotatedClass(clazz);
@@ -207,6 +206,13 @@ public class SchemaGenerator {
 	 * @param dbDialect to use
 	 */
 	private void generate(Dialect dialect) {
+		
+		Map<String, String> settings = new HashMap<>();
+		settings.put("hibernate.dialect",  dialect.getDialectClass());
+		
+		ServiceRegistry serviceRegistry = 
+			      new StandardServiceRegistryBuilder().applySettings(settings).build();
+		
 		cfg.setProperty("hibernate.dialect", dialect.getDialectClass());
 
 		SchemaExport export = new SchemaExport(cfg);
@@ -222,10 +228,25 @@ public class SchemaGenerator {
 				"_" + packeNameSuffix + ".sql";
 		
 		export.setOutputFile(outputFilename);
-		
+		 EnumSet<TargetType> enumSet = EnumSet.of(TargetType.SCRIPT);
 		// Export, but only to an SQL file. Don't actually modify the database
 		System.out.println("Writing file " + outputFilename);
 		export.execute(true, false, false, false);
+		
+		MetadataSources metadatasource = new MetadataSources(serviceRegistry);
+							
+		for(Class<Object> annotatedClass:classList)
+		{
+			metadatasource.addAnnotatedClass( annotatedClass);
+		}
+		
+		Metadata metadata =metadatasource.buildMetadata();
+		
+	    new SchemaExport().setDelimiter(";") //
+	            .setOutputFile(outputFilename)
+	            .create(EnumSet.of(TargetType.SCRIPT), metadata);
+	 
+	    metadata.buildSessionFactory().close();
 		
 		// Get rid of unneeded SQL for dropping tables and keys and such
 		trimCruftFromFile(outputFilename);
