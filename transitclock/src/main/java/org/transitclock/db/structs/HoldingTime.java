@@ -15,6 +15,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.GenericGenerator;
 import org.transitclock.applications.Core;
 import org.transitclock.db.hibernate.HibernateUtils;
 @Entity @DynamicUpdate 
@@ -119,8 +120,9 @@ public class HoldingTime implements Serializable {
 
 	private static final long serialVersionUID = -8000018800462712153L;
 
-	@Id 
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@Id
+	@GeneratedValue(strategy= GenerationType.AUTO, generator="native")
+	@GenericGenerator(name = "native", strategy = "native")
 	private long id;
 	
 	// The revision of the configuration data that was being used

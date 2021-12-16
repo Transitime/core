@@ -14,6 +14,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.GenericGenerator;
 import org.transitclock.applications.Core;
 import org.transitclock.db.hibernate.HibernateUtils;
 @Entity @DynamicUpdate 
@@ -29,7 +30,8 @@ public class Headway implements Serializable {
 	 */
 	private static final long serialVersionUID = -4561111910398287801L;
 
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@GeneratedValue(strategy= GenerationType.AUTO, generator="native")
+	@GenericGenerator(name = "native", strategy = "native")
 	private long id;
 	
 	// The revision of the configuration data that was being used

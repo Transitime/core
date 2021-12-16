@@ -19,6 +19,7 @@ import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.criterion.Restrictions;
 import org.transitclock.db.hibernate.HibernateUtils;
 /**
@@ -34,8 +35,9 @@ public class PredictionForStopPath implements Serializable{
 	
 	private static final long serialVersionUID = -6409934486927225387L;
 
-	@Id 
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@Id
+	@GeneratedValue(strategy= GenerationType.AUTO, generator="native")
+	@GenericGenerator(name = "native", strategy = "native")
 	private long id;
 	
 	@Column	
