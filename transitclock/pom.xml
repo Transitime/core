@@ -103,6 +103,17 @@
 			<artifactId>hibernate-core</artifactId>
 			<version>4.3.9.Final</version>
 		</dependency>
+		<dependency>
+			<groupId>org.hibernate.common</groupId>
+			<artifactId>hibernate-commons-annotations</artifactId>
+			<version>4.0.5.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-c3p0</artifactId>
+			<version>4.3.9.Final</version>
+		</dependency>
+
 
 
 		<!-- hibernate-core loads in really old version of xml-apis so load in 
