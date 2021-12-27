@@ -767,6 +767,10 @@ opacity: 0.3;
 .percentileLabel {max-width: 120px;display: inline-flex;}
 .percentileSelect{max-width: 120px;display: inline-flex;}
 
+.font-weight-normal{
+    font-weight: normal;
+}
+
 #n-th-percentile {
     padding: 0px 4px;
 }

@@ -13,6 +13,7 @@
 </style>
 <script>
     $( document ).ready(function() {
+        $("#allStops").
         $("#allStops").click(function(){
 
             if($(this).prop("checked") == true){
@@ -40,17 +41,27 @@
 
 </script>
 
-<fieldset id="stopsFieldSet" >
-    <legend >Stops</legend>
-    <div id="stopsDiv"  class="param"  >
-       <label for="allStops">All Stops:</label>
-       <input id="allStops" type="checkbox" checked />
+<!-- <fieldset id="stopsFieldSet" > <!-->
+    <div class="row">
+        <label class="col-sm-12 col-form-label">Search</label>
     </div>
-    <div style="padding: 2px;">
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox"   id="allStops" checked>
+        <label class="form-check-label" for="allStops">
+            All Stops
+        </label>
+    </div>
+    <div class="row">
+        <label class="col-sm-12 col-form-label">Routes</label>
+        <textarea  id="stopIds" rows="2" disabled="true"> </textarea>
+    </div>
+
+<input id="stopIdsHidden" type="hidden" name="s"/>
+<!--
+<div style="padding: 2px;">
       <label for="stopIds">Stops Ids:</label>
       <textarea style="width:350px;" id="stopIds" rows="2" disabled="true"></textarea>
     </div>
     <input id="stopIdsHidden" type="hidden" name="s"/>
-</fieldset>
+</fieldset> <!-->
 
-    
