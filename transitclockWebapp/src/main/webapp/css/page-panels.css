@@ -790,4 +790,30 @@ td.ontime{
 
 .color-legend-block {
     padding: 10px;
+
+}
+#summaryChartDetails div{
+    width: auto
+}
+
+#summaryChartDetails div b{
+    padding-left: 5px
+}
+
+
+.on-time-split-1 {
+    width: Calc(100% - 420px);
+}
+
+.on-time-split-2 {
+    max-width: 400px;
+}
+.on-time-split-2 .toggle-chart{
+    margin-bottom: 20px;
+    padding: 5px
+}
+
+
+.on-time-split-2 .toggle-chart h6{
+    color:#1E3F78
 }
