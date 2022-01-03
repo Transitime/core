@@ -817,3 +817,7 @@ td.ontime{
 .on-time-split-2 .toggle-chart h6{
     color:#1E3F78
 }
+
+.otp-side-panel label{
+    padding-right: 5px ;
+}
