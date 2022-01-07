@@ -1,9 +1,8 @@
 package org.transitclock.core.reporting;
 
-import org.apache.commons.csv.CSVRecord;
 import org.transitclock.utils.csv.CsvBase;
 
-public class TestTrip extends CsvBase {
+public class MockTrip extends CsvBase {
 
     private int configRev;
     private String tripId;
@@ -15,7 +14,7 @@ public class TestTrip extends CsvBase {
     private int startTime;
     private int endTime;
 
-    public TestTrip(TestTrip.Builder builder){
+    public MockTrip(MockTrip.Builder builder){
         this.configRev = builder.configRev;
         this.tripId = builder.tripId;
         this.serviceId = builder.serviceId;
@@ -77,53 +76,53 @@ public class TestTrip extends CsvBase {
 
         public Builder(){ }
 
-        public TestTrip.Builder configRev(int configRev) {
+        public MockTrip.Builder configRev(int configRev) {
             this.configRev = configRev;
             return this;
         }
 
-        public TestTrip.Builder tripId(String tripId){
+        public MockTrip.Builder tripId(String tripId){
             this.tripId = tripId;
             return this;
         }
 
-        public TestTrip.Builder serviceId(String serviceId){
+        public MockTrip.Builder serviceId(String serviceId){
             this.serviceId = serviceId;
             return this;
         }
 
-        public TestTrip.Builder directionId(String directionId){
+        public MockTrip.Builder directionId(String directionId){
             this.directionId = directionId;
             return this;
         }
 
-        public TestTrip.Builder routeShortName(String routeShortName){
+        public MockTrip.Builder routeShortName(String routeShortName){
             this.routeShortName = routeShortName;
             return this;
         }
 
-        public TestTrip.Builder tripPatternId(String tripPatternId){
+        public MockTrip.Builder tripPatternId(String tripPatternId){
             this.tripPatternId = tripPatternId;
             return this;
         }
 
-        public TestTrip.Builder headSign(String headSign){
+        public MockTrip.Builder headSign(String headSign){
             this.headSign = headSign;
             return this;
         }
 
-        public TestTrip.Builder startTime(int startTime){
+        public MockTrip.Builder startTime(int startTime){
             this.startTime = startTime;
             return this;
         }
 
-        public TestTrip.Builder endTime(int endTime){
+        public MockTrip.Builder endTime(int endTime){
             this.endTime = endTime;
             return this;
         }
 
-        public TestTrip build(){
-            TestTrip trip = new TestTrip(this);
+        public MockTrip build(){
+            MockTrip trip = new MockTrip(this);
             return trip;
         }
     }

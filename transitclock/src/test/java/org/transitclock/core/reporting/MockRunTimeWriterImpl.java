@@ -2,7 +2,7 @@ package org.transitclock.core.reporting;
 
 import java.util.Date;
 
-public class TestRunTimeWriterImpl implements RunTimeWriter{
+public class MockRunTimeWriterImpl implements RunTimeWriter{
     @Override
     public void writeToDatabase(String agencyId, RunTimeCache cache) {
 

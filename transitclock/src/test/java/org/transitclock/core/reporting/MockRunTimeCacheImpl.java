@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-public class TestRunTimeCacheImpl implements RunTimeCache{
+public class MockRunTimeCacheImpl implements RunTimeCache{
     @Override
     public List<RunTimesForRoutes> getAll() {
         return Collections.EMPTY_LIST;

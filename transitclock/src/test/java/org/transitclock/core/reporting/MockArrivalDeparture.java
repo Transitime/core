@@ -1,6 +1,5 @@
 package org.transitclock.core.reporting;
 
-import org.apache.commons.csv.CSVRecord;
 import org.transitclock.db.structs.Arrival;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Block;
@@ -8,7 +7,7 @@ import org.transitclock.db.structs.Departure;
 
 import java.util.Date;
 
-public class TestArrivalDeparture {
+public class MockArrivalDeparture {
     private boolean isArrival;
     private int configRev;
     private String vehicleId;
@@ -40,57 +39,57 @@ public class TestArrivalDeparture {
             this.isArrival = isArrival;
         }
 
-        public TestArrivalDeparture.Builder configRev(int configRev) {
+        public MockArrivalDeparture.Builder configRev(int configRev) {
             this.configRev = configRev;
             return this;
         }
 
-        public TestArrivalDeparture.Builder vehicleId(String vehicleId) {
+        public MockArrivalDeparture.Builder vehicleId(String vehicleId) {
             this.vehicleId = vehicleId;
             return this;
         }
 
-        public TestArrivalDeparture.Builder time(Date time) {
+        public MockArrivalDeparture.Builder time(Date time) {
             this.time = time;
             return this;
         }
 
-        public TestArrivalDeparture.Builder avlTime(Date avlTime) {
+        public MockArrivalDeparture.Builder avlTime(Date avlTime) {
             this.avlTime = avlTime;
             return this;
         }
 
-        public TestArrivalDeparture.Builder block(Block block) {
+        public MockArrivalDeparture.Builder block(Block block) {
             this.block = block;
             return this;
         }
 
-        public TestArrivalDeparture.Builder tripIndex(int tripIndex) {
+        public MockArrivalDeparture.Builder tripIndex(int tripIndex) {
             this.tripIndex = tripIndex;
             return this;
         }
 
-        public TestArrivalDeparture.Builder stopPathIndex(int pathIndex) {
+        public MockArrivalDeparture.Builder stopPathIndex(int pathIndex) {
             this.pathIndex = pathIndex;
             return this;
         }
 
-        public TestArrivalDeparture.Builder freqStartTime(Date freqStartTime) {
+        public MockArrivalDeparture.Builder freqStartTime(Date freqStartTime) {
             this.freqStartTime = freqStartTime;
             return this;
         }
 
-        public TestArrivalDeparture.Builder stopPathId(String stopPathId) {
+        public MockArrivalDeparture.Builder stopPathId(String stopPathId) {
             this.stopPathId = stopPathId;
             return this;
         }
 
-        public TestArrivalDeparture.Builder dwellTime(Long dwellTime) {
+        public MockArrivalDeparture.Builder dwellTime(Long dwellTime) {
             this.dwellTime = dwellTime;
             return this;
         }
 
-        public TestArrivalDeparture.Builder isWaitStop(boolean isWaitStop) {
+        public MockArrivalDeparture.Builder isWaitStop(boolean isWaitStop) {
             this.isWaitStop = isWaitStop;
             return this;
         }
