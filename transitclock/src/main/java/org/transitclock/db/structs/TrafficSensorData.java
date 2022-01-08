@@ -28,6 +28,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents one sample of traffic data from a single traffic sensor.
@@ -163,6 +164,25 @@ public class TrafficSensorData implements Serializable {
     query.setTimestamp("endDate", endDate);
 
     return query.list();
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(trafficSensorId, trafficRev, time);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    TrafficSensorData tp = (TrafficSensorData) o;
+    return Objects.equals(this.trafficSensorId, tp.trafficSensorId) &&
+            Objects.equals(this.trafficRev, tp.trafficRev) &&
+            Objects.equals(this.time, tp.time);
   }
 
 }

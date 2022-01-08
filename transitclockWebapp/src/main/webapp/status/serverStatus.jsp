@@ -4,6 +4,7 @@
 <%@page import="org.transitclock.ipc.clients.ServerStatusInterfaceFactory"%>
 <%@page import="org.transitclock.monitoring.*"%>
 <%@page import="java.util.List"%>
+<%@ page import="org.transitclock.ipc.data.IpcServerStatus" %>
 
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
@@ -38,7 +39,17 @@ WebAgency.getCachedWebAgency(agencyId).getAgencyName() %></div>
 ServerStatusInterface serverStatusInterface = 
 org.transitclock.ipc.clients.ServerStatusInterfaceFactory.get(agencyId);
 try {
-  List<MonitorResult> monitorResults = serverStatusInterface.get().getMonitorResults();
+    if (serverStatusInterface == null) {
+      throw new RemoteException("Unable to connect to TransitClock Core.  Is it running? (Factory retrieval of ServerStatusInterface for agency " + agencyId + " failed)");
+    }
+    IpcServerStatus ipcServerStatus = serverStatusInterface.get();
+    if (ipcServerStatus == null) {
+      throw new RemoteException("Unable to connect TransitClock Core. Is it running?  (Failed to retrieve IpcServerStatus for agency " + agencyId + ")  ");
+    }
+    List<MonitorResult> monitorResults = ipcServerStatus.getMonitorResults();
+    if (monitorResults == null) {
+      throw new RemoteException("No monitors configured.  Configuration issue?");
+    }
   for (MonitorResult monitorResult : monitorResults) {
     if (monitorResult.getMessage() != null) {
 	%>
@@ -48,7 +59,11 @@ try {
     }
   }
 } catch (RemoteException e) {
-	%><%= e.getMessage() %><%
+%>
+    <h1>Error:</h1><p>
+    <%= e.getMessage() %>
+    </p>
+<%
 }
 %>
 </body>

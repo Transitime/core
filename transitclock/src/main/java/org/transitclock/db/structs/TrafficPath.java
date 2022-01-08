@@ -37,6 +37,7 @@ import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Mirroring the conventions in StopPath, a TrafficPath is a set of points
@@ -126,6 +127,24 @@ public class TrafficPath implements Serializable {
 
   public int getTrafficRev() {
     return trafficRev;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(trafficPathId, trafficRev);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    TrafficPath tp = (TrafficPath) o;
+    return Objects.equals(this.trafficPathId, tp.trafficPathId) &&
+            Objects.equals(this.trafficRev, tp.trafficRev);
   }
 
 }
