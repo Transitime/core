@@ -1,4 +1,5 @@
 <%@ page import="org.transitclock.reports.ChartGenericJsonQuery" %>
+<%@ page import="org.transitclock.db.webstructs.WebAgency" %>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -16,6 +17,12 @@ if (agencyId == null || agencyId.isEmpty()) {
   
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
+        <%
+        WebAgency agency = WebAgency.getCachedWebAgency(agencyId);
+        // we show different charts for mysql vs postgres
+        boolean isMysqlJava = agency == null || "mysql".equals(agency.getDbType());
+        %>
+        var isMysql = <%=(isMysqlJava?"true":"false") %>;
       // Load in Google charts library
       google.load("visualization", "1", {packages:["table", "corechart"]});
       
@@ -43,13 +50,40 @@ if (agencyId == null || agencyId.isEmpty()) {
       // To be called at page load. Renders the tables and charts
       function drawCharts() {
     	<%
+        String sql;
+        if (isMysqlJava) {
+          sql =
+          	  	"SELECT table_name AS \"Table Name\", "
+          	  	+ "     total_size AS \"Total Size\", "
+          	  	+ "     total_bytes AS \"Total Bytes\", "
+          	  	+ "     table_schema AS \"Schema\" "
+          	  	+ " FROM "
+                + "((SELECT table_name AS \"table_name\", "
+                + "  CONCAT(ROUND(table_rows / 1000000, 2), ' MB') AS \"total_size\", "
+                + "  CONCAT(ROUND(( data_length + index_length ) / ( 1024 * 1024 * 1024 ), 2), ' G') AS \"total_bytes\","
+                + " table_schema,"
+                + "  1 as ordering "
+                + "  FROM   information_schema.TABLES"
+                + " ORDER  BY data_length + index_length DESC"
+                + " LIMIT 20"
+                + ") "
+          	    + "UNION "
+          	    + "SELECT 'Total:', "
+                + "  CONCAT(ROUND(sum(table_rows) / 1000000, 2), ' MB') AS \"Total Size\", "
+                + "  CONCAT(ROUND(( sum(data_length + index_length) ) / ( 1024 * 1024 * 1024 ), 2), ' G') AS \"Total Bytes \","
+                + " 'ALL', "
+                + "2 as ordering "
+                + "  FROM   information_schema.TABLES"
+                + ") as needed_alias_name "
+                + "ORDER BY ordering, \"Total Bytes\" DESC";
+        } else {
     	  // This query is rather complicated. Want the values in order but also
     	  // want total at end. Using two queries and a union to do this but
     	  // need to also use an ordering column so that the total will always
     	  // be at the end. And then need to do a select on the whole result
     	  // to get rid of the ordering column and to provde human readable 
     	  // column titles like "Table Size".
-      	  String sql = 
+      	  sql =
           	  	"SELECT relname AS \"Table Name\", "
           	  	+ "     total_size AS \"Total Size\", "
           	  	+ "     total_bytes AS \"Total Bytes\" "
@@ -74,8 +108,9 @@ if (agencyId == null || agencyId.isEmpty()) {
           	    + " WHERE nspname NOT IN ('pg_catalog', 'information_schema') "
           	    + ") AS needed_alias_name "
           	    + "ORDER BY ordering, \"Total Bytes\" DESC";
+          }
     	%>
-    	var jsonData = <%= ChartGenericJsonQuery.getJsonString(agencyId, sql, null, null) %>;
+    	var jsonData = <%= ChartGenericJsonQuery.getJsonString(agencyId, sql, null) %>;
         var data1 = new google.visualization.DataTable(jsonData);
         // Make total size cells right justified. When setting to class
         // totalSizeCell also need to set to google-visualization-table-td
@@ -110,7 +145,10 @@ if (agencyId == null || agencyId.isEmpty()) {
         	// fixed by Google at some point. 
         	//animation: {duration: 1500, startup: true },        	
         };
-        chart.draw(chartView , chartOptions);
+        if (!isMysql) {
+            // this chart doesn't work with mysql
+            chart.draw(chartView, chartOptions);
+        }
         
         
         // Create a view for table chart so can eliminate unneeded columns and do sorting 
@@ -126,7 +164,34 @@ if (agencyId == null || agencyId.isEmpty()) {
         // Create second table that also breaks out sizes of indices and keys 
         // for tables
         <%
-        String sql2 = 
+        String sql2;
+        if (isMysqlJava) {
+         sql2 =
+          	  	"SELECT table_name AS \"Table Name\", "
+          	  	+ "     total_size AS \"Total Size\", "
+          	  	+ "     total_bytes AS \"Index Bytes\", "
+          	  	+ "     table_schema AS \"Schema\" "
+          	  	+ " FROM "
+                + "((SELECT table_name AS \"table_name\", "
+                + "  CONCAT(ROUND(table_rows / 1000000, 2), ' MB') AS \"total_size\", "
+                + "  CONCAT(ROUND(( index_length ) / ( 1024 * 1024 * 1024 ), 2), ' G') AS \"total_bytes\","
+                + " table_schema,"
+                + "  1 as ordering "
+                + "  FROM   information_schema.TABLES"
+                + " ORDER  BY data_length + index_length DESC"
+                + " LIMIT 20"
+                + ") "
+          	    + "UNION "
+          	    + "SELECT 'Total:', "
+                + "  CONCAT(ROUND(sum(table_rows) / 1000000, 2), ' MB') AS \"Total Size\", "
+                + "  CONCAT(ROUND(( sum(data_length + index_length) ) / ( 1024 * 1024 * 1024 ), 2), ' G') AS \"Total Bytes \","
+                + " 'ALL', "
+                + "2 as ordering "
+                + "  FROM   information_schema.TABLES"
+                + ") as needed_alias_name "
+                + "ORDER BY ordering, \"Total Bytes\" DESC";
+        } else {
+        sql2 =
         	"SELECT relname AS \"Table Name\", "
     	    + "pg_size_pretty(pg_total_relation_size(C.oid)) AS \"Total Size\", "
     	    + "pg_total_relation_size(C.oid) AS \"Total Bytes\" "
@@ -135,8 +200,9 @@ if (agencyId == null || agencyId.isEmpty()) {
     	    + "WHERE nspname NOT IN ('pg_catalog', 'information_schema') "
       	    + "    AND nspname !~ '^pg_toast' "
     	    + "ORDER BY pg_total_relation_size(C.oid) DESC";
+        }
     	%>
-    	var jsonData2 = <%= ChartGenericJsonQuery.getJsonString(agencyId, sql2) %>;
+    	var jsonData2 = <%= ChartGenericJsonQuery.getJsonString(agencyId, sql2, null) %>;
         var data2 = new google.visualization.DataTable(jsonData2);
         
         // Make total size cells right justified. When setting to class
@@ -214,7 +280,11 @@ if (agencyId == null || agencyId.isEmpty()) {
   	
   	#chart_div {
   		width: 80%;
-  		height: 250px;
+        <% if (isMysqlJava) { %>
+        height: 0px;
+        <% } else { %>
+        height: 250px;
+        <% } %>
   		margin-left: auto;
   		margin-right: auto;
   		margin-bottom: 30px;
@@ -232,7 +302,10 @@ if (agencyId == null || agencyId.isEmpty()) {
 </head>
 <body>
 <%@include file="/template/header.jsp" %>
+<% if ( !isMysqlJava) { %>
+<!-- the main chart doesn't work with with mysql -->
 <div id="title">Database Disk Space for Largest Tables</div>
+<% } %>
 <div id="chart_div"></div>
 
 <div id="title">Database Disk Space by Table</div>

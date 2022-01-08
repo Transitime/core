@@ -201,13 +201,13 @@ public class GenericQuery {
 		try {			
 			
 			statement = connection.prepareStatement(sql);
-			
-			// TODO Deal with dates for the moment
-			for (int i=0;i<parameters.length;i++)
-			{
-				if(parameters[i] instanceof java.util.Date)
-				{
-					statement.setTimestamp(i+1, new Timestamp(((java.util.Date)parameters[i]).getTime()));
+
+			if (parameters != null) {
+				// TODO Deal with dates for the moment
+				for (int i = 0; i < parameters.length; i++) {
+					if (parameters[i] instanceof java.util.Date) {
+						statement.setTimestamp(i + 1, new Timestamp(((java.util.Date) parameters[i]).getTime()));
+					}
 				}
 			}
 			
