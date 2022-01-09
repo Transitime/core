@@ -7,7 +7,31 @@
     <name>transitclock</name>
     <url>http://www.transitclock.org//</url>
   <repositories>
-    <repository>
+      <repository>
+          <id>repo.camsys-apps.com</id>
+          <url>https://repo.camsys-apps.com/third-party/</url>
+      </repository>
+      <repository>
+          <id>releases-camsys-public-repo</id>
+          <url>https://repo.camsys-apps.com/releases/</url>
+          <releases>
+              <enabled>true</enabled>
+          </releases>
+          <snapshots>
+              <enabled>false</enabled>
+          </snapshots>
+      </repository>
+      <repository>
+          <id>snapshots-camsys-public-repo</id>
+          <url>https://repo.camsys-apps.com/snapshots/</url>
+          <releases>
+              <enabled>false</enabled>
+          </releases>
+          <snapshots>
+              <enabled>true</enabled>
+          </snapshots>
+      </repository>
+      <repository>
       <id>repo.camsys-apps.com</id>
       <url>https://repo.camsys-apps.com/third-party/</url>
     </repository>
