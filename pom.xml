@@ -31,10 +31,6 @@
               <enabled>true</enabled>
           </snapshots>
       </repository>
-      <repository>
-      <id>repo.camsys-apps.com</id>
-      <url>https://repo.camsys-apps.com/third-party/</url>
-    </repository>
   </repositories>
 
     <modules>
