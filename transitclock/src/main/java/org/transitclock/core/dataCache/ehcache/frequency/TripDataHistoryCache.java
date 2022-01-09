@@ -3,7 +3,6 @@
  */
 package org.transitclock.core.dataCache.ehcache.frequency;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.slf4j.Logger;
@@ -19,6 +18,7 @@ import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.gtfs.GtfsData;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
+import org.transitclock.utils.DateUtils;
 import org.transitclock.utils.Time;
 
 import java.util.*;
@@ -273,8 +273,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 					return tocheck;
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("exception {}", e, e);
 			}			
 		}		
 		return null;		

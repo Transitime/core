@@ -23,6 +23,30 @@
         primary key (configRev, agencyName)
     );
 
+    create table ApcReport (
+        messageId varchar2(60 char) not null,
+        alightings number(10,0),
+        arrival number(10,0),
+        boardings number(10,0),
+        departure number(10,0),
+        doorClose number(10,0),
+        doorOpen number(10,0),
+        driverId varchar2(60 char),
+        lat double precision,
+        lon double precision,
+        odo number(10,0),
+        serviceDate number(19,0),
+        time timestamp,
+        vehicleId varchar2(60 char),
+        arrivalDeparture_vehicleId varchar2(60 char),
+        arrivalDeparture_tripId varchar2(60 char),
+        arrivalDeparture_time timestamp,
+        arrivalDeparture_stopId varchar2(60 char),
+        arrivalDeparture_isArrival number(1,0),
+        arrivalDeparture_gtfsStopSeq number(10,0),
+        primary key (messageId)
+    );
+
     create table ArrivalsDepartures (
         DTYPE varchar2(31 char) not null,
         vehicleId varchar2(60 char) not null,
@@ -180,6 +204,7 @@
         numVehicles number(10,0),
         otherVehicleId varchar2(60 char),
         routeId varchar2(60 char),
+        scheduledHeadway double precision,
         secondDeparture timestamp,
         stopId varchar2(60 char),
         tripId varchar2(60 char),
@@ -598,6 +623,11 @@
     create index VehicleEventsTimeIndex on VehicleEvents (time);
 
     create index VehicleStateAvlTimeIndex on VehicleStates (avlTime);
+
+    alter table ApcReport 
+        add constraint FK_7mdrruyxl0sdxx2w8rflofniq 
+        foreign key (arrivalDeparture_vehicleId, arrivalDeparture_tripId, arrivalDeparture_time, arrivalDeparture_stopId, arrivalDeparture_isArrival, arrivalDeparture_gtfsStopSeq) 
+        references ArrivalsDepartures;
 
     alter table ArrivalsDepartures 
         add constraint FK_m1eyesv8rr42fo6qpcrkcgjp3 

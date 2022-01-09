@@ -26,6 +26,8 @@ import org.transitclock.applications.Core;
 import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.core.ServiceUtilsImpl;
+import org.transitclock.configData.DbSetupConfig;
+
 import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.db.structs.Calendar;
 import org.transitclock.db.structs.*;
@@ -135,6 +137,24 @@ public class DbConfig {
 
 	// Keyed by stop_id.
 	private Map<String, Stop> stopsMap;
+
+	/**
+	 * for unit tests, set the underlying list of stops
+	 * @param stops
+	 */
+	public void setStopsMap(Map<String, Stop> stops) {
+		this.stopsMap = stops;
+	}
+
+	/**
+	 * for unit tests, to test if setup is necessar;
+	 * @return
+	 */
+	public boolean isEmptyStopsMap() {
+		return stopsMap == null || stopsMap.isEmpty();
+	}
+
+
 	// Keyed by stop_code
 	private Map<Integer, Stop> stopsByStopCode;
 	
@@ -150,7 +170,7 @@ public class DbConfig {
 	= new StringConfigValue("transitclock.db.validateQuery", 
 			"SELECT 1", 
 			"query to validate database connection");
-	
+
 	public String getValidateTestQuery() {
 		return validateTestQuery.getValue();
 	}
@@ -459,7 +479,7 @@ public class DbConfig {
 
 		return map;
 	}
-	
+
 	/**
 	 * Returns the list of trip patterns associated with the specified route.
 	 * Reads the trip patterns from the database and stores them in cache so
@@ -864,7 +884,7 @@ public class DbConfig {
 				logger.warn("Duplicate Service Id {} in Calendar", calendar.getServiceId());
 			}
 		}
-		
+
 		calendarDatesMap = new HashMap<>();
 		for (CalendarDate calendarDate : calendarDates) {
 			Long time = calendarDate.getTime();

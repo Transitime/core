@@ -15,11 +15,13 @@ import java.util.List;
  */
 public class KalmanErrorCache implements ErrorCache {
 	final private static String cacheName = "KalmanErrorCache";
+	final private static String dwellCacheName = "KalmanDwellErrorCache";
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(KalmanErrorCache.class);
 
 	private Cache<KalmanErrorCacheKey, KalmanError> cache = null;
+	private Cache<KalmanErrorCacheKey, KalmanError> dwellCache = null;
 	/**
 	 * Gets the singleton instance of this class.
 	 * 
@@ -30,7 +32,8 @@ public class KalmanErrorCache implements ErrorCache {
 					
 		CacheManager cm = CacheManagerFactory.getInstance();
 									
-		cache = cm.getCache(cacheName, KalmanErrorCacheKey.class, KalmanError.class);									
+		cache = cm.getCache(cacheName, KalmanErrorCacheKey.class, KalmanError.class);
+		dwellCache = cm.getCache(dwellCacheName, KalmanErrorCacheKey.class, KalmanError.class);
 	}
 	
 	public void logCache(Logger logger)
@@ -45,15 +48,8 @@ public class KalmanErrorCache implements ErrorCache {
 	@Override
 	@SuppressWarnings("unchecked")
 	synchronized public KalmanError getErrorValue(Indices indices) {		
-		
 		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices);
-		
-		KalmanError result = (KalmanError)cache.get(key);
-		
-		if(result==null)
-			return null;
-		else
-			return result;		
+		return (KalmanError)cache.get(key);
 	}
 	/* (non-Javadoc)
 	 * @see org.transitclock.core.dataCache.ErrorCache#getErrorValue(org.transitclock.core.dataCache.KalmanErrorCacheKey)
@@ -61,39 +57,55 @@ public class KalmanErrorCache implements ErrorCache {
 	@Override
 	@SuppressWarnings("unchecked")
 	synchronized public KalmanError getErrorValue(KalmanErrorCacheKey key) {		
-						
-		KalmanError result = (KalmanError)cache.get(key);
-		
-		if(result==null)
-			return null;
-		else
-			return result;				
+		return (KalmanError)cache.get(key);
 	}
+
+	@Override
+	public KalmanError getDwellErrorValue(Indices indices) {
+		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices);
+		return (KalmanError)dwellCache.get(key);
+	}
+
+	@Override
+	public KalmanError getDwellErrorValue(KalmanErrorCacheKey key) {
+		return (KalmanError)dwellCache.get(key);
+	}
+
 	/* (non-Javadoc)
 	 * @see org.transitclock.core.dataCache.ErrorCache#putErrorValue(org.transitclock.core.Indices, java.lang.Double)
 	 */
 	@Override	
 	synchronized public void putErrorValue(Indices indices,  Double value) {
-		
 		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices);		
 		putErrorValue(key,value);		
 	}				
 		
 	@Override
 	public void putErrorValue(KalmanErrorCacheKey key, Double value) {
-		
 		KalmanError error= (KalmanError)cache.get(key);
-		
-		if(error==null)
-		{
+		if(error==null) {
 			error=new KalmanError(value);			
-		}else
-		{
+		} else {
 			error.setError(value);	
 		}
-			
-								
 		cache.put(key,error);
+	}
+
+	@Override
+	public synchronized void putDwellErrorValue(Indices indices, Double value) {
+		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices);
+		putDwellErrorValue(key,value);
+	}
+
+	@Override
+	public void putDwellErrorValue(KalmanErrorCacheKey key, Double value) {
+		KalmanError error= (KalmanError)dwellCache.get(key);
+		if(error==null) {
+			error=new KalmanError(value);
+		} else {
+			error.setError(value);
+		}
+		dwellCache.put(key,error);
 	}
 
 	@Override

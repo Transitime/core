@@ -157,6 +157,15 @@ public class Trip implements Lifecycle, Serializable {
 	@ManyToMany(mappedBy = "trips")
 	private List<Block> blocks;
 
+	@Column
+	/*
+	 * Custom extension representing boarding style.
+	 * 0 = onboard fare payment, pay on entry
+	 * 1 = offboard fare payment
+	 * 2 = onboard fare payment, pay on exit
+	 */
+	private final Integer boardingType;
+
 	@Transient
 	private Route route;
 	
@@ -231,6 +240,7 @@ public class Trip implements Lifecycle, Serializable {
 
 		// Not a frequency based trip with an exact time so remember such
 		this.exactTimesHeadway = false;
+		this.boardingType = gtfsTrip.getBoardingType();
 	}
 
 	/**
@@ -285,7 +295,8 @@ public class Trip implements Lifecycle, Serializable {
 		// Since this constructor is only for frequency based trips where
 		// exact_times is true set the corresponding members to indicate such
 		this.noSchedule = false;
-		this.exactTimesHeadway = true;		
+		this.exactTimesHeadway = true;
+		this.boardingType = tripFromStopTimes.boardingType;
 	}
 	
 	/**
@@ -327,7 +338,8 @@ public class Trip implements Lifecycle, Serializable {
 		// Since this constructor is only for frequency based trips where
 		// exact_times is false set the corresponding members to indicate such
 		this.noSchedule = true;
-		this.exactTimesHeadway = false;		
+		this.exactTimesHeadway = false;
+		this.boardingType = tripFromStopTimes.boardingType;
 	}
 	
 	/**
@@ -347,6 +359,7 @@ public class Trip implements Lifecycle, Serializable {
 		shapeId = null;
 		noSchedule = false;
 		exactTimesHeadway = false;
+		boardingType = null;
 	}
 
 	/**
@@ -1024,18 +1037,14 @@ public class Trip implements Lifecycle, Serializable {
 	 * @return
 	 */
 	public ScheduleTime getScheduleTime(int stopPathIndex) {
-	  if (scheduledTimesList instanceof PersistentList) {
-	    // TODO this is an anti-pattern
-	    // instead find a way to manage sessions more consistently 
-	    PersistentList persistentListTimes = (PersistentList)scheduledTimesList;
-	    SessionImplementor session = 
-          persistentListTimes.getSession();
-	    if (session == null) {
-	      Session globalLazyLoadSession = Core.getInstance().getDbConfig().getGlobalSession();
-	      globalLazyLoadSession.update(this);
-	    }
-	  }
-		return scheduledTimesList.get(stopPathIndex);
+		try {
+			return scheduledTimesList.get(stopPathIndex);
+		} catch (ArrayIndexOutOfBoundsException ae) {
+			logger.error("illegal stopPathIndex {} for scheduleTimesList on trip {}", stopPathIndex, tripId);
+		} catch (NullPointerException npe) {
+			logger.error("empty schedule for trip {}", tripId);
+		}
+		return null;
 	}
 	
 	/**
@@ -1119,6 +1128,15 @@ public class Trip implements Lifecycle, Serializable {
 	public int getNumberStopPaths() {
 		return getTripPattern().getStopPaths().size();
 	}
+
+	/**
+	 * GTFS extension representing information about boarding
+	 * @return
+	 */
+	public final Integer getBoardingType() {
+		return boardingType;
+	}
+
 
 	/**
 	 * Callback due to implementing Lifecycle interface. Used to compact

@@ -19,11 +19,14 @@ package org.transitclock.applications;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.commons.cli.*;
-import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.avl.ApcModule;
 import org.transitclock.config.ConfigFileReader;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.configData.AgencyConfig;
@@ -52,6 +55,7 @@ import org.transitclock.guice.modules.ReportingModule;
 import org.transitclock.ipc.servers.*;
 import org.transitclock.modules.Module;
 import org.transitclock.monitoring.PidFile;
+import org.transitclock.utils.DateUtils;
 import org.transitclock.utils.SettableSystemTime;
 import org.transitclock.utils.SystemCurrentTime;
 import org.transitclock.utils.SystemTime;
@@ -69,8 +73,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
-import static org.transitclock.core.dataCache.StopArrivalDepartureCacheInterface.createArrivalDeparturesCriteria;
 
 /**
  * The main class for running a Transitime Core real-time data processing
@@ -93,6 +95,9 @@ public class Core {
 
 	private final ServiceUtilsImpl service;
 	private Time time;
+	// quartz scheduler
+	private Scheduler scheduler = null;
+
 
 	// So that can access the current time, even when in playback mode
 	private SystemTime systemTime = new SystemCurrentTime();
@@ -196,6 +201,15 @@ public class Core {
 
 		service = new ServiceUtilsImpl(configData);
 		time = new Time(configData);
+
+		try {
+			// Grab the Scheduler instance from the Factory
+			scheduler = StdSchedulerFactory.getDefaultScheduler();
+			scheduler.start();
+		} catch (SchedulerException e) {
+			logger.error("quartz failed to start.  Scheduler will not run.  Exception:{}", e, e);
+		}
+
 	}
 
 	/**
@@ -279,6 +293,14 @@ public class Core {
 	 */
 	public DbConfig getDbConfig() {
 		return configData;
+	}
+
+	/**
+	 * access to the quartz scheduler.
+	 * @return
+	 */
+	public Scheduler getScheduler() {
+		return scheduler;
 	}
 
 	/**
@@ -458,7 +480,7 @@ public class Core {
 		if(cacheReloadStartTimeStr.getValue().length()>0&&cacheReloadEndTimeStr.getValue().length()>0)
 		{
 			Criteria criteria = session.createCriteria(ArrivalDeparture.class);
-			List<ArrivalDeparture> results = StopArrivalDepartureCache.createArrivalDeparturesCriteria(criteria,
+			List<ArrivalDeparture> results = StopArrivalDepartureCache.createArrivalDeparturesCriteriaMultiDay(criteria,
 							new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()),
 							new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
 
@@ -481,7 +503,14 @@ public class Core {
 			}
 
 			if (TrafficManager.getInstance() != null) {
-				TrafficManager.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
+				try {
+					TrafficManager.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
+				} catch (Exception any) {
+					logger.error("TrafficManager populate failed:", any, any);
+				}
+			}
+			if (ApcModule.getInstance() != null) {
+				ApcModule.getInstance().populateFromDb(results);
 			}
 		}else
 		{
@@ -537,6 +566,13 @@ public class Core {
 					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.TrafficDataHistoryCache, futureInput);
 					pp.enqueue(ct);
 				}
+				if (ApcModule.getInstance() != null) {
+					logger.info("queuing apc for startDate {}", startDate);
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.ApcCache, futureInput);
+					pp.enqueue(ct);
+				} else {
+					logger.info("skipping APC integration startDate {}, apcModule not configured", startDate);
+				}
 
 				endDate=startDate;
 			}
@@ -552,7 +588,7 @@ public class Core {
 			// clean up after ourselves -- releasing threads
 			pp.shutdown();
 		}		
-	
+	logger.info("populate caches complete");
 	}
 
 	private static String getDateAsString(LocalDateTime date){
@@ -600,13 +636,16 @@ public class Core {
 		            public void run() 
 		            {
 		            	try {
-							logger.info("Closing cache.");
-							CacheManagerFactory.getInstance().close();
-							logger.info("Cache closed.");
-						} catch (Exception e) {
-							logger.error("Cache close failed.");
-							logger.error(e.getMessage(),e);
-						}
+												logger.info("Closing cache.");
+												CacheManagerFactory.getInstance().close();
+												logger.info("Cache closed.");
+												if (Core.getInstance().scheduler != null) {
+													Core.getInstance().scheduler.shutdown();
+												}
+											} catch (Exception e) {
+												logger.error("Cache close failed.");
+												logger.error(e.getMessage(),e);
+											}
 		            	System.exit(0);		            	
 		            }
 		    }));

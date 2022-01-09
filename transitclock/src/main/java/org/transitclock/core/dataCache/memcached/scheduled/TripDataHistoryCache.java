@@ -9,10 +9,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.StringConfigValue;
@@ -25,11 +23,15 @@ import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.gtfs.GtfsData;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
+import org.transitclock.utils.DateUtils;
 import org.transitclock.utils.Time;
 
 import net.spy.memcached.MemcachedClient;
 
 public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
+
+	private static final Logger logger =
+					LoggerFactory.getLogger(TripDataHistoryCache.class);
 
 	private static StringConfigValue memcachedHost = new StringConfigValue("transitclock.cache.memcached.host", "127.0.0.1",
 			"Specifies the host machine that memcache is running on.");
@@ -138,9 +140,8 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 					return tocheck;
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}			
+				logger.error("exception with previous departure {}", e, e);
+			}
 		}		
 		return null;	
 	}

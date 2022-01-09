@@ -258,7 +258,7 @@ public class AvlSqsClientModule extends Module {
       request.setMessage(content);
       _sns.publish(request);
     } catch (Exception any) {
-      logger.error("issue archving message {}: ", message, any);
+      logger.error("issue archiving message {}: ", message, any);
     }
   }
 

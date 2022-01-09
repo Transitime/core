@@ -159,11 +159,11 @@ public class MonitoringService {
             while (iterator.hasNext() && i < 20) {
                 i++;
                 MetricDatum datum = (MetricDatum) iterator.next();
-                if (datum != null && datum.getValue() != null) {
+                if (datum != null && datum.getValue() != null && !Double.isNaN(datum.getValue())) {
                     only20.add(datum);
                     logger.info("{},{},{}", datum.getUnit(), datum.getMetricName(), datum.getValue());
                 } else {
-                    logger.info("discarding empty metric {}", datum.getMetricName());
+                    logger.info("discarding empty/illegal metric {}", datum.getMetricName());
                 }
                 iterator.remove();
             }

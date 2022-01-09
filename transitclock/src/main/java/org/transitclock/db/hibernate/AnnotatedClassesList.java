@@ -44,6 +44,7 @@ public class AnnotatedClassesList {
 	private static Class<?>[] classList = new Class[] {
 		ActiveRevisions.class,
 		Agency.class,
+		ApcReport.class,
 		Arrival.class,
 		AvlReport.class,
 		Block.class,

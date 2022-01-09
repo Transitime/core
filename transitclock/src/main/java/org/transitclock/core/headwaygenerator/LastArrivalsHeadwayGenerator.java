@@ -90,7 +90,7 @@ public class LastArrivalsHeadwayGenerator extends AbstractHeadwayGenerator {
 				}
 			}
 		} catch (Exception e) {
-			logger.error("Exception when processing headway", e);
+			logger.error("Exception getting headway {}", e, e);
 		}
 		return null;
 	}

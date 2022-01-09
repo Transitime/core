@@ -239,7 +239,7 @@ public class StopPathProcessor {
 		TripPattern tripPattern;
 		int stopIndex;
 		Stop stop;
-		
+
 		@Override
 		public String toString() {
 			return "BestMatch [" 
@@ -803,5 +803,5 @@ public class StopPathProcessor {
 				"Took {} msec.",
 				timer.elapsedMsec());		
 	}
-	
+
 }

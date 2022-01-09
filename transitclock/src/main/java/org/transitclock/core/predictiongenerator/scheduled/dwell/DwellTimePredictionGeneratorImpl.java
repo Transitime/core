@@ -2,7 +2,9 @@ package org.transitclock.core.predictiongenerator.scheduled.dwell;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.core.Algorithm;
 import org.transitclock.core.Indices;
+import org.transitclock.core.PredictionResult;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.DwellTimeModelCacheFactory;
 import org.transitclock.core.dataCache.StopPathCacheKey;
@@ -26,7 +28,7 @@ public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorI
 	private static final Logger logger = LoggerFactory.getLogger(DwellTimePredictionGeneratorImpl.class);
 		
 	@Override
-	public long getStopTimeForPath(Indices indices,  AvlReport avlReport, VehicleState vehicleState) {
+	public PredictionResult getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
 		Long result=null;
 		try {
 			Headway headway = vehicleState.getHeadway();
@@ -37,7 +39,7 @@ public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorI
 																	
 				/* Change approach to use a RLS model.
 				*/																		
-				if(super.getStopTimeForPath(indices, avlReport, vehicleState)>0)
+				if(super.getStopTimeForPath(indices, avlReport, vehicleState).getPrediction()>0)
 				{																		
 					
 					StopPathCacheKey cacheKey=new StopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex(),  false); 
@@ -48,7 +50,7 @@ public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorI
 					if(result==null)
 					{
 						logger.debug("Using scheduled value for dwell time as no model available for {}.", indices);
-						result = super.getStopTimeForPath(indices,  avlReport, vehicleState);
+						result = super.getStopTimeForPath(indices,  avlReport, vehicleState).getPrediction();
 					}
 					
 					
@@ -62,14 +64,14 @@ public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorI
 				}else
 				{
 					logger.debug("Scheduled dwell time is less than 0 for {}.", indices);
-					result = super.getStopTimeForPath(indices, avlReport, vehicleState);
+					result = super.getStopTimeForPath(indices, avlReport, vehicleState).getPrediction();
 				}				
 								
 				logger.debug("Using dwell time {} for {} instead of {}. Headway for vehicle {} is {}",result,indices, super.getStopTimeForPath(indices,  avlReport, vehicleState), vehicleState.getVehicleId(),headway );
 			}
 			else
 			{
-				result = super.getStopTimeForPath(indices, avlReport, vehicleState);
+				result = super.getStopTimeForPath(indices, avlReport, vehicleState).getPrediction();
 				logger.debug("Using dwell time {} for {} instead of {}. No headway.",result,indices, super.getStopTimeForPath(indices ,avlReport, vehicleState));
 			}			
 	
@@ -80,7 +82,7 @@ public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorI
 
 		}
 		
-		return result;
+		return new PredictionResult(result, Algorithm.LEGACY_DWELL);
 	}
 
 }

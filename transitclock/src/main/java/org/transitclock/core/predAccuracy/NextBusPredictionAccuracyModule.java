@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.StringConfigValue;
+import org.transitclock.core.Algorithm;
 import org.transitclock.db.structs.Route;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
@@ -89,7 +90,6 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 	/**
 	 * Determine the URL to use to get data for all the routes/stops
 	 * 
-	 * @param routeId
 	 * @return
 	 */
 	private String getUrl(RouteAndStops routeAndStops) {
@@ -250,7 +250,7 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 					PredAccuracyPrediction pred = new PredAccuracyPrediction(
 							routeId, directionId, stopId, tripId, vehicleId,
 							predictedTime, predictionsReadTime, isArrival,
-							affectedByWaitStop, "NextBus",null,null);
+							affectedByWaitStop, "NextBus", Algorithm.NEXTBUS.getValue(),Algorithm.NEXTBUS.getValue(), null);
 					storePrediction(pred);
 				}
 			}

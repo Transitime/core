@@ -1,0 +1,24 @@
+{
+[
+  {
+    "id": 2139984326,
+    "service_date": 20210218,
+    "message_type": 4,
+    "driver": 79497,
+    "lat": 44.9465819,
+    "lon": -93.1493102,
+    "fom": 2,
+    "odo": 98,
+    "vehicle_id": 2081,
+    "door_open": 54422,
+    "door_close": 54429,
+    "dep": 54442,
+    "arr": 54409,
+    "timestamp": "2021-02-18T21:07:18",
+    "ons": 1,
+    "offs": 0,
+    "door_activity": "1,0,0,0,0,0,0,0,0,0,0,0",
+    "sent": null
+  }
+]
+}

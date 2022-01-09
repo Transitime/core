@@ -68,6 +68,7 @@ public class AvlJsonQuery {
 		String timeSql = getTimeSql(beginTime, endTime);
 		String headwayColSql = getHeadwayColSql(includeHeadway);
 		String headwayJoinSql = getHeadwayJoinSql(includeHeadway);
+		String headwayWhereSql = getHeadwayWhereSql(includeHeadway);
 		String onTimePerformanceSql = getOnTimePerformanceSql(earlyMsec, lateMsec);
 
 		//need to limit the vehicle state table by time as well to utilize index on avlTime column
@@ -88,6 +89,7 @@ public class AvlJsonQuery {
 				+ headwayJoinSql
 				+ "WHERE a.time BETWEEN '" + beginDate + "' "
 				+ "AND TIMESTAMPADD(DAY,1,'" + beginDate + "') "
+				+ headwayWhereSql
 				+ timeSql;
 
 		// If only want data for single vehicle then specify so in SQL
@@ -158,15 +160,18 @@ public class AvlJsonQuery {
 	private static String getHeadwayJoinSql(String includeHeadway){
 		String headwayJoinSql = "";
 		if	(includeHeadway != null && includeHeadway.equalsIgnoreCase("true")){
-			headwayJoinSql = "LEFT JOIN (" +
-					"SELECT creationTime, headway, vehicleId, scheduledHeadway " +
-					"FROM  Headway " +
-					"WHERE  headway < 10800000" +
-					") h " +
-					"ON a.time = h.creationTime " +
-					"AND a.vehicleId = h.vehicleId ";
+			headwayJoinSql = "LEFT JOIN Headway h ON a.time= h.creationTime AND a.vehicleId = h.vehicleId ";
 		}
 		return headwayJoinSql;
+	}
+
+	private static String getHeadwayWhereSql(String includeHeadway){
+		String sql = "";
+		if(includeHeadway != null && includeHeadway.equalsIgnoreCase("true")){
+			sql +=  "AND (h.headway < " + MAX_HEADWAY + " OR h.headway is null) ";
+		}
+		return sql;
+
 	}
 
 	private static String getOnTimePerformanceSql(String early, String late){

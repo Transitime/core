@@ -11,12 +11,18 @@ public interface ErrorCache {
 
 	KalmanError getErrorValue(KalmanErrorCacheKey key);
 
+	KalmanError getDwellErrorValue(Indices indices);
+
+	KalmanError getDwellErrorValue(KalmanErrorCacheKey key);
+
 	void putErrorValue(Indices indices, Double value);
 		
 	void putErrorValue(KalmanErrorCacheKey key, Double value);
 
+	void putDwellErrorValue(Indices indices, Double value);
+
+	void putDwellErrorValue(KalmanErrorCacheKey key, Double value);
+
 	List<KalmanErrorCacheKey> getKeys();
-
-
 
 }

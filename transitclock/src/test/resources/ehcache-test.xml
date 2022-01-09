@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ehcache:config xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+                xmlns:ehcache='http://www.ehcache.org/v3'
+                xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core-3.1.xsd">
+    <ehcache:persistence directory="/tmp/cache/" />
+    <ehcache:disk-store thread-pool="pool-disk" />
+
+
+    <ehcache:cache alias="dwellTimeModelCache">
+        <ehcache:key-type >org.transitclock.core.dataCache.StopPathCacheKey</ehcache:key-type>
+        <ehcache:value-type>org.transitclock.core.predictiongenerator.scheduled.dwell.DwellModel</ehcache:value-type>
+        <ehcache:expiry>
+            <ehcache:tti unit="days">7</ehcache:tti>
+        </ehcache:expiry>
+        <ehcache:resources>
+            <ehcache:heap unit="entries">2000</ehcache:heap>
+            <ehcache:offheap unit="MB">100</ehcache:offheap>
+            <ehcache:disk unit="MB">200</ehcache:disk>
+        </ehcache:resources>
+        <ehcache:disk-store-settings thread-pool="pool-disk"
+                                     writer-concurrency="1" />
+    </ehcache:cache>
+
+    <ehcache:cache alias="arrivalDeparturesByTrip">
+        <ehcache:key-type >org.transitclock.core.dataCache.TripKey</ehcache:key-type>
+        <ehcache:value-type serializer="org.transitclock.core.dataCache.ehcache.serializers.TripEventKyroSerializer">org.transitclock.core.dataCache.TripEvents</ehcache:value-type>
+        <ehcache:expiry>
+            <ehcache:tti unit="days">7</ehcache:tti>
+        </ehcache:expiry>
+        <ehcache:resources>
+            <ehcache:heap unit="entries">1000</ehcache:heap>
+            <ehcache:offheap unit="MB">100</ehcache:offheap>
+            <ehcache:disk unit="MB">200</ehcache:disk>
+        </ehcache:resources>
+        <ehcache:disk-store-settings thread-pool="pool-disk"
+                                     writer-concurrency="1" />
+    </ehcache:cache>
+
+    <ehcache:cache alias="arrivalDeparturesByStop">
+        <ehcache:key-type>org.transitclock.core.dataCache.StopArrivalDepartureCacheKey</ehcache:key-type>
+        <ehcache:value-type>org.transitclock.core.dataCache.StopEvents</ehcache:value-type>
+        <ehcache:expiry>
+            <ehcache:ttl unit="days">1</ehcache:ttl>
+        </ehcache:expiry>
+        <ehcache:resources>
+            <ehcache:heap unit="entries">2000</ehcache:heap>
+            <ehcache:offheap unit="MB">100</ehcache:offheap>
+            <ehcache:disk unit="MB">200</ehcache:disk>
+        </ehcache:resources>
+        <ehcache:disk-store-settings thread-pool="pool-disk"
+                                     writer-concurrency="1" />
+    </ehcache:cache>
+
+    <ehcache:cache alias="KalmanErrorCache">
+        <ehcache:key-type>org.transitclock.core.dataCache.KalmanErrorCacheKey</ehcache:key-type>
+        <ehcache:value-type>org.transitclock.core.dataCache.KalmanError</ehcache:value-type>
+        <ehcache:expiry>
+            <ehcache:ttl unit="hours">24</ehcache:ttl>
+        </ehcache:expiry>
+        <ehcache:resources>
+            <ehcache:heap unit="entries">10000</ehcache:heap>
+            <ehcache:offheap unit="MB">5</ehcache:offheap>
+        </ehcache:resources>
+    </ehcache:cache>
+    <ehcache:cache alias="KalmanDwellErrorCache">
+        <ehcache:key-type>org.transitclock.core.dataCache.KalmanErrorCacheKey</ehcache:key-type>
+        <ehcache:value-type>org.transitclock.core.dataCache.KalmanError</ehcache:value-type>
+        <ehcache:expiry>
+            <ehcache:ttl unit="hours">24</ehcache:ttl>
+        </ehcache:expiry>
+        <ehcache:resources>
+            <ehcache:heap unit="entries">10000</ehcache:heap>
+            <ehcache:offheap unit="MB">5</ehcache:offheap>
+        </ehcache:resources>
+    </ehcache:cache>
+
+    <ehcache:cache alias="HistoricalAverageCache">
+        <ehcache:key-type>org.transitclock.core.dataCache.StopPathCacheKey</ehcache:key-type>
+        <ehcache:value-type>org.transitclock.core.dataCache.HistoricalAverage</ehcache:value-type>
+        <ehcache:expiry>
+            <ehcache:tti unit="days">14</ehcache:tti>
+        </ehcache:expiry>
+        <ehcache:resources>
+            <ehcache:heap unit="entries">10000</ehcache:heap>
+            <ehcache:offheap unit="MB">100</ehcache:offheap>
+
+        </ehcache:resources>
+    </ehcache:cache>
+
+    <ehcache:cache alias="StopPathPredictionCache">
+        <ehcache:key-type>java.lang.Long</ehcache:key-type>
+        <ehcache:value-type>java.lang.String</ehcache:value-type>
+        <ehcache:expiry>
+            <ehcache:ttl unit="hours">1</ehcache:ttl>
+        </ehcache:expiry>
+        <ehcache:resources>
+            <ehcache:heap unit="entries">100</ehcache:heap>
+            <ehcache:offheap unit="MB">1</ehcache:offheap>
+        </ehcache:resources>
+    </ehcache:cache>
+
+    <ehcache:cache alias="HoldingTimeCache">
+        <ehcache:key-type>org.transitclock.core.dataCache.HoldingTimeCacheKey</ehcache:key-type>
+        <ehcache:value-type>org.transitclock.db.structs.HoldingTime</ehcache:value-type>
+        <ehcache:expiry>
+            <ehcache:ttl unit="hours">2</ehcache:ttl>
+        </ehcache:expiry>
+        <ehcache:resources>
+            <ehcache:heap unit="entries">100</ehcache:heap>
+            <ehcache:offheap unit="MB">1</ehcache:offheap>
+        </ehcache:resources>
+    </ehcache:cache>
+
+    <ehcache:cache alias="apcStopTimeCache">
+        <ehcache:key-type >org.transitclock.avl.ApcStopTimeEvent</ehcache:key-type>
+        <ehcache:value-type>java.lang.Long</ehcache:value-type>
+        <ehcache:expiry>
+            <ehcache:tti unit="days">7</ehcache:tti>
+        </ehcache:expiry>
+        <ehcache:resources>
+            <ehcache:heap unit="entries">2000</ehcache:heap>
+            <ehcache:offheap unit="MB">200</ehcache:offheap>
+            <ehcache:disk unit="GB">1</ehcache:disk>
+        </ehcache:resources>
+        <ehcache:disk-store-settings thread-pool="pool-disk"
+                                     writer-concurrency="1" />
+    </ehcache:cache>
+    <ehcache:cache alias="apcCacheBin">
+        <ehcache:key-type >org.transitclock.avl.CacheBin</ehcache:key-type>
+        <ehcache:value-type>org.transitclock.avl.ApcCacheElements</ehcache:value-type>
+        <ehcache:expiry>
+            <ehcache:tti unit="days">7</ehcache:tti>
+        </ehcache:expiry>
+        <ehcache:resources>
+            <ehcache:heap unit="entries">2000</ehcache:heap>
+            <ehcache:offheap unit="MB">200</ehcache:offheap>
+            <ehcache:disk unit="GB">1</ehcache:disk>
+        </ehcache:resources>
+        <ehcache:disk-store-settings thread-pool="pool-disk"
+                                     writer-concurrency="1" />
+    </ehcache:cache>
+
+</ehcache:config>

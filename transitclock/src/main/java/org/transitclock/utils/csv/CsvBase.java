@@ -193,7 +193,25 @@ public class CsvBase {
 			return null;
 		}
 	}
-	
+
+	/**
+	 * For int extensions to CSV, such as flex values of -999.
+	 *
+	 * @param record
+	 *            The data for the row in the CSV file
+	 * @param name
+	 *            The name of the column in the CSV file
+	 * @paran defaultValue
+	 * 						The value to default to if no value foun.
+	 * @return The optional Integer value or defaultValue if it is not set or could not
+	 *         be parsed.
+	 */
+
+	protected int getIntValueWithDefault(CSVRecord record, String name, int defaultValue) {
+		Integer recordValue = getOptionalIntegerValue(record, name);
+		if (recordValue == null) return defaultValue;
+		return recordValue;
+	}
 	/**
 	 * For Double extensions to CSV, such as for route max_distance.
 	 * 

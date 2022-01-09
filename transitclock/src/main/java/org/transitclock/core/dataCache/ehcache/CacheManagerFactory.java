@@ -39,8 +39,12 @@ public class CacheManagerFactory {
 
 	private static URL getConfigPath() {
 		URL defaultConfig = CacheManagerFactory.class.getClassLoader().getResource(ehcacheConfigFile.getValue());
-		if(ehcacheConfigFile.getValue().equalsIgnoreCase(DEFAULT_CONFIG)){
+		if(ehcacheConfigFile.getValue().equalsIgnoreCase(DEFAULT_CONFIG)) {
 			return defaultConfig;
+		} else if (ehcacheConfigFile.getValue().contains("classpath:")) {
+			// support for classpath:ehcache-test.xml
+			String uri = ehcacheConfigFile.getValue().substring("classpath:".length());
+			return CacheManagerFactory.class.getClassLoader().getResource(uri);
 		} else {
 			try {
 				File file = new File(ehcacheConfigFile.getValue());

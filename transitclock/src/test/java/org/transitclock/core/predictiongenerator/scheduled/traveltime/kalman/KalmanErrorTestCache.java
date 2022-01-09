@@ -37,6 +37,7 @@ public class KalmanErrorTestCache implements ErrorCache {
   }
 
   private Map<Indices, KalmanError> map = new HashMap<>();
+  private Map<Indices, KalmanError> dwellMap = new HashMap<>();
 
   @Override
   public KalmanError getErrorValue(Indices indices) {
@@ -52,6 +53,20 @@ public class KalmanErrorTestCache implements ErrorCache {
   }
 
   @Override
+  public KalmanError getDwellErrorValue(Indices indices) {
+    KalmanError error = dwellMap.get(indices);
+    if (error == null)
+      return test.getDwellErrorValue(indices);
+    return error;
+
+  }
+
+  @Override
+  public KalmanError getDwellErrorValue(KalmanErrorCacheKey key) {
+    throw new UnsupportedOperationException("getDwellErrorValue(KalmanErrorCacheKey key)");
+  }
+
+  @Override
   public void putErrorValue(Indices indices, Double value) {
     map.put(indices, new KalmanError(value));
   }
@@ -59,6 +74,16 @@ public class KalmanErrorTestCache implements ErrorCache {
   @Override
   public void putErrorValue(KalmanErrorCacheKey key, Double value) {
     throw new UnsupportedOperationException("putErrorValue(KalmanErrorCacheKey key, Double value)");
+  }
+
+  @Override
+  public void putDwellErrorValue(Indices indices, Double value) {
+    dwellMap.put(indices, new KalmanError(value));
+  }
+
+  @Override
+  public void putDwellErrorValue(KalmanErrorCacheKey key, Double value) {
+    throw new UnsupportedOperationException("putDwellErrorValue(KalmanErrorCacheKey key, Double value)");
   }
 
   @Override

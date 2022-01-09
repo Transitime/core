@@ -111,8 +111,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 				}
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("exception adding sample {}", e, e);
 		}
 	}
 

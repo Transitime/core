@@ -17,7 +17,6 @@
 
 package org.transitclock.core.predictiongenerator;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
@@ -31,9 +30,11 @@ import org.transitclock.core.predictiongenerator.datafilter.TravelTimeFilterFact
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.PredictionEvent;
+import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.monitoring.MonitoringService;
+import org.transitclock.utils.DateUtils;
 
 import java.util.*;
 
@@ -47,6 +48,11 @@ public class HistoricalPredictionLibrary {
 	private static final IntegerConfigValue closestVehicleStopsAhead = new IntegerConfigValue(
 			"transitclock.prediction.closestvehiclestopsahead", new Integer(2),
 			"Num stops ahead a vehicle must be to be considers in the closest vehicle calculation");
+
+	private static final IntegerConfigValue maxHeadwayMinutes = new IntegerConfigValue(
+					"transitclock.prediction.dwell.maxHeadwayMinutes",
+					180,
+					"Max time between trips to be considered a valid headway");
 
 	private static final Logger logger = LoggerFactory.getLogger(HistoricalPredictionLibrary.class);
 
@@ -307,6 +313,30 @@ public class HistoricalPredictionLibrary {
 		}
 		return times;
     }
+
+	public static Long getLastHeadway(String referenceStopId, String routeId, Date referenceTime) {
+		StopArrivalDepartureCacheKey currentStopKey = new StopArrivalDepartureCacheKey(referenceStopId,
+						referenceTime);
+		List<IpcArrivalDeparture> currentStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(currentStopKey);
+		if (currentStopList == null || currentStopList.isEmpty()) {
+			logger.debug("no real-time headway stopList for {}", referenceStopId);
+			return null;
+		}
+
+		// list is sorted in newest order.  First hit AFTER our reference time is the answer
+		for (int i = 0; i < currentStopList.size(); i++) {
+			IpcArrivalDeparture ipcArrivalDeparture = currentStopList.get(i);
+			Trip headwayTrip = Core.getInstance().getDbConfig().getTrip(ipcArrivalDeparture.getTripId());
+			if (headwayTrip == null || headwayTrip.getRouteId().equals(routeId)) {
+				// don't let the headway be negative -- as can happen during playback (or bad data)
+				if (referenceTime.getTime() > ipcArrivalDeparture.getTime().getTime()) {
+					return referenceTime.getTime() - ipcArrivalDeparture.getTime().getTime();
+				}
+			}
+		}
+		return null;
+	}
+
 
 	private static IpcArrivalDeparture getArrival(int stopPathIndex, List<IpcArrivalDeparture> results)
 	{

@@ -146,6 +146,9 @@ public class GtfsData {
 	private List<FareAttribute> fareAttributes;
 	private List<FareRule> fareRules;
 	private List<Transfer> transfers;
+	private List<VehicleConfig> newVehicleConfigs;
+	// VehicleConfig is not versioned, so we need to track updates separately
+	private List<VehicleConfig> updatedVehicleConfigs;
 	private List<FeedInfo> feedInfoList;
 	private List<RouteDirection> routeDirectionList;
 
@@ -2217,6 +2220,36 @@ public class GtfsData {
 		logger.info("Finished processing transfers.txt data. ");
 	}
 
+	private void processVehicles() {
+		logger.info("Processing vehicles.txt data...");
+		updatedVehicleConfigs = new ArrayList<>();
+		newVehicleConfigs = new ArrayList<>();
+		Map<String, VehicleConfig> vehicleConfigMap;
+
+		GtfsVehiclesReader vehiclesReader = new GtfsVehiclesReader(gtfsDirectoryName);
+		List<GtfsVehicle> gtfsVehicles = vehiclesReader.get();
+		vehicleConfigMap = VehicleConfig.buildConfigMap(session);
+		for (GtfsVehicle gtfsVehicle : gtfsVehicles) {
+			VehicleConfig vc= new VehicleConfig(gtfsVehicle.getVehicleId(),
+							gtfsVehicle.getVehicleDescription(),
+							gtfsVehicle.getSeatedCapacity(),
+							gtfsVehicle.getStandingCapacity(),
+							gtfsVehicle.getDoorCount(),
+							gtfsVehicle.getDoorWidth(),
+							gtfsVehicle.getLowFloor(),
+							gtfsVehicle.getBikeCapacity(),
+							gtfsVehicle.getWheelchairAccess());
+
+			if (vehicleConfigMap.containsKey(gtfsVehicle.getVehicleId())) {
+				updatedVehicleConfigs.add(vc);
+			} else {
+				newVehicleConfigs.add(vc);
+			}
+		}
+
+		logger.info("Finished processing vehicles.txt data. ");
+	}
+
 	/**
 	 * Reads feed_info.txt file and puts feed_version into ConfigRevision
 	 */
@@ -2367,6 +2400,7 @@ public class GtfsData {
 	}
 	
 	public boolean isTripPatternIdAlreadyUsed(String tripPatternId) {
+		if (tripPatternIdSet == null) return false; // for testing
 		return tripPatternIdSet.contains(tripPatternId);
 	}
 	
@@ -2534,6 +2568,12 @@ public class GtfsData {
 
 	public List<RouteDirection> getRouteDirection() { return routeDirectionList; }
 
+	public List<VehicleConfig> getUpdatedVehicleConfigs() {
+		return updatedVehicleConfigs;
+	}
+	public List<VehicleConfig> getNewVehicleConfigs() {
+		return newVehicleConfigs;
+	}
 
 	/**
 	 * Returns information about the current revision.
@@ -2697,9 +2737,10 @@ public class GtfsData {
 		processFareAttributes();
 		processFareRules();
 		processTransfers();
+		processVehicles();
 		processFeedInfo();
 		processRouteDirection();
-		
+
 		// Sometimes will be using a partial configuration. For example, for 
 		// MBTA commuter rail only want to use the trips defined for 
 		// commuter rail even though the GTFS data can have trips for

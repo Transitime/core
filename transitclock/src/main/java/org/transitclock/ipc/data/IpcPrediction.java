@@ -17,6 +17,7 @@
 package org.transitclock.ipc.data;
 
 import org.transitclock.applications.Core;
+import org.transitclock.core.Algorithm;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.utils.StringUtils;
@@ -47,7 +48,7 @@ public class IpcPrediction implements Serializable {
 	// stopId so they are stored here as well.
 	private final String routeId;
 	private final String stopId;
-	
+	private final int stopPathIndex;
 	private final int gtfsStopSeq;
 	private final String tripId;
 	private final String tripPatternId;
@@ -81,6 +82,8 @@ public class IpcPrediction implements Serializable {
 	private final boolean isArrival;
 	private final Integer delay;
 	private boolean isCanceled;
+	private final int travelTimeAlgorithm;
+	private final int dwellTimeAlgorithm;
 
 	public boolean isCanceled() {
 		return isCanceled;
@@ -93,6 +96,10 @@ public class IpcPrediction implements Serializable {
 	private final Trip trip;
 
 	private static final long serialVersionUID = 7264507678733060173L;
+
+	public int getStopPathIndex() {
+		return stopPathIndex;
+	}
 
 	public enum ArrivalOrDeparture {ARRIVAL, DEPARTURE};
 
@@ -122,7 +129,6 @@ public class IpcPrediction implements Serializable {
 	 * @param atEndOfTrip
 	 *            True if prediction for last stop of trip, which means likely
 	 *            not useful to user
-	 * @param predictionAffectedByWaitStop
 	 * @param isDelayed
 	 * @param lateAndSubsequentTripSoMarkAsUncertain
 	 * @param arrivalOrDeparture
@@ -131,15 +137,16 @@ public class IpcPrediction implements Serializable {
 	 * @param tripCounter
 	 * 
 	 */
-	public IpcPrediction(AvlReport avlReport, String stopId, int gtfsStopSeq,
+	public IpcPrediction(AvlReport avlReport, String stopId, int stopPathIndex, int gtfsStopSeq,
 		      Trip trip, long predictionTime, long actualPredictionTime,
 		      boolean atEndOfTrip, boolean affectedByWaitStop,
 		      boolean isDelayed, boolean lateAndSubsequentTripSoMarkAsUncertain,
 		      ArrivalOrDeparture arrivalOrDeparture, Integer delay, long freqStartTime,
-			int tripCounter,boolean isCanceled) {
+			int tripCounter,boolean isCanceled, Algorithm travelTime, Algorithm dwellTime) {
 		this.vehicleId = avlReport.getVehicleId();
 	    this.routeId = trip.getRouteId();
 	    this.stopId = stopId;
+	    this.stopPathIndex = stopPathIndex;
 	    this.gtfsStopSeq = gtfsStopSeq;
 	    this.trip = trip;
 	    // For when trip is null use "" instead of null for the tripId
@@ -175,13 +182,15 @@ public class IpcPrediction implements Serializable {
 	    this.freqStartTime = freqStartTime;
 		this.tripCounter =  tripCounter;
 		this.isCanceled=isCanceled;
+		this.travelTimeAlgorithm = travelTime.getValue();
+		this.dwellTimeAlgorithm = dwellTime.getValue();
 	}
 
 	/**
 	 * Constructor used for when deserializing a proxy object. Declared private
 	 * because only used internally by the proxy class.
 	 */
-	private IpcPrediction(String vehicleId, String routeId, String stopId,
+	private IpcPrediction(String vehicleId, String routeId, String stopId, int stopPathIndex,
 			int gtfsStopSeq, String tripId, String tripPatternId, boolean isTripUnscheduled,
 			String blockId, long predictionTime, long actualPredictionTime,
 			boolean atEndOfTrip, boolean schedBasedPred, long avlTime,
@@ -189,11 +198,12 @@ public class IpcPrediction implements Serializable {
 			boolean affectedByWaitStop, String driverId, short passengerCount,
 			float passengerFullness, boolean isDelayed,
 			boolean lateAndSubsequentTripSoMarkAsUncertain, boolean isArrival,  Integer delay,
-		    Long freqStartTime, int tripCounter,boolean isCanceled) {
+		    Long freqStartTime, int tripCounter,boolean isCanceled, Algorithm travelTime, Algorithm dwelLTime) {
 
 		this.vehicleId = vehicleId;
 		this.routeId = routeId;
 		this.stopId = stopId;
+		this.stopPathIndex = stopPathIndex;
 		this.gtfsStopSeq = gtfsStopSeq;
 		// trip is only for client side
 		this.trip = null;
@@ -223,6 +233,8 @@ public class IpcPrediction implements Serializable {
 
 		this.delay = delay;
 		this.isCanceled=isCanceled;
+		this.travelTimeAlgorithm = travelTime.getValue();
+		this.dwellTimeAlgorithm = dwelLTime.getValue();
 	}
 
 	
@@ -235,6 +247,7 @@ public class IpcPrediction implements Serializable {
 		private String vehicleId;
 		private String routeId;
 		private String stopId;
+		private int stopPathIndex;
 		private int gtfsStopSeq;
 		private String tripId;
 		private String tripPatternId;
@@ -261,6 +274,9 @@ public class IpcPrediction implements Serializable {
 		private Integer delay;
 		private boolean isCanceled;
 
+		private int travelTimeAlgorithm;
+		private int dwellTimeAlgorithm;
+
 		private static final long serialVersionUID = -8585283691951746719L;
 		private static final short currentSerializationVersion = 0;
 
@@ -271,6 +287,7 @@ public class IpcPrediction implements Serializable {
 			this.vehicleId = p.vehicleId;
 			this.routeId = p.routeId;
 			this.stopId = p.stopId;
+			this.stopPathIndex = p.stopPathIndex;
 			this.gtfsStopSeq = p.gtfsStopSeq;
 			this.tripId = p.tripId;
 			this.tripPatternId = p.tripPatternId;
@@ -297,6 +314,8 @@ public class IpcPrediction implements Serializable {
 
 			this.delay = p.delay;
 			this.isCanceled=p.isCanceled;
+			this.travelTimeAlgorithm = p.travelTimeAlgorithm;
+			this.dwellTimeAlgorithm = p.dwellTimeAlgorithm;
 		}
 
 		/*
@@ -312,6 +331,7 @@ public class IpcPrediction implements Serializable {
 			stream.writeObject(vehicleId);
 			stream.writeObject(routeId);
 			stream.writeObject(stopId);
+			stream.writeInt(stopPathIndex);
 			stream.writeInt(gtfsStopSeq);
 			stream.writeObject(tripId);
 			stream.writeObject(tripPatternId);
@@ -337,6 +357,8 @@ public class IpcPrediction implements Serializable {
 
 			stream.writeObject(delay);
 			stream.writeBoolean(isCanceled);
+			stream.writeInt(travelTimeAlgorithm);
+			stream.writeInt(dwellTimeAlgorithm);
 		}
 
 		/*
@@ -359,6 +381,7 @@ public class IpcPrediction implements Serializable {
 			vehicleId = (String) stream.readObject();
 			routeId = (String) stream.readObject();
 			stopId = (String) stream.readObject();
+			stopPathIndex = stream.readInt();
 			gtfsStopSeq = stream.readInt();
 			tripId = (String) stream.readObject();
 			tripPatternId = (String) stream.readObject();
@@ -384,6 +407,8 @@ public class IpcPrediction implements Serializable {
 
 			delay = (Integer) stream.readObject();
 			isCanceled=stream.readBoolean();
+			travelTimeAlgorithm=stream.readInt();
+			dwellTimeAlgorithm=stream.readInt();
 		}
 
 		/*
@@ -393,12 +418,13 @@ public class IpcPrediction implements Serializable {
 		 * object is converted to an enclosing class object.
 		 */
 		private Object readResolve() {
-			return new IpcPrediction(vehicleId, routeId, stopId, gtfsStopSeq,
+			return new IpcPrediction(vehicleId, routeId, stopId, stopPathIndex, gtfsStopSeq,
 					tripId, tripPatternId, isTripUnscheduled, blockId, predictionTime, 0,
 					atEndOfTrip, schedBasedPred, avlTime, creationTime,
 					tripStartEpochTime, tripStartDateTime, affectedByWaitStop, driverId,
 					passengerCount, passengerFullness, isDelayed, lateAndSubsequentTripSoMarkAsUncertain,
-					isArrival, delay, freqStartTime, tripCounter,isCanceled);
+					isArrival, delay, freqStartTime, tripCounter,isCanceled,
+							Algorithm.fromValue(travelTimeAlgorithm), Algorithm.fromValue(dwellTimeAlgorithm));
 
 		}
 	}
@@ -605,5 +631,8 @@ public class IpcPrediction implements Serializable {
 	public long getFreqStartTime() {
 		return freqStartTime;
 	}
+
+	public Algorithm getTravelTime() { return Algorithm.fromValue(travelTimeAlgorithm); }
+	public Algorithm getDwelLTime() { return Algorithm.fromValue(dwellTimeAlgorithm); }
 	
 }

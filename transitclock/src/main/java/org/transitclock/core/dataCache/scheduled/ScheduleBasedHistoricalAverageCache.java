@@ -1,6 +1,5 @@
 package org.transitclock.core.dataCache.scheduled;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.slf4j.Logger;
@@ -15,6 +14,7 @@ import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
+import org.transitclock.utils.DateUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;

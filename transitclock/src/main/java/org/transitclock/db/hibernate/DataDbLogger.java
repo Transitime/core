@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.configData.CoreConfig;
 import org.transitclock.configData.DbSetupConfig;
+import org.transitclock.db.structs.ApcReport;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.Headway;
@@ -85,6 +86,7 @@ public class DataDbLogger {
 
   private DbQueue<ArrivalDeparture> arrivalDepartureQueue;
   private DbQueue<AvlReport> avlReportQueue;
+  private DbQueue<ApcReport> apcRecordQueue;
   private DbQueue<VehicleConfig> vehicleConfigQueue;
   private DbQueue<Prediction> predictionQueue;
   private DbQueue<Match> matchQueue;
@@ -191,6 +193,7 @@ public class DataDbLogger {
 		this.shouldPauseToReduceQueue = shouldPauseToReduceQueue;
 	  arrivalDepartureQueue = new DbQueue<ArrivalDeparture>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, ArrivalDeparture.class.getSimpleName());
 	  avlReportQueue = new DbQueue<AvlReport>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, AvlReport.class.getSimpleName());
+	  apcRecordQueue = new DbQueue<ApcReport>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, ApcReport.class.getSimpleName());
 	  vehicleConfigQueue = new DbQueue<VehicleConfig>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, VehicleConfig.class.getSimpleName());
 		predictionQueue = new DbQueue<Prediction>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, Prediction.class.getSimpleName());
 	  matchQueue = new DbQueue<Match>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, Match.class.getSimpleName());
@@ -225,6 +228,9 @@ public class DataDbLogger {
 		}
 		vehicleToPrimayKeyMap.put(key, hash);
 		return avlReportQueue.add(ar);
+	}
+	public boolean add(ApcReport apc) {
+		return apcRecordQueue.add(apc);
 	}
 	public boolean add(VehicleConfig vc) {
 	  return vehicleConfigQueue.add(vc);
@@ -321,6 +327,7 @@ public class DataDbLogger {
 		Double[] queueLevelsArray = {
 						arrivalDepartureQueue.queueLevel(),
 						avlReportQueue.queueLevel(),
+						apcRecordQueue.queueLevel(),
 						vehicleConfigQueue.queueLevel(),
 						predictionQueue.queueLevel(),
 						matchQueue.queueLevel(),
@@ -339,12 +346,13 @@ public class DataDbLogger {
 		Collections.sort(levels);
 		return levels.get(levels.size()-1);
 	}
-	
+
 	// as a summary of queue sizes, return the largest queue size
 	public int queueSize() {
 		Integer[] sizesArray = {
 						arrivalDepartureQueue.queueSize(),
 						avlReportQueue.queueSize(),
+						apcRecordQueue.queueSize(),
 						vehicleConfigQueue.queueSize(),
 						predictionQueue.queueSize(),
 						matchQueue.queueSize(),
@@ -388,7 +396,7 @@ public class DataDbLogger {
 		return simple.format(vs.getAvlTime());
 
 	}
-	
+
 	/**
 	 * Just for doing some testing
 	 * 

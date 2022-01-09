@@ -3,8 +3,10 @@ package org.transitclock.core.predictiongenerator.lastvehicle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
+import org.transitclock.core.Algorithm;
 import org.transitclock.core.Indices;
 import org.transitclock.core.PredictionGeneratorDefaultImpl;
+import org.transitclock.core.PredictionResult;
 import org.transitclock.core.TravelTimeDetails;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.StopPathPredictionCacheFactory;
@@ -38,10 +40,10 @@ public class LastVehiclePredictionGeneratorImpl extends
 	@Override
 	protected IpcPrediction generatePredictionForStop(AvlReport avlReport,  Indices indices, long predictionTime,
 			boolean useArrivalTimes, boolean affectedByWaitStop, boolean isDelayed, boolean lateSoMarkAsUncertain,
-			int tripCounter, Integer scheduleDeviation) {
+			int tripCounter, Integer scheduleDeviation, Algorithm lastTravelTime, Algorithm lastDwell) {
 		// TODO Auto-generated method stub
 		return super.generatePredictionForStop(avlReport,  indices, predictionTime, useArrivalTimes, affectedByWaitStop,
-				isDelayed, lateSoMarkAsUncertain, tripCounter, scheduleDeviation);
+				isDelayed, lateSoMarkAsUncertain, tripCounter, scheduleDeviation, lastTravelTime, lastDwell);
 	}
 	private String alternative="PredictionGeneratorDefaultImpl";
 				
@@ -52,7 +54,7 @@ public class LastVehiclePredictionGeneratorImpl extends
 	 * @see org.transitclock.core.predictiongenerator.KalmanPredictionGeneratorImpl#getTravelTimeForPath(org.transitclock.core.Indices, org.transitclock.db.structs.AvlReport)
 	 */
 	@Override
-	public long getTravelTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
+	public PredictionResult getTravelTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
 	
 		VehicleDataCache vehicleCache = VehicleDataCache.getInstance();
 		
@@ -85,11 +87,10 @@ public class LastVehiclePredictionGeneratorImpl extends
 					StopPathPredictionCacheFactory.getInstance().putPrediction(predictionForStopPath);
 				}
 				
-				return travelTimeDetails.getTravelTime();
+				return new PredictionResult(travelTimeDetails.getTravelTime(), Algorithm.LAST_VEHICLE);
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("exception {} in getTravelTimeForPath", e, e);
 		}
 				
 		//logger.debug("No last vehicle data found, generating default prediction : " + indices.toString());
@@ -97,7 +98,7 @@ public class LastVehiclePredictionGeneratorImpl extends
 		return super.getTravelTimeForPath(indices, avlReport, currentVehicleState);
 	}
 	@Override
-	public long getStopTimeForPath(Indices indices,  AvlReport avlReport, VehicleState vehicleState) {
+	public PredictionResult getStopTimeForPath(Indices indices,  AvlReport avlReport, VehicleState vehicleState) {
 		// Looking at last vehicle value would be a bad idea for dwell time, so no implementation here.
 		
 		return super.getStopTimeForPath(indices,  avlReport, vehicleState);

@@ -17,7 +17,9 @@
 
 package org.transitclock.db.structs;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -33,7 +35,12 @@ import org.transitclock.db.hibernate.HibernateUtils;
 /**
  * For storing static configuration information for a vehicle.
  *
+ * This class was originally for external vehicle configuration,
+ * but was later repurposed to GTFS vehicle extension as both have
+ * the same intention
+ *
  * @author SkiBu Smith
+ * @author shelondabrown
  *
  */
 @Entity @DynamicUpdate @Table(name="VehicleConfigs")
@@ -70,6 +77,21 @@ public class VehicleConfig {
 	// If true then a non-revenue vehicle.
 	@Column
 	private final Boolean nonPassengerVehicle;
+
+	@Column
+	private final Integer doorCount;
+
+	@Column
+	private final String doorWidth;
+
+	@Column
+	private final Integer lowFloor;
+
+	@Column
+	private final Integer bikeCapacity;
+
+	@Column
+	private final String wheelchairAccess;
 	
 	/********************** Member Functions **************************/
 
@@ -87,6 +109,38 @@ public class VehicleConfig {
 		capacity = null;
 		crushCapacity = null;
 		nonPassengerVehicle = null;
+		doorCount = null;
+		doorWidth = null;
+		lowFloor = null;
+		bikeCapacity = null;
+		wheelchairAccess = null;
+	}
+
+	/**
+	 * GTFS Vehicle extension constructor.
+	 */
+	public VehicleConfig(String vehicleId,
+											 String vehicleDescription,
+											 Integer seatedCapacity,
+											 Integer standingCapacity,
+											 Integer doorCount,
+											 String doorWidth,
+											 Integer lowFloor,
+											 Integer bikeCapacity,
+											 String wheelchairAccess) {
+		this.id = vehicleId;
+		this.type = 3; // TODO we assume bus here
+		this.description = vehicleDescription;
+		this.trackerId = null;
+		this.capacity = seatedCapacity;
+		this.crushCapacity = standingCapacity;
+		this.nonPassengerVehicle = null;
+		this.doorCount = doorCount;
+		this. doorWidth = doorWidth;
+		this.lowFloor = lowFloor;
+		this.bikeCapacity = bikeCapacity;
+		this.wheelchairAccess = wheelchairAccess;
+
 	}
 
 	/**
@@ -101,6 +155,11 @@ public class VehicleConfig {
 		capacity = null;
 		crushCapacity = null;
 		nonPassengerVehicle = null;
+		doorCount = null;
+		doorWidth = null;
+		lowFloor = null;
+		bikeCapacity = null;
+		wheelchairAccess = null;
 	}
 
 	/**
@@ -117,7 +176,17 @@ public class VehicleConfig {
 		Query query = session.createQuery(hql);
 		return query.list();
 	}
-	
+
+	public static Map<String, VehicleConfig> buildConfigMap(Session session) {
+		Map<String, VehicleConfig> map = new HashMap<>();
+		List<VehicleConfig> configs = getVehicleConfigs(session);
+		if (configs == null) return map;
+		for (VehicleConfig vc : configs) {
+			map.put(vc.getId(), vc);
+		}
+		return map;
+	}
+
 	@Override
 	public String toString() {
 		return "VehicleConfig [" 
@@ -192,5 +261,35 @@ public class VehicleConfig {
 	public Boolean isNonPassengerVehicle() {
 		return nonPassengerVehicle;
 	}
-	
+
+	/**
+	 * number of doors for exit purposes.
+	 * @return
+	 */
+	public Integer getDoorCount() { return doorCount; }
+
+	/**
+	 * Door width:  normal or wide.
+	 * @return
+	 */
+	public String getDoorWidth() { return doorWidth; }
+
+	/**
+	 * flag for lowFloor.
+	 * @return
+	 */
+	public Integer getLowFloor() { return lowFloor; }
+
+	/**
+	 * static configuration for bicycles.
+	 * @return
+	 */
+	public Integer getBikeCapacity() { return bikeCapacity; }
+
+	/**
+	 * type of configuration for wheelchair access.
+	 * @return
+	 */
+	public String getWheelchairAccess() { return wheelchairAccess; }
+
 }

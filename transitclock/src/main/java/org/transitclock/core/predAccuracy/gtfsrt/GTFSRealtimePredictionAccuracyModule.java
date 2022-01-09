@@ -29,6 +29,7 @@ import org.transitclock.applications.Core;
 import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.ClassConfigValue;
 import org.transitclock.config.StringConfigValue;
+import org.transitclock.core.Algorithm;
 import org.transitclock.core.blockAssigner.BlockAssigner;
 import org.transitclock.core.predAccuracy.PredAccuracyPrediction;
 import org.transitclock.core.predAccuracy.PredictionAccuracyModule;
@@ -359,9 +360,18 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 				isArrival,
 				false,
 				source,
-				null,
+				Algorithm.EXTERNAL.getValue(),
+				Algorithm.EXTERNAL.getValue(),
 				scheduledTime
 			);
+			/*
+						PredAccuracyPrediction pred = new PredAccuracyPrediction(
+					gtfsTrip.getRouteId(), direction, stopId,
+					tripId, update.getVehicle().getId(),
+					eventTime, eventReadTime, true, new Boolean(false),
+					"GTFS-rt", Algorithm.EXTERNAL.getValue(), Algorithm.EXTERNAL.getValue(), scheduledTime.toString());
+
+			 */
 			if(isArrival){
 				storeArrivalPrediction(pred);
 			} else{

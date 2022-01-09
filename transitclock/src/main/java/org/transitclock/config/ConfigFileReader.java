@@ -238,7 +238,7 @@ public class ConfigFileReader {
 	 * 
 	 * @param inputStream The properties file
 	 */
-	private static void readPropertiesConfigFile(InputStream inputStream) {
+	public static void readPropertiesConfigFile(InputStream inputStream) {
 		try {
 			// Read the properties config file
 			Properties properties = new Properties();
