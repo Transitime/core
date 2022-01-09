@@ -96,9 +96,9 @@
         </plugins>
         <extensions>
             <extension>
-                <groupId>com.github.platform-team</groupId>
+                <groupId>com.github.ottogroupsolutionprovider</groupId>
                 <artifactId>aws-maven</artifactId>
-                <version>6.0.0</version>
+                <version>6.0.1</version>
             </extension>
         </extensions>
     </build>
