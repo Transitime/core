@@ -116,7 +116,7 @@
     <div class="right-panel  position-relative">
 
         <div class="list-group toggle-chart ">
-            <button class="list-group-item list-group-item-action"   >On Time Performance By Route</button>
+            <button class="list-group-item list-group-item-action otp-header"   >On Time Performance By Route</button>
         </div>
         <div class="image-container full-width-image d-flex justify-content-center grey-bg">
             <div class="position-relative d-flex justify-content-centerd-flex justify-content-center align-items-center img-path">
@@ -125,17 +125,86 @@
             </div>
         </div>
         <div class="row toggle-chart d-flex justify-content-center ">
+            <div class="on-time-split-1">
             <div class=" chart-container">
                 <canvas id="chartCanvas" ></canvas>
             </div>
-        </div>
-        <div class="row toggle-chart">
+                </div>
+       <!-- <div class="row toggle-chart">
             <div class="col-sm-12 d-flex justify-content-center align-items-center">
                 <div id="chartTotal"></div>
             </div>
+        </div> -->
+        <div class="on-time-split-2">
+        <div class="row card toggle-chart otp-side-panel">
+
+
+            <h6 class="col-sm-12 align-items-center">
+                On Time Performance Paramters
+            </h6>
+            <div class="col-sm-12 d-flex align-items-center">
+                <label class="col-xs-4">Route:</label>
+                <div  class="col-xs-8" id="route-detail-param"></div>
+            </div>
+            <div class="col-sm-12 d-flex align-items-center">
+                <label class="col-xs-4">Date Range:</label>
+                <div  class="col-xs-8" id="dateRange-detail-param"></div>
+            </div>
+            <div class="col-sm-12 d-flex align-items-center">
+                <label class="col-xs-4">Time Range:</label>
+                <div  class="col-xs-8" id="timeRange-detail-param"></div>
+            </div>
+            <div class="col-sm-12 d-flex align-items-center">
+                <label class="col-xs-4">Stop Type:</label>
+                <div  class="col-xs-8" id="stop-detail-param"></div>
+            </div>
+            <div class="col-sm-12 d-flex align-items-center">
+                <label class="col-xs-4">Allowable Late:</label>
+                <div  class="col-xs-8" id="late-detail-param"></div>
+            </div>
+            <div class="col-sm-12 d-flex align-items-center">
+                <label class="col-xs-4">Allowable Early:</label>
+                <div  class="col-xs-8" id="early-detail-param"></div>
+            </div>
+
+
         </div>
 
-    </div>
+        <div class="row card toggle-chart otp-side-panel">
+            <h6 class="col-sm-12 align-items-center">
+                On Time Performance Results
+            </h6>
+            <div class="col-sm-12 align-items-center">
+                <label class="col-xs-4">Total Trips:</label>
+                <div  class="col-xs-8"></div>
+            </div>
+            <div class="col-sm-12 d-flex align-items-center">
+                <label class="col-xs-4">Total Trips: </label>
+                <div  class="col-xs-8"></div>
+            </div>
+            <div class="col-sm-12 d-flex align-items-center">
+                <label class="col-xs-4">Total Departures Earlier than 5 min: </label>
+                <div  class="col-xs-8"></div>
+            </div>
+            <div class="col-sm-12 d-flex align-items-center">
+                <label class="col-xs-4">Total Departures Later than 5 min: </label>
+                <div  class="col-xs-8"></div>
+            </div>
+            <div class="col-sm-12 d-flex align-items-center">
+                <label class="col-xs-4">Total Departures On Time: </label>
+                <div  class="col-xs-8"></div>
+            </div>
+
+
+        </div>
+        <div class="row toggle-chart justify-content-center">
+            <div class="col-xs-5 list-group ">
+                <button class="list-group-item list-group-item-action" >Export Data</button>
+            </div>
+        </div>
+        </div>
+        </div>
+        </div>
 </div>
 </div>
 

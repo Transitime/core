@@ -4,7 +4,7 @@ var canvas = $("#chartCanvas");
 $("#timePointsOnly").prop("checked", true);
 $(".toggle-chart").addClass("d-none");
 var pieChart = new Chart(canvas, {
-    type: 'pie',
+    type: 'doughnut',
     data: {
         datasets: [{
             data: [],
@@ -21,7 +21,7 @@ var pieChart = new Chart(canvas, {
                 render: function(args) {
                     return args.value + "\n(" + args.percentage + "%)";
                 },
-                fontSize: 24,
+                fontSize: 16,
                 fontColor: '#000000',
                 position: 'border',
                 precision: 1
@@ -107,6 +107,24 @@ function drawChart(response) {
     $("#chartTotal").html("Total count: " + values.reduce(function(total, num) {return total + num}));
 
     showSplit();
+    var innerRouteValue = '';
+    $("#route").find("option").each(function(index, eachRoute){
+        if($(eachRoute).attr('value') === request.r )
+        {
+            innerRouteValue =  $(eachRoute).html()
+        }
+    });
+
+    $("#route-detail-param").html( innerRouteValue )
+    $("#dateRange-detail-param").html(request.beginDate +' to ' +request.endDate)
+    $("#timeRange-detail-param").html(request.beginTime + ' to '+ request.endTime)
+    // $("#stop-detail-param").html(request.serviceType === '' ? 'All' : request.serviceType)
+    $("#stop-detail-param").html($("#timePointsOnly")[0].checked ? 'Time Points': 'All Points')
+    ;
+    $("#late-detail-param").html($("#late").val() + ' min')
+    $("#early-detail-param").html($("#early").val() + ' min')
+
+    $(".otp-header").html(innerRouteValue +" On Time Performance " )
 
 }
 

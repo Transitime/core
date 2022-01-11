@@ -334,11 +334,15 @@
 
         chart.draw(globalDataTable, chartOptions);
         $(".image-container ").addClass("d-none");
-        $(".toggle-chart").removeClass("d-none")
+        $(".toggle-chart").removeClass("d-none");
+        $("#submit").removeAttr("disabled")
+        $("#submit").html("Submit");
     }
 
     $( "#submit" ).click(function(e) {
         e.preventDefault();
+        $("#submit").attr("disabled","disabled");
+        $("#submit").html("Loading...");
 
         var beginTime = $("#beginTime").val() == "" ? "00:00" : $("#beginTime").val() ;
         var endTime = $("#endTime").val() == "" ? "23:59" : $("#endTime").val() ;

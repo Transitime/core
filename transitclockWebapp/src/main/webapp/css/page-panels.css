@@ -463,8 +463,8 @@ button.submit-button {
 
 .chart-container{
     position: relative;
-    height: 300px;
-    width: 60vw;
+    /*height: 300px;
+    width: 60vw;*/
 }
 
 .full-width-image{
@@ -810,6 +810,7 @@ td.ontime{
 }
 .on-time-split-2 .toggle-chart{
     margin-bottom: 20px;
+    margin-right: 10px;
     padding: 5px
 }
 
