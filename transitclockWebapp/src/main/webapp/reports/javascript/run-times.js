@@ -281,7 +281,7 @@
         var beginTime = $("#beginTime").val() == "" ? "00:00:00" : $("#beginTime").val() + ":00";
         var endTime = $("#endTime").val() == "" ? "23:59:59" : $("#endTime").val() + ":00";
 
-        var routeName = $("#route").val().trim() == "" ? "" : $("#route").val();
+        var routeName = ($("#route").val() || "").trim() == "" ? "" : $("#route").val();
 
         var tripPatternName = $("#tripPattern").val() == null ? "" : $("#tripPattern").val();
 
