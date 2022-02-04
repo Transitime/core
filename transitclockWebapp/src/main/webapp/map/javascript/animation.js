@@ -140,7 +140,7 @@ function avlAnimation(map, icon, clock) {
 			radius: 13,
 			weight: 0,
 			fillColor: '#1E3F78',
-			fillOpacity: 0.5,
+			fillOpacity: 1,
 		};
 
 		if (vehicleData.otp === "on-time")
@@ -318,7 +318,7 @@ function avlAnimation(map, icon, clock) {
 		elapsedTime = avl.timestamp;
 		
 		// update GUI if tick won't.
-		if (paused) {
+		// if (paused) {
 			sprite.setLatLng(avl);
 
 			sprite.headingArrow.options.angle = positions[currentIndex].heading;
@@ -331,8 +331,9 @@ function avlAnimation(map, icon, clock) {
 			sprite.background._updateStyle();
 
 			sprite.update();
+			console.log('elapsedTime .....',parseTime(elapsedTime));
 			clock.textContent = parseTime(elapsedTime);
-		}
+		// }
 	}
 	
 	function parseTime(x) {
