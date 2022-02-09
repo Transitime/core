@@ -130,7 +130,14 @@
 
     </div>
 </div>
+
+<div class="modal fade comparision-modal-popup" id="schedule-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog dialog-content modal-lg" role="document">
+    </div>
 </div>
+</div>
+
 <script>
     var request = {<%= WebUtils.getAjaxDataString(request) %>},
         contextPath = "<%= request.getContextPath() %>";

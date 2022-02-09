@@ -530,24 +530,21 @@ $("#playbackRew").on("click", function() {
 
 function scheduleAjax(tripId) {
 
-	if ($("#schedule-modal").length == 0) {
-		var containerHeight = $(".leaflet-popup-content").height();
+	//if ($("#schedule-modal").length == 0) {
+		// var containerHeight = $(".leaflet-popup-content").height();
 		var scheduleModal =
-			$("<div class='modal' id='schedule-modal' style='display: none;z-index: -1;width: 200%;height: " + containerHeight + "px;overflow: auto;background-color: rgb(255,255,255);'>"
-				+ "<div class='modal-content' style='z-index: -1;'>"
+			$("<div class='modal-content' >"
 					+ "<div class='modal-header'>"
-						+ "<button type='button' class='close-modal' style='float:right;'>&times;</button>"
+
 					+ "</div>"
 					+ "<div class='modal-body'>"
 					+ "</div>"
 					+ "<div class='modal-footer' style='text-align: center;'>"
-						+ "<button type='button' class='btn btn-default close-modal' style='margin: 10px auto;'>Close</button>"
-					+ "</div>"
-				+ "</div>"
-			+ "</div>");
+						+ "<button type='button' class='btn btn-default close-modal' data-bs-modal='modal'>Close</button>"
+					+ "</div></div>");
 
-		$(".leaflet-popup-content-wrapper").append(scheduleModal);
-	}
+		$("#schedule-modal .dialog-content").html("").html(scheduleModal);
+	//}
 
 	$.ajax({
 			// The page being requested
@@ -563,25 +560,31 @@ function scheduleAjax(tripId) {
 
 function dataReadCallback(jsonData) {
 	// Set the title now that have the trip name from the API
+	$("#schedule-modal").modal("show")
+
+
+
 	if ($('.modal-title').length > 0) {
-		$('.modal-title').html("<h4 class='modal-title'>Schedule for trip " + jsonData.schedule[0].trip[0].tripShortName + "</h4>");
+		$('.modal-title').html("<h5 class='modal-title'>Schedule for trip " + jsonData.schedule[0].trip[0].tripShortName + "</h5>");
 	} else {
-		($('.modal-header').append("<h4 class='modal-title'>Schedule for trip " + jsonData.schedule[0].trip[0].tripShortName + "</h4>"));
+		($('.modal-header').html("<h5 class='modal-title'>Schedule for trip " + jsonData.schedule[0].trip[0].tripShortName + "</h5><button type='button' class='close-modal' data-bs-modal='modal'>&times;</button>"));
 	}
 
 	// Only one schedule
 	var schedule = jsonData.schedule[0];
 
 	// Create title for schedule
-	$('.modal-body').html("<div id='scheduleTitle'>"
+	$('.modal-body').html("<h5 id='scheduleTitle'>"
 		+ "Direction: " + schedule.directionId
 		+ ", Service: " + schedule.serviceName
-		+ "</div>");
+		+ "</h5><div class='table-responsive'></div>");
+
+
 
 	if ($('#dataTable').length > 0) {
-		var table = $('.modal-body')[0].innerHTML($("<table id='dataTable'></table>"));
+		var table = $('.modal-body .table-responsive')[0].innerHTML($("<table id='dataTable'></table>"));
 	} else {
-		var table = $("<table id='dataTable'></table>").appendTo('.modal-body')[0];
+		var table = $("<table id='dataTable'></table>").appendTo('.modal-body .table-responsive')[0];
 	}
 
 	// Create the columns. First column is stop name. And then there
@@ -621,10 +624,8 @@ function dataReadCallback(jsonData) {
 		}
 	}
 
-	$("#schedule-modal")[0].style.display = "block";
-
-	$(".close-modal").click(function() {
-		$("#schedule-modal")[0].style.display = "none";
+	$(".close-modal").off('click').on('click',function() {
+		$("#schedule-modal").modal('hide')
 	})
 
 	$("#schedule-modal").hover(function() {
@@ -636,3 +637,4 @@ function dataReadCallback(jsonData) {
 }
 
 
+var myModal = new bootstrap.Modal(document.getElementById("schedule-modal"),{})
