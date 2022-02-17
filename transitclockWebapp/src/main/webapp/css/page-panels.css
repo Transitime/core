@@ -822,3 +822,7 @@ td.ontime{
 .otp-side-panel label{
     padding-right: 5px ;
 }
+
+.hide-routes{
+    display: none;
+}

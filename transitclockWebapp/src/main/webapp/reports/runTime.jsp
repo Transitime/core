@@ -54,7 +54,7 @@
 
             <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
 
-            <input type="hidden" name="allRoutesDisabled" value="no-auto-trigger-default" class="isAllRoutesDisabled">
+            <input type="hidden" name="allRoutesDisabled" value="no-auto-trigger-default" >
             <input type="hidden" name="date-range-picker" value="true" class="isDateRangePicker">
 
             <jsp:include page="params/routeAllOrSingleNew.jsp" />
