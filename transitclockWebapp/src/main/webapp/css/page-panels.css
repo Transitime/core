@@ -819,8 +819,12 @@ td.ontime{
     color:#1E3F78
 }
 
+.otp-side-panel > div{
+    padding: 20px;
+}
+
 .otp-side-panel label{
-    padding-right: 5px ;
+    padding-right: 5px;
 }
 
 .hide-routes{
