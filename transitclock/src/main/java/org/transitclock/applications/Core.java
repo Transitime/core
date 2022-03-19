@@ -534,6 +534,7 @@ public class Core {
 
 				if(TripDataHistoryCacheFactory.getInstance()!=null)
 				{
+					logger.info("queuing TripDataHistoryCache for startDate {}", startDate);
 					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.TripDataHistoryCacheFactory, futureInput);
 					pp.enqueue(ct);
 				} else {

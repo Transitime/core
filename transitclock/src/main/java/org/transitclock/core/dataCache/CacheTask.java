@@ -63,7 +63,11 @@ public class CacheTask implements ParallelTask {
         if (futureResults != null) {
             // block here until we have input ready
             logger.error("async retrieval of {} to {}", startDate, endDate);
-            results = (List<ArrivalDeparture>) futureResults.get();
+            try {
+                results = (List<ArrivalDeparture>) futureResults.get();
+            } catch (Throwable t) {
+                logger.error("futureResult retrieval failed with {}", t, t);
+            }
             if (results == null) {
                 logger.error("async retrieval of {} to {} failed!", startDate, endDate);
             } else {
