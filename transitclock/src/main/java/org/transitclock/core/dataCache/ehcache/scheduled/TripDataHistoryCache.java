@@ -195,6 +195,8 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 				// TODO this might be better done in the database.
 				if (GtfsData.routeNotFiltered(result.getRouteId())) {
 					putArrivalDeparture(map, result, dbConfig, nearestDay);
+				} else {
+					logger.error("filtered route " + result.getRouteId());
 				}
 				counter++;
 			}
@@ -202,13 +204,14 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 			logger.error("Exception in populateCacheFromDb {}", t, t);
 		}
 
-		logger.info("sorting Trip Data History Records of {}", map.size());
+		logger.error("sorting Trip Data History Records of {}", map.size());
 		for (TripEvents value : map.values()) {
 			value.sort();
 		}
-		logger.info("sorted Trip Data History Records of {}", map.size());
+		logger.error("sorted Trip Data History Records of {}", map.size());
 
 		synchronized (cache) {
+			logger.info("adding " + map.size() + " to cache");
 			cache.putAll(map);
 		}
 	}

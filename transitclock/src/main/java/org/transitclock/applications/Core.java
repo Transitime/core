@@ -536,6 +536,8 @@ public class Core {
 				{
 					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.TripDataHistoryCacheFactory, futureInput);
 					pp.enqueue(ct);
+				} else {
+					logger.error("TripDataHistoryCache instance is null.  Kalman filter predictions will not work");
 				}
 
 				// new: need stop arrivals history for kalman dwell time

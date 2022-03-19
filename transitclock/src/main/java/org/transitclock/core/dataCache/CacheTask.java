@@ -61,24 +61,30 @@ public class CacheTask implements ParallelTask {
         List<ArrivalDeparture> results = null;
         if (futureResults != null) {
             // block here until we have input ready
-            logger.info("async retrieval of {} to {}", startDate, endDate);
+            logger.error("async retrieval of {} to {}", startDate, endDate);
             results = (List<ArrivalDeparture>) futureResults.get();
             if (results == null) {
-                logger.info("async retrieval of {} to {} failed!", startDate, endDate);
+                logger.error("async retrieval of {} to {} failed!", startDate, endDate);
             } else {
-                logger.info("async retrieval of {} to {} finished with {} results", startDate, endDate, results.size());
+                logger.error("async retrieval of {} to {} finished with {} results", startDate, endDate, results.size());
             }
         }
         try {
             if (this.futureResults == null) {
                 session = HibernateUtils.getSession();
                 Criteria criteria = session.createCriteria(ArrivalDeparture.class);
+                logger.error("async / future results null, performing manual retrieval now");
                 results = criteria.add(Restrictions.between("time", startDate, endDate)).list();
             }
 
             logger.info("Populating {} cache for period {} to {}", type, startDate, endDate);
             switch (type) {
                 case TripDataHistoryCacheFactory:
+                    if (results != null) {
+                        logger.error("populating TripDataHistoryCache with " + results.size() + "records");
+                    } else {
+                        logger.error("populating TripDataHistoryCache with NuLl records");
+                    }
                     TripDataHistoryCacheFactory.getInstance().populateCacheFromDb(results);
                     break;
                 case StopArrivalDepartureCacheFactory:
