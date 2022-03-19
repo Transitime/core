@@ -180,6 +180,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	@Override
 	public void populateCacheFromDb(List<ArrivalDeparture> results)
 	{
+		logger.error("in populateCacheFromDb with results=" + results);
 		if (results == null || results.isEmpty()) return;
 
 		Map<TripKey, TripEvents> map = new HashMap<>(results.size());

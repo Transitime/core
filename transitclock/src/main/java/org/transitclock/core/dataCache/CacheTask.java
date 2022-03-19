@@ -57,6 +57,7 @@ public class CacheTask implements ParallelTask {
 
     @Override
     public void run() throws Exception {
+        logger.error("in run for task with results=" + futureResults);
         Session session = null;
         List<ArrivalDeparture> results = null;
         if (futureResults != null) {
@@ -108,9 +109,10 @@ public class CacheTask implements ParallelTask {
                 default:
                     throw new IllegalArgumentException("unknown type=" + type);
             }
-
+        } catch (Throwable t) {
+            logger.error("Error Populating {} cache for period {} to {}, {}", type, startDate, endDate, t, t);
         } finally {
-            logger.info("Finished Populating {} cache for period {} to {}", type, startDate, endDate);
+            logger.error("Finished Populating {} cache for period {} to {}", type, startDate, endDate);
             if (session != null) {
                 // this session is in a separate thread and needs to be reclaimed
                 // as it counts against the connection pool

@@ -189,7 +189,7 @@ public class ParallelProcessor {
             started = true;
             try {
                 task.run();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 logger.error("task {} exited with {}", taskNumber, e.toString(), e);
             } finally {
                 logger.debug("completing task {}", taskNumber);
