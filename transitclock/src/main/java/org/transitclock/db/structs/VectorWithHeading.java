@@ -74,6 +74,10 @@ public class VectorWithHeading extends Vector {
 		return Geo.headingOK(vehicleHeading, headingInDegrees, allowableDelta); 
 	}
 
+	public String logHeadingOK(float vehicleHeading, float allowableDelta) {
+		return Geo.formatHeadingOk(vehicleHeading, headingInDegrees, allowableDelta);
+	}
+
 	@Override
 	public String toString() {
 		return "VectorWithHeading [" +

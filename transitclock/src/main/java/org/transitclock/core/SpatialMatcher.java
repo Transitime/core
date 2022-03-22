@@ -16,7 +16,7 @@
  */
 package org.transitclock.core;
 
-import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -552,7 +552,7 @@ public class SpatialMatcher {
 		double distanceAlongSegment = 
 				segmentVector.matchDistanceAlongVector(avlReport.getLocation());
 		boolean atLayover = potentialMatchIndices.isLayover();
-	
+
 		// Make sure only searching starting from previous spatial match. 
 		// Otherwise would screw up determination of arrivals/departures etc.
 		// But only do this for blocks that have a schedule since no-schedule
@@ -620,8 +620,9 @@ public class SpatialMatcher {
 				distanceToSegment,
 				distanceAlongSegment);
 		logger.debug("For vehicleId={} examining match to see if it should " +
-				"be included in list of spatial matches. {}", 
-				avlReport.getVehicleId(), spatialMatch);
+				"be included in list of spatial matches. {}, {}",
+				avlReport.getVehicleId(), spatialMatch,
+						Geo.debugSpatialMatch(avlReport.getLocation(), potentialMatchIndices.getStopPath().getLocations()));
 		
 		// If the match is better than the previous one then it trending 
 		// towards a minimum so keep track of it if heading and distance are OK. 
@@ -631,29 +632,32 @@ public class SpatialMatcher {
 			boolean distanceOK =
 					distanceToSegment < getMaxAllowableDistanceFromSegment(
 							potentialMatchIndices, matchingType);
-			
+
 				
 			if (headingOK && distanceOK) {
 				// Heading and distance OK so store this as a potential match
 				previousPotentialSpatialMatch = spatialMatch;
-				
 				logger.debug("For vehicleId={} distanceToSegment={} is better " +
-						"and because heading and distance are " +
+						"and because headingOK={} and distance are " +
 						"OK keeping track of this spatial match as a potential " +
-						"best spatial match", 
+						"best spatial match {}",
 						avlReport.getVehicleId(), 
-						Geo.distanceFormat(distanceToSegment));				
+						Geo.distanceFormat(distanceToSegment),
+						segmentVector.logHeadingOK(avlReport.getHeading(), CoreConfig.getMaxHeadingOffsetFromSegment()),
+								Geo.debugSpatialMatch(avlReport.getLocation(), potentialMatchIndices.getStopPath().getLocations()));
 			} else {
 				// Heading or distance not OK so don't store as potential match.
 				// Simply log what is happening.
 				logger.debug("For vehicleId={} distanceToSegment={} is better " +
 						"than previousDistanceToSegment={} but headingOK={} " +
 						"distanceOK={} so not keeping track of this match " +
-						"as a potential best spatial match", 
+						"as a potential best spatial match {}",
 						avlReport.getVehicleId(), 
 						Geo.distanceFormat(distanceToSegment), 
 						Geo.distanceFormat(previousDistanceToSegment), 
-						headingOK, distanceOK);
+						headingOK, distanceOK,
+						segmentVector.logHeadingOK(avlReport.getHeading(), CoreConfig.getMaxHeadingOffsetFromSegment()),
+								Geo.debugSpatialMatch(avlReport.getLocation(), potentialMatchIndices.getStopPath().getLocations()));
 			}
 		} else {
 			// This match is not as good as previous one which means that 
