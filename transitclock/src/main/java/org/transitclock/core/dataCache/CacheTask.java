@@ -65,6 +65,7 @@ public class CacheTask implements ParallelTask {
             try {
                 results = (List<ArrivalDeparture>) futureResults.get();
             } catch (Throwable t) {
+                // this will catch any hydration issues in the future query
                 logger.error("futureResult retrieval failed with {}", t, t);
             }
             if (results == null) {
