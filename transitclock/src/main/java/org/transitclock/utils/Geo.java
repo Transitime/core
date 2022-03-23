@@ -17,6 +17,7 @@
 package org.transitclock.utils;
 
 import java.text.DecimalFormat;
+import java.util.List;
 
 import org.transitclock.db.structs.Location;
 import org.transitclock.db.structs.Vector;
@@ -626,5 +627,28 @@ public class Geo {
 		
 		// Return results
 		return delta < allowableDelta;
+	}
+
+	public static String formatHeadingOk(float vehicleHeading, float segmentheading,
+																			 float allowableDelta) {
+			return "vehicleHeading=" + vehicleHeading
+		+ " segmentHeading=" + segmentheading
+		+ " allowableDelta=" + allowableDelta
+		+ " headingOK=" + headingOK(vehicleHeading, segmentheading, allowableDelta);
+	}
+
+	public static String debugSpatialMatch(Location point, List<Location> segments) {
+		StringBuffer sb = new StringBuffer("http://developer.onebusaway.org/maps/debug.html?polyline=");
+		for (Location s : segments) {
+			sb.append(s.getLat())
+							.append("%2C")
+							.append(s.getLon())
+							.append("%20");
+		}
+		sb.append("&points=")
+						.append(point.getLat())
+						.append("%2C")
+						.append(point.getLon());
+		return sb.toString();
 	}
 }

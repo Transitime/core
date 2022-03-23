@@ -62,7 +62,12 @@ public class CacheTask implements ParallelTask {
         if (futureResults != null) {
             // block here until we have input ready
             logger.info("async retrieval of {} to {}", startDate, endDate);
-            results = (List<ArrivalDeparture>) futureResults.get();
+            try {
+                results = (List<ArrivalDeparture>) futureResults.get();
+            } catch (Throwable t) {
+                // this will catch any hydration issues in the future query
+                logger.error("futureResult retrieval failed with {}", t, t);
+            }
             if (results == null) {
                 logger.info("async retrieval of {} to {} failed!", startDate, endDate);
             } else {
@@ -102,7 +107,8 @@ public class CacheTask implements ParallelTask {
                 default:
                     throw new IllegalArgumentException("unknown type=" + type);
             }
-
+        } catch (Throwable t) {
+            logger.error("Error Populating {} cache for period {} to {}, {}", type, startDate, endDate, t, t);
         } finally {
             logger.info("Finished Populating {} cache for period {} to {}", type, startDate, endDate);
             if (session != null) {

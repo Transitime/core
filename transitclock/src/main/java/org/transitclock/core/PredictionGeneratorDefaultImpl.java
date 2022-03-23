@@ -289,7 +289,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 							predictionTime + path.getBreakTimeSec()*Time.MS_PER_SEC) {
 						expectedDepartureTime = 
 								predictionTime + path.getBreakTimeSec()*Time.MS_PER_SEC;
-						logger.info("For vehicleId={} adjusted departure time " 
+						logger.info("For vehicleId={} adjusted departure time "
 								+ "for wait stop stopId={} tripId={} blockId={} "
 								+ "to expectedDepartureTime={} to ensure "
 								+ "driver gets break of path.getBreakTimeSec()={}",
@@ -426,7 +426,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 		// For filtering out predictions that are before now, which can
 		// happen for schedule based predictions
 		long now = Core.getInstance().getSystemTime();
-				
+
 		//indices.incrementStopPath(predictionTime);
 		
 		Integer tripCounter = new Integer(vehicleState.getTripCounter());
