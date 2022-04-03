@@ -144,10 +144,14 @@ public class GtfsStop extends CsvBase {
 		// A waitStop is when driver is supposed to wait until the
 		// scheduled time before proceeding. Vehicle is expected
 		// to stay on path.
-		// wait_stop was experimental, timepoint has become the expected
-		// field so we use either her to indicate waitStop
-		waitStop = getOptionalBooleanValue(record, "wait_stop")
-						|| getOptionalBooleanValue(record, "timepoint");
+		Boolean waitStopAssigment;
+		waitStopAssigment = getOptionalBooleanValue(record, "wait_stop");
+		if (waitStopAssigment == null) {
+			// wait_stop was experimental, timepoint has become the expected
+			// field so we use either her to indicate waitStop
+			waitStopAssigment = getOptionalBooleanValue(record, "timepoint");
+		}
+		waitStop = waitStopAssigment;
 		
 		// hidden is also an extra column not defined in GTFS spec.
 		// Useful for supplemental files because allows one to hide
