@@ -143,7 +143,7 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 		timepointStop = getOptionalBooleanValue(record, "timepoint");
 		
 		delete = getOptionalBooleanValue(record, "delete");
-		isWaitStop = null;
+		isWaitStop = getOptionalBooleanValue(record, "timepoint");
 		
 		maxDistance = getOptionalDoubleValue(record, "max_distance");
 		
