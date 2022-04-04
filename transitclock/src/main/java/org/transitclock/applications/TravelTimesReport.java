@@ -27,6 +27,9 @@ public class TravelTimesReport {
     private static final Logger logger =
             LoggerFactory.getLogger(TravelTimesReport.class);
 
+    public static final String REPORT_CMD = "report";
+    public static final String SHOW_TRIP_CMD = "show_trip";
+
     public static final String AUTO_CORRECT = "repair";
 
     private static final String ZERO_STOP_PATH_LENGTH = "Zero Stop Path Length";
@@ -77,7 +80,38 @@ public class TravelTimesReport {
 
     }
 
-    public void run() {
+    public void printTravelTimesForTrip(String tripId) {
+        Session session = HibernateUtils.getSession(agencyId);
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            List<TravelTimesForTrip> travelTimesForTrips = loadTravelTimes(session);
+            for (TravelTimesForTrip travelTimesForTrip : travelTimesForTrips) {
+                if (travelTimesForTrip.getTripCreatedForId().equals(tripId)) {
+                    for (TravelTimesForStopPath travelTimesForStopPath : travelTimesForTrip.getTravelTimesForStopPaths()) {
+                        logger.info("{},{},{},{}",
+                                SHOW_TRIP_CMD,
+                                travelTimesForStopPath.getStopPathId(),
+                                travelTimesForStopPath.getHowSet(),
+                                travelTimesForStopPath.getTravelTimesMsec());
+                    }
+
+                }
+            }
+
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null)
+                tx.rollback();
+            logger.error("exception with transaction", e);
+        } finally {
+            session.close();
+            HibernateUtils.clearSessionFactory();
+        }
+
+    }
+
+    public void runReport() {
         Session session = HibernateUtils.getSession(agencyId);
         Transaction tx = null;
         try {
@@ -229,21 +263,22 @@ public class TravelTimesReport {
         return repair;
     }
 
+    // usage:  CMD {travelTimeRev | -1 } [ report_args ]
     public static void main(String[] args) {
         logger.info("Starting travel times report");
+
+        String cmd = REPORT_CMD;
 
         Integer startTravelTimesRev = null;
         Integer maxTravelTimesRev = null;
 
-
-        if (args.length == 1) {
-            startTravelTimesRev = Integer.parseInt(args[0]);
-            maxTravelTimesRev = Integer.parseInt(args[0]);
-            logger.info("running travel times on rev {}", startTravelTimesRev);
-        } else if (args.length == 2) {
-            startTravelTimesRev = Integer.parseInt(args[0]);
-            maxTravelTimesRev = Integer.parseInt(args[1]);
-            logger.info("running travel times on revs {} through {}", startTravelTimesRev, maxTravelTimesRev);
+        if (args.length == 3) {
+            cmd = args[0];
+            if (!args[1].equals("-1")) {
+                startTravelTimesRev = Integer.parseInt(args[1]);
+                maxTravelTimesRev = Integer.parseInt(args[1]);
+                logger.info("loading travel times for rev {}", startTravelTimesRev);
+            }
         }
 
         ConfigFileReader.processConfig();
@@ -255,7 +290,7 @@ public class TravelTimesReport {
             // run for last rev
             startTravelTimesRev = ActiveRevisions.get(agencyId).getTravelTimesRev();
             maxTravelTimesRev = ActiveRevisions.get(agencyId).getTravelTimesRev();
-            logger.info("running travel times on latest rev {}", startTravelTimesRev);
+            logger.info("liading travel times for latest rev {}", startTravelTimesRev);
         }
 
         int i = startTravelTimesRev;
@@ -265,7 +300,13 @@ public class TravelTimesReport {
             ttr.setAgencyId(agencyId);
             ttr.setConfigRev(configRev);
             ttr.setTravelTimesRev(i);
-            ttr.run();
+            if (REPORT_CMD.equals(cmd)) {
+                ttr.runReport();
+            } else if (SHOW_TRIP_CMD.equals(cmd)) {
+                ttr.printTravelTimesForTrip(args[2]);
+            } else {
+                logger.error("misunderstood command {}", cmd);
+            }
             i++;
         }
         logger.info("travel times report complete!");
