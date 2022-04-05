@@ -117,8 +117,9 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 				tripStartTime = trip.getStartTime();
 			}
 
-			tripKey = new TripKey(arrivalDeparture.getTripId(),
-					nearestDay,
+			tripKey = new TripKey(arrivalDeparture.getRouteId(),
+					arrivalDeparture.getDirectionId(),
+					nearestDay.getTime(),
 					tripStartTime);
 
 			IpcArrivalDeparture ipcad = null;
@@ -155,8 +156,9 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 			tripStartTime = trip.getStartTime();
 		}
 
-		TripKey tripKey = new TripKey(arrivalDeparture.getTripId(),
-						nearestDay,
+		TripKey tripKey = new TripKey(arrivalDeparture.getRouteId(),
+						arrivalDeparture.getDirectionId(),
+						nearestDay.getTime(),
 						tripStartTime);
 
 		IpcArrivalDeparture ipcad = new IpcArrivalDeparture(arrivalDeparture);
@@ -180,8 +182,11 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	@Override
 	public void populateCacheFromDb(List<ArrivalDeparture> results)
 	{
-		logger.error("in populateCacheFromDb with results=" + results);
-		if (results == null || results.isEmpty()) return;
+		if (results == null || results.isEmpty()) {
+			logger.info("in populateCacheFromDb with null");
+			return;
+		}
+		logger.info("in populateCacheFromDb with results entries" + results.size());
 
 		Map<TripKey, TripEvents> map = new HashMap<>(results.size());
 		Date nearestDay = DateUtils.truncate(new Date(results.get(0).getTime()), Calendar.DAY_OF_MONTH);
@@ -197,7 +202,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 				if (GtfsData.routeNotFiltered(result.getRouteId())) {
 					putArrivalDeparture(map, result, dbConfig, nearestDay);
 				} else {
-					logger.error("filtered route " + result.getRouteId());
+					logger.info("filtered route " + result.getRouteId());
 				}
 				counter++;
 			}
@@ -205,11 +210,11 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 			logger.error("Exception in populateCacheFromDb {}", t, t);
 		}
 
-		logger.error("sorting Trip Data History Records of {}", map.size());
+		logger.info("sorting Trip Data History Records of {}", map.size());
 		for (TripEvents value : map.values()) {
 			value.sort();
 		}
-		logger.error("sorted Trip Data History Records of {}", map.size());
+		logger.info("sorted Trip Data History Records of {}", map.size());
 
 		synchronized (cache) {
 			logger.info("adding " + map.size() + " to cache");

@@ -480,10 +480,12 @@ public class Core {
 		if(cacheReloadStartTimeStr.getValue().length()>0&&cacheReloadEndTimeStr.getValue().length()>0)
 		{
 			Criteria criteria = session.createCriteria(ArrivalDeparture.class);
+			logger.info("querying from {} to {}", cacheReloadStartTimeStr, cacheReloadEndTimeStr);
+
 			List<ArrivalDeparture> results = StopArrivalDepartureCache.createArrivalDeparturesCriteriaMultiDay(criteria,
 							new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()),
 							new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
-
+			logger.info("query complete  from {} to {}", cacheReloadStartTimeStr, cacheReloadEndTimeStr);
 			if(TripDataHistoryCacheFactory.getInstance()!=null)
 			{
 				logger.info("Populating TripDataHistoryCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());

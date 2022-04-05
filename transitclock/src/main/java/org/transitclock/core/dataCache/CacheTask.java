@@ -57,12 +57,12 @@ public class CacheTask implements ParallelTask {
 
     @Override
     public void run() throws Exception {
-        logger.error("in run for task with results=" + futureResults);
+        logger.info("in run for task with results=" + futureResults);
         Session session = null;
         List<ArrivalDeparture> results = null;
         if (futureResults != null) {
             // block here until we have input ready
-            logger.error("async retrieval of {} to {}", startDate, endDate);
+            logger.info("async retrieval of {} to {}", startDate, endDate);
             try {
                 results = (List<ArrivalDeparture>) futureResults.get();
             } catch (Throwable t) {
@@ -70,16 +70,16 @@ public class CacheTask implements ParallelTask {
                 logger.error("futureResult retrieval failed with {}", t, t);
             }
             if (results == null) {
-                logger.error("async retrieval of {} to {} failed!", startDate, endDate);
+                logger.info("async retrieval of {} to {} failed!", startDate, endDate);
             } else {
-                logger.error("async retrieval of {} to {} finished with {} results", startDate, endDate, results.size());
+                logger.info("async retrieval of {} to {} finished with {} results", startDate, endDate, results.size());
             }
         }
         try {
             if (this.futureResults == null) {
                 session = HibernateUtils.getSession();
                 Criteria criteria = session.createCriteria(ArrivalDeparture.class);
-                logger.error("async / future results null, performing manual retrieval now");
+                logger.info("async / future results null, performing manual retrieval now");
                 results = criteria.add(Restrictions.between("time", startDate, endDate)).list();
             }
 
@@ -87,9 +87,9 @@ public class CacheTask implements ParallelTask {
             switch (type) {
                 case TripDataHistoryCacheFactory:
                     if (results != null) {
-                        logger.error("populating TripDataHistoryCache with " + results.size() + "records");
+                        logger.info("populating TripDataHistoryCache with " + results.size() + "records");
                     } else {
-                        logger.error("populating TripDataHistoryCache with NuLl records");
+                        logger.info("populating TripDataHistoryCache with NuLl records");
                     }
                     TripDataHistoryCacheFactory.getInstance().populateCacheFromDb(results);
                     break;
@@ -117,7 +117,7 @@ public class CacheTask implements ParallelTask {
         } catch (Throwable t) {
             logger.error("Error Populating {} cache for period {} to {}, {}", type, startDate, endDate, t, t);
         } finally {
-            logger.error("Finished Populating {} cache for period {} to {}", type, startDate, endDate);
+            logger.info("Finished Populating {} cache for period {} to {}", type, startDate, endDate);
             if (session != null) {
                 // this session is in a separate thread and needs to be reclaimed
                 // as it counts against the connection pool

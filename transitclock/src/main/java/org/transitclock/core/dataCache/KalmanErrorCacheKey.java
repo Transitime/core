@@ -1,6 +1,7 @@
 package org.transitclock.core.dataCache;
 
 import org.transitclock.core.Indices;
+import org.transitclock.db.structs.Trip;
 
 /**
  * @author Sean Og Crudden
@@ -8,67 +9,92 @@ import org.transitclock.core.Indices;
  */
 public class KalmanErrorCacheKey implements java.io.Serializable {
 	
-	
-	public String getTripId() {
-		return tripId;
-	}
 
-	public void setTripId(String tripId) {
-		this.tripId = tripId;
-	}
-
-	public void setStopPathIndex(Integer stopPathIndex) {
-		this.stopPathIndex = stopPathIndex;
-	}
-
-	private String tripId;
-	private Integer stopPathIndex;
+	private String routeId;
+	private String directionId;
+	private Integer startTimeSecondsIntoDay;
+	private String originStopId;
+	private String destinationStopId;
 	
 	// The vehicleId is only used for debug purposed we know in log which vehicle set the error value
-	private String vehiceId;
-	
-		
-	public String getVehiceId() {
-		return vehiceId;
+	private String vehicleId;
+
+	public String getRouteId() {
+		return routeId;
 	}
 
-	public void setVehiceId(String vehiceId) {
-		this.vehiceId = vehiceId;
+	public String getDirectionId() {
+		return directionId;
+	}
+
+	public Integer getStartTimeSecondsIntoDay() {
+		return startTimeSecondsIntoDay;
+	}
+
+	public String getOriginStopId() {
+		return originStopId;
+	}
+
+	public String getDestinationStopId() {
+		return destinationStopId;
+	}
+
+	public String getVehicleId() {
+		return vehicleId;
+	}
+
+	public void setVehicleId(String vehicleId) {
+		this.vehicleId = vehicleId;
 	}
 
 	/**
 	 * Needs to be serializable to add to cache
 	 */
-	private static final long serialVersionUID = 5029823633051153716L;
+	private static final long serialVersionUID = 5029823633051153717L;
 	
 
 	public KalmanErrorCacheKey(Indices indices, String vehicleId) {
 		super();
-		
-		this.tripId=indices.getBlock().getTrip(indices.getTripIndex()).getId();
-		this.stopPathIndex=indices.getStopPathIndex();		
-		this.vehiceId=vehicleId;
+
+		Trip trip = indices.getBlock().getTrip(indices.getTripIndex());
+		this.routeId = trip.getRouteId();
+		this.directionId = trip.getDirectionId();
+		this.startTimeSecondsIntoDay = trip.getStartTime();
+		this.originStopId = trip.getTripPattern().getStopIds().get(0);
+		this.destinationStopId = trip.getLastStopId();
+		this.vehicleId =vehicleId;
 		
 	}
 	public KalmanErrorCacheKey(Indices indices) {
 		super();
-		
-		this.tripId=indices.getBlock().getTrip(indices.getTripIndex()).getId();
-		this.stopPathIndex=indices.getStopPathIndex();		
-		
-		
+
+		Trip trip = indices.getBlock().getTrip(indices.getTripIndex());
+		this.routeId = trip.getRouteId();
+		this.directionId = trip.getDirectionId();
+		this.startTimeSecondsIntoDay = trip.getStartTime();
+		this.originStopId = trip.getTripPattern().getStopIds().get(0);
+		this.destinationStopId = trip.getLastStopId();
+
 	}
 	@Override
 	public String toString() {
-		return "KalmanErrorCacheKey [tripId=" + tripId + ", stopPathIndex=" + stopPathIndex + "]";
+		return "KalmanErrorCacheKey [routeId=" + routeId
+						+ ", directionId=" + directionId
+						+ ", startTime=" + startTimeSecondsIntoDay
+						+ ", originStopId=" + originStopId
+						+ ", destinationStopId=" + destinationStopId
+						+ "]";
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((stopPathIndex == null) ? 0 : stopPathIndex.hashCode());
-		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
+		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
+		result = prime * result + ((directionId == null) ? 0 : directionId.hashCode());
+		result = prime * result + ((originStopId == null) ? 0 : originStopId.hashCode());
+		result = prime * result + ((destinationStopId == null) ? 0 : destinationStopId.hashCode());
+		result = prime * result + ((startTimeSecondsIntoDay == null) ? 0 : startTimeSecondsIntoDay.hashCode());
 		return result;
 	}
 
@@ -81,40 +107,47 @@ public class KalmanErrorCacheKey implements java.io.Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		KalmanErrorCacheKey other = (KalmanErrorCacheKey) obj;
-		if (stopPathIndex == null) {
-			if (other.stopPathIndex != null)
+		if (routeId == null) {
+			if (other.routeId != null)
 				return false;
-		} else if (!stopPathIndex.equals(other.stopPathIndex))
+		} else if (!routeId.equals(other.routeId))
 			return false;
-		if (tripId == null) {
-			if (other.tripId != null)
+		if (directionId == null) {
+			if (other.directionId != null)
 				return false;
-		} else if (!tripId.equals(other.tripId))
+		} else if (!directionId.equals(other.directionId))
 			return false;
+		if (startTimeSecondsIntoDay == null) {
+			if (other.startTimeSecondsIntoDay != null)
+				return false;
+		} else if (!startTimeSecondsIntoDay.equals(other.startTimeSecondsIntoDay))
+			return false;
+		if (originStopId == null) {
+			if (other.originStopId != null)
+				return false;
+		} else if (!originStopId.equals(other.originStopId))
+			return false;
+		if (destinationStopId == null) {
+			if (other.destinationStopId != null)
+				return false;
+		} else if (!destinationStopId.equals(other.destinationStopId))
+			return false;
+
 		return true;
 	}
 
-	public KalmanErrorCacheKey(String tripId, Integer stopPathIndex) {
+	public KalmanErrorCacheKey(String routeId, String directionId,
+														 Integer startTimeSecondsIntoDay, String originStopId,
+														 String destinationStopId) {
 		super();
 		
-		this.tripId = tripId;
-		this.stopPathIndex = stopPathIndex;
+		this.routeId = routeId;
+		this.directionId = directionId;
+		this.startTimeSecondsIntoDay = startTimeSecondsIntoDay;
+		this.originStopId = originStopId;
+		this.destinationStopId = destinationStopId;
 	}
 
-	
-	/**
-	 * @return the stopPathIndex
-	 */
-	public int getStopPathIndex() {
-		return stopPathIndex;
-	}
-
-	/**
-	 * @param stopPathIndex the stopPathIndex to set
-	 */
-	public void setStopPathIndex(int stopPathIndex) {
-		this.stopPathIndex = stopPathIndex;
-	}
 	
 }
 

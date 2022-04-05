@@ -1,98 +1,65 @@
 package org.transitclock.core.dataCache;
 
 import java.util.Date;
+import java.util.Objects;
+
 /**
- * @author Sean Og Crudden
- * 
+ * index based on the instance of a trip via route, direction, and startTime
  */
 public class TripKey implements java.io.Serializable {
-	/**
-	 * Needs to be serializable to add to cache
-	 */
-	private static final long serialVersionUID = 5029823633051153715L;
-	private String tripId;
-	
-	private Date tripStartDate;
-	private Integer startTime;
 
-	
-	/**
-	 * @return the tripId
-	 */
-	public String getTripId() {
-		return tripId;
-	}
-	
-	/**
-	 * @return the tripStartDate
-	 */
-	public Date getTripStartDate() {
-		return tripStartDate;
-	}
-	/**
-	 * @return the startTime
-	 */
-	public Integer getStartTime() {
-		return startTime;
-	}
-	public TripKey(String tripId,  Date tripStartDate,
-			Integer startTime) {
-		super();
-		this.tripId = tripId;	
-		
-		this.tripStartDate = tripStartDate;
-		this.startTime = startTime;
-	}
+  private static final long serialVersionUID = 1;
+  private String routeId;
+  private String directionId;
+  private Long tripStartTime;
+  private Integer startTimeSecondsIntoDay;
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((startTime == null) ? 0 : startTime.hashCode());
-		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
-		result = prime * result + ((tripStartDate == null) ? 0 : tripStartDate.hashCode());
-		return result;
-	}
+  public TripKey(String routeId,
+                 String directionId,
+                 Long tripStartTime,
+                 Integer startTimeSecondsIntoDay) {
+    this.routeId = routeId;
+    this.directionId = directionId;
+    this.tripStartTime = tripStartTime;
+    this.startTimeSecondsIntoDay = startTimeSecondsIntoDay;
+  }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		TripKey other = (TripKey) obj;
-		if (startTime == null) {
-			if (other.startTime != null)
-				return false;
-		} else if (!startTime.equals(other.startTime))
-			return false;
-		if (tripId == null) {
-			if (other.tripId != null)
-				return false;
-		} else if (!tripId.equals(other.tripId))
-			return false;
-		if (tripStartDate == null) {
-			if (other.tripStartDate != null)
-				return false;
-		} else if (!tripStartDate.equals(other.tripStartDate))
-			return false;
-		return true;
-	}
+  public String getRouteId() {
+    return routeId;
+  }
 
-	@Override
-	public String toString() {
-		return "TripKey [tripId=" + tripId + ", tripStartDate=" + tripStartDate + ", startTime=" + startTime + "]";
-	}
+  public String getDirectionId() {
+    return directionId;
+  }
 
-	public void setStartTime(Integer time) {
-		// TODO Auto-generated method stub
-		this.startTime=time;
-		
-	}
+  public Integer getStartTimeSecondsIntoDay() {
+    return startTimeSecondsIntoDay;
+  }
 
+  public Long getTripStartTime() {
+    return tripStartTime;
+  }
 
+  @Override
+  public int hashCode() {
+    return Objects.hash(routeId, directionId, startTimeSecondsIntoDay, tripStartTime);
+  }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return true;
+    TripKey that = (TripKey) o;
+    return Objects.equals(routeId, that.routeId)
+            && Objects.equals(directionId, that.directionId)
+            && Objects.equals(startTimeSecondsIntoDay, that.startTimeSecondsIntoDay)
+            && Objects.equals(tripStartTime, that.tripStartTime);
+  }
+
+  @Override
+  public String toString() {
+    return "TripKey [routeId=" + routeId + ", directionId=" + directionId + ", startTimeSecondsIntoDay=" + startTimeSecondsIntoDay
+            + ", tripStartTime=" + new Date(tripStartTime) + "]";
+  }
 
 }

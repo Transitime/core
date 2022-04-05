@@ -250,8 +250,8 @@ public class HistoricalPredictionLibrary {
 	}
 
     public static List<TravelTimeDetails> getHistoricalTravelTimes(TripDataHistoryCacheInterface cache,
-																																	 String tripId,
-																																	 String direction,
+																																	 String routeId,
+																																	 String directionId,
 																																	 int stopPathIndex,
 																																	 Date startDate,
 																																	 Integer startTime,
@@ -270,7 +270,7 @@ public class HistoricalPredictionLibrary {
 
 			Date nearestDay = DateUtils.truncate(DateUtils.addDays(startDate, (i + 1) * -1), Calendar.DAY_OF_MONTH);
 
-			TripKey tripKey = new TripKey(tripId, nearestDay, startTime);
+			TripKey tripKey = new TripKey(routeId, directionId, nearestDay.getTime(), startTime);
 
 			results = cache.getTripHistory(tripKey);
 
