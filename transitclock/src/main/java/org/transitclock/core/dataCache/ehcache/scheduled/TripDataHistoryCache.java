@@ -24,6 +24,8 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -77,7 +79,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	public List<IpcArrivalDeparture> getTripHistory(TripKey tripKey) {
 		TripEvents result = null;
 		synchronized (cache) {
-			// we need to protected the deserializer from modifications
+			// we need to protect the deserializer from modifications
 			result = cache.get(tripKey);
 		}
 
@@ -149,11 +151,13 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 																		 DbConfig dbConfig, Date nearestDay)
 		throws Exception {
 
-		Trip trip = dbConfig.getTrip(arrivalDeparture.getTripId());
+		Trip trip = dbConfig.getTripFromCurrentOrPreviousConfigRev(arrivalDeparture.getTripId());
 		Integer tripStartTime = null;
 
 		if (trip != null) {
 			tripStartTime = trip.getStartTime();
+		} else {
+			logger.info("missing trip {}, invalid A/D", arrivalDeparture.getTripId());
 		}
 
 		TripKey tripKey = new TripKey(arrivalDeparture.getRouteId(),
@@ -190,6 +194,8 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 
 		Map<TripKey, TripEvents> map = new HashMap<>(results.size());
 		Date nearestDay = DateUtils.truncate(new Date(results.get(0).getTime()), Calendar.DAY_OF_MONTH);
+		Date furthestDay = DateUtils.truncate(new Date(results.get(results.size()-1).getTime()), Calendar.DAY_OF_MONTH);
+		boolean cacheNearestDay = (nearestDay.equals(furthestDay));
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
 
 		try {
@@ -200,7 +206,12 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 				}
 				// TODO this might be better done in the database.
 				if (GtfsData.routeNotFiltered(result.getRouteId())) {
-					putArrivalDeparture(map, result, dbConfig, nearestDay);
+					if (cacheNearestDay) {
+						putArrivalDeparture(map, result, dbConfig, nearestDay);
+					} else {
+						putArrivalDeparture(map, result, dbConfig,
+										DateUtils.truncate(new Date(result.getTime()), Calendar.DAY_OF_MONTH));
+					}
 				} else {
 					logger.info("filtered route " + result.getRouteId());
 				}
@@ -221,7 +232,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 			cache.putAll(map);
 		}
 	}
-		
+
 	/* (non-Javadoc)
 	 * @see org.transitclock.core.dataCache.ehcache.test#findPreviousArrivalEvent(java.util.List, org.transitclock.db.structs.ArrivalDeparture)
 	 */

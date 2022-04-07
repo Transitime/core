@@ -261,14 +261,14 @@ public class HistoricalPredictionLibrary {
 		List<TravelTimeDetails> times = new ArrayList<TravelTimeDetails>();
 		List<IpcArrivalDeparture> results = null;
 		int num_found = 0;
-		/*
-		 * TODO This could be smarter about the dates it looks at by looking at
-		 * which services use this trip and only 1ook on day service is
-		 * running
-		 */
+
 		for (int i = 0; i < num_days_look_back && num_found < num_days; i++) {
 
 			Date nearestDay = DateUtils.truncate(DateUtils.addDays(startDate, (i + 1) * -1), Calendar.DAY_OF_MONTH);
+			boolean isHoliday = false;
+			if (!calendarMatches(startDate, nearestDay, isHoliday)) {
+				continue;
+			}
 
 			TripKey tripKey = new TripKey(routeId, directionId, nearestDay.getTime(), startTime);
 
@@ -313,6 +313,10 @@ public class HistoricalPredictionLibrary {
 		}
 		return times;
     }
+
+	private static boolean calendarMatches(Date startDate, Date nearestDay, boolean isHoliday) {
+		return DateUtils.getTypeForDate(startDate).equals(DateUtils.getTypeForDate(nearestDay, isHoliday));
+	}
 
 	public static Long getLastHeadway(String referenceStopId, String routeId, Date referenceTime) {
 		StopArrivalDepartureCacheKey currentStopKey = new StopArrivalDepartureCacheKey(referenceStopId,

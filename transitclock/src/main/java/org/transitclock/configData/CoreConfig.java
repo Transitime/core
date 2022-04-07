@@ -49,6 +49,14 @@ public class CoreConfig {
 	private static IntegerConfigValue daysPopulateHistoricalCache =
 			new IntegerConfigValue("transitclock.cache.core.daysPopulateHistoricalCache", 0,
 					"How many days data to read in to populate historical cache on start up.");
+
+	public static int getAdditionalWeekendsPopulateHistoricalCache() {
+		return additionalWeekendsPopulateHistoricalCache.getValue();
+	}
+	private static IntegerConfigValue additionalWeekendsPopulateHistoricalCache =
+					new IntegerConfigValue("transitclock.cache.core.additionalWeekendsPopulateHistoricalCache", 0,
+									"How many additional weekends of data to read in to populate historical cache on start up.");
+
 	/**
 	 * When in playback mode or some other situations don't want to store
 	 * generated data such as arrivals/departures, events, and such to the
