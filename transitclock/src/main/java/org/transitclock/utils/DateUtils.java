@@ -19,6 +19,11 @@ public class DateUtils {
   // similar ot ServiceType, but needs to consider holidays
   public enum CalendarType {
     WEEKDAY, SATURDAY, SUNDAY, HOLIDAY;
+
+    public boolean isWeekend() {
+      return this.equals(CalendarType.SATURDAY)
+              || this.equals(CalendarType.SUNDAY);
+    }
   }
 
   /**

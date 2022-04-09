@@ -114,45 +114,50 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 	}
 
 	@Override
-	public List<IpcArrivalDeparture> getTripArrivalDepartures(String tripId, LocalDate localDate, Integer starttime)
+	public List<IpcArrivalDeparture> getTripArrivalDepartures(String routeId, String directionId,
+																														LocalDate localDate, Integer secondsIntoDay)
 			throws RemoteException {
 
 		try {
 			List<IpcArrivalDeparture> result = new ArrayList<IpcArrivalDeparture>();
 
-			if(tripId!=null && localDate!=null && starttime!=null){
+			// case I:  we have route/direction/secondsIntoDay/startTime
+			if(routeId!=null && directionId!=null && localDate!=null && secondsIntoDay!=null){
 
 				Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-				TripKey tripKey = new TripKey(tripId, date, starttime);
+				TripKey tripKey = new TripKey(routeId, directionId, date.getTime(), secondsIntoDay);
 
 				result = TripDataHistoryCacheFactory.getInstance().getTripHistory(tripKey);
 			}
-			else if(tripId!=null && localDate!=null && starttime==null)
+			// case II:  we have route/direction/secondsIntoDay
+			else if(result!=null && directionId!=null && localDate!=null && secondsIntoDay==null)
 			{
 				Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 				for(TripKey key:TripDataHistoryCacheFactory.getInstance().getKeys())
 				{
-					if(key.getTripId().equals(tripId) && date.compareTo(key.getTripStartDate())==0)
+					if(key.getRouteId().equals(routeId) && date.getTime() == key.getTripStartTime())
 					{
 						result.addAll(TripDataHistoryCacheFactory.getInstance().getTripHistory(key));
 					}
 				}
-			}else if(tripId!=null && localDate==null && starttime==null)
+			// case III:  we have route/direction
+			}else if(routeId!=null && directionId !=null && localDate==null && secondsIntoDay==null)
 			{
 				for(TripKey key:TripDataHistoryCacheFactory.getInstance().getKeys())
 				{
-					if(key.getTripId().equals(tripId))
+					if(key.getRouteId().equals(routeId) && key.getDirectionId().equals(directionId))
 					{
 						result.addAll(TripDataHistoryCacheFactory.getInstance().getTripHistory(key));
 					}
 				}
 			}
-			else if(tripId==null && localDate!=null && starttime==null)
+			// case IV: we have tripStartTime
+			else if(routeId==null && directionId==null && localDate!=null && secondsIntoDay==null)
 			{
 				Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 				for(TripKey key:TripDataHistoryCacheFactory.getInstance().getKeys())
 				{
-					if(date.compareTo(key.getTripStartDate())==0)
+					if(date.getTime() == key.getTripStartTime())
 					{
 						result.addAll(TripDataHistoryCacheFactory.getInstance().getTripHistory(key));
 					}
@@ -183,8 +188,9 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 	}
 
 	@Override
-	public Double getKalmanErrorValue(String tripId, Integer stopPathIndex) throws RemoteException {
-		KalmanErrorCacheKey key=new KalmanErrorCacheKey(tripId, stopPathIndex);
+	public Double getKalmanErrorValue(String routeId, String directionId, Integer startTimeSecondsIntoDay,
+																		String originStopId, String destinationStopId) throws RemoteException {
+		KalmanErrorCacheKey key=new KalmanErrorCacheKey(routeId, directionId, startTimeSecondsIntoDay, originStopId, destinationStopId);
 		Double result = ErrorCacheFactory.getInstance().getErrorValue(key).getError();
 		return result;
 	}

@@ -55,6 +55,7 @@ import org.transitclock.guice.modules.ReportingModule;
 import org.transitclock.ipc.servers.*;
 import org.transitclock.modules.Module;
 import org.transitclock.monitoring.PidFile;
+import org.transitclock.utils.DateRange;
 import org.transitclock.utils.DateUtils;
 import org.transitclock.utils.SettableSystemTime;
 import org.transitclock.utils.SystemCurrentTime;
@@ -65,6 +66,7 @@ import org.transitclock.utils.threading.NamedThreadFactory;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -116,12 +118,14 @@ public class Core {
 	private static StringConfigValue cacheReloadStartTimeStr =
 			new StringConfigValue("transitclock.core.cacheReloadStartTimeStr",
 					"",
-					"Date and time of when to start reading arrivaldepartures to inform caches.");
+					"Date and time of when to start reading arrivaldepartures to inform caches.  " +
+									"Can be comma delimited to include multiple ranges.");
 
 	private static StringConfigValue cacheReloadEndTimeStr =
 			new StringConfigValue("transitclock.core.cacheReloadEndTimeStr",
 					"",
-					"Date and time of when to end reading arrivaldepartures to inform caches.");
+					"Date and time of when to end reading arrivaldepartures to inform caches.  " +
+									"Can be comma delimited to include multiple ranges");
 	private static final Logger logger =
 			LoggerFactory.getLogger(Core.class);
 
@@ -473,32 +477,32 @@ public class Core {
 	
 	static private void populateCaches() throws Exception
 	{
+		boolean cacheLoaded = false;
 		Session session = HibernateUtils.getSession();
-		Date endDate=new Date(Time.getStartOfDay(Calendar.getInstance().getTime()));
-		endDate = DateUtils.addDays(endDate, 1); // go to end of day
 
-		if(cacheReloadStartTimeStr.getValue().length()>0&&cacheReloadEndTimeStr.getValue().length()>0)
-		{
+		List<DateRange> cacheReloadRanges = DateRange.parseFromCSV(cacheReloadStartTimeStr.getValue(), cacheReloadEndTimeStr.getValue());
+		// CASE I:  a configured range of dates to load
+		for (DateRange cacheReloadRange : cacheReloadRanges) {
+			cacheLoaded = true;
 			Criteria criteria = session.createCriteria(ArrivalDeparture.class);
-			List<ArrivalDeparture> results = StopArrivalDepartureCache.createArrivalDeparturesCriteriaMultiDay(criteria,
-							new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()),
-							new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
+			logger.info("querying from {} to {}", cacheReloadRange.getStart(), cacheReloadRange.getEnd());
 
-			if(TripDataHistoryCacheFactory.getInstance()!=null)
-			{
-				logger.info("Populating TripDataHistoryCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
+			List<ArrivalDeparture> results = StopArrivalDepartureCache.createArrivalDeparturesCriteriaMultiDay(criteria,
+							cacheReloadRange.getStart(),
+							cacheReloadRange.getEnd());
+			logger.info("query complete  from {} to {}", cacheReloadRange.getStart(), cacheReloadRange.getEnd());
+			if (TripDataHistoryCacheFactory.getInstance() != null) {
+				logger.info("Populating TripDataHistoryCache cache for period {} to {}", cacheReloadRange.getStart(), cacheReloadRange.getEnd());
 				TripDataHistoryCacheFactory.getInstance().populateCacheFromDb(results);
 			}
-			
-			if(FrequencyBasedHistoricalAverageCache.getInstance()!=null)
-			{
-				logger.info("Populating FrequencyBasedHistoricalAverageCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
+
+			if (FrequencyBasedHistoricalAverageCache.getInstance() != null) {
+				logger.info("Populating FrequencyBasedHistoricalAverageCache cache for period {} to {}", cacheReloadRange.getStart(), cacheReloadRange.getEnd());
 				FrequencyBasedHistoricalAverageCache.getInstance().populateCacheFromDb(results);
 			}
-			
-			if(StopArrivalDepartureCacheFactory.getInstance()!=null)
-			{
-				logger.info("Populating StopArrivalDepartureCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
+
+			if (StopArrivalDepartureCacheFactory.getInstance() != null) {
+				logger.info("Populating StopArrivalDepartureCache cache for period {} to {}", cacheReloadRange.getStart(), cacheReloadRange.getEnd());
 				StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(results);
 			}
 
@@ -512,7 +516,10 @@ public class Core {
 			if (ApcModule.getInstance() != null) {
 				ApcModule.getInstance().populateFromDb(results);
 			}
-		}else
+		}
+
+		// CASE II:  a configured number of days back to load in parallel (plus weekends)
+		if (!cacheLoaded)
 		{
 			ParallelProcessor pp = new ParallelProcessor();
 			pp.startup();
@@ -525,17 +532,16 @@ public class Core {
 			ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads,
 							cacheLoaderThreadFactory);
 
-			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
+			for(DateRange cacheRange : generateCacheLoadRange())
 			{
-				Date startDate=DateUtils.addDays(endDate, -1);
-				logger.info("ParallelProcessor generating cache tasks for  {} to {}", startDate, endDate);
+				logger.info("ParallelProcessor generating cache tasks for  {} to {}", cacheRange.getStart(), cacheRange.getEnd());
 
-				ScheduledFuture<?> futureInput = executor.schedule(pp.asyncQuery(startDate, endDate), 1, TimeUnit.SECONDS);
+				ScheduledFuture<?> futureInput = executor.schedule(pp.asyncQuery(cacheRange.getStart(), cacheRange.getEnd()), 1, TimeUnit.SECONDS);
 
 				if(TripDataHistoryCacheFactory.getInstance()!=null)
 				{
-					logger.info("queuing TripDataHistoryCache for startDate {}", startDate);
-					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.TripDataHistoryCacheFactory, futureInput);
+					logger.info("queuing TripDataHistoryCache for startDate {}", cacheRange.getStart());
+					CacheTask ct = new CacheTask(cacheRange.getStart(), cacheRange.getEnd(), CacheTask.Type.TripDataHistoryCacheFactory, futureInput);
 					pp.enqueue(ct);
 				} else {
 					logger.error("TripDataHistoryCache instance is null.  Kalman filter predictions will not work");
@@ -544,40 +550,39 @@ public class Core {
 				// new: need stop arrivals history for kalman dwell time
 				if(StopArrivalDepartureCacheFactory.getInstance()!=null)
 				{
-					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.StopArrivalDepartureCacheFactory, futureInput);
+					CacheTask ct = new CacheTask(cacheRange.getStart(), cacheRange.getEnd(), CacheTask.Type.StopArrivalDepartureCacheFactory, futureInput);
 					pp.enqueue(ct);
 				}
 
 				if(FrequencyBasedHistoricalAverageCache.getInstance()!=null)
 				{
-					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.FrequencyBasedHistoricalAverageCache, futureInput);
+					CacheTask ct = new CacheTask(cacheRange.getStart(), cacheRange.getEnd(), CacheTask.Type.FrequencyBasedHistoricalAverageCache, futureInput);
 					pp.enqueue(ct);
 				}
 
 				if(ScheduleBasedHistoricalAverageCache.getInstance()!=null)
 				{
-					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.ScheduleBasedHistoricalAverageCache, futureInput);
+					CacheTask ct = new CacheTask(cacheRange.getStart(), cacheRange.getEnd(), CacheTask.Type.ScheduleBasedHistoricalAverageCache, futureInput);
 					pp.enqueue(ct);
 				}
 
 				if(DwellTimeModelCacheFactory.getInstance() != null) {
-					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.DwellTimeModelCacheFactory, futureInput);
+					CacheTask ct = new CacheTask(cacheRange.getStart(), cacheRange.getEnd(), CacheTask.Type.DwellTimeModelCacheFactory, futureInput);
 					pp.enqueue(ct);
 				}
 
-				if (i < 5 && TrafficManager.getInstance() != null && TrafficManager.getInstance().isEnabled()) {
-					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.TrafficDataHistoryCache, futureInput);
+				if (TrafficManager.getInstance() != null) {
+					CacheTask ct = new CacheTask(cacheRange.getStart(), cacheRange.getEnd(), CacheTask.Type.TrafficDataHistoryCache, futureInput);
 					pp.enqueue(ct);
 				}
 				if (ApcModule.getInstance() != null) {
-					logger.info("queuing apc for startDate {}", startDate);
-					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.ApcCache, futureInput);
+					logger.info("queuing apc for startDate {}", cacheRange.getStart());
+					CacheTask ct = new CacheTask(cacheRange.getStart(), cacheRange.getEnd(), CacheTask.Type.ApcCache, futureInput);
 					pp.enqueue(ct);
 				} else {
-					logger.info("skipping APC integration startDate {}, apcModule not configured", startDate);
+					logger.info("skipping APC integration startDate {}, apcModule not configured", cacheRange.getStart());
 				}
 
-				endDate=startDate;
 			}
 			// don't continue until caches are ready!
 			while (!pp.isDone()) {
@@ -592,6 +597,31 @@ public class Core {
 			pp.shutdown();
 		}		
 	logger.info("populate caches complete");
+	}
+
+	private static List<DateRange> generateCacheLoadRange() {
+		List<DateRange> ranges = new ArrayList<>();
+		Date endDate = new Date(Time.getStartOfDay(Calendar.getInstance().getTime()));
+		endDate = DateUtils.addDays(endDate, 1); // go to end of day
+		// go back configurable days
+		for (int i = 0; i<CoreConfig.getDaysPopulateHistoricalCache(); i++) {
+			Date startDate=DateUtils.addDays(endDate, -1);
+			ranges.add(new DateRange(startDate, endDate));
+			endDate = DateUtils.addDays(endDate, -1);
+		}
+		// then add configurable weekends
+		List<DateRange> weekendRanges = new ArrayList<>();
+		while (weekendRanges.size() < CoreConfig.getAdditionalWeekendsPopulateHistoricalCache() * 2) {
+			Date startDate=DateUtils.addDays(endDate, -1);
+			DateUtils.CalendarType testType = DateUtils.getTypeForDate(startDate);
+			if (testType.isWeekend()) {
+				weekendRanges.add(new DateRange(startDate, endDate));
+			}
+			endDate = DateUtils.addDays(endDate, -1);
+		}
+		ranges.addAll(weekendRanges);
+		logger.info("cache load ranges = " + ranges);
+		return ranges;
 	}
 
 	private static String getDateAsString(LocalDateTime date){

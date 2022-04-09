@@ -24,6 +24,8 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -77,7 +79,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	public List<IpcArrivalDeparture> getTripHistory(TripKey tripKey) {
 		TripEvents result = null;
 		synchronized (cache) {
-			// we need to protected the deserializer from modifications
+			// we need to protect the deserializer from modifications
 			result = cache.get(tripKey);
 		}
 
@@ -117,8 +119,9 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 				tripStartTime = trip.getStartTime();
 			}
 
-			tripKey = new TripKey(arrivalDeparture.getTripId(),
-					nearestDay,
+			tripKey = new TripKey(arrivalDeparture.getRouteId(),
+					arrivalDeparture.getDirectionId(),
+					nearestDay.getTime(),
 					tripStartTime);
 
 			IpcArrivalDeparture ipcad = null;
@@ -148,15 +151,18 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 																		 DbConfig dbConfig, Date nearestDay)
 		throws Exception {
 
-		Trip trip = dbConfig.getTrip(arrivalDeparture.getTripId());
+		Trip trip = dbConfig.getTripFromCurrentOrPreviousConfigRev(arrivalDeparture.getTripId());
 		Integer tripStartTime = null;
 
 		if (trip != null) {
 			tripStartTime = trip.getStartTime();
+		} else {
+			logger.info("missing trip {}, invalid A/D", arrivalDeparture.getTripId());
 		}
 
-		TripKey tripKey = new TripKey(arrivalDeparture.getTripId(),
-						nearestDay,
+		TripKey tripKey = new TripKey(arrivalDeparture.getRouteId(),
+						arrivalDeparture.getDirectionId(),
+						nearestDay.getTime(),
 						tripStartTime);
 
 		IpcArrivalDeparture ipcad = new IpcArrivalDeparture(arrivalDeparture);
@@ -180,11 +186,16 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	@Override
 	public void populateCacheFromDb(List<ArrivalDeparture> results)
 	{
-		logger.error("in populateCacheFromDb with results=" + results);
-		if (results == null || results.isEmpty()) return;
+		if (results == null || results.isEmpty()) {
+			logger.info("in populateCacheFromDb with null");
+			return;
+		}
+		logger.info("in populateCacheFromDb with results entries" + results.size());
 
 		Map<TripKey, TripEvents> map = new HashMap<>(results.size());
 		Date nearestDay = DateUtils.truncate(new Date(results.get(0).getTime()), Calendar.DAY_OF_MONTH);
+		Date furthestDay = DateUtils.truncate(new Date(results.get(results.size()-1).getTime()), Calendar.DAY_OF_MONTH);
+		boolean cacheNearestDay = (nearestDay.equals(furthestDay));
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
 
 		try {
@@ -195,9 +206,14 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 				}
 				// TODO this might be better done in the database.
 				if (GtfsData.routeNotFiltered(result.getRouteId())) {
-					putArrivalDeparture(map, result, dbConfig, nearestDay);
+					if (cacheNearestDay) {
+						putArrivalDeparture(map, result, dbConfig, nearestDay);
+					} else {
+						putArrivalDeparture(map, result, dbConfig,
+										DateUtils.truncate(new Date(result.getTime()), Calendar.DAY_OF_MONTH));
+					}
 				} else {
-					logger.error("filtered route " + result.getRouteId());
+					logger.info("filtered route " + result.getRouteId());
 				}
 				counter++;
 			}
@@ -205,18 +221,18 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 			logger.error("Exception in populateCacheFromDb {}", t, t);
 		}
 
-		logger.error("sorting Trip Data History Records of {}", map.size());
+		logger.info("sorting Trip Data History Records of {}", map.size());
 		for (TripEvents value : map.values()) {
 			value.sort();
 		}
-		logger.error("sorted Trip Data History Records of {}", map.size());
+		logger.info("sorted Trip Data History Records of {}", map.size());
 
 		synchronized (cache) {
 			logger.info("adding " + map.size() + " to cache");
 			cache.putAll(map);
 		}
 	}
-		
+
 	/* (non-Javadoc)
 	 * @see org.transitclock.core.dataCache.ehcache.test#findPreviousArrivalEvent(java.util.List, org.transitclock.db.structs.ArrivalDeparture)
 	 */

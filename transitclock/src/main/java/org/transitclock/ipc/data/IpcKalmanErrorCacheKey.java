@@ -8,25 +8,61 @@ import org.transitclock.core.dataCache.StopPathCacheKey;
 public class IpcKalmanErrorCacheKey implements Serializable	
 {
 	
-	private static final long serialVersionUID = -748336688312487489L;
-	private String tripId;
-	private Integer stopPathIndex;
-	
+	private static final long serialVersionUID = -748336688312487490L;
+
+	private String routeId;
+	private String directionId;
+	private Integer startTimeSecondsIntoDay;
+	private String originStopId;
+	private String destinationStopId;
+
+
 	public IpcKalmanErrorCacheKey(KalmanErrorCacheKey key) {
-		super();		
-		this.tripId=key.getTripId();
-		this.stopPathIndex=key.getStopPathIndex();	
-	}	
-	public String getTripId() {
-		return tripId;
+		super();
+		this.routeId = key.getRouteId();
+		this.directionId = key.getDirectionId();
+		this.startTimeSecondsIntoDay = key.getStartTimeSecondsIntoDay();
+		this.originStopId = key.getOriginStopId();
+		this.destinationStopId = key.getDestinationStopId();
 	}
-	public void setTripId(String tripId) {
-		this.tripId = tripId;
+
+	public String getRouteId() {
+		return routeId;
 	}
-	public Integer getStopPathIndex() {
-		return stopPathIndex;
+
+	public void setRouteId(String routeId) {
+		this.routeId = routeId;
 	}
-	public void setStopPathIndex(Integer stopPathIndex) {
-		this.stopPathIndex = stopPathIndex;
+
+	public String getDirectionId() {
+		return directionId;
+	}
+
+	public void setDirectionId(String directionId) {
+		this.directionId = directionId;
+	}
+
+	public Integer getStartTimeSecondsIntoDay() {
+		return startTimeSecondsIntoDay;
+	}
+
+	public void setStartTimeSecondsIntoDay(Integer startTimeSecondsIntoDay) {
+		this.startTimeSecondsIntoDay = startTimeSecondsIntoDay;
+	}
+
+	public String getOriginStopId() {
+		return originStopId;
+	}
+
+	public void setOriginStopId(String originStopId) {
+		this.originStopId = originStopId;
+	}
+
+	public String getDestinationStopId() {
+		return destinationStopId;
+	}
+
+	public void setDestinationStopId(String destinationStopId) {
+		this.destinationStopId = destinationStopId;
 	}
 }
