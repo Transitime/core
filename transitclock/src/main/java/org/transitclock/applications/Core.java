@@ -620,6 +620,7 @@ public class Core {
 			endDate = DateUtils.addDays(endDate, -1);
 		}
 		ranges.addAll(weekendRanges);
+		logger.info("cache load ranges = " + ranges);
 		return ranges;
 	}
 
