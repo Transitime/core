@@ -86,19 +86,31 @@ public class TravelTimesReport {
         try {
             tx = session.beginTransaction();
             List<TravelTimesForTrip> travelTimesForTrips = loadTravelTimes(session);
+            logger.info("found {} travel times", travelTimesForTrips.size());
+            if (travelTimesForTrips.isEmpty()) {
+                logger.error("loadTravelTimes failed for configuration");
+            }
+            boolean found = false;
             for (TravelTimesForTrip travelTimesForTrip : travelTimesForTrips) {
+                //logger.info("checking trip {}", travelTimesForTrip.getTripCreatedForId());
                 if (travelTimesForTrip.getTripCreatedForId().equals(tripId)) {
+                    found = true;
                     for (TravelTimesForStopPath travelTimesForStopPath : travelTimesForTrip.getTravelTimesForStopPaths()) {
-                        logger.info("{},{},{},{}",
+                        logger.info("{},{},{},{},{},{},{}",
                                 SHOW_TRIP_CMD,
+                                travelTimesRev,
                                 travelTimesForStopPath.getStopPathId(),
                                 travelTimesForStopPath.getHowSet(),
-                                travelTimesForStopPath.getTravelTimesMsec());
+                                travelTimesForStopPath.getTravelTimeSegmentLength(),
+                                travelTimesForStopPath.getStopTimeMsec(),
+                                prettyPrint(travelTimesForStopPath.getTravelTimesMsec()));
                     }
 
                 }
             }
-
+            if (!found) {
+                logger.error("trip {} not found for configuration rev {}", tripId, travelTimesRev);
+            }
             tx.commit();
         } catch (Exception e) {
             if (tx != null)
@@ -109,6 +121,14 @@ public class TravelTimesReport {
             HibernateUtils.clearSessionFactory();
         }
 
+    }
+
+    private String prettyPrint(List<Integer> travelTimesMsec) {
+        StringBuffer sb = new StringBuffer();
+        for (Integer msec : travelTimesMsec) {
+            sb.append(msec).append(",");
+        }
+        return sb.substring(0, sb.length()-1);
     }
 
     public void runReport() {
@@ -263,7 +283,7 @@ public class TravelTimesReport {
         return repair;
     }
 
-    // usage:  CMD {travelTimeRev | -1 } [ report_args ]
+    // usage:  CMD {travelTimeRevStart} {travelTimesRevStop} [ report_args ]
     public static void main(String[] args) {
         logger.info("Starting travel times report");
 
@@ -272,14 +292,11 @@ public class TravelTimesReport {
         Integer startTravelTimesRev = null;
         Integer maxTravelTimesRev = null;
 
-        if (args.length == 3) {
-            cmd = args[0];
-            if (!args[1].equals("-1")) {
-                startTravelTimesRev = Integer.parseInt(args[1]);
-                maxTravelTimesRev = Integer.parseInt(args[1]);
-                logger.info("loading travel times for rev {}", startTravelTimesRev);
-            }
-        }
+
+        cmd = args[0];
+        startTravelTimesRev = Integer.parseInt(args[1]);
+        maxTravelTimesRev = Integer.parseInt(args[2]);
+        logger.info("loading travel times for rev {}", startTravelTimesRev);
 
         ConfigFileReader.processConfig();
 
@@ -303,7 +320,7 @@ public class TravelTimesReport {
             if (REPORT_CMD.equals(cmd)) {
                 ttr.runReport();
             } else if (SHOW_TRIP_CMD.equals(cmd)) {
-                ttr.printTravelTimesForTrip(args[2]);
+                ttr.printTravelTimesForTrip(args[3].trim());
             } else {
                 logger.error("misunderstood command {}", cmd);
             }
