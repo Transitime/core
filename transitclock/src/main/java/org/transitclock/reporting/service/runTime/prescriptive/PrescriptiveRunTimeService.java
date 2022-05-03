@@ -1,4 +1,4 @@
-package org.transitclock.reporting.service.runTime;
+package org.transitclock.reporting.service.runTime.prescriptive;
 
 import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
@@ -18,6 +18,8 @@ import org.transitclock.ipc.data.IpcStopTime;
 import org.transitclock.reporting.TimePointStatistics;
 import org.transitclock.reporting.keys.StopPathRunTimeKey;
 import org.transitclock.reporting.service.RunTimeService;
+import org.transitclock.reporting.service.runTime.PrescriptiveAdjustmentResult;
+import org.transitclock.reporting.service.runTime.TimePointRunTimeProcessor;
 
 import javax.inject.Inject;
 import java.time.LocalDate;

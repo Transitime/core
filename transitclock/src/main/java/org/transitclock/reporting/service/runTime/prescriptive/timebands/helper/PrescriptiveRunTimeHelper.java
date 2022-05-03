@@ -1,4 +1,4 @@
-package org.transitclock.reporting.service.runTime;
+package org.transitclock.reporting.service.runTime.prescriptive.timebands.helper;
 
 import org.transitclock.config.DoubleConfigValue;
 import org.transitclock.config.IntegerConfigValue;

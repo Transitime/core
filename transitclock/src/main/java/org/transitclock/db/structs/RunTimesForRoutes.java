@@ -288,6 +288,14 @@ public class RunTimesForRoutes implements Serializable {
         return runTime;
     }
 
+    public Long getScheduledRunTime(){
+        Long runTime = null;
+        if(scheduledEndTime != null && scheduledStartTime != null){
+            runTime = (long)(scheduledEndTime - scheduledStartTime);
+        }
+        return runTime;
+    }
+
     public boolean hasCompleteRunTime(){
         return hasFirstStop() && hasLastStop();
     }
