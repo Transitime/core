@@ -1,11 +1,9 @@
 package org.transitclock.reporting.service.runTime.prescriptive.timebands;
 
-import com.mysql.jdbc.log.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.DoubleConfigValue;
 import org.transitclock.config.IntegerConfigValue;
-import org.transitclock.reporting.service.RunTimeService;
 import org.transitclock.reporting.service.runTime.prescriptive.timebands.helper.RunTimeDataHelper;
 import org.transitclock.reporting.service.runTime.prescriptive.timebands.kmeans.BasicDistance;
 import org.transitclock.reporting.service.runTime.prescriptive.timebands.kmeans.Centroid;
