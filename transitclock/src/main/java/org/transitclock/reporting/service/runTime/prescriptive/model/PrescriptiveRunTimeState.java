@@ -1,4 +1,4 @@
-package org.transitclock.reporting.service.runTime.prescriptive;
+package org.transitclock.reporting.service.runTime.prescriptive.model;
 
 import org.transitclock.db.structs.ScheduleTime;
 import org.transitclock.ipc.data.IpcPrescriptiveRunTime;

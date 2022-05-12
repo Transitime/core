@@ -67,6 +67,12 @@ public class DbConfig {
 	 */
 	private List<ConfigRevision> configRevisions;
 
+
+	/**
+	 * cache of known "feedInfo" ids.
+	 */
+	private List<FeedInfo> feedInfos;
+
 	// So can access blocks by service ID and block ID easily.
 	// Keyed on serviceId. Submap keyed on blockId
 	private Map<String, Map<String, Block>> blocksByServiceMap = null;
@@ -848,6 +854,8 @@ public class DbConfig {
 			}
 		}
 		configRevisions = ConfigRevision.getConfigRevisions(globalSession, configRev);
+		feedInfos = FeedInfo.getFeedInfos(globalSession);
+
 		blocksByServiceMap = putBlocksIntoMap(blocks);
 		blocksByRouteMap = putBlocksIntoMapByRoute(blocks);
 		logger.debug("Reading blocks took {} msec", timer.elapsedMsec());
@@ -1031,6 +1039,14 @@ public class DbConfig {
 	 */
 	public List<ConfigRevision> getConfigRevisions() {
 		return Collections.unmodifiableList(configRevisions);
+	}
+
+	/**
+	 * Expose metadata about data loaded.
+	 * @return
+	 */
+	public List<FeedInfo> getFeedInfos() {
+		return Collections.unmodifiableList(feedInfos);
 	}
 
 	/**

@@ -5,9 +5,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import org.apache.commons.lang3.StringUtils;
 import org.transitclock.api.data.ApiStopTimes;
 import org.transitclock.api.data.*;
-import org.transitclock.api.data.reporting.*;
+import org.transitclock.api.data.reporting.OnTimePerformanceOutput;
+import org.transitclock.api.data.reporting.RouteRunTimeOutput;
+import org.transitclock.api.data.reporting.StopPathRunTimeOutput;
+import org.transitclock.api.data.reporting.TripRunTimeOutput;
 import org.transitclock.api.data.reporting.chartjs.ChartType;
 import org.transitclock.api.data.ApiDispatcher;
+import org.transitclock.api.data.reporting.prescriptive.PrescriptiveRunTimeOutput;
 import org.transitclock.api.utils.StandardParameters;
 import org.transitclock.api.utils.WebUtils;
 import org.transitclock.config.BooleanConfigValue;
@@ -568,6 +572,10 @@ public class ReportingApi {
     public Response getPrescriptiveRunTimes(
             @BeanParam StandardParameters stdParameters,
             @Parameter(description="Begin time of time-band to use for retrieving run-times")
+            @QueryParam(value = "beginDate") DateParam beginDate,
+            @Parameter(description="End time of time-band to use for retrieving run-times")
+            @QueryParam(value = "endDate") DateParam endDate,
+            @Parameter(description="Begin time of time-band to use for retrieving run-times")
             @QueryParam(value = "beginTime") TimeParam beginTime,
             @Parameter(description="End time of time-band to use for retrieving run-times")
             @QueryParam(value = "endTime") TimeParam endTime,
@@ -580,7 +588,9 @@ public class ReportingApi {
             @Parameter(description="Retrives only runTimes belonging to the headsign specified.",required=true)
             @QueryParam(value = "headsign") String headsign,
             @Parameter(description="Retrives only runTimes belonging to the directionId specified.",required=true)
-            @QueryParam(value = "directionId") String directionId
+            @QueryParam(value = "directionId") String directionId,
+            @Parameter(description="Retrives only runTimes belonging to the configRev specified.")
+            @QueryParam(value = "configRev") Integer configRev
         )
             throws WebApplicationException {
 
@@ -596,17 +606,17 @@ public class ReportingApi {
                 serviceTypeEnum = ServiceType.valueOf(serviceType.toUpperCase());
             }
 
-            IpcPrescriptiveRunTimes ipcPrescriptiveRunTimes = reportingInterface.getPrescriptiveRunTimes(
-                    getTime(beginTime),
-                    getTime(endTime),
-                    route,
-                    headsign,
-                    directionId,
-                    tripPatternId,
-                    serviceTypeEnum,
-                    useReadOnlyDb());
+            List<IpcPrescriptiveRunTimeBands> ipcPrescriptiveRunTimebands =
+                    reportingInterface.getPrescriptiveRunTimeBands(
+                        getDate(beginDate),
+                        getDate(endDate),
+                        route,
+                        serviceTypeEnum,
+                        configRev,
+                        useReadOnlyDb()
+                    );
 
-            Object response = PrescriptiveRunTimeOutput.getRunTimes(ipcPrescriptiveRunTimes);
+            Object response = PrescriptiveRunTimeOutput.getRunTimes(ipcPrescriptiveRunTimebands);
 
             return stdParameters.createResponse(response);
         } catch (Exception e) {
@@ -626,10 +636,14 @@ public class ReportingApi {
     public List<ApiStopTime> getPrescriptiveRunTimesSchedule(
             @BeanParam StandardParameters stdParameters,
             @Parameter(description="Begin time of time-band to use for retrieving run-times")
+            @QueryParam(value = "beginDate") DateParam beginDate,
+            @Parameter(description="End time of time-band to use for retrieving run-times")
+            @QueryParam(value = "endDate") DateParam endDate,
+            @Parameter(description="Begin time of time-band to use for retrieving run-times")
             @QueryParam(value = "beginTime") TimeParam beginTime,
             @Parameter(description="End time of time-band to use for retrieving run-times")
             @QueryParam(value = "endTime") TimeParam endTime,
-            @Parameter(description="if set, retrives only run-times belonging to the serviceType (Weekday, Saturday,Sunday)")
+            @Parameter(description="if set, retrives only run-times belonging to the serviceType (Weekday, Saturday,Sunday)",required=true)
             @QueryParam(value = "serviceType") String serviceType,
             @Parameter(description="Retrives only arrivalDepartures belonging to the route name specified.",required=true)
             @QueryParam(value = "r") String route,
@@ -638,7 +652,9 @@ public class ReportingApi {
             @Parameter(description="Retrives only runTimes belonging to the headsign specified.",required=true)
             @QueryParam(value = "headsign") String headsign,
             @Parameter(description="Retrives only runTimes belonging to the directionId specified.",required=true)
-            @QueryParam(value = "directionId") String directionId
+            @QueryParam(value = "directionId") String directionId,
+            @Parameter(description="Retrives only runTimes belonging to the configRev specified.")
+            @QueryParam(value = "configRev") String configRev
     )
             throws WebApplicationException {
 
@@ -655,14 +671,14 @@ public class ReportingApi {
             }
 
             List<IpcStopTime> ipcStopTimes = reportingInterface.getPrescriptiveRunTimesSchedule(
-                    getTime(beginTime),
-                    getTime(endTime),
-                    route,
-                    headsign,
-                    directionId,
-                    tripPatternId,
-                    serviceTypeEnum,
-                    useReadOnlyDb());
+                                                getTime(beginTime),
+                                                getTime(endTime),
+                                                route,
+                                                headsign,
+                                                directionId,
+                                                tripPatternId,
+                                                serviceTypeEnum,
+                                                useReadOnlyDb());
 
             ApiStopTimes apiStopTimes = new ApiStopTimes(ipcStopTimes);
 

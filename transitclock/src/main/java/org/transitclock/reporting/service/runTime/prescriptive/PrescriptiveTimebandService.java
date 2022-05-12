@@ -8,12 +8,14 @@ import org.transitclock.db.structs.RunTimesForRoutes;
 import org.transitclock.ipc.util.GtfsDbDataUtil;
 import org.transitclock.reporting.service.RunTimeService;
 import org.transitclock.reporting.service.runTime.prescriptive.timebands.PrescriptiveRuntimeClusteringService;
+import org.transitclock.reporting.service.runTime.prescriptive.timebands.kmeans.Centroid;
 import org.transitclock.reporting.service.runTime.prescriptive.timebands.model.PrescriptiveRuntimeResult;
 import org.transitclock.reporting.service.runTime.prescriptive.timebands.model.RunTimeData;
+import org.transitclock.reporting.service.runTime.prescriptive.timebands.model.TimebandTime;
+import org.transitclock.reporting.service.runTime.prescriptive.timebands.model.TimebandsForTripPattern;
 
 import javax.inject.Inject;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,14 +30,10 @@ public class PrescriptiveTimebandService {
     private PrescriptiveRuntimeClusteringService clusteringService;
 
 
-    public List<PrescriptiveRuntimeResult> generateTimebands(LocalDate beginDate,
+
+    public Map<String, TimebandsForTripPattern> generateTimebands(LocalDate beginDate,
                                                              LocalDate endDate,
-                                                             LocalTime beginTime,
-                                                             LocalTime endTime,
                                                              String routeIdOrShortName,
-                                                             String headsign,
-                                                             String directionId,
-                                                             String tripPatternId,
                                                              ServiceType serviceType,
                                                              boolean readOnly) throws Exception {
 
@@ -46,14 +44,8 @@ public class PrescriptiveTimebandService {
         RunTimeForRouteQuery rtQuery = rtBuilder
                 .beginDate(beginDate)
                 .endDate(endDate)
-                .beginTime(beginTime)
-                .endTime(endTime)
                 .serviceType(serviceType)
                 .routeShortName(routeShortName)
-                .headsign(headsign)
-                .directionId(directionId)
-                .tripPatternId(tripPatternId)
-                .includeRunTimesForStops(true)
                 .readOnly(readOnly)
                 .build();
 
@@ -61,13 +53,34 @@ public class PrescriptiveTimebandService {
 
         List<RunTimeData> runTimeData = getRunTimesForRoutesAsRunTimeData(runTimesForRoutes);
 
-        return clusteringService.processRunTimeData(runTimeData);
+        List<PrescriptiveRuntimeResult> results = clusteringService.processRunTimeData(runTimeData);
+
+        return getTimebandsForTripPattern(results);
     }
 
     private List<RunTimeData> getRunTimesForRoutesAsRunTimeData(List<RunTimesForRoutes> runTimesForRoutes) {
         List<RunTimeData> runTimeData;
         runTimeData = runTimesForRoutes.stream().map(rt -> new RunTimeData(rt)).collect(Collectors.toList());
         return runTimeData;
+    }
+
+    private Map<String, TimebandsForTripPattern> getTimebandsForTripPattern(List<PrescriptiveRuntimeResult> results){
+        Map<String, TimebandsForTripPattern> timebandsForTripPatternMap = new HashMap<>();
+        for(PrescriptiveRuntimeResult result : results){
+            List<TimebandTime> timebandTimes = new ArrayList<>();
+            String routeShortName = result.getFirstRunTime().getRouteShortName();
+            String tripPatternId = result.getFirstRunTime().getTripPatternId();
+            for (Map.Entry<Centroid, List<RunTimeData>> centroidResult : result.getRunTimeDataPerCentroid().entrySet()) {
+                Centroid centroid = centroidResult.getKey();
+                List<RunTimeData> centroidRunTimeData = centroidResult.getValue();
+                timebandTimes.add(new TimebandTime(centroidRunTimeData));
+            }
+            TimebandsForTripPattern timebandsForTripPattern = new TimebandsForTripPattern(routeShortName, tripPatternId, timebandTimes);
+            timebandsForTripPatternMap.put(tripPatternId, timebandsForTripPattern);
+        }
+
+        return timebandsForTripPatternMap;
+
     }
 
 }

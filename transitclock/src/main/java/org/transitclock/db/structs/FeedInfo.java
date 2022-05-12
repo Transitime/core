@@ -165,6 +165,12 @@ public class FeedInfo implements Serializable {
 		return query.list();
 	}
 
+	public static List<FeedInfo> getFeedInfos(Session session) throws HibernateException {
+		String hql = "From FeedInfo f ORDER by feedStartDate, feedEndDate";
+		Query query = session.createQuery(hql);
+		return query.list();
+	}
+
 	public int getConfigRev() {
 		return configRev;
 	}
