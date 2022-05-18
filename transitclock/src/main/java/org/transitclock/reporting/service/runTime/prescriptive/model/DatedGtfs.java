@@ -2,17 +2,20 @@ package org.transitclock.reporting.service.runTime.prescriptive.model;
 
 import java.time.LocalDate;
 
-public class RunTimeDateRange {
+public class DatedGtfs {
+
+    private String version;
     private LocalDate startDate;
     private LocalDate endDate;
     private int configRev;
 
-    public RunTimeDateRange() { }
+    public DatedGtfs() { }
 
-    public RunTimeDateRange(LocalDate startDate, LocalDate endDate, int configRev) {
-
+    public DatedGtfs(LocalDate startDate, LocalDate endDate, String version, int configRev) {
+        this.version = version;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.configRev = configRev;
     }
 
     public LocalDate getStartDate() {
@@ -37,5 +40,13 @@ public class RunTimeDateRange {
 
     public void setConfigRev(int configRev) {
         this.configRev = configRev;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 }

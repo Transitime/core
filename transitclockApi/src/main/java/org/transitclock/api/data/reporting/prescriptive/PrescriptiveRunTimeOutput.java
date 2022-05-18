@@ -1,12 +1,8 @@
 package org.transitclock.api.data.reporting.prescriptive;
 
-import org.transitclock.api.data.ApiRunTimeSummary;
-import org.transitclock.api.data.reporting.prescriptive.PrescriptiveRunTimeAdjustment;
-import org.transitclock.api.data.reporting.prescriptive.PrescriptiveRunTimeData;
 import org.transitclock.api.data.reporting.ReportDataFormatter;
 import org.transitclock.ipc.data.IpcPrescriptiveRunTime;
 import org.transitclock.ipc.data.IpcPrescriptiveRunTimeBands;
-import org.transitclock.ipc.data.IpcPrescriptiveRunTimes;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -18,15 +14,15 @@ import java.util.stream.Collectors;
 
 public class PrescriptiveRunTimeOutput implements Serializable {
 
-    public static List<PrescriptiveRunTimeData> getRunTimes(List<IpcPrescriptiveRunTimeBands> prescriptiveRunTimeBands){
-        List<PrescriptiveRunTimeData> prescriptiveRunTimeDataList = new ArrayList<>();
+    public static PrescriptiveRunTimeDataAll getRunTimes(List<IpcPrescriptiveRunTimeBands> prescriptiveRunTimeBands){
+        PrescriptiveRunTimeDataAll prescriptiveRunTimeDataAll = new PrescriptiveRunTimeDataAll();
 
         for(IpcPrescriptiveRunTimeBands prescriptiveRunTimeBand : prescriptiveRunTimeBands){
-            PrescriptiveRunTimeData prescriptiveRunTimeData = new PrescriptiveRunTimeData(prescriptiveRunTimeBand);
-            prescriptiveRunTimeDataList.add(prescriptiveRunTimeData);
+            PrescriptiveRunTimeDataForPattern prescriptiveRunTimeDataForPattern = new PrescriptiveRunTimeDataForPattern(prescriptiveRunTimeBand);
+            prescriptiveRunTimeDataAll.getDataForPatterns().add(prescriptiveRunTimeDataForPattern);
         }
 
-        return prescriptiveRunTimeDataList;
+        return prescriptiveRunTimeDataAll;
     }
 
     private static String getFormattedStopPath(IpcPrescriptiveRunTime prescriptiveRunTime){

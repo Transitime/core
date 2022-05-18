@@ -1,7 +1,10 @@
 package org.transitclock.api.data.reporting.prescriptive;
 
+import org.transitclock.ipc.data.IpcPrescriptiveRunTimeBand;
+
 import javax.xml.bind.annotation.XmlElement;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class PrescriptiveRunTimeAdjustment {
@@ -31,24 +34,24 @@ public class PrescriptiveRunTimeAdjustment {
 
     public PrescriptiveRunTimeAdjustment() { }
 
-    public PrescriptiveRunTimeAdjustment(String fromTime,
-                                         String toTime,
-                                         String currentOtp,
-                                         String expectedOtp,
-                                         List<Long> adjustedTimes,
-                                         List<Long> originalTimes) {
-        this.fromTime = fromTime;
-        this.toTime = toTime;
-        this.currentOtp = currentOtp;
-        this.expectedOtp = expectedOtp;
-        this.adjustedTimes = adjustedTimes;
-        this.originalTimes = originalTimes;
+    public PrescriptiveRunTimeAdjustment(IpcPrescriptiveRunTimeBand timeBand){
 
+        this.adjustedTimes = timeBand.getRunTimeByStopPathId().stream()
+                .map(rt -> (long) (rt.getScheduled() + rt.getAdjustment()))
+                .collect(Collectors.toList());
+
+        this.originalTimes = timeBand.getRunTimeByStopPathId().stream()
+                .map(rt -> (long) rt.getScheduled())
+                .collect(Collectors.toList());
+
+
+        this.fromTime = timeBand.getStartTime();
+        this.toTime = timeBand.getEndTime();
+
+        this.totalOriginal = originalTimes.stream().mapToLong(Long::longValue).sum();
         this.totalAdjusted = adjustedTimes.stream().mapToLong(Long::longValue).sum();
-        this.totalOriginal = adjustedTimes.stream().mapToLong(Long::longValue).sum();
 
     }
-
 
     public String getFromTime() {
         return fromTime;

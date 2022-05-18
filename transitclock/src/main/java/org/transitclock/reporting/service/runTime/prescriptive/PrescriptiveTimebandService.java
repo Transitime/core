@@ -33,12 +33,11 @@ public class PrescriptiveTimebandService {
 
     public Map<String, TimebandsForTripPattern> generateTimebands(LocalDate beginDate,
                                                              LocalDate endDate,
-                                                             String routeIdOrShortName,
+                                                             String routeShortName,
                                                              ServiceType serviceType,
                                                              boolean readOnly) throws Exception {
 
 
-        String routeShortName = GtfsDbDataUtil.getRouteShortName(routeIdOrShortName);
 
         RunTimeForRouteQuery.Builder rtBuilder = new RunTimeForRouteQuery.Builder();
         RunTimeForRouteQuery rtQuery = rtBuilder
@@ -66,19 +65,22 @@ public class PrescriptiveTimebandService {
 
     private Map<String, TimebandsForTripPattern> getTimebandsForTripPattern(List<PrescriptiveRuntimeResult> results){
         Map<String, TimebandsForTripPattern> timebandsForTripPatternMap = new HashMap<>();
-        for(PrescriptiveRuntimeResult result : results){
-            List<TimebandTime> timebandTimes = new ArrayList<>();
-            String routeShortName = result.getFirstRunTime().getRouteShortName();
-            String tripPatternId = result.getFirstRunTime().getTripPatternId();
-            for (Map.Entry<Centroid, List<RunTimeData>> centroidResult : result.getRunTimeDataPerCentroid().entrySet()) {
-                Centroid centroid = centroidResult.getKey();
-                List<RunTimeData> centroidRunTimeData = centroidResult.getValue();
-                timebandTimes.add(new TimebandTime(centroidRunTimeData));
+        try{
+            for (PrescriptiveRuntimeResult result : results) {
+                List<TimebandTime> timebandTimes = new ArrayList<>();
+                String routeShortName = result.getFirstRunTime().getRouteShortName();
+                String tripPatternId = result.getFirstRunTime().getTripPatternId();
+                for (Map.Entry<Centroid, List<RunTimeData>> centroidResult : result.getRunTimeDataPerCentroid().entrySet()) {
+                    Centroid centroid = centroidResult.getKey();
+                    List<RunTimeData> centroidRunTimeData = centroidResult.getValue();
+                    timebandTimes.add(new TimebandTime(centroidRunTimeData));
+                }
+                TimebandsForTripPattern timebandsForTripPattern = new TimebandsForTripPattern(routeShortName, tripPatternId, timebandTimes);
+                timebandsForTripPatternMap.put(tripPatternId, timebandsForTripPattern);
             }
-            TimebandsForTripPattern timebandsForTripPattern = new TimebandsForTripPattern(routeShortName, tripPatternId, timebandTimes);
-            timebandsForTripPatternMap.put(tripPatternId, timebandsForTripPattern);
+        }catch(Exception e){
+            e.printStackTrace();
         }
-
         return timebandsForTripPatternMap;
 
     }

@@ -28,6 +28,8 @@ public interface ReportingInterface extends Remote {
                                                     boolean readOnly) throws Exception;
 
 
+    List<IpcDatedGtfs> getDatedGtfs() throws Exception;
+
     List<IpcPrescriptiveRunTimeBands> getPrescriptiveRunTimeBands(LocalDate beginDate,
                                                                   LocalDate endDate,
                                                                   String routeIdOrShortName,

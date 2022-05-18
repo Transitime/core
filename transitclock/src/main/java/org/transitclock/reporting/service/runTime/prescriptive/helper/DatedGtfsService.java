@@ -1,11 +1,9 @@
 package org.transitclock.reporting.service.runTime.prescriptive.helper;
 
 import org.transitclock.applications.Core;
-import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.db.structs.FeedInfo;
-import org.transitclock.gtfs.DbConfig;
-import org.transitclock.reporting.service.runTime.prescriptive.model.RunTimeDateRange;
+import org.transitclock.reporting.service.runTime.prescriptive.model.DatedGtfs;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -13,7 +11,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class RunTimeDateRangeHelper {
+public class DatedGtfsService {
 
     private static final StringConfigValue feedInfoVersionRegex = new StringConfigValue(
             "transitclock.runTime.feedInfoVersionRegex",
@@ -25,39 +23,49 @@ public class RunTimeDateRangeHelper {
             "1,2",
             "Comma separated list of indices that make up feedVersion");
 
-    public static List<RunTimeDateRange> getDateRanges(){
-        List<RunTimeDateRange> dateRanges = new ArrayList<>();
+    private static final StringConfigValue feedInfoNameIndices = new StringConfigValue(
+            "transitclock.runTime.feedInfoNameIndices",
+            "0",
+            "Comma separated list of indices that make up feedName");
+
+    public static List<DatedGtfs> getDatedGtfs(){
         List<FeedInfo> feedInfos = Core.getInstance().getDbConfig().getFeedInfos();
-        Map<String, RunTimeDateRange> datesForFeedVersion = new HashMap<>();
+        Map<String, DatedGtfs> datesForFeedVersion = new HashMap<>();
         int feedInfosCount = feedInfos.size();
 
-        RunTimeDateRange prevDateRangeForVersion = null;
+        DatedGtfs prevDateRangeForVersion = null;
 
         for(int i=0; i < feedInfosCount; i++){
             FeedInfo currentFeedInfo = feedInfos.get(i);
             String currentFeedVersion = getConvertedFeedVersion(currentFeedInfo);
-            RunTimeDateRange currentDateRangeForVersion;
-            RunTimeDateRange nextVersionDateRange = null;
-
+            DatedGtfs currentDateRangeForVersion;
+            DatedGtfs nextVersionDateRange = null;
 
             // Get Next Date Range
             if(i+1 < feedInfosCount){
                 FeedInfo nextFeedInfo = feedInfos.get(i+1);
                 String nextFeedVersion = getConvertedFeedVersion(nextFeedInfo);
                 if(!nextFeedVersion.equalsIgnoreCase(currentFeedVersion)){
-                    nextVersionDateRange =  getDateRangeForFeedInfo(nextFeedInfo);
+                    nextVersionDateRange =  getDateRangeForFeedInfo(nextFeedInfo, nextFeedVersion);
                 }
             }
 
             // Current Date Range
             String feedVersion = getConvertedFeedVersion(currentFeedInfo);
             currentDateRangeForVersion = datesForFeedVersion.get(feedVersion);
+            // First Date Range for this vrsion
             if(currentDateRangeForVersion == null){
-                currentDateRangeForVersion = getDateRangeForFeedInfo(currentFeedInfo);
-            } else {
-                currentDateRangeForVersion = getDateRangeForFeedInfo(currentDateRangeForVersion,
-                                                        prevDateRangeForVersion, nextVersionDateRange);
+                currentDateRangeForVersion = getDateRangeForFeedInfo(currentFeedInfo, feedVersion);
             }
+            // Found existing Date Range for this version
+            else {
+                // Reconfigure start and end date by comparing to next and prev date range
+                currentDateRangeForVersion = getDateRangeForFeedInfo(currentDateRangeForVersion,
+                                                                     prevDateRangeForVersion,
+                                                                     nextVersionDateRange);
+            }
+
+            // Add to map
             if(currentDateRangeForVersion != null){
                 datesForFeedVersion.put(feedVersion, currentDateRangeForVersion);
             }
@@ -66,27 +74,27 @@ public class RunTimeDateRangeHelper {
             prevDateRangeForVersion = currentDateRangeForVersion;
         }
 
-
-        return dateRanges;
+        return datesForFeedVersion.values().stream().collect(Collectors.toList());
     }
 
 
-    private static RunTimeDateRange getDateRangeForFeedInfo(FeedInfo feedInfo){
+    private static DatedGtfs getDateRangeForFeedInfo(FeedInfo feedInfo, String feedVersion){
         try {
             LocalDate feedStartDate =  Instant.ofEpochMilli(feedInfo.getFeedStartDate().getTime())
                     .atZone(ZoneId.systemDefault()).toLocalDate();
             LocalDate feedEndDate =  Instant.ofEpochMilli(feedInfo.getFeedEndDate().getTime())
                     .atZone(ZoneId.systemDefault()).toLocalDate();
 
-            return new RunTimeDateRange(feedStartDate, feedEndDate, feedInfo.getConfigRev());
+            return new DatedGtfs(feedStartDate, feedEndDate, feedVersion, feedInfo.getConfigRev());
         } catch (Exception e){
             return null;
         }
     }
 
-    private static RunTimeDateRange getDateRangeForFeedInfo(RunTimeDateRange currentDateRangeForVersion,
-                                                            RunTimeDateRange prevDateRangeForVersion,
-                                                            RunTimeDateRange nextVersionDateRange){
+    private static DatedGtfs getDateRangeForFeedInfo(DatedGtfs currentDateRangeForVersion,
+                                                     DatedGtfs prevDateRangeForVersion,
+                                                     DatedGtfs nextVersionDateRange){
+
         LocalDate prevStartDate = prevDateRangeForVersion.getStartDate();
         LocalDate prevEndDate = prevDateRangeForVersion.getEndDate();
         LocalDate currentStartDate = currentDateRangeForVersion.getStartDate();
@@ -100,7 +108,7 @@ public class RunTimeDateRangeHelper {
             LocalDate maxEndDate = currentEndDate.isAfter(prevEndDate) ? currentStartDate : prevStartDate;
             maxEndDate = !maxEndDate.isAfter(nextVersionStartDate) ? maxEndDate : nextVersionStartDate;
 
-            return new RunTimeDateRange(minStartDate, maxEndDate, currentConfigRev);
+            return new DatedGtfs(minStartDate, maxEndDate, currentDateRangeForVersion.getVersion(), currentConfigRev);
         }
 
         return prevDateRangeForVersion;
@@ -126,9 +134,36 @@ public class RunTimeDateRangeHelper {
                                 .collect(Collectors.toList());
 
         StringBuilder sb = new StringBuilder();
-        for(Integer index : indices){
+       /* for(Integer index : indices){
             sb.append("_");
             sb.append(feedVersionArray[index]);
+        }*/
+
+        for(int i=0; i < indices.size(); i++){
+            if(i>0){
+                sb.append("-");
+            }
+            sb.append(feedVersionArray[indices.get(i)]);
+
+        }
+
+        return sb.toString();
+    }
+
+    private static String buildRegexFeedName(String[] feedNameArray) throws Exception{
+        String[] nameIndices = feedInfoNameIndices.toString().split(",");
+        List<Integer> indices = Arrays.stream(nameIndices)
+                                .map(Integer::parseInt)
+                                .collect(Collectors.toList());
+
+        StringBuilder sb = new StringBuilder();
+
+        for(int i=0; i < indices.size(); i++){
+            if(i>0){
+                sb.append("-");
+            }
+            sb.append(feedNameArray[indices.get(i)]);
+
         }
 
         return sb.toString();

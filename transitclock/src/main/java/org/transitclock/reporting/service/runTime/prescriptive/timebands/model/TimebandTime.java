@@ -17,8 +17,12 @@ public class TimebandTime {
     }
 
     public TimebandTime(List<RunTimeData> runTimeData){
-        this.startTime = LocalTime.ofSecondOfDay(runTimeData.stream().findFirst().get().getScheduledStartTime());
-        this.endTime = LocalTime.ofSecondOfDay(runTimeData.stream().reduce((first, second) -> second).get().getScheduledStartTime());
+        this.startTime = LocalTime.ofSecondOfDay(runTimeData.stream().findFirst().get().getScheduledStartTime() % 86400);
+        try {
+            this.endTime = LocalTime.ofSecondOfDay(runTimeData.stream().reduce((first, second) -> second).get().getScheduledStartTime() % 86400);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public LocalTime getStartTime() {

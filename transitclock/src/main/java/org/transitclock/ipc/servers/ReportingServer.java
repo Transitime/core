@@ -151,6 +151,16 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
     }
 
     /**
+     * Get Dated Gtfs Versions
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public List<IpcDatedGtfs> getDatedGtfs() throws Exception {
+        return prescriptiveRunTimeService.getDatedGtfs();
+    }
+
+    /**
      * New prescriptive runtimes method
      * @param beginDate
      * @param endDate
@@ -242,7 +252,7 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                                         Integer earlyThreshold, Integer lateThreshold,
                                                         boolean readOnly) throws Exception{
         return routeRunTimesService.getRunTimeForRoutes(beginDate, endDate, beginTime, endTime, serviceType,
-                earlyThreshold, lateThreshold, readOnly);
+                                                        earlyThreshold, lateThreshold, readOnly);
     }
 
 }

@@ -576,19 +576,9 @@ public class ReportingApi {
             @Parameter(description="End time of time-band to use for retrieving run-times")
             @QueryParam(value = "endDate") DateParam endDate,
             @Parameter(description="Begin time of time-band to use for retrieving run-times")
-            @QueryParam(value = "beginTime") TimeParam beginTime,
-            @Parameter(description="End time of time-band to use for retrieving run-times")
-            @QueryParam(value = "endTime") TimeParam endTime,
-            @Parameter(description="if set, retrives only run-times belonging to the serviceType (Weekday, Saturday,Sunday)")
             @QueryParam(value = "serviceType") String serviceType,
             @Parameter(description="Retrives only arrivalDepartures belonging to the route name specified.",required=true)
             @QueryParam(value = "r") String route,
-            @Parameter(description="Specifies the tripPatternId to filter by.")
-            @QueryParam(value = "tripPattern") String tripPatternId,
-            @Parameter(description="Retrives only runTimes belonging to the headsign specified.",required=true)
-            @QueryParam(value = "headsign") String headsign,
-            @Parameter(description="Retrives only runTimes belonging to the directionId specified.",required=true)
-            @QueryParam(value = "directionId") String directionId,
             @Parameter(description="Retrives only runTimes belonging to the configRev specified.")
             @QueryParam(value = "configRev") Integer configRev
         )
@@ -617,6 +607,37 @@ public class ReportingApi {
                     );
 
             Object response = PrescriptiveRunTimeOutput.getRunTimes(ipcPrescriptiveRunTimebands);
+
+            return stdParameters.createResponse(response);
+        } catch (Exception e) {
+            // If problem getting data then return a Bad Request
+            throw WebUtils.badRequestException(e);
+        }
+
+    }
+
+    @Path("/report/runTime/datedGtfs")
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Operation(summary="Gets route run-times for date range",
+            description="Retrives a list of route run-times for a specified date range "
+                    + "Optionally can be filered according to routesIdOrShortNames params."
+                    + "Every trip is associated with a block.",tags= {"prediction","trip","block","route","vehicle"})
+    public Response gtfsVersions(@BeanParam StandardParameters stdParameters)
+            throws WebApplicationException {
+
+        // Make sure request is valid
+        stdParameters.validate();
+
+        try {
+            // Get active block data from server
+            ReportingInterface reportingInterface = stdParameters.getReportingInterface();
+
+            List<IpcDatedGtfs> datedGtfs = reportingInterface.getDatedGtfs();
+
+            ApiDatedGtfsData apiDatedGtfsData = new ApiDatedGtfsData(datedGtfs);
+
+            Object response = apiDatedGtfsData;
 
             return stdParameters.createResponse(response);
         } catch (Exception e) {
