@@ -7,6 +7,9 @@ import org.transitclock.reporting.service.OnTimePerformanceService;
 import org.transitclock.reporting.service.RunTimeService;
 import org.transitclock.reporting.service.SpeedMapService;
 import org.transitclock.reporting.service.runTime.*;
+import org.transitclock.reporting.service.runTime.prescriptive.PrescriptiveRunTimeService;
+import org.transitclock.reporting.service.runTime.prescriptive.PrescriptiveTimebandService;
+import org.transitclock.reporting.service.runTime.prescriptive.timebands.PrescriptiveRuntimeClusteringService;
 
 public class ReportingModule extends AbstractModule {
     @Override
@@ -17,6 +20,8 @@ public class ReportingModule extends AbstractModule {
         bind(TripRunTimesService.class).in(Scopes.SINGLETON);
         bind(StopRunTimesService.class).in(Scopes.SINGLETON);
         bind(PrescriptiveRunTimeService.class).in(Scopes.SINGLETON);
+        bind(PrescriptiveTimebandService.class).in(Scopes.SINGLETON);
+        bind(PrescriptiveRuntimeClusteringService.class).in(Scopes.SINGLETON);
         bind(OnTimePerformanceService.class).in(Scopes.SINGLETON);
         bind(SpeedMapService.class).in(Scopes.SINGLETON);
     }

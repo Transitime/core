@@ -9,8 +9,10 @@ public class IpcPrescriptiveRunTimes implements Serializable {
     private Double expectedOtp;
     private IpcRunTime runTimeSummary;
 
-    public IpcPrescriptiveRunTimes(List<IpcPrescriptiveRunTime> prescriptiveRunTimes, Double currentOtp,
-                                   Double expectedOtp, IpcRunTime runTimeSummary) {
+    public IpcPrescriptiveRunTimes(List<IpcPrescriptiveRunTime> prescriptiveRunTimes,
+                                   Double currentOtp,
+                                   Double expectedOtp,
+                                   IpcRunTime runTimeSummary) {
         this.prescriptiveRunTimes = prescriptiveRunTimes;
         this.currentOtp = currentOtp;
         this.expectedOtp = expectedOtp;

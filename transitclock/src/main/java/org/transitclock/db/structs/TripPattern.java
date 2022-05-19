@@ -44,7 +44,7 @@ import org.transitclock.gtfs.gtfsStructs.GtfsRoute;
  */
 @Entity 
 @DynamicUpdate 
-@Table(name="TripPatterns")
+@Table(name="TripPatterns" ,indexes = { @Index(name="TripPatternsRouteShortNameIndex", columnList="routeShortName" ) })
 public class TripPattern implements Serializable, Lifecycle {
 
 	// Which configuration revision used
@@ -313,13 +313,32 @@ public class TripPattern implements Serializable, Lifecycle {
 	 * @throws HibernateException
 	 */
 	@SuppressWarnings("unchecked")
-	public static List<TripPattern> getTripPatterns(Session session, 
-			int configRev) 
+	public static List<TripPattern> getTripPatterns(Session session, int configRev)
 			throws HibernateException {
 		String hql = "FROM TripPattern " +
 				"    WHERE configRev = :configRev";
 		Query query = session.createQuery(hql);
 		query.setInteger("configRev", configRev);
+		return query.list();
+	}
+
+	/**
+	 * Returns list of TripPattern objects for the specified configRev
+	 *
+	 * @param configRev
+	 * @return
+	 * @throws HibernateException
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<TripPattern> getTripPatternsForRoute(String routeShortName, int configRev, boolean readOnly)
+			throws HibernateException {
+		Session session = HibernateUtils.getSession(readOnly);
+		String hql = "FROM TripPattern " +
+					 "WHERE configRev = :configRev " +
+					 "AND routeShortName = :routeShortName";
+		Query query = session.createQuery(hql);
+		query.setInteger("configRev", configRev);
+		query.setString("routeShortName", routeShortName);
 		return query.list();
 	}
 

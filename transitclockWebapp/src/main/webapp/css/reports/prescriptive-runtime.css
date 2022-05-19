@@ -1,0 +1,8 @@
+.adjustment-details table{
+    table-layout: fixed;
+}
+
+.adjustment-details table th{
+    font-size: smaller;
+}
+

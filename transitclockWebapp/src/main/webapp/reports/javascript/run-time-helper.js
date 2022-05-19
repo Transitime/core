@@ -374,8 +374,8 @@ function updateParamDetails(route, headsign, tripPattern, beginDateString, endDa
         }
                 
     $(".param-detail-content").html("<p style='font-size: 0.8em;'>" +
-        (!route || route == "" ? "All routes" : "Route " + route) + " to " +
-        (!headsign || headsign == "" ? "All directions" : headsign) + " | " +
+        (!route || route == "" ? "All Routes" : "Route " + route) +
+        (!headsign || headsign == "" ? "to All Directions" : " to " + headsign) + " | " +
         tripPatternContent +
         beginDateString + " to " + endDateString +  " | " +
         timeRange +

@@ -1,4 +1,4 @@
-package org.transitclock.reporting.service.runTime;
+package org.transitclock.reporting.service.runTime.prescriptive;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
