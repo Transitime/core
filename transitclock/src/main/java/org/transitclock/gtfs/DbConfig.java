@@ -26,7 +26,6 @@ import org.transitclock.applications.Core;
 import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.core.ServiceUtilsImpl;
-import org.transitclock.configData.DbSetupConfig;
 
 import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.db.structs.Calendar;
@@ -53,6 +52,7 @@ import java.util.stream.Collectors;
  */
 public class DbConfig {
 
+	public static final int MAX_PREVIOUS_CONFIG_REV_LOAD = 5;
 	private final String agencyId;
 
 	// Keeps track of which revision of config data was read in
@@ -594,6 +594,14 @@ public class DbConfig {
 	 * @return The trip, or null if no such trip
 	 */
 	public Trip getTrip(String tripIdOrShortName) {
+		return getTripFromCurrentOrPreviousConfigRev(tripIdOrShortName, 0);
+	}
+
+	public Trip getTripFromCurrentOrPreviousConfigRev(String tripIdOrShortName) {
+		return getTripFromCurrentOrPreviousConfigRev(tripIdOrShortName, MAX_PREVIOUS_CONFIG_REV_LOAD);
+	}
+
+	public Trip getTripFromCurrentOrPreviousConfigRev(String tripIdOrShortName, int previousConfigRevsToCheck) {
 		Trip trip = individualTripsMap.get(tripIdOrShortName);
 
 		// If trip not read in yet, do so now
@@ -617,6 +625,16 @@ public class DbConfig {
 			// collection" error.
 			synchronized (Block.getLazyLoadingSyncObject()) {
 				trip = Trip.getTrip(globalSession, configRev, tripIdOrShortName);
+				int configRevToTry = 0;
+				while (trip == null && configRevToTry < previousConfigRevsToCheck) {
+					 configRevToTry++;
+					 trip = Trip.getTrip(globalSession, configRev - configRevToTry , tripIdOrShortName);
+					 if (trip != null) {
+						 logger.info("loaded trip {} that was {} rev behind current", tripIdOrShortName, configRevToTry);
+						 getTripNameSet().add(tripIdOrShortName);
+						 getTripIdSet().add(tripIdOrShortName);
+					 }
+				}
 			}
 			if (trip != null)
 				individualTripsMap.put(tripIdOrShortName, trip);
@@ -652,9 +670,9 @@ public class DbConfig {
 				IntervalTimer tick = new IntervalTimer();
 				logger.info("loading tripShortName Cache....");
 				String hql = "select tripShortName FROM Trip t " +
-						"    WHERE t.configRev = :configRev";
+						"    WHERE t.configRev in (" + generateConfigRevStr(configRev) + ")";
 				Query query = globalSession.createQuery(hql);
-				query.setInteger("configRev", configRev);
+
 
 				// Actually perform the query
 				tripNameSet = new HashSet<String>(query.list());
@@ -662,6 +680,17 @@ public class DbConfig {
 			}
 		}
 		return tripNameSet;
+	}
+
+	private String generateConfigRevStr(int configRev) {
+		int i = 0;
+		StringBuffer sb = new StringBuffer();
+		while (i < MAX_PREVIOUS_CONFIG_REV_LOAD) {
+			i++;
+			sb.append(configRev - i)
+							.append(",");
+		}
+		return sb.substring(0, sb.length()-1);
 	}
 
 	/**

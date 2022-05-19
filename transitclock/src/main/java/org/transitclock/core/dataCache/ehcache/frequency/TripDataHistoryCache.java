@@ -140,8 +140,9 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 				time = FrequencyBasedHistoricalAverageCache.round(time, FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
 
 				if (trip != null) {
-					tripKey = new TripKey(arrivalDeparture.getTripId(),
-									nearestDay,
+					tripKey = new TripKey(arrivalDeparture.getRouteId(),
+									arrivalDeparture.getDirectionId(),
+									nearestDay.getTime(),
 									time);
 
 					logger.debug("Putting :{} in TripDataHistoryCache cache using key {}.", arrivalDeparture, tripKey);
@@ -188,8 +189,9 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 			time = FrequencyBasedHistoricalAverageCache.round(time, FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
 
 			if (trip != null) {
-				tripKey = new TripKey(arrivalDeparture.getTripId(),
-								nearestDay,
+				tripKey = new TripKey(arrivalDeparture.getRouteId(),
+								arrivalDeparture.getDirectionId(),
+								nearestDay.getTime(),
 								time);
 
 				logger.debug("Putting :{} in TripDataHistoryCache cache using key {}.", arrivalDeparture, tripKey);

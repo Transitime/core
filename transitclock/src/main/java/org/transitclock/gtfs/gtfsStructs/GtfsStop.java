@@ -145,7 +145,7 @@ public class GtfsStop extends CsvBase {
 		// scheduled time before proceeding. Vehicle is expected
 		// to stay on path.
 		waitStop = getOptionalBooleanValue(record, "wait_stop");
-		
+
 		// hidden is also an extra column not defined in GTFS spec.
 		// Useful for supplemental files because allows one to hide
 		// a particular stop from the public.

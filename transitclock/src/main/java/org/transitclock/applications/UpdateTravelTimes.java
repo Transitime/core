@@ -81,7 +81,7 @@ public class UpdateTravelTimes {
 	 *            Contains travel times that are available by trip pattern ID
 	 * @return the newly created travelTimesRev
 	 */
-	private static int setTravelTimesForAllTrips(Session session, 
+	private static int setTravelTimesForAllTrips(Session session,
 			Map<String, Trip> tripMap, TravelTimeInfoMap travelTimeInfoMap) {
 		// For caching TravelTimesForTrip and TravelTimesForStopPaths that are
 		// created. This way won't store duplicate objects. Caching both 
@@ -436,12 +436,15 @@ public class UpdateTravelTimes {
 //		specialDaysOfWeek.add(java.util.Calendar.FRIDAY);
 		List<Integer> specialDaysOfWeek = null;
 		
-		// Set the timezone for the application. Must be done before
-		// determine begin and end time so that get the proper time of day.
 		int configRev = ActiveRevisions.get(agencyId).getConfigRev();
+		if (args.length > 2) {
+			configRev = Integer.parseInt(args[2]);
+		}
 
 		logger.info("Config Revision {}", configRev);
-		TimeZone timezone = 
+		// Set the timezone for the application. Must be done before
+		// determine begin and end time so that get the proper time of day.
+		TimeZone timezone =
 				Agency.getAgencies(agencyId, configRev).get(0).getTimeZone();
 		TimeZone.setDefault(timezone);
 

@@ -163,7 +163,7 @@ public class TravelTimes {
 	/**
 	 * Returns the scheduled epoch time vehicle is scheduled leave a wait stop.
 	 * Does not take into account whether vehicle can make it to the wait stop
-	 * in time.
+	 * in time.  A wait stop now includes timepoint stops.
 	 * 
 	 * @param indices
 	 *            Describes which stop
@@ -192,7 +192,9 @@ public class TravelTimes {
 		Integer scheduledDepartureTimeSecs = 
 				scheduleTime.getDepartureTime();
 		if (scheduledDepartureTimeSecs == null) {
-			logger.error("Called scheduledDepartureTimePlusWaitTime() for stop "
+			// timepoints will not have departure time set via convention
+			// this is not an error
+			logger.debug("Called scheduledDepartureTimePlusWaitTime() for stop "
 					+ "that doesn't have a scheduled departure time. {}", 
 					indices);
 			return -1;

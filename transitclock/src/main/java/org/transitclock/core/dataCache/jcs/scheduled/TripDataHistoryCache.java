@@ -60,7 +60,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 	}
 
 	@Override
-	public List<IpcArrivalDeparture> getTripHistory(TripKey tripKey) {	
+	public List<IpcArrivalDeparture> getTripHistory(TripKey tripKey) {
 		return cache.get(tripKey);
 	}
 
@@ -84,8 +84,9 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 			
 			if(trip!=null)
 			{				
-				tripKey = new TripKey(arrivalDeparture.getTripId(),
-						nearestDay,
+				tripKey = new TripKey(arrivalDeparture.getRouteId(),
+						arrivalDeparture.getDirectionId(),
+						nearestDay.getTime(),
 						trip.getStartTime());
 										
 				List<IpcArrivalDeparture> list  = cache.get(tripKey);

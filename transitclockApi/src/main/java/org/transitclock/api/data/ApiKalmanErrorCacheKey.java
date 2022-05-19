@@ -15,16 +15,24 @@ import org.transitclock.ipc.data.IpcKalmanErrorCacheKey;
 public class ApiKalmanErrorCacheKey {
 	
 	@XmlAttribute
-	private String tripId;
+	private String routeId;
 	@XmlAttribute
-	private Integer stopPathIndex;
+	private String directionId;
+	@XmlAttribute
+	private Integer startTimeSecondsIntoDay;
+	@XmlAttribute
+	private String originStopId;
+	@XmlAttribute
+	private String destinationStopId;
 	
 	public ApiKalmanErrorCacheKey() {
 	
 	}
 	public ApiKalmanErrorCacheKey(IpcKalmanErrorCacheKey key) {
-		
-		this.tripId=key.getTripId();
-		this.stopPathIndex=key.getStopPathIndex();
+		this.routeId = key.getRouteId();
+		this.directionId = key.getDirectionId();
+		this.startTimeSecondsIntoDay = key.getStartTimeSecondsIntoDay();
+		this.originStopId = key.getOriginStopId();
+		this.destinationStopId = key.getDestinationStopId();
 	}
 }

@@ -16,13 +16,11 @@
  */
 package org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman;
 
-import org.hibernate.Session;
 import org.transitclock.core.dataCache.TripDataHistoryCacheInterface;
 import org.transitclock.core.dataCache.TripKey;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 
-import java.util.Date;
 import java.util.List;
 
 /**
