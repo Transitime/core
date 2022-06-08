@@ -54,7 +54,7 @@ public class OnTimePerformanceOutput {
 
         for(IpcArrivalDeparture ad : arrivalDepartures) {
             if(ad.isArrival()){
-                if (ad.getScheduledAdherence().isLaterThan(minLateSec)) {
+                if (ad.getScheduledAdherence().isLaterThan(-1 * minLateSec)) {
                     lateCount = otpLabelsAndCountsMap.get(LATE);
                     otpLabelsAndCountsMap.put(LATE, lateCount + 1);
                 } else {
