@@ -65,7 +65,7 @@ public class ServiceTypeUtil {
                 return true;
             } else if(serviceType.equals(ServiceType.SATURDAY) && calendar.getSaturday()){
                 return true;
-            } else if(serviceType.equals(ServiceType.SATURDAY) && calendar.getSunday()){
+            } else if(serviceType.equals(ServiceType.SUNDAY) && calendar.getSunday()){
                 return true;
             }
         }
