@@ -8,6 +8,7 @@ public class TripQuery {
     private final String routeShortName;
     private final String headsign;
     private final String direction;
+    private final String tripPatternId;
     private final Integer firstStartTime;
     private final Integer lastStartTime;
     private final Set<Integer> configRevs;
@@ -21,6 +22,7 @@ public class TripQuery {
         this.firstStartTime = builder.firstStartTime;
         this.lastStartTime = builder.lastStartTime;
         this.readOnly = builder.readOnly;
+        this.tripPatternId = builder.tripPatternId;
     }
 
     public String getRouteShortName() {
@@ -51,6 +53,8 @@ public class TripQuery {
         return readOnly;
     }
 
+    public String getTripPatternId() { return tripPatternId; }
+
 
     public static class Builder{
 
@@ -61,6 +65,7 @@ public class TripQuery {
         private Integer lastStartTime;
         private Set<Integer> configRevs;
         private boolean readOnly = false;
+        private String tripPatternId;
 
         public Builder(String routeShortName, Set<Integer> configRevs){
             this.routeShortName = routeShortName;
@@ -93,6 +98,11 @@ public class TripQuery {
 
         public Builder readOnly(boolean readOnly) {
             this.readOnly = readOnly;
+            return this;
+        }
+
+        public Builder tripPatternId(String tripPatternId) {
+            this.tripPatternId = tripPatternId;
             return this;
         }
 
