@@ -98,6 +98,13 @@ public class ScheduleTime implements Serializable {
 	public Integer getDepartureTime() {
 		return departureTime;
 	}
+
+	public Integer getScheduledDwellTime(){
+		if(departureTime != null && arrivalTime != null && departureTime >= arrivalTime){
+			return departureTime - arrivalTime;
+		}
+		return 0;
+	}
 	
 	@Override
 	public String toString() {
