@@ -27,10 +27,7 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
@@ -1090,6 +1087,14 @@ public class Time {
 		formattedTime += seconds ;
 
 		return formattedTime;
+	}
+
+	public static Date getLocalDateAsDate(LocalDate localDate){
+		return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+	}
+
+	public static LocalTime getLocalTimeFromDate(Date date){
+		return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault()).toLocalTime();
 	}
 
 	/**
