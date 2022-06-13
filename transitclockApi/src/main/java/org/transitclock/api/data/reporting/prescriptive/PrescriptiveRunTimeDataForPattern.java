@@ -1,8 +1,7 @@
 package org.transitclock.api.data.reporting.prescriptive;
 
-import org.transitclock.ipc.data.IpcPrescriptiveRunTime;
-import org.transitclock.ipc.data.IpcPrescriptiveRunTimeBand;
-import org.transitclock.ipc.data.IpcPrescriptiveRunTimeBands;
+import org.transitclock.ipc.data.IpcPrescriptiveRunTimesForTimeBand;
+import org.transitclock.ipc.data.IpcPrescriptiveRunTimesForTimeBands;
 import org.transitclock.ipc.data.IpcStopPath;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -11,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class PrescriptiveRunTimeDataForPattern {
+
     @XmlElement(name = "adjustments")
     private List<PrescriptiveRunTimeAdjustment> adjustments = new ArrayList<>();
 
@@ -19,12 +19,12 @@ public class PrescriptiveRunTimeDataForPattern {
 
     public PrescriptiveRunTimeDataForPattern() {}
 
-    public PrescriptiveRunTimeDataForPattern(IpcPrescriptiveRunTimeBands prescriptiveRunTimeBands) {
-        this. stopNames = prescriptiveRunTimeBands.getTimePoints().stream()
+    public PrescriptiveRunTimeDataForPattern(IpcPrescriptiveRunTimesForTimeBands prescriptiveRunTimeBands) {
+        this.stopNames = prescriptiveRunTimeBands.getTimePoints().stream()
                                                             .map(IpcStopPath::getStopName)
                                                             .collect(Collectors.toList());
 
-        for(IpcPrescriptiveRunTimeBand tb : prescriptiveRunTimeBands.getTimeBands()){
+        for(IpcPrescriptiveRunTimesForTimeBand tb : prescriptiveRunTimeBands.getRunTimesForTimeBands()){
             adjustments.add(new PrescriptiveRunTimeAdjustment(tb));
         }
     }

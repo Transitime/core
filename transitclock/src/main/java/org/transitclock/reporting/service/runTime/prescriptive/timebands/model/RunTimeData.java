@@ -3,7 +3,11 @@ package org.transitclock.reporting.service.runTime.prescriptive.timebands.model;
 import com.google.common.base.Objects;
 import org.transitclock.core.ServiceType;
 import org.transitclock.db.structs.RunTimesForRoutes;
+import org.transitclock.db.structs.Trip;
+import org.transitclock.utils.Time;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 
 public class RunTimeData {
@@ -45,6 +49,24 @@ public class RunTimeData {
         this.setStartTime(runTimesForRoutes.getStartTime());
         this.setTripId(runTimesForRoutes.getTripId());
         this.setTripPatternId(runTimesForRoutes.getTripPatternId());
+    }
+
+    public RunTimeData(Trip trip, String tripPatternId, ServiceType serviceType, LocalDate date){
+        Date startTime = Time.getLocalDateAsDate(date);
+        startTime.setTime(startTime.getTime() + (trip.getStartTime() * 1000));
+
+        this.setServiceType(serviceType);
+        this.setStartTime(startTime);
+        this.setTripPatternId(tripPatternId);
+
+        double runTime = trip.getEndTime() - trip.getStartTime();
+        this.setActualRuntime(runTime);
+        this.setExpectedRuntime(runTime);
+        this.setTripId(trip.getId());
+        this.setConfigRev(trip.getConfigRev());
+        this.setHeadsign(trip.getHeadsign());
+        this.setRouteShortName(trip.getRouteShortName());
+        this.setScheduledStartTime(trip.getStartTime());
     }
 
     public Date getStartTime() {

@@ -11,6 +11,7 @@ import org.transitclock.api.data.reporting.StopPathRunTimeOutput;
 import org.transitclock.api.data.reporting.TripRunTimeOutput;
 import org.transitclock.api.data.reporting.chartjs.ChartType;
 import org.transitclock.api.data.ApiDispatcher;
+import org.transitclock.api.data.reporting.prescriptive.PrescriptiveRunTimeCsvOutput;
 import org.transitclock.api.data.reporting.prescriptive.PrescriptiveRunTimeOutput;
 import org.transitclock.api.utils.StandardParameters;
 import org.transitclock.api.utils.WebUtils;
@@ -21,8 +22,10 @@ import org.transitclock.ipc.interfaces.ReportingInterface;
 import org.transitclock.ipc.interfaces.VehiclesInterface;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collection;
@@ -596,7 +599,7 @@ public class ReportingApi {
                 serviceTypeEnum = ServiceType.valueOf(serviceType.toUpperCase());
             }
 
-            List<IpcPrescriptiveRunTimeBands> ipcPrescriptiveRunTimebands =
+            List<IpcPrescriptiveRunTimesForTimeBands> ipcPrescriptiveRunTimesForTimebands =
                     reportingInterface.getPrescriptiveRunTimeBands(
                         getDate(beginDate),
                         getDate(endDate),
@@ -606,9 +609,29 @@ public class ReportingApi {
                         useReadOnlyDb()
                     );
 
-            Object response = PrescriptiveRunTimeOutput.getRunTimes(ipcPrescriptiveRunTimebands);
+            Object response = PrescriptiveRunTimeOutput.getRunTimes(ipcPrescriptiveRunTimesForTimebands);
 
             return stdParameters.createResponse(response);
+        } catch (Exception e) {
+            // If problem getting data then return a Bad Request
+            throw WebUtils.badRequestException(e);
+        }
+
+    }
+
+    @Path("/report/runTime/prescriptiveRunTimesExport")
+    @POST
+    @Produces({"text/csv"})
+    @Operation(summary="Gets an export of prescriptive runTime data as a CSV file")
+    public Response getPrescriptiveRunTimesExport(@BeanParam StandardParameters stdParameters, String body) throws WebApplicationException {
+
+        try {
+            StreamingOutput entity = PrescriptiveRunTimeCsvOutput.getCsv(body);
+
+            return Response.ok(entity, "text/csv")
+                           .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=export.csv")
+                           .build();
         } catch (Exception e) {
             // If problem getting data then return a Bad Request
             throw WebUtils.badRequestException(e);
@@ -647,69 +670,6 @@ public class ReportingApi {
 
     }
 
-    @Path("/report/runTime/prescriptiveRunTimesSchedule")
-    @GET
-    @Produces({ "text/csv", MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    @Operation(summary="Gets route run-times for date range",
-            description="Retrives a list of route run-times for a specified date range "
-                    + "Optionally can be filered according to routesIdOrShortNames params."
-                    + "Every trip is associated with a block.",tags= {"prediction","trip","block","route","vehicle"})
-    public List<ApiStopTime> getPrescriptiveRunTimesSchedule(
-            @BeanParam StandardParameters stdParameters,
-            @Parameter(description="Begin time of time-band to use for retrieving run-times")
-            @QueryParam(value = "beginDate") DateParam beginDate,
-            @Parameter(description="End time of time-band to use for retrieving run-times")
-            @QueryParam(value = "endDate") DateParam endDate,
-            @Parameter(description="Begin time of time-band to use for retrieving run-times")
-            @QueryParam(value = "beginTime") TimeParam beginTime,
-            @Parameter(description="End time of time-band to use for retrieving run-times")
-            @QueryParam(value = "endTime") TimeParam endTime,
-            @Parameter(description="if set, retrives only run-times belonging to the serviceType (Weekday, Saturday,Sunday)",required=true)
-            @QueryParam(value = "serviceType") String serviceType,
-            @Parameter(description="Retrives only arrivalDepartures belonging to the route name specified.",required=true)
-            @QueryParam(value = "r") String route,
-            @Parameter(description="Specifies the tripPatternId to filter by.")
-            @QueryParam(value = "tripPattern") String tripPatternId,
-            @Parameter(description="Retrives only runTimes belonging to the headsign specified.",required=true)
-            @QueryParam(value = "headsign") String headsign,
-            @Parameter(description="Retrives only runTimes belonging to the directionId specified.",required=true)
-            @QueryParam(value = "directionId") String directionId,
-            @Parameter(description="Retrives only runTimes belonging to the configRev specified.")
-            @QueryParam(value = "configRev") String configRev
-    )
-            throws WebApplicationException {
-
-        // Make sure request is valid
-        stdParameters.validate();
-
-        try {
-            // Get active block data from server
-            ReportingInterface reportingInterface = stdParameters.getReportingInterface();
-
-            ServiceType serviceTypeEnum = null;
-            if(StringUtils.isNotBlank(serviceType)){
-                serviceTypeEnum = ServiceType.valueOf(serviceType.toUpperCase());
-            }
-
-            List<IpcStopTime> ipcStopTimes = reportingInterface.getPrescriptiveRunTimesSchedule(
-                                                getTime(beginTime),
-                                                getTime(endTime),
-                                                route,
-                                                headsign,
-                                                directionId,
-                                                tripPatternId,
-                                                serviceTypeEnum,
-                                                useReadOnlyDb());
-
-            ApiStopTimes apiStopTimes = new ApiStopTimes(ipcStopTimes);
-
-            return apiStopTimes.getApiStopTimes();
-        } catch (Exception e) {
-            // If problem getting data then return a Bad Request
-            throw WebUtils.badRequestException(e);
-        }
-
-    }
 
     @Path("/report/live/dispatch")
     @GET

@@ -10,6 +10,7 @@ import org.transitclock.reporting.service.OnTimePerformanceService;
 import org.transitclock.reporting.service.RunTimeService;
 import org.transitclock.reporting.service.SpeedMapService;
 import org.transitclock.reporting.service.runTime.*;
+import org.transitclock.reporting.service.runTime.prescriptive.PrescriptiveRunTimeScheduleService;
 import org.transitclock.reporting.service.runTime.prescriptive.PrescriptiveRunTimeService;
 
 import javax.inject.Inject;
@@ -172,63 +173,18 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
      * @throws Exception
      */
     @Override
-    public List<IpcPrescriptiveRunTimeBands> getPrescriptiveRunTimeBands(LocalDate beginDate,
-                                                                         LocalDate endDate,
-                                                                         String routeIdOrShortName,
-                                                                         ServiceType serviceType,
-                                                                         int configRev,
-                                                                         boolean readOnly) throws Exception {
+    public List<IpcPrescriptiveRunTimesForTimeBands> getPrescriptiveRunTimeBands(LocalDate beginDate,
+                                                                                 LocalDate endDate,
+                                                                                 String routeIdOrShortName,
+                                                                                 ServiceType serviceType,
+                                                                                 int configRev,
+                                                                                 boolean readOnly) throws Exception {
 
         return prescriptiveRunTimeService.getPrescriptiveRunTimeBands(beginDate, endDate, routeIdOrShortName,
                                                                         serviceType, configRev, readOnly);
     }
 
-    /**
-     * Old prescriptive runtimes method
-     * @param beginDate
-     * @param endDate
-     * @param beginTime
-     * @param endTime
-     * @param routeIdOrShortName
-     * @param headsign
-     * @param directionId
-     * @param tripPatternId
-     * @param serviceType
-     * @param configRev
-     * @param readOnly
-     * @return
-     * @throws Exception
-     */
-    @Override
-    public IpcPrescriptiveRunTimes getPrescriptiveRunTimes(LocalDate beginDate,
-                                                                 LocalDate endDate,
-                                                                 LocalTime beginTime,
-                                                                 LocalTime endTime,
-                                                                 String routeIdOrShortName,
-                                                                 String headsign,
-                                                                 String directionId,
-                                                                 String tripPatternId,
-                                                                 ServiceType serviceType,
-                                                                 int configRev,
-                                                                 boolean readOnly) throws Exception {
 
-        return prescriptiveRunTimeService.getPrescriptiveRunTimes(beginDate, endDate, beginTime, endTime,
-                routeIdOrShortName, headsign, directionId, tripPatternId, serviceType, configRev, readOnly);
-    }
-
-    @Override
-    public List<IpcStopTime> getPrescriptiveRunTimesSchedule(  LocalTime beginTime,
-                                                               LocalTime endTime,
-                                                               String routeIdOrShortName,
-                                                               String headsign,
-                                                               String directionId,
-                                                               String tripPatternId,
-                                                               ServiceType serviceType,
-                                                               boolean readOnly) throws Exception {
-
-        return prescriptiveRunTimeService.getPrescriptiveRunTimesSchedule(beginTime, endTime, routeIdOrShortName,
-                headsign, directionId, tripPatternId, serviceType, readOnly);
-    }
 
     // On Time Performance Reports
     @Override

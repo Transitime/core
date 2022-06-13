@@ -295,6 +295,18 @@ button.submit-button {
     background-color:#E6D83E;
 }
 
+.bg-orange{
+    background-color:rgba(255, 191, 41, .6);
+}
+
+.bg-light-yellow {
+    background-color: rgba(226, 246, 95, .5);
+}
+
+.bg-lime-green{
+    background-color: rgba(146, 245, 116, .5)
+}
+
 .bg-green{
     background-color:#37E627;
 }

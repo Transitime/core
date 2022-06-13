@@ -5,16 +5,18 @@ import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.BooleanConfigValue;
-import org.transitclock.config.FloatConfigValue;
+import org.transitclock.config.LongConfigValue;
 import org.transitclock.core.ServiceType;
 import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.db.query.RunTimeForRouteQuery;
+import org.transitclock.db.query.TripQuery;
 import org.transitclock.db.structs.*;
 import org.transitclock.ipc.data.*;
 import org.transitclock.reporting.*;
 import org.transitclock.reporting.dao.RunTimeRoutesDao;
 import org.transitclock.reporting.keys.TripConfigRevKey;
 import org.transitclock.statistics.RunTimeStatistics;
+import org.transitclock.utils.Time;
 
 import javax.inject.Inject;
 import java.time.*;
@@ -29,6 +31,10 @@ public class RunTimeService {
     private static BooleanConfigValue filterRunTimeOutliers = new BooleanConfigValue(
             "transitclock.reporting.runTime.filterOutliers", true, "When set to true allows" +
             "filtering of runTime ouliers.");
+
+    private static LongConfigValue defaultScheduledDwellTime = new LongConfigValue(
+            "transitclock.reporting.runTime.scheduledDwellTime", 0l,
+            "Default value for scheduled run dwell time");
 
     private static Boolean getFilterRunTimeOutliers(){
         return filterRunTimeOutliers.getValue();
@@ -96,6 +102,139 @@ public class RunTimeService {
         }
         return runTimesForRoutes;
     }
+
+    /**
+     * Get scheduled runtimes for routes
+     * Uses a list of scheduled trips to build runtimes
+     * Checks to make sure that the scheduled trip id doesn't already exist in the list of runtimes
+     *
+     * @param rtQuery
+     * @param routeTrips
+     * @return
+     */
+    public List<RunTimesForRoutes> getScheduledRunTimesForRoutes(RunTimeForRouteQuery rtQuery,
+                                                                 List<Trip> routeTrips) {
+
+        List<RunTimesForRoutes> scheduledRunTimesForRoutes = new ArrayList<>();
+
+        LocalDate tripDate = rtQuery.getBeginDate();
+        ServiceType serviceType = rtQuery.getServiceType();
+
+        for(Trip trip : routeTrips){
+            RunTimesForRoutes runTimesForRoutes = new RunTimesForRoutes(trip, serviceType, tripDate);
+            List<RunTimesForStops> runTimesForStops = getScheduledRunTimesForStops(trip, tripDate, runTimesForRoutes);
+            runTimesForRoutes.setScheduled(true);
+            runTimesForRoutes.setRunTimesForStops(runTimesForStops);
+            scheduledRunTimesForRoutes.add(runTimesForRoutes);
+        }
+
+        return scheduledRunTimesForRoutes;
+
+    }
+
+    /**
+     * Checks to make sure the scheduled trip should actually be included in the list of runtimes
+     * Checks for things like making sure the serviceId is valid, making sure a runtime with that trip id doesn't
+     * already exist, and making sure the trip start and end times line up
+     *
+     * @param trip
+     * @param rtQuery
+     * @param existingRunTimeTripIds
+     * @param serviceTypesByServiceId
+     * @return
+     */
+    private boolean includeTripAsScheduledRunTime(Trip trip,
+                                                  RunTimeForRouteQuery rtQuery,
+                                                  Set<String> existingRunTimeTripIds,
+                                                  Map<String, Set<ServiceType>> serviceTypesByServiceId) {
+
+        if(existingRunTimeTripIds.contains(trip.getId())){
+            return false;
+        }
+
+        if(trip.getStartTime() < rtQuery.getBeginTime() || trip.getEndTime() > rtQuery.getEndTime()) {
+            return false;
+        }
+
+        Set<ServiceType> serviceTypesForServiceId = serviceTypesByServiceId.get(trip.getServiceId());
+        if(serviceTypesForServiceId == null || !serviceTypesForServiceId.contains(rtQuery.getServiceType())){
+            return false;
+        }
+
+        return true;
+
+    }
+
+    /**
+     * Builds runtime stop information for scheduled trip runtimes
+     * Spoofs the date and marks runtimes for stops as scheduled
+     * @param trip
+     * @param beginDate
+     * @param runTimesForRoutes
+     * @return
+     */
+    private List<RunTimesForStops> getScheduledRunTimesForStops(Trip trip,
+                                                                LocalDate beginDate,
+                                                                RunTimesForRoutes runTimesForRoutes){
+
+        Date tripDate = Time.getLocalDateAsDate(beginDate);
+
+        List<RunTimesForStops> runTimesForStopsList = new ArrayList<>();
+
+        List<ScheduleTime> tripScheduleTimes = trip.getScheduleTimes();
+        List<StopPath> tripStopPaths = trip.getStopPaths();
+
+        if(!hasValidTripStops(tripScheduleTimes, tripStopPaths)){
+            return Collections.EMPTY_LIST;
+        }
+
+        for(int i=0; i < tripStopPaths.size(); i++){
+            RunTimesForStops runTimesForStops = new RunTimesForStops();
+            runTimesForStops.setScheduled(true);
+            runTimesForStops.setStopPathIndex(i);
+            runTimesForStops.setStopPathId(tripStopPaths.get(i).getStopPathId());
+            runTimesForStops.setScheduledTime(tripScheduleTimes.get(i).getTime());
+            runTimesForStops.setDwellTime(getScheduledDwellTime(tripScheduleTimes.get(i)));
+            runTimesForStops.setLastStop(tripStopPaths.get(i).isLastStopInTrip());
+            runTimesForStops.setTimePoint(tripStopPaths.get(i).isScheduleAdherenceStop());
+
+            // Set Stop Time
+            Date stopTime = new Date(tripDate.getTime());
+            stopTime.setTime(stopTime.getTime() + (tripScheduleTimes.get(i).getTime() * 1000));
+            runTimesForStops.setTime(stopTime);
+
+            // Set prev departure time
+            if(i > 0){
+                Date prevStopDepartureTime = new Date(tripDate.getTime());
+                prevStopDepartureTime.setTime(prevStopDepartureTime.getTime() + (tripScheduleTimes.get(i-1).getDepartureTime() * 1000));
+                runTimesForStops.setPrevStopDepartureTime(prevStopDepartureTime);
+            }
+
+            runTimesForStops.setRunTimesForRoutes(runTimesForRoutes);
+
+            runTimesForStopsList.add(runTimesForStops);
+        }
+
+        return runTimesForStopsList;
+    }
+
+    private Long getScheduledDwellTime(ScheduleTime scheduleTime){
+        Integer scheduledDwellTime = scheduleTime.getScheduledDwellTime();
+        if(scheduledDwellTime > 0){
+            return scheduledDwellTime.longValue();
+        } else {
+            return defaultScheduledDwellTime.getValue();
+        }
+    }
+
+    private boolean hasValidTripStops(List<ScheduleTime> tripScheduleTimes,
+                                      List<StopPath> tripStopPaths) {
+        if(tripScheduleTimes.size() != tripStopPaths.size()){
+            return false;
+        }
+        return true;
+    }
+
 
     public IpcRunTime getRunTimeStats(Map<String, TripStopPathStatistics> tripStatsByRunTimeKey){
 
@@ -202,5 +341,7 @@ public class RunTimeService {
     public boolean invalidTripStatistics(TripStopPathStatistics tripStatistics) {
         return !tripStatistics.hasAllStopPathsForRunTimes() || !tripStatistics.hasAllStopPathsForDwellTimes();
     }
+
+
 
 }

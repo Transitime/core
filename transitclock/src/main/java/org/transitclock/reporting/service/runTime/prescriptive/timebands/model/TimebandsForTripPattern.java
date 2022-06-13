@@ -6,6 +6,7 @@ public class TimebandsForTripPattern {
     String routeShortName;
     String tripPatternId;
     List<TimebandTime> timebandTimes;
+    List<TimebandTime> adjustedTimebandTimes;
 
     public TimebandsForTripPattern(String routeShortName, String tripPatternId, List<TimebandTime> timebandTimes) {
         this.routeShortName = routeShortName;
@@ -35,5 +36,13 @@ public class TimebandsForTripPattern {
 
     public void setTimebandTimes(List<TimebandTime> timebandTimes) {
         this.timebandTimes = timebandTimes;
+    }
+
+    public List<TimebandTime> getAdjustedTimebandTimes() {
+        return adjustedTimebandTimes;
+    }
+
+    public void setAdjustedTimebandTimes(List<TimebandTime> adjustedTimebandTimes) {
+        this.adjustedTimebandTimes = adjustedTimebandTimes;
     }
 }

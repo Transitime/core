@@ -7,13 +7,14 @@ import java.util.List;
 /**
  * Prescriptive RunTime Bands
  */
-public class IpcPrescriptiveRunTimeBands implements Serializable {
+public class IpcPrescriptiveRunTimesForTimeBands implements Serializable {
+    private String routeShortName;
     private List<IpcStopPath> timePoints;
-    private List<IpcPrescriptiveRunTimeBand> timeBands = new ArrayList<>();
+    private List<IpcPrescriptiveRunTimesForTimeBand> runTimesForTimeBands = new ArrayList<>();
     private Double currentOtp;
     private Double expectedOtp;
 
-    public IpcPrescriptiveRunTimeBands(List<IpcStopPath> timePoints) {
+    public IpcPrescriptiveRunTimesForTimeBands(List<IpcStopPath> timePoints) {
         this.timePoints = timePoints;
     }
 
@@ -25,12 +26,12 @@ public class IpcPrescriptiveRunTimeBands implements Serializable {
         this.timePoints = timePoints;
     }
 
-    public List<IpcPrescriptiveRunTimeBand> getTimeBands() {
-        return timeBands;
+    public List<IpcPrescriptiveRunTimesForTimeBand> getRunTimesForTimeBands() {
+        return runTimesForTimeBands;
     }
 
-    public void setTimeBands(List<IpcPrescriptiveRunTimeBand> timeBands) {
-        this.timeBands = timeBands;
+    public void setRunTimesForTimeBands(List<IpcPrescriptiveRunTimesForTimeBand> runTimesForTimeBands) {
+        this.runTimesForTimeBands = runTimesForTimeBands;
     }
 
     public Double getCurrentOtp() {
@@ -47,5 +48,13 @@ public class IpcPrescriptiveRunTimeBands implements Serializable {
 
     public void setExpectedOtp(Double expectedOtp) {
         this.expectedOtp = expectedOtp;
+    }
+
+    public String getRouteShortName() {
+        return routeShortName;
+    }
+
+    public void setRouteShortName(String routeShortName) {
+        this.routeShortName = routeShortName;
     }
 }

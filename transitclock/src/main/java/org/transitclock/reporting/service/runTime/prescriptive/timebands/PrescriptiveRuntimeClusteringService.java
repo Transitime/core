@@ -30,7 +30,7 @@ public class PrescriptiveRuntimeClusteringService {
 
     private static final IntegerConfigValue prescriptiveTimebandMaxIterations = new IntegerConfigValue(
             "transitclock.runTime.prescriptiveTimebandMaxIterations",
-            20,
+            30,
             "The max number of iterations for k-means processing of prescriptive timeband clusters");
 
     public Integer getMaxIterations(){
@@ -39,7 +39,7 @@ public class PrescriptiveRuntimeClusteringService {
 
     private static final DoubleConfigValue prescriptiveTimebandMinPartitionLength = new DoubleConfigValue(
             "transitclock.runTime.prescriptiveTimebandMinPartitionLengthSec",
-            30 * 60.0, // 30 min
+            45 * 60.0, // 45 min
             "The minimum partition length for prescriptive timeband clusters");
 
     public Double getMinPartitionLength(){
@@ -61,16 +61,16 @@ public class PrescriptiveRuntimeClusteringService {
         runTimeData = RunTimeDataHelper.reduce(runTimeData);
 
         //map run time data by trip pattern id
-        Map<String, List<RunTimeData>> tripPatternMap = RunTimeDataHelper.mapRunTimeDataByTripPattern(runTimeData);
+        Map<String, List<RunTimeData>> tripPatternRunTimeMap = RunTimeDataHelper.mapRunTimeDataByTripPattern(runTimeData);
 
         Set<PrescriptiveRuntimeResult> results = new LinkedHashSet<>();
 
-        for (String tripPatternId : tripPatternMap.keySet()) {
+        for (String tripPatternId : tripPatternRunTimeMap.keySet()) {
             //for each trip pattern, sequence runtimes
-            RunTimeDataHelper.assignSequence(tripPatternMap.get(tripPatternId));
+            RunTimeDataHelper.assignSequence(tripPatternRunTimeMap.get(tripPatternId));
 
             //list of runtimes for trip pattern
-            List<RunTimeData> runTimeDataForTripPattern = tripPatternMap.get(tripPatternId);
+            List<RunTimeData> runTimeDataForTripPattern = tripPatternRunTimeMap.get(tripPatternId);
 
             //for each trip pattern, run kmeans
             Map<Centroid, List<RunTimeData>> kmeansResult =

@@ -1,6 +1,6 @@
 package org.transitclock.api.data.reporting.prescriptive;
 
-import org.transitclock.ipc.data.IpcPrescriptiveRunTimeBand;
+import org.transitclock.ipc.data.IpcPrescriptiveRunTimesForTimeBand;
 
 import javax.xml.bind.annotation.XmlElement;
 import java.util.List;
@@ -34,7 +34,7 @@ public class PrescriptiveRunTimeAdjustment {
 
     public PrescriptiveRunTimeAdjustment() { }
 
-    public PrescriptiveRunTimeAdjustment(IpcPrescriptiveRunTimeBand timeBand){
+    public PrescriptiveRunTimeAdjustment(IpcPrescriptiveRunTimesForTimeBand timeBand){
 
         this.adjustedTimes = timeBand.getRunTimeByStopPathId().stream()
                 .map(rt -> (long) (rt.getScheduled() + rt.getAdjustment()))

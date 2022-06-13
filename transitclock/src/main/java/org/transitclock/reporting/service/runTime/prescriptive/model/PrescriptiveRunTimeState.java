@@ -128,7 +128,12 @@ public class PrescriptiveRunTimeState {
         if (timePointStatistics.isFirstStop()) {
             return 0d;
         }
-        return (getCurrentTimePointFixedTime() + getCurrentTimePointVariableTime() + getCurrentTimePointDwellTime()) - scheduleRunTime;
+        Double currentFixedTime = getCurrentTimePointFixedTime();
+        Double currentTimePointVariableTime = getCurrentTimePointVariableTime();
+        Double currentTimePointDwellTime = getCurrentTimePointDwellTime();
+
+        Double adjustment = (currentFixedTime + currentTimePointVariableTime + currentTimePointDwellTime) - scheduleRunTime;
+        return adjustment;
     }
 
     private Double getScheduledRunTime() {

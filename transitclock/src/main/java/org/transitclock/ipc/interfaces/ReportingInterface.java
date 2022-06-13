@@ -15,36 +15,17 @@ import java.util.List;
  *
  */
 public interface ReportingInterface extends Remote {
-    IpcPrescriptiveRunTimes getPrescriptiveRunTimes(LocalDate beginDate,
-                                                    LocalDate endDate,
-                                                    LocalTime beginTime,
-                                                    LocalTime endTime,
-                                                    String routeIdOrShortName,
-                                                    String headsign,
-                                                    String directionId,
-                                                    String tripPatternId,
-                                                    ServiceType serviceType,
-                                                    int configRev,
-                                                    boolean readOnly) throws Exception;
 
 
     List<IpcDatedGtfs> getDatedGtfs() throws Exception;
 
-    List<IpcPrescriptiveRunTimeBands> getPrescriptiveRunTimeBands(LocalDate beginDate,
-                                                                  LocalDate endDate,
-                                                                  String routeIdOrShortName,
-                                                                  ServiceType serviceType,
-                                                                  int configRev,
-                                                                  boolean readOnly) throws Exception;
+    List<IpcPrescriptiveRunTimesForTimeBands> getPrescriptiveRunTimeBands(LocalDate beginDate,
+                                                                          LocalDate endDate,
+                                                                          String routeIdOrShortName,
+                                                                          ServiceType serviceType,
+                                                                          int configRev,
+                                                                          boolean readOnly) throws Exception;
 
-    List<IpcStopTime> getPrescriptiveRunTimesSchedule(LocalTime beginTime,
-                                                      LocalTime endTime,
-                                                      String routeIdOrShortName,
-                                                      String headsign,
-                                                      String directionId,
-                                                      String tripPatternId,
-                                                      ServiceType serviceType,
-                                                      boolean readOnly) throws Exception;
 
     List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForOtp(LocalDate beginDate, LocalDate endDate,
                                                                            LocalTime beginTime, LocalTime endTime,

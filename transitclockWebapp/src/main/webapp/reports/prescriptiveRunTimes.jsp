@@ -94,19 +94,31 @@
                 </div>
             </div>
             <!-- main content -->
-            <div class="row mx-2">
+            <div class="row mx-2 pt-3">
                 <!-- OTP Info -->
-                <div class="row toggle-chart">
+                <div class="row toggle-chart mb-1">
                     <div class="col-sm-4">
-                        <label class="col-sm-6 col-form-label m-bt-20 ">OTP (current) <span  class="fw-light" id="current_otp"></span></label>
-                        <label class="col-sm-6 col-form-label bg-secondary-light m-bt-20 float-right">OTP (predicted) <span  class="fw-light" id="expected_otp"></span></label>
+                        <label class="col-sm-6 col-form-label m-bt-20">OTP (current): <span  class="fw-light" id="current_otp"></span></label>
+                        <label class=" col-sm-6 col-form-label bg-secondary-light m-bt-20">OTP (predicted): <span  class="fw-light" id="expected_otp"></span></label>
+                    </div>
+                    <div class="col-sm-4"></div>
+                    <div class="col-sm-4">
+                        <ul class="prescriptive-legend float-end">
+                            <li><span class="prescriptive-legend-block bg-orange"></span><span class="align-top prescriptive-legend-label">Total RunTime</span></li>
+                            <li><span class="prescriptive-legend-block bg-lime-green"></span><span class="align-top prescriptive-legend-label">New RunTime</span></li>
+                            <li><span class="prescriptive-legend-block bg-light-yellow"></span><span class="align-top prescriptive-legend-label">Old RunTime</span></li>
+                        </ul>
                     </div>
                 </div>
                 <!-- Run Time Tables -->
-                <div class="row ">
+                <div class="row">
                     <!-- tables header label -->
-                    <div class="row toggle-chart py-2">
-                        <h5>Run Time Tables</h5>
+                    <div class="row toggle-chart align-items-center">
+                        <div class="col-sm-2"><h5>Run Time Tables</h5></div>
+                        <div class="col-sm-8"></div>
+                        <div class="col-sm-2">
+                            <button class="float-end list-group-item list-group-item-action gtfs-submit">Export</button>
+                        </div>
                     </div>
                     <!-- table content -->
                     <div class="row toggle-chart">
@@ -117,6 +129,8 @@
                     <div class="row toggle-chart py-2">
                         <div class="d-flex justify-content-center">
                             <div class="col-sm-2">
+                                <input type="hidden" id="resultObject">
+                                <input type="hidden" id="routeName">
                                 <button class="list-group-item list-group-item-action gtfs-submit">Export</button>
                             </div>
                         </div>

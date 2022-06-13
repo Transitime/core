@@ -84,7 +84,7 @@ $("#submit").click(function() {
                 $(".image-container").addClass("d-none");
                 if (adjustmentsSuccess) {
                     updateParamHeader(requestParams);
-                    generatePrescriptiveRunTimesTable(response.data);
+                    generatePrescriptiveRunTimesTable(response.data, response.routeShortName);
                 } else {
                     alert("No Prescriptive RunTimes available for selected criteria.");
                 }
@@ -166,11 +166,19 @@ function getParams() {
 }
 
 // SUBMIT - Show Prescriptive RunTimes
-function generatePrescriptiveRunTimesTable(data) {
+function generatePrescriptiveRunTimesTable(data, routeName) {
 
     $(".adjustment-details").html('');
 
+    var resultObject = {};
+    resultObject.routeName = 'ROUTE ' + routeName;
+    resultObject.runTimeTables = [];
+
     data.forEach(function(tripPattern){
+        var runTimeTable = {};
+        runTimeTable.rowHeader = ['From Time','To Time'];
+        runTimeTable.rowValues = [];
+
         var currentTable = '<table class="table table-bordered small"><tbody>';
 
         // Header row
@@ -178,30 +186,84 @@ function generatePrescriptiveRunTimesTable(data) {
         currentTable += '<th>From Time</th><th>To Time</th><th>Total Time</th>';
         tripPattern.stop_names.forEach(function(stopName){
             currentTable += '<th>' + stopName + '</th>';
+            runTimeTable.rowHeader.push(stopName);
         });
         currentTable += '</tr>';
 
         // Time band info
         tripPattern.adjustments.forEach(function(adjustment){
+            var rowValue = [];
+
             currentTable += '<tr>';
             currentTable += '<td>' + adjustment.fromTime + '</td>';
             currentTable += '<td>' + adjustment.toTime + '</td>';
 
-            var totalTime = parseFloat((adjustment.total_adjusted / 60000).toFixed(0));
-            currentTable += '<td>' + totalTime + '</td>';
-            adjustment.adjusted_times.forEach(function(time){
-                var adjustment = parseFloat((time / 60000).toFixed(0));
-                currentTable += '<td>' + adjustment + '</td>';
-            });
+            rowValue.push(adjustment.fromTime);
+            rowValue.push(adjustment.toTime);
+
+
+            if(adjustment.adjusted_times !== 'undefined') {
+                var size  = adjustment.adjusted_times.length;
+                var rounded_adjusted_times = [];
+                var rounded_scheduled_times = [];
+                var rounded_total_adjusted_time = 0;
+                var rounded_total_scheduled_time = 0;
+
+                for (let idx = 0; idx < size; idx++) {
+                    var adjusted_time = adjustment.adjusted_times[idx];
+                    var schedule_time = adjustment.original_times[idx];
+
+                    var rounded_adjustment_time = getRoundedTime(adjusted_time);
+                    var rounded_scheduled_time = getRoundedTime(schedule_time);
+
+                    rounded_adjusted_times.push(rounded_adjustment_time);
+                    rounded_scheduled_times.push(rounded_scheduled_time);
+                    rounded_total_adjusted_time += rounded_adjustment_time;
+                    rounded_total_scheduled_time += rounded_scheduled_time;
+                }
+
+                currentTable += '<td><table class="prescriptive-table-cell"><tr>';
+                currentTable += '<td class="totalAdjustment">' + rounded_total_adjusted_time + '</td>';
+                currentTable += '<td class="totalScheduled">' + rounded_total_scheduled_time + '</td>';
+                currentTable += '</tr></table></td>';
+
+                for (let idx = 0; idx < size; idx++) {
+                    var adjustment_output = rounded_adjusted_times[idx];
+                    var scheduled_output = rounded_scheduled_times[idx];
+
+                    if(adjustment_output == 0){
+                        currentTable += '<td><table class="prescriptive-table-cell"><tr>';
+                        currentTable += '<td>' + '-' + '</td>'
+                        currentTable += '</tr></table></td>';
+                    }
+                    else {
+                        currentTable += '<td><table class="prescriptive-table-cell"><tr>';
+                        currentTable += '<td class="adjustment">' + adjustment_output + '</td>'
+                        currentTable += '<td class="schedule">' + scheduled_output + '</td>'
+                        currentTable += '</tr></table></td>';
+                    }
+
+                    rowValue.push(adjustment_output);
+                }
+            }
+
+            runTimeTable.rowValues.push(rowValue);
+
             currentTable += '</tr>';
+
         });
 
         currentTable += '</tbody></table>';
+
+        resultObject.runTimeTables.push(runTimeTable);
 
         //$("#current_otp").html(response.current_otp);
         //$("#expected_otp").html(response.expected_otp);
         $(".adjustment-details").append(currentTable);
     });
+
+    $("#routeName").val(routeName);
+    $("#resultObject").val(encodeURIComponent(JSON.stringify(resultObject)));
 
 
 }
@@ -221,38 +283,36 @@ function getScheduledType(timeReference) {
 // DOWNLOAD - Click
 $(".gtfs-submit").click(function() {
     $(".gtfs-submit").attr("disabled", "disabled");
-    var request = getParams();
     var type = "text/csv";
-    var filename = "stop_times.txt";
-    var dataUrl = apiUrlPrefix + "/report/runTime/prescriptiveRunTimesSchedule";
+    var errorMsg = "Unable to export Prescriptive RunTimes Schedule.";
+    var dataUrl = apiUrlPrefix + "/report/runTime/prescriptiveRunTimesExport";
+    var data = decodeURIComponent($("#resultObject").val());
+    var routeName = $("#routeName").val();
+    var filename = 'ROUTE ' + routeName + '.csv';
+
 
     $.ajax({
         url: dataUrl,
-        accepts: {
-            text: type
-        },
         // Pass in query string parameters to page being requested
-        data: request,
+        data: data,
+        method: 'POST',
         // Needed so that parameters passed properly to page being requested
-        traditional: true,
-        success: function(data) {
+        success: function(result) {
             $(".gtfs-submit").attr("disabled", false);
-            var blob = new Blob([data], {
-                type: type
-            });
-            saveFile(filename, type, blob);
+            var blob = new Blob([result], {type: 'application/csv'});
+            saveFile(filename, type, blob, errorMsg);
         },
         error: function(e) {
             console.log(e);
             $(".gtfs-submit").attr("disabled", false);
-            alert("Unable to export Prescriptive RunTimes GTFS Schedule.");
+            alert(errorMsg);
         }
     })
 
 });
 
 // DOWNLOAD - Save File Function
-function saveFile(name, type, data) {
+function saveFile(name, type, data, errorMsg) {
     if (data !== null) {
         if (window.navigator && window.navigator.msSaveOrOpenBlob) {
             return navigator.msSaveBlob(new Blob([data], {
@@ -271,6 +331,14 @@ function saveFile(name, type, data) {
             a.remove();
         }
     } else {
-        alert("Unable to export Prescriptive RunTimes GTFS Schedule.");
+        alert(errorMsg);
     }
+}
+
+function getRoundedTime(timeInMillisec){
+    var result = parseFloat((timeInMillisec / 60000).toFixed(0));
+    if(timeInMillisec > 0 && result <= 1){
+        return 2;
+    }
+    return result;
 }

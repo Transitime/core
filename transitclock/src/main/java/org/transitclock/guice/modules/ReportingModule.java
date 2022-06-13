@@ -7,6 +7,7 @@ import org.transitclock.reporting.service.OnTimePerformanceService;
 import org.transitclock.reporting.service.RunTimeService;
 import org.transitclock.reporting.service.SpeedMapService;
 import org.transitclock.reporting.service.runTime.*;
+import org.transitclock.reporting.service.runTime.prescriptive.PrescriptiveRunTimeScheduleService;
 import org.transitclock.reporting.service.runTime.prescriptive.PrescriptiveRunTimeService;
 import org.transitclock.reporting.service.runTime.prescriptive.PrescriptiveTimebandService;
 import org.transitclock.reporting.service.runTime.prescriptive.timebands.PrescriptiveRuntimeClusteringService;

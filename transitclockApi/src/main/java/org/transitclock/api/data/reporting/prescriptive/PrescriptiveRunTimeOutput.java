@@ -2,10 +2,9 @@ package org.transitclock.api.data.reporting.prescriptive;
 
 import org.transitclock.api.data.reporting.ReportDataFormatter;
 import org.transitclock.ipc.data.IpcPrescriptiveRunTime;
-import org.transitclock.ipc.data.IpcPrescriptiveRunTimeBands;
+import org.transitclock.ipc.data.IpcPrescriptiveRunTimesForTimeBands;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,10 +13,15 @@ import java.util.stream.Collectors;
 
 public class PrescriptiveRunTimeOutput implements Serializable {
 
-    public static PrescriptiveRunTimeDataAll getRunTimes(List<IpcPrescriptiveRunTimeBands> prescriptiveRunTimeBands){
+    public static PrescriptiveRunTimeDataAll getRunTimes(List<IpcPrescriptiveRunTimesForTimeBands> prescriptiveRunTimeBands){
         PrescriptiveRunTimeDataAll prescriptiveRunTimeDataAll = new PrescriptiveRunTimeDataAll();
 
-        for(IpcPrescriptiveRunTimeBands prescriptiveRunTimeBand : prescriptiveRunTimeBands){
+        String routeShortName = null;
+        for(IpcPrescriptiveRunTimesForTimeBands prescriptiveRunTimeBand : prescriptiveRunTimeBands){
+            if(routeShortName == null && prescriptiveRunTimeBand.getRouteShortName() != null){
+                routeShortName = prescriptiveRunTimeBand.getRouteShortName();
+                prescriptiveRunTimeDataAll.setRouteShortName(routeShortName);
+            }
             PrescriptiveRunTimeDataForPattern prescriptiveRunTimeDataForPattern = new PrescriptiveRunTimeDataForPattern(prescriptiveRunTimeBand);
             prescriptiveRunTimeDataAll.getDataForPatterns().add(prescriptiveRunTimeDataForPattern);
         }

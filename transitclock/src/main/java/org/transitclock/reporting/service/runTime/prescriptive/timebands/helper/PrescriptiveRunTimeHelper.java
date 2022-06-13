@@ -58,9 +58,7 @@ public class PrescriptiveRunTimeHelper {
     }
 
     public static Double getDwellPercentileValue(List<Double> dwellValues, boolean isLastStop){
-        if(isLastStop){
-            return 0d;
-        }
+        // You still want the dwell time for all the stops leading up to the last stop.
         return getPercentileValue(dwellValues, getDwellTimePercentile());
     }
 
