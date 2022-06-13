@@ -185,6 +185,9 @@ public class RunTimeForRouteQuery {
         }
 
         public RunTimeForRouteQuery build(){
+            if(endTime != null && beginTime != null && endTime < beginTime){
+                endTime += 86400;
+            }
             RunTimeForRouteQuery query = new RunTimeForRouteQuery(this);
             return query;
         }
