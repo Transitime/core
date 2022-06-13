@@ -236,6 +236,8 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	/* (non-Javadoc)
 	 * @see org.transitclock.core.dataCache.ehcache.test#findPreviousArrivalEvent(java.util.List, org.transitclock.db.structs.ArrivalDeparture)
 	 */
+	//TODO - Need to check stopPathIndex.
+	// Doesn't check for the case where the same stopPath is hit later on in the trip.
 	@Override
 	public IpcArrivalDeparture findPreviousArrivalEvent(List<IpcArrivalDeparture> arrivalDepartures,IpcArrivalDeparture current)
 	{
