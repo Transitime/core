@@ -6,9 +6,11 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.transitclock.core.ServiceType;
 import org.transitclock.core.dwell.DwellTimeUtil;
 import org.transitclock.db.hibernate.HibernateUtils;
+import org.transitclock.utils.Time;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -92,7 +94,34 @@ public class RunTimesForRoutes implements Serializable {
     @OneToMany(mappedBy = "runTimesForRoutes", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
     private List<RunTimesForStops> runTimesForStops;
 
+    @Transient
+    private boolean isScheduled;
+
     public RunTimesForRoutes() {
+    }
+
+    public RunTimesForRoutes(Trip trip, ServiceType serviceType, LocalDate tripDate){
+        Date startTime = Time.getLocalDateAsDate(tripDate);
+        startTime.setTime(startTime.getTime() + (trip.getStartTime() * 1000));
+
+        Date endTime = Time.getLocalDateAsDate(tripDate);
+        endTime.setTime(endTime.getTime() + (trip.getEndTime() * 1000));
+
+        this.configRev = trip.getConfigRev();
+        this.serviceId = trip.getServiceId();
+        this.directionId = trip.getDirectionId();
+        this.routeShortName = trip.getRouteShortName();
+        this.tripPatternId = trip.getTripPatternId();
+        this.tripId = trip.getId();
+        this.headsign = trip.getHeadsign();
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.scheduledStartTime = trip.getStartTime();
+        this.scheduledEndTime = trip.getEndTime();
+        this.nextTripStartTime = null;
+        this.vehicleId = null;
+        this.serviceType = serviceType;
+        this.dwellTime = null;
     }
 
     public RunTimesForRoutes(int configRev,
@@ -288,6 +317,14 @@ public class RunTimesForRoutes implements Serializable {
         return runTime;
     }
 
+    public Long getScheduledRunTime(){
+        Long runTime = null;
+        if(scheduledEndTime != null && scheduledStartTime != null){
+            runTime = (long)(scheduledEndTime - scheduledStartTime);
+        }
+        return runTime;
+    }
+
     public boolean hasCompleteRunTime(){
         return hasFirstStop() && hasLastStop();
     }
@@ -314,6 +351,14 @@ public class RunTimesForRoutes implements Serializable {
 
     public void setExpectedLastStopPathIndex(Integer expectedLastStopPathIndex) {
         this.expectedLastStopPathIndex = expectedLastStopPathIndex;
+    }
+
+    public boolean isScheduled() {
+        return isScheduled;
+    }
+
+    public void setScheduled(boolean scheduled) {
+        isScheduled = scheduled;
     }
 
     @Override

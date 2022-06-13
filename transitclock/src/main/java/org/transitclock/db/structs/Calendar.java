@@ -201,6 +201,11 @@ public class Calendar implements Serializable {
 	@SuppressWarnings("unchecked")
 	public static List<Calendar> getCalendars(Session session, int configRev) 
 			throws HibernateException {
+
+		if(session == null){
+			session = HibernateUtils.getSession(true);
+		}
+
 		String hql = "FROM Calendar " +
 				"    WHERE configRev = :configRev" +
 				" ORDER BY serviceId";

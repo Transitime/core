@@ -8,6 +8,8 @@ public class IpcPrescriptiveRunTime implements Serializable {
     private final Integer stopPathIndex;
     private final double adjustment;
     private final double scheduled;
+    private final double newRunTime;
+
 
     public IpcPrescriptiveRunTime(String stopPathId, String stopName, Integer stopPathIndex,
                                   double adjustment, double scheduled){
@@ -16,6 +18,7 @@ public class IpcPrescriptiveRunTime implements Serializable {
         this.stopPathIndex = stopPathIndex;
         this.adjustment = adjustment;
         this.scheduled = scheduled;
+        this.newRunTime = scheduled + adjustment;
     }
 
     public String getStopPathId() {
@@ -36,5 +39,9 @@ public class IpcPrescriptiveRunTime implements Serializable {
 
     public double getScheduled() {
         return scheduled;
+    }
+
+    public double getNewRunTime() {
+        return newRunTime;
     }
 }

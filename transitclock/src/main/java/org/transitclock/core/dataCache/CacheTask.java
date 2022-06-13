@@ -57,6 +57,7 @@ public class CacheTask implements ParallelTask {
 
     @Override
     public void run() throws Exception {
+        logger.info("in run for task with results=" + futureResults);
         Session session = null;
         List<ArrivalDeparture> results = null;
         if (futureResults != null) {
@@ -78,12 +79,18 @@ public class CacheTask implements ParallelTask {
             if (this.futureResults == null) {
                 session = HibernateUtils.getSession();
                 Criteria criteria = session.createCriteria(ArrivalDeparture.class);
+                logger.info("async / future results null, performing manual retrieval now");
                 results = criteria.add(Restrictions.between("time", startDate, endDate)).list();
             }
 
             logger.info("Populating {} cache for period {} to {}", type, startDate, endDate);
             switch (type) {
                 case TripDataHistoryCacheFactory:
+                    if (results != null) {
+                        logger.info("populating TripDataHistoryCache with " + results.size() + "records");
+                    } else {
+                        logger.info("populating TripDataHistoryCache with NuLl records");
+                    }
                     TripDataHistoryCacheFactory.getInstance().populateCacheFromDb(results);
                     break;
                 case StopArrivalDepartureCacheFactory:

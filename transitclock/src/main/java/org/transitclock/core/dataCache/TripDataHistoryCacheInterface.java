@@ -1,10 +1,7 @@
 package org.transitclock.core.dataCache;
 
-import java.util.Date;
 import java.util.List;
 
-import org.hibernate.Session;
-import org.slf4j.Logger;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 

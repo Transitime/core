@@ -1,6 +1,5 @@
 package org.transitclock.db.structs;
 
-import com.google.common.base.Objects;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitclock.core.dwell.DwellTimeUtil;
@@ -9,6 +8,7 @@ import org.transitclock.db.hibernate.HibernateUtils;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 @Entity
 @DynamicUpdate
@@ -47,6 +47,9 @@ public class RunTimesForStops implements Serializable {
     @Column
     private Boolean timePoint;
 
+    @Transient
+    private boolean isScheduled;
+
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.MERGE})
@@ -63,6 +66,7 @@ public class RunTimesForStops implements Serializable {
 
 
     public RunTimesForStops() {}
+
 
     public RunTimesForStops(String stopPathId,
                             int stopPathIndex,
@@ -101,7 +105,7 @@ public class RunTimesForStops implements Serializable {
         return prevStopDepartureTime;
     }
 
-    public void setPrevStopDepartureTime(Date prevStopArrivalTime) {
+    public void setPrevStopDepartureTime(Date prevStopDepartureTime) {
         this.prevStopDepartureTime = prevStopDepartureTime;
     }
 
@@ -207,27 +211,39 @@ public class RunTimesForStops implements Serializable {
         return null;
     }
 
+    public boolean isScheduled() {
+        return isScheduled;
+    }
+
+    public void setScheduled(boolean scheduled) {
+        isScheduled = scheduled;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RunTimesForStops that = (RunTimesForStops) o;
-        return stopPathIndex == that.stopPathIndex &&
-                Objects.equal(time, that.time) &&
-                Objects.equal(stopPathId, that.stopPathId) &&
-                Objects.equal(prevStopDepartureTime, that.prevStopDepartureTime) &&
-                Objects.equal(scheduledTime, that.scheduledTime) &&
-                Objects.equal(scheduledPrevStopArrivalTime, that.scheduledPrevStopArrivalTime) &&
-                Objects.equal(dwellTime, that.dwellTime) &&
-                Objects.equal(speed, that.speed) &&
-                Objects.equal(lastStop, that.lastStop) &&
-                Objects.equal(timePoint, that.timePoint);
+        return stopPathIndex == that.stopPathIndex
+                && isScheduled == that.isScheduled
+                && firstStopDwellSet == that.firstStopDwellSet
+                && time.equals(that.time)
+                && stopPathId.equals(that.stopPathId)
+                && Objects.equals(prevStopDepartureTime, that.prevStopDepartureTime)
+                && scheduledTime.equals(that.scheduledTime)
+                && Objects.equals(scheduledPrevStopArrivalTime, that.scheduledPrevStopArrivalTime)
+                && Objects.equals(dwellTime, that.dwellTime)
+                && Objects.equals(speed, that.speed)
+                && lastStop.equals(that.lastStop)
+                && timePoint.equals(that.timePoint)
+                && runTimesForRoutes.equals(that.runTimesForRoutes);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(stopPathIndex, time, stopPathId, prevStopDepartureTime, scheduledTime,
-                scheduledPrevStopArrivalTime, dwellTime, speed, lastStop, timePoint);
+        return Objects.hash(stopPathIndex, time, stopPathId, prevStopDepartureTime, scheduledTime,
+                scheduledPrevStopArrivalTime, dwellTime, speed, lastStop, timePoint, isScheduled,
+                runTimesForRoutes, firstStopDwellSet);
     }
 
     @Override
@@ -248,6 +264,7 @@ public class RunTimesForStops implements Serializable {
                 ", tripId=" + runTimesForRoutes.getTripId() +
                 ", startTime=" + runTimesForRoutes.getStartTime() +
                 ", route=" + runTimesForRoutes.getRouteShortName() +
+                ", runTime=" + getRunTime() +
                 '}';
     }
 }

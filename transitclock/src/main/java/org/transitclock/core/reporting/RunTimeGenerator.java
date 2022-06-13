@@ -61,12 +61,13 @@ public class RunTimeGenerator {
 
 			// Lookup ArrivalsDepartures for Trip
 			// If no valid ArrivalsDepartures then return
-			String tripId = prevMatch.getTrip().getId();
+			String routeId = prevMatch.getRoute().getId();
+			String directionId = prevMatch.getTrip().getDirectionId();
 			long vehicleMatchAvlTime = prevMatch.getAvlTime();
 			Integer tripStartTime = prevMatch.getTrip().getStartTime();
 
-			List<IpcArrivalDeparture> arrivalDeparturesForStop = getArrivalDeparturesForTrip(tripId,
-					vehicleMatchAvlTime, tripStartTime);
+			List<IpcArrivalDeparture> arrivalDeparturesForStop = getArrivalDeparturesForTrip(routeId,
+					directionId, vehicleMatchAvlTime, tripStartTime);
 
 			if(!isArrivalDeparturesValid(arrivalDeparturesForStop)){
 				return false;
@@ -144,9 +145,9 @@ public class RunTimeGenerator {
 	}
 
 
-	public List<IpcArrivalDeparture> getArrivalDeparturesForTrip(String tripId, long vehicleMatchAvlTime, Integer startTime){
+	public List<IpcArrivalDeparture> getArrivalDeparturesForTrip(String routeId, String directionId, long vehicleMatchAvlTime, Integer startTime){
 		Date nearestDay = DateUtils.truncate(new Date(vehicleMatchAvlTime), Calendar.DAY_OF_MONTH);
-		TripKey key=new TripKey(tripId, nearestDay, startTime);
+		TripKey key=new TripKey(routeId, directionId, nearestDay.getTime(), startTime);
 		return TripDataHistoryCacheFactory.getInstance().getTripHistory(key);
 	}
 

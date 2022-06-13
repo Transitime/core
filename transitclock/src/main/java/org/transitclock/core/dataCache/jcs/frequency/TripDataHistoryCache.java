@@ -61,14 +61,17 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 	}
 
 	@Override
-	public List<IpcArrivalDeparture> getTripHistory(TripKey tripKey) {	
-				
+	public List<IpcArrivalDeparture> getTripHistory(TripKey tripKey) {
+
 		/* this is what gets the trip from the buckets */
-		int time = FrequencyBasedHistoricalAverageCache.round(tripKey.getStartTime(), FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
-		
-		tripKey.setStartTime(time);
-				
-		return cache.get(tripKey);
+		int time = FrequencyBasedHistoricalAverageCache.round(tripKey.getTripStartTime(), FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
+
+		TripKey copy = new TripKey(tripKey.getRouteId(),
+						tripKey.getDirectionId(),
+						tripKey.getTripStartTime(),
+						time);
+
+		return cache.get(copy);
 	}
 
 	@Override
@@ -96,8 +99,9 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 				/* this is what gets the trip from the buckets */
 				time=FrequencyBasedHistoricalAverageCache.round(time, FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
 				
-				tripKey = new TripKey(arrivalDeparture.getTripId(),
-						nearestDay,
+				tripKey = new TripKey(arrivalDeparture.getRouteId(),
+						arrivalDeparture.getDirectionId(),
+						nearestDay.getTime(),
 						time);
 										
 				List<IpcArrivalDeparture> list  = cache.get(tripKey);

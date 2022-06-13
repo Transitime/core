@@ -81,7 +81,10 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 
 		Trip trip = dbConfig.getTrip(arrivalDeparture.getTripId());
 		if (trip != null) {
-			TripKey tripKey = new TripKey(arrivalDeparture.getTripId(), nearestDay, trip.getStartTime());
+			TripKey tripKey = new TripKey(arrivalDeparture.getRouteId(),
+							arrivalDeparture.getDirectionId(),
+							nearestDay.getTime(),
+							trip.getStartTime());
 
 			List<IpcArrivalDeparture> list = this.getTripHistory(tripKey);
 
@@ -148,7 +151,11 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 
 	private String createKey(TripKey tripKey) {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-		return keystub + tripKey.getTripId() + "_" + formatter.format(tripKey.getTripStartDate());				
+		return keystub + tripKey.getRouteId()
+						+ "_"
+						+ tripKey.getDirectionId()
+						+ "_"
+						+ formatter.format(tripKey.getTripStartTime());
 	}
 	private static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {
 		return iterable == null ? Collections.<T> emptyList() : iterable;

@@ -27,6 +27,9 @@ public class TravelTimesReport {
     private static final Logger logger =
             LoggerFactory.getLogger(TravelTimesReport.class);
 
+    public static final String REPORT_CMD = "report";
+    public static final String SHOW_TRIP_CMD = "show_trip";
+
     public static final String AUTO_CORRECT = "repair";
 
     private static final String ZERO_STOP_PATH_LENGTH = "Zero Stop Path Length";
@@ -77,7 +80,58 @@ public class TravelTimesReport {
 
     }
 
-    public void run() {
+    public void printTravelTimesForTrip(String tripId) {
+        Session session = HibernateUtils.getSession(agencyId);
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            List<TravelTimesForTrip> travelTimesForTrips = loadTravelTimes(session);
+            logger.info("found {} travel times", travelTimesForTrips.size());
+            if (travelTimesForTrips.isEmpty()) {
+                logger.error("loadTravelTimes failed for configuration");
+            }
+            boolean found = false;
+            for (TravelTimesForTrip travelTimesForTrip : travelTimesForTrips) {
+                //logger.info("checking trip {}", travelTimesForTrip.getTripCreatedForId());
+                if (travelTimesForTrip.getTripCreatedForId().equals(tripId)) {
+                    found = true;
+                    for (TravelTimesForStopPath travelTimesForStopPath : travelTimesForTrip.getTravelTimesForStopPaths()) {
+                        logger.info("{},{},{},{},{},{},{}",
+                                SHOW_TRIP_CMD,
+                                travelTimesRev,
+                                travelTimesForStopPath.getStopPathId(),
+                                travelTimesForStopPath.getHowSet(),
+                                travelTimesForStopPath.getTravelTimeSegmentLength(),
+                                travelTimesForStopPath.getStopTimeMsec(),
+                                prettyPrint(travelTimesForStopPath.getTravelTimesMsec()));
+                    }
+
+                }
+            }
+            if (!found) {
+                logger.error("trip {} not found for configuration rev {}", tripId, travelTimesRev);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null)
+                tx.rollback();
+            logger.error("exception with transaction", e);
+        } finally {
+            session.close();
+            HibernateUtils.clearSessionFactory();
+        }
+
+    }
+
+    private String prettyPrint(List<Integer> travelTimesMsec) {
+        StringBuffer sb = new StringBuffer();
+        for (Integer msec : travelTimesMsec) {
+            sb.append(msec).append(",");
+        }
+        return sb.substring(0, sb.length()-1);
+    }
+
+    public void runReport() {
         Session session = HibernateUtils.getSession(agencyId);
         Transaction tx = null;
         try {
@@ -229,22 +283,20 @@ public class TravelTimesReport {
         return repair;
     }
 
+    // usage:  CMD {travelTimeRevStart} {travelTimesRevStop} [ report_args ]
     public static void main(String[] args) {
         logger.info("Starting travel times report");
+
+        String cmd = REPORT_CMD;
 
         Integer startTravelTimesRev = null;
         Integer maxTravelTimesRev = null;
 
 
-        if (args.length == 1) {
-            startTravelTimesRev = Integer.parseInt(args[0]);
-            maxTravelTimesRev = Integer.parseInt(args[0]);
-            logger.info("running travel times on rev {}", startTravelTimesRev);
-        } else if (args.length == 2) {
-            startTravelTimesRev = Integer.parseInt(args[0]);
-            maxTravelTimesRev = Integer.parseInt(args[1]);
-            logger.info("running travel times on revs {} through {}", startTravelTimesRev, maxTravelTimesRev);
-        }
+        cmd = args[0];
+        startTravelTimesRev = Integer.parseInt(args[1]);
+        maxTravelTimesRev = Integer.parseInt(args[2]);
+        logger.info("loading travel times for rev {}", startTravelTimesRev);
 
         ConfigFileReader.processConfig();
 
@@ -255,7 +307,7 @@ public class TravelTimesReport {
             // run for last rev
             startTravelTimesRev = ActiveRevisions.get(agencyId).getTravelTimesRev();
             maxTravelTimesRev = ActiveRevisions.get(agencyId).getTravelTimesRev();
-            logger.info("running travel times on latest rev {}", startTravelTimesRev);
+            logger.info("liading travel times for latest rev {}", startTravelTimesRev);
         }
 
         int i = startTravelTimesRev;
@@ -265,7 +317,13 @@ public class TravelTimesReport {
             ttr.setAgencyId(agencyId);
             ttr.setConfigRev(configRev);
             ttr.setTravelTimesRev(i);
-            ttr.run();
+            if (REPORT_CMD.equals(cmd)) {
+                ttr.runReport();
+            } else if (SHOW_TRIP_CMD.equals(cmd)) {
+                ttr.printTravelTimesForTrip(args[3].trim());
+            } else {
+                logger.error("misunderstood command {}", cmd);
+            }
             i++;
         }
         logger.info("travel times report complete!");

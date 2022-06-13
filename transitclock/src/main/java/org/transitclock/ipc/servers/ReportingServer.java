@@ -10,6 +10,8 @@ import org.transitclock.reporting.service.OnTimePerformanceService;
 import org.transitclock.reporting.service.RunTimeService;
 import org.transitclock.reporting.service.SpeedMapService;
 import org.transitclock.reporting.service.runTime.*;
+import org.transitclock.reporting.service.runTime.prescriptive.PrescriptiveRunTimeScheduleService;
+import org.transitclock.reporting.service.runTime.prescriptive.PrescriptiveRunTimeService;
 
 import javax.inject.Inject;
 import java.time.*;
@@ -149,33 +151,40 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                 tripId, serviceType, timePointsOnly, this.getAgencyId(), readOnly);
     }
 
+    /**
+     * Get Dated Gtfs Versions
+     * @return
+     * @throws Exception
+     */
     @Override
-    public IpcPrescriptiveRunTimes getPrescriptiveRunTimes(LocalTime beginTime,
-                                                           LocalTime endTime,
-                                                           String routeIdOrShortName,
-                                                           String headsign,
-                                                           String directionId,
-                                                           String tripPatternId,
-                                                           ServiceType serviceType,
-                                                           boolean readOnly) throws Exception {
-
-        return prescriptiveRunTimeService.getPrescriptiveRunTimes(beginTime, endTime, routeIdOrShortName, headsign,
-                directionId, tripPatternId, serviceType, readOnly);
+    public List<IpcDatedGtfs> getDatedGtfs() throws Exception {
+        return prescriptiveRunTimeService.getDatedGtfs();
     }
 
+    /**
+     * New prescriptive runtimes method
+     * @param beginDate
+     * @param endDate
+     * @param routeIdOrShortName
+     * @param serviceType
+     * @param configRev
+     * @param readOnly
+     * @return
+     * @throws Exception
+     */
     @Override
-    public List<IpcStopTime> getPrescriptiveRunTimesSchedule(LocalTime beginTime,
-                                                               LocalTime endTime,
-                                                               String routeIdOrShortName,
-                                                               String headsign,
-                                                               String directionId,
-                                                               String tripPatternId,
-                                                               ServiceType serviceType,
-                                                               boolean readOnly) throws Exception {
+    public List<IpcPrescriptiveRunTimesForTimeBands> getPrescriptiveRunTimeBands(LocalDate beginDate,
+                                                                                 LocalDate endDate,
+                                                                                 String routeIdOrShortName,
+                                                                                 ServiceType serviceType,
+                                                                                 int configRev,
+                                                                                 boolean readOnly) throws Exception {
 
-        return prescriptiveRunTimeService.getPrescriptiveRunTimesSchedule(beginTime, endTime, routeIdOrShortName,
-                headsign, directionId, tripPatternId, serviceType, readOnly);
+        return prescriptiveRunTimeService.getPrescriptiveRunTimeBands(beginDate, endDate, routeIdOrShortName,
+                                                                        serviceType, configRev, readOnly);
     }
+
+
 
     // On Time Performance Reports
     @Override
@@ -199,7 +208,7 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                                         Integer earlyThreshold, Integer lateThreshold,
                                                         boolean readOnly) throws Exception{
         return routeRunTimesService.getRunTimeForRoutes(beginDate, endDate, beginTime, endTime, serviceType,
-                earlyThreshold, lateThreshold, readOnly);
+                                                        earlyThreshold, lateThreshold, readOnly);
     }
 
 }

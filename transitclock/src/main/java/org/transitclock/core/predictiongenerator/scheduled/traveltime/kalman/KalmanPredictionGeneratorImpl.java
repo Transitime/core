@@ -190,7 +190,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
     List<TravelTimeDetails> historicalTravelTimes =
             HistoricalPredictionLibrary.getHistoricalTravelTimes(
                     getTripCache(),
-                    currentVehicleState.getTrip().getId(),
+                    currentVehicleState.getTrip().getRouteId(),
                     currentVehicleState.getTrip().getDirectionId(),
                     indices.getStopPathIndex(),
                     nearestDay,

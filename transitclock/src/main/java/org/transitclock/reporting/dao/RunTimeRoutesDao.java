@@ -49,6 +49,7 @@ public class RunTimeRoutesDao {
                 "WHERE " +
                 getTimeRange(rtQuery, parameterNameAndValues) +
                 getServiceTypeWhere(rtQuery, parameterNameAndValues) +
+                getRouteShortnameWhere(rtQuery, parameterNameAndValues) +
                 getHeadSignWhere(rtQuery, parameterNameAndValues) +
                 getDirectionIdWhere(rtQuery, parameterNameAndValues) +
                 getTripPatternWhere(rtQuery, parameterNameAndValues) +
@@ -82,6 +83,16 @@ public class RunTimeRoutesDao {
             return "JOIN FETCH rt.runTimesForStops rts ";
         }
         return "";
+    }
+
+    private String getRouteShortnameWhere(RunTimeForRouteQuery rtQuery, Map<String, Object> parameterNameAndValues) {
+        String hql = "";
+        String routeShortName = rtQuery.getRouteShortName();
+        if(StringUtils.isNotBlank(routeShortName)) {
+            hql += " AND rt.routeShortName = :routeShortName ";
+            parameterNameAndValues.put("routeShortName", routeShortName);
+        }
+        return hql;
     }
 
     public static String getTimeRange(RunTimeForRouteQuery rtQuery, Map<String, Object> parameterNameAndValues) {

@@ -16,12 +16,8 @@
  */
 package org.transitclock.avl;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +29,6 @@ import org.transitclock.core.AvlProcessor;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.modules.Module;
 import org.transitclock.utils.IntervalTimer;
-import org.transitclock.utils.PlaybackIntervalTimer;
 import org.transitclock.utils.Time;
 
 /**
@@ -104,9 +99,7 @@ public class PlaybackModule extends Module {
 		super(agencyId);
 		
 		// Make sure params are set
-		if (getPlaybackVehicleId() == null 
-				|| getPlaybackVehicleId().isEmpty()
-				|| getPlaybackStartTimeStr() == null
+		if (getPlaybackStartTimeStr() == null
 				|| getPlaybackStartTimeStr().isEmpty()) {
 			logger.warn("Parameters not set. See log file for details.");			
 		}
@@ -175,22 +168,42 @@ public class PlaybackModule extends Module {
 		// The times that should be reading data for
 		long start = dbReadBeginTime;
 		long end = dbReadBeginTime + DB_POLLING_TIME_MSEC;
-				
-		logger.info("PlaybackModule getting batch of AVLReports for " +
-				"between beginTime={} and endTime={} " +
-				"and vehicleId={}", 
-				Time.dateTimeStr(start),
-				Time.dateTimeStr(end),
-				playbackVehicleId);
-		
-		List<AvlReport> avlReports = 
-				AvlReport.getAvlReportsFromDb(
-						new Date(start), 
-						new Date(end), 
-						getPlaybackVehicleId(),
-						"ORDER BY time");
-		
-		logger.info("PlaybackModule read {} AVLReports.", avlReports.size());
+
+		List<AvlReport> avlReports = null;
+		if (playbackVehicleId.getValue() == null
+				|| playbackVehicleId.getValue().length() == 0) {
+			logger.info("PlaybackModule getting batch of AVLReports for " +
+											"between beginTime={} and endTime={} " +
+											"and vehicleId={}",
+							Time.dateTimeStr(start),
+							Time.dateTimeStr(end),
+							playbackVehicleId);
+			avlReports =
+							AvlReport.getAvlReportsFromDb(
+											new Date(start),
+											new Date(end),
+											getPlaybackVehicleId(),
+											"ORDER BY time");
+
+		}	else {
+			logger.info("PlaybackModule getting batch of AVLReports for " +
+											"between beginTime={} and endTime={} " +
+											"and no vehicle specified",
+							Time.dateTimeStr(start),
+							Time.dateTimeStr(end),
+							playbackVehicleId);
+			avlReports = AvlReport.getAvlReportsFromDb(new Date(start),
+							new Date(end),
+							null,
+							"ORDER BY time");
+		}
+
+
+		if (avlReports == null) {
+			logger.error("No AVLReports were read -- something went wrong");
+		} else {
+			logger.info("PlaybackModule read {} AVLReports.", avlReports.size());
+		}
 
 		// For next time this method is called.
 		dbReadBeginTime = end;

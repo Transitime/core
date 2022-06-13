@@ -168,6 +168,9 @@ public class Trip implements Lifecycle, Serializable {
 
 	@Transient
 	private Route route;
+
+	@Column(name="tripPattern_id", updatable=false, insertable=false)
+	private String tripPatternId;
 	
 	// Note: though trip_short_name and wheelchair_accessible are available
 	// as part of the GTFS spec and in a GtfsTrip object, they are not
@@ -508,10 +511,10 @@ public class Trip implements Lifecycle, Serializable {
 			throws HibernateException {
 		// Setup the query
 		String hql = "FROM Trip t " +
-                "   left join fetch t.scheduledTimesList " +
-                "   left join fetch t.travelTimes " +
-				"    WHERE t.configRev = :configRev" +
-				"      AND tripId = :tripId";
+                " left join fetch t.scheduledTimesList " +
+                " left join fetch t.travelTimes " +
+				" WHERE t.configRev = :configRev" +
+				" AND tripId = :tripId";
 		Query query = session.createQuery(hql);
 		query.setInteger("configRev", configRev);
 		query.setString("tripId", tripId);
@@ -1129,6 +1132,10 @@ public class Trip implements Lifecycle, Serializable {
 		return getTripPattern().getStopPaths().size();
 	}
 
+	public String getTripPatternId(){
+		return tripPatternId;
+	}
+
 	/**
 	 * GTFS extension representing information about boarding
 	 * @return
@@ -1235,21 +1242,22 @@ public class Trip implements Lifecycle, Serializable {
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.
 
-		String hql = "SELECT " +
-				"t " +
-				"FROM " +
-				"Trip t " +
+		String hql = "SELECT DISTINCT t " +
+				"FROM Trip t " +
+				"LEFT JOIN fetch t.scheduledTimesList " +
 				"WHERE t.routeShortName = :routeShortName " +
 				"AND t.configRev IN (:configRevs) " +
 				getHeadsignWhere(tripQuery, parameterNameAndValues) +
 				getDirectionWhere(tripQuery, parameterNameAndValues) +
+				getTripPatternWhere(tripQuery, parameterNameAndValues) +
 				getStartTimeWhere(tripQuery, parameterNameAndValues) +
 				"ORDER BY t.startTime";
 		try {
-			parameterNameAndValues.put("routeShortName", tripQuery.getRouteShortName());
-			parameterNameAndValues.put("configRevs", tripQuery.getConfigRevs());
-
 			Query query = session.createQuery(hql);
+
+			query.setParameter("routeShortName", tripQuery.getRouteShortName());
+			query.setParameterList("configRevs", new ArrayList(tripQuery.getConfigRevs()));
+
 			for (Map.Entry<String, Object> e : parameterNameAndValues.entrySet()) {
 				query.setParameter(e.getKey(), e.getValue());
 			}
@@ -1261,7 +1269,7 @@ public class Trip implements Lifecycle, Serializable {
 
 			return results;
 
-		} catch (HibernateException e) {
+		} catch (Exception e) {
 			// Log error to the Core logger
 			Core.getLogger().error("Unable to retrieve trips", e);
 			return null;
@@ -1286,6 +1294,14 @@ public class Trip implements Lifecycle, Serializable {
 		if(StringUtils.isNotBlank(tripQuery.getDirection())){
 			parameterNameAndValues.put("directionId", tripQuery.getDirection());
 			return "AND t.directionId = :directionId ";
+		}
+		return "";
+	}
+
+	private static String getTripPatternWhere(TripQuery tripQuery, Map<String, Object> parameterNameAndValues){
+		if(StringUtils.isNotBlank(tripQuery.getDirection())){
+			parameterNameAndValues.put("tripPatternId", tripQuery.getTripPatternId());
+			return "AND t.tripPatternId = :tripPatternId ";
 		}
 		return "";
 	}

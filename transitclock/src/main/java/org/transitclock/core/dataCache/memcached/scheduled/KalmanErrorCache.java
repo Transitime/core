@@ -108,10 +108,20 @@ public class KalmanErrorCache implements ErrorCache {
 	}
 
 	private String createKey(KalmanErrorCacheKey key) {
-		return keystub + key.getTripId() + "_" + key.getStopPathIndex();
+
+		return keystub + key.getRouteId()
+						+ "_" + key.getDirectionId()
+						+ "_" + key.getStartTimeSecondsIntoDay()
+						+ "_" + key.getOriginStopId()
+						+ "_" + key.getDestinationStopId();
 	}
 	private String createDwellKey(KalmanErrorCacheKey key) {
-		return dwellKeystub + key.getTripId() + "_" + key.getStopPathIndex();
+		return dwellKeystub
+						+ key.getRouteId()
+						+ "_" + key.getDirectionId()
+						+ "_" + key.getStartTimeSecondsIntoDay()
+						+ "_" + key.getOriginStopId()
+						+ "_" + key.getDestinationStopId();
 	}
 
 

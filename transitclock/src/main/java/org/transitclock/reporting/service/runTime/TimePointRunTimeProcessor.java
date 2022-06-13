@@ -13,6 +13,8 @@ public class TimePointRunTimeProcessor {
     Map<StopPathRunTimeKey, StopPath> stopPathsMap = new LinkedHashMap<>();
     Map<StopPathRunTimeKey, StopPath> timePointStopPathsMap = new LinkedHashMap<>();
     Map<StopPathRunTimeKey, TimePointStatistics> timePointStatsMap = new HashMap<>();
+    Map<StopPathRunTimeKey, TimePointStatistics> scheduledTimePointStatsMap = new HashMap<>();
+
     Map<Integer, ScheduleTime> scheduleTimesByStopPathIndexMap;
 
     public TimePointRunTimeProcessor(List<StopPath> stopPaths) {
@@ -50,7 +52,7 @@ public class TimePointRunTimeProcessor {
 
             if(isValid(runTimeForStops)){
                 currentTimePointRunTime += runTimeForStops.getRunTime() == null ? 0 : runTimeForStops.getRunTime();
-                currentTimePointDwellTime += runTimeForStops.getDwellTime() == null ? 0 : runTimeForStops.getDwellTime();
+                currentTimePointDwellTime += runTimeForStops.getDwellTime() == null || runTimeForStops.getLastStop() ? 0 : runTimeForStops.getDwellTime();
             }else{
                 validTimePoint = false;
             }
@@ -60,7 +62,10 @@ public class TimePointRunTimeProcessor {
                     if(key.getStopPathIndex() == 0){
                         currentTimePointRunTime = 0d;
                     }
-                    createRunTimeForTimePoint(key, stopPath, currentTimePointRunTime, currentTimePointDwellTime);
+
+                    TimePointStatistics timePointStatistics = getOrCreateTimePointStatistics(key, stopPath);
+
+                    createRunTimeForTimePoint(timePointStatistics, currentTimePointRunTime, currentTimePointDwellTime);
                 }
                 currentTimePointRunTime = 0d;
                 currentTimePointDwellTime = 0d;
@@ -91,17 +96,6 @@ public class TimePointRunTimeProcessor {
         return runTimeForStops.getDwellTime() != null && runTimeForStops.getRunTime() != null;
     }
 
-
-    public void createRunTimeForTimePoint(StopPathRunTimeKey key,
-                                          StopPath stopPath,
-                                         Double currentTimePointRunTime,
-                                         Double currentTimePointDwellTime){
-        TimePointStatistics timePointStatistics = getOrCreateTimePointStatistics(key, stopPath);
-        timePointStatistics.getRunTimeStats().add(currentTimePointRunTime);
-        timePointStatistics.getDwellTimeStats().add(currentTimePointDwellTime);
-        timePointStatistics.getTotalRunTimes().add(currentTimePointRunTime + currentTimePointDwellTime);
-    }
-
     private TimePointStatistics getOrCreateTimePointStatistics(StopPathRunTimeKey key, StopPath stopPath){
         TimePointStatistics timePointStatistics = timePointStatsMap.get(key);
         if(timePointStatistics == null){
@@ -113,12 +107,43 @@ public class TimePointRunTimeProcessor {
 
     }
 
+    private TimePointStatistics getOrCreateScheduledTimePointStatistics(StopPathRunTimeKey key, StopPath stopPath){
+        TimePointStatistics timePointStatistics = scheduledTimePointStatsMap.get(key);
+        if(timePointStatistics == null){
+            timePointStatistics = new TimePointStatistics(key.getStopPathId(), key.getStopPathIndex(),
+                    stopPath.getStopName(), stopPath.isLastStopInTrip());
+            scheduledTimePointStatsMap.put(key, timePointStatistics);
+        }
+        return timePointStatistics;
+
+    }
+
+    public void createRunTimeForTimePoint(TimePointStatistics timePointStatistics,
+                                          Double currentTimePointRunTime,
+                                          Double currentTimePointDwellTime){
+        timePointStatistics.getRunTimeStats().add(currentTimePointRunTime);
+        timePointStatistics.getDwellTimeStats().add(currentTimePointDwellTime);
+        timePointStatistics.getTotalRunTimes().add(currentTimePointRunTime + currentTimePointDwellTime);
+    }
+
+
     public Map<StopPathRunTimeKey, TimePointStatistics> getTimePointsStatistics(){
         return timePointStatsMap;
     }
 
     public Map<StopPathRunTimeKey, TimePointStatistics> getSortedTimePointsStatistics(){
         return timePointStatsMap
+                .entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByKey())
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+    }
+
+    public Map<StopPathRunTimeKey, TimePointStatistics> getSortedScheduledTimePointsStatistics(){
+        return scheduledTimePointStatsMap
                 .entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByKey())

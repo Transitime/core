@@ -1,7 +1,5 @@
-package org.transitclock.reporting.service.runTime;
+package org.transitclock.reporting.service.runTime.prescriptive.model;
 
-import org.transitclock.config.BooleanConfigValue;
-import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.db.structs.ScheduleTime;
 import org.transitclock.ipc.data.IpcPrescriptiveRunTime;
 import org.transitclock.ipc.data.IpcRunTime;
@@ -10,7 +8,7 @@ import org.transitclock.reporting.TimePointStatistics;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static org.transitclock.reporting.service.runTime.PrescriptiveRunTimeHelper.*;
+import static org.transitclock.reporting.service.runTime.prescriptive.timebands.helper.PrescriptiveRunTimeHelper.*;
 
 public class PrescriptiveRunTimeState {
 
@@ -130,7 +128,12 @@ public class PrescriptiveRunTimeState {
         if (timePointStatistics.isFirstStop()) {
             return 0d;
         }
-        return (getCurrentTimePointFixedTime() + getCurrentTimePointVariableTime() + getCurrentTimePointDwellTime()) - scheduleRunTime;
+        Double currentFixedTime = getCurrentTimePointFixedTime();
+        Double currentTimePointVariableTime = getCurrentTimePointVariableTime();
+        Double currentTimePointDwellTime = getCurrentTimePointDwellTime();
+
+        Double adjustment = (currentFixedTime + currentTimePointVariableTime + currentTimePointDwellTime) - scheduleRunTime;
+        return adjustment;
     }
 
     private Double getScheduledRunTime() {

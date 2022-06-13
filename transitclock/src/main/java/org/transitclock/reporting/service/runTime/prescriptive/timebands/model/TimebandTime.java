@@ -1,0 +1,68 @@
+package org.transitclock.reporting.service.runTime.prescriptive.timebands.model;
+
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.transitclock.utils.Time.formatSecondsIntoDay;
+
+public class TimebandTime {
+    private LocalTime startTime;
+    private LocalTime endTime;
+    private LocalTime adjustedStartTime;
+    private LocalTime adjustedEndTime;
+
+    public TimebandTime(){}
+
+    public TimebandTime(LocalTime startTime, LocalTime endTime){
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+
+    public TimebandTime(List<RunTimeData> runTimeData){
+        this.startTime = LocalTime.ofSecondOfDay(runTimeData.stream().findFirst().get().getScheduledStartTime() % 86400);
+        try {
+            this.endTime = LocalTime.ofSecondOfDay(runTimeData.stream().reduce((first, second) -> second).get().getScheduledStartTime() % 86400);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
+    }
+
+    public LocalTime getAdjustedStartTime() {
+        if(adjustedStartTime == null){
+            return startTime;
+        }
+        return adjustedStartTime;
+    }
+
+    public void setAdjustedStartTime(LocalTime adjustedStartTime) {
+        this.adjustedStartTime = adjustedStartTime;
+    }
+
+    public LocalTime getAdjustedEndTime() {
+        if(adjustedEndTime == null){
+            return endTime;
+        }
+        return adjustedEndTime;
+    }
+
+    public void setAdjustedEndTime(LocalTime adjustedEndTime) {
+        this.adjustedEndTime = adjustedEndTime;
+    }
+}
+

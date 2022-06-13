@@ -27,10 +27,7 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
@@ -1067,6 +1064,37 @@ public class Time {
 			return Math.abs(minuendDate.getTime() - subtrahendDate.getTime());
 		}
 		return null;
+	}
+
+	public static String formatSecondsIntoDay(int timeInSeconds)
+	{
+		int hours = timeInSeconds / 3600;
+		int secondsLeft = timeInSeconds - hours * 3600;
+		int minutes = secondsLeft / 60;
+		int seconds = secondsLeft - minutes * 60;
+
+		String formattedTime = "";
+		if (hours < 10)
+			formattedTime += "0";
+		formattedTime += hours + ":";
+
+		if (minutes < 10)
+			formattedTime += "0";
+		formattedTime += minutes + ":";
+
+		if (seconds < 10)
+			formattedTime += "0";
+		formattedTime += seconds ;
+
+		return formattedTime;
+	}
+
+	public static Date getLocalDateAsDate(LocalDate localDate){
+		return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+	}
+
+	public static LocalTime getLocalTimeFromDate(Date date){
+		return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault()).toLocalTime();
 	}
 
 	/**

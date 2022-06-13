@@ -242,7 +242,9 @@ public class CacheApi {
 	tags= {"cache"})
 	public Response getTripArrivalDepartureCacheData(@BeanParam StandardParameters stdParameters,
 			@Parameter(description="if specified, returns the list for that tripId.",required=false) 
-			@QueryParam(value = "tripId") String tripid,
+			@QueryParam(value = "routeId") String routeId,
+			@Parameter(description="if specified, returns the list for that direction.",required=false)
+			@QueryParam(value = "directionId") String directionId,
 			@Parameter(description="if specified, returns the list for that date.",required=false)
 			@QueryParam(value = "date") DateParam date,
 			@Parameter(description="if specified, returns the list for that starttime.",required=false)
@@ -253,7 +255,7 @@ public class CacheApi {
 			LocalDate queryDate = null;
 			if (date != null)
 				queryDate = date.getDate();
-			List<IpcArrivalDeparture> result = cachequeryInterface.getTripArrivalDepartures(tripid, queryDate,
+			List<IpcArrivalDeparture> result = cachequeryInterface.getTripArrivalDepartures(routeId, directionId, queryDate,
 					starttime);
 
 			ApiArrivalDepartures apiResult = new ApiArrivalDepartures(result);
@@ -305,14 +307,20 @@ public class CacheApi {
 	tags= {"kalman","cache"})
 	public Response getKalmanErrorValue(@BeanParam StandardParameters stdParameters,
 			@Parameter(description="Trip Id",required=true)
-			@QueryParam(value = "tripId") String tripId, 
-			@Parameter(description="Stop path index",required=true)
-			@QueryParam(value = "stopPathIndex") Integer stopPathIndex) {
+			@QueryParam(value = "routeId") String routeId,
+			@QueryParam(value = "directionId") String directionId,
+			@Parameter(description="Trip Start time",required=true)
+			@QueryParam(value = "startTimeSecondsIntoDay") Integer startTimeSecondsIntoDay,
+			@Parameter(description="Origin Stop Id",required=true)
+			@QueryParam(value = "originStopId") String originStopId,
+			@Parameter(description="Destination Stop Id",required=true)
+			@QueryParam(value = "destinationStopId") String destinationStopId) {
 		try {
 
 			CacheQueryInterface cachequeryInterface = stdParameters.getCacheQueryInterface();
 
-			Double result = cachequeryInterface.getKalmanErrorValue(tripId, stopPathIndex);
+			Double result = cachequeryInterface.getKalmanErrorValue(routeId, directionId,
+							startTimeSecondsIntoDay, originStopId, destinationStopId);
 
 			Response response = stdParameters.createResponse(result);
 

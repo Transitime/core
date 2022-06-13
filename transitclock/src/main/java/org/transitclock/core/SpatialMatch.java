@@ -594,6 +594,11 @@ public class SpatialMatch {
 			  logger.error("no scheduled wait stop time for {} {}", tripIndex, stopPathIndex);
 			  return -1;
 			}
+			if (scheduleTime.getDepartureTime() == null) {
+				// timepoints dont have departure times by convention
+				// this isn't an error
+				return -1;
+			}
 			return scheduleTime.getDepartureTime();
 		} catch (Exception e) {
 			logger.error("Tried to get wait stop time for a stop that didn't "

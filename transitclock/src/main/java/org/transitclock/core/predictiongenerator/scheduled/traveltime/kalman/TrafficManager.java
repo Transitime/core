@@ -59,8 +59,10 @@ public class TrafficManager {
 
   public static TrafficManager getInstance() {
     if (INSTANCE == null) {
-      INSTANCE = new TrafficManager();
-      INSTANCE.init();
+      if (trafficDataEnabled.getValue()) {
+        INSTANCE = new TrafficManager();
+        INSTANCE.init();
+      }
     }
     return INSTANCE;
   }

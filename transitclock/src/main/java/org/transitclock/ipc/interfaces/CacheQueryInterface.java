@@ -71,13 +71,15 @@ public interface CacheQueryInterface extends Remote {
 	
 	/**
 	 * Return the arrivals and departures for a trip on a specific day and start time
-	 * @param tripId
+	 * @param routeId
+	 * @param directionId
 	 * @param date
 	 * @param starttime
 	 * @return
 	 * @throws RemoteException
 	 */
-	public List<IpcArrivalDeparture> getTripArrivalDepartures(String tripId, LocalDate date, Integer starttime)
+	public List<IpcArrivalDeparture> getTripArrivalDepartures(String routeId, String directionId,
+																														LocalDate date, Integer starttime)
 		throws RemoteException;
 	
 	
@@ -112,11 +114,14 @@ public interface CacheQueryInterface extends Remote {
 	
 	/**
 	 * Return the latest Kalman error value for a the stop path of a trip.
-	 * @param tripId
-	 * @param stopPathIndex
+	 * @param routeId
+	 * @param directionId
+	 *
 	 * @return
 	 * @throws RemoteException
 	 */	
-	public  Double getKalmanErrorValue(String tripId, Integer stopPathIndex) throws RemoteException;
+	public  Double getKalmanErrorValue(String routeId, String directionId,
+																		 Integer startTimeSecondsIntoDay,
+																		 String originStopId, String destinationStopId) throws RemoteException;
 
 }

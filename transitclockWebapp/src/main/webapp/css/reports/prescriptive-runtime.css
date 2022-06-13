@@ -1,0 +1,66 @@
+.adjustment-details table{
+    table-layout: fixed;
+}
+
+.adjustment-details table th{
+    font-size: smaller;
+}
+
+.prescriptive-table-cell {
+    width: 100%;
+    font-size:14px;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+.prescriptive-table-cell td{
+    text-align: center;
+}
+
+.prescriptive-table-cell .adjustment{
+    width: 65%;
+    background-color: rgba(146, 245, 116, .5);
+    font-weight: bold;
+}
+
+.prescriptive-table-cell .totalAdjustment {
+    width: 65%;
+    background-color: rgba(255, 191, 41, .6);
+    font-weight: bold;
+}
+
+.prescriptive-table-cell .schedule, .prescriptive-table-cell .totalScheduled{
+    width: 35%;
+    background-color: rgba(226, 246, 95, .5);
+    opacity:0.6;
+}
+.prescriptive-legend .color-block{
+    display: inline-block;
+    width: 14px;
+    min-width: 14px;
+    height: 14px;
+    border-style: solid;
+}
+
+.prescriptive-legend {
+    list-style: none;
+}
+
+.prescriptive-legend-label {
+    font-size: small;
+    margin-left: 6px;
+}
+
+.prescriptive-legend li { float: left; margin-right: 12px; }
+.prescriptive-legend .prescriptive-legend-block {
+    border: 1px solid #ccc;
+    float: left;
+    width: 12px;
+    height: 12px;
+    margin: 2px;
+}
+
+
+
+
+
