@@ -37,23 +37,13 @@ public class DatedGtfsService {
 
         for(int i=0; i < feedInfosCount; i++){
             FeedInfo currentFeedInfo = feedInfos.get(i);
-            String currentFeedVersion = getConvertedFeedVersion(currentFeedInfo);
             DatedGtfs currentDateRangeForVersion;
-            DatedGtfs nextVersionDateRange = null;
-
-            // Get Next Date Range
-            if(i+1 < feedInfosCount){
-                FeedInfo nextFeedInfo = feedInfos.get(i+1);
-                String nextFeedVersion = getConvertedFeedVersion(nextFeedInfo);
-                if(!nextFeedVersion.equalsIgnoreCase(currentFeedVersion)){
-                    nextVersionDateRange =  getDateRangeForFeedInfo(nextFeedInfo, nextFeedVersion);
-                }
-            }
 
             // Current Date Range
             String feedVersion = getConvertedFeedVersion(currentFeedInfo);
             currentDateRangeForVersion = datesForFeedVersion.get(feedVersion);
-            // First Date Range for this vrsion
+
+            // First Date Range for this version
             if(currentDateRangeForVersion == null){
                 currentDateRangeForVersion = getDateRangeForFeedInfo(currentFeedInfo, feedVersion);
             }
@@ -61,8 +51,7 @@ public class DatedGtfsService {
             else {
                 // Reconfigure start and end date by comparing to next and prev date range
                 currentDateRangeForVersion = getDateRangeForFeedInfo(currentDateRangeForVersion,
-                                                                     prevDateRangeForVersion,
-                                                                     nextVersionDateRange);
+                                                                     prevDateRangeForVersion);
             }
 
             // Add to map
@@ -74,7 +63,13 @@ public class DatedGtfsService {
             prevDateRangeForVersion = currentDateRangeForVersion;
         }
 
-        return datesForFeedVersion.values().stream().collect(Collectors.toList());
+        Map<String, DatedGtfs> sortedDatesForFeedVersion = new LinkedHashMap<>();
+        datesForFeedVersion.entrySet()
+                           .stream()
+                           .sorted(Map.Entry.comparingByKey(Comparator.reverseOrder()))
+                           .forEachOrdered(x -> sortedDatesForFeedVersion.put(x.getKey(), x.getValue()));
+
+        return sortedDatesForFeedVersion.values().stream().collect(Collectors.toList());
     }
 
 
@@ -92,26 +87,31 @@ public class DatedGtfsService {
     }
 
     private static DatedGtfs getDateRangeForFeedInfo(DatedGtfs currentDateRangeForVersion,
-                                                     DatedGtfs prevDateRangeForVersion,
-                                                     DatedGtfs nextVersionDateRange){
+                                                     DatedGtfs prevDateRangeForVersion){
 
         LocalDate prevStartDate = prevDateRangeForVersion.getStartDate();
         LocalDate prevEndDate = prevDateRangeForVersion.getEndDate();
+
         LocalDate currentStartDate = currentDateRangeForVersion.getStartDate();
         LocalDate currentEndDate = currentDateRangeForVersion.getStartDate();
-        LocalDate nextVersionStartDate = nextVersionDateRange.getStartDate();
-        int currentConfigRev = currentDateRangeForVersion.getConfigRev();
 
-        if(nextVersionStartDate.isAfter(currentStartDate) && currentStartDate != null && currentEndDate != null){
+        LocalDate minStartDate = prevStartDate;
+        LocalDate maxEndDate = prevEndDate;
 
-            LocalDate minStartDate = currentStartDate.isBefore(prevStartDate) ? currentStartDate : prevStartDate;
-            LocalDate maxEndDate = currentEndDate.isAfter(prevEndDate) ? currentStartDate : prevStartDate;
-            maxEndDate = !maxEndDate.isAfter(nextVersionStartDate) ? maxEndDate : nextVersionStartDate;
+        String feedVersion = currentDateRangeForVersion.getVersion();
+        int configRev = prevDateRangeForVersion.getConfigRev();
 
-            return new DatedGtfs(minStartDate, maxEndDate, currentDateRangeForVersion.getVersion(), currentConfigRev);
+        if(!currentStartDate.isAfter(minStartDate)){
+            minStartDate = currentStartDate;
         }
 
-        return prevDateRangeForVersion;
+        if(!currentEndDate.isBefore(maxEndDate)){
+            maxEndDate = currentStartDate;
+            configRev = currentDateRangeForVersion.getConfigRev();
+        }
+
+        return new DatedGtfs(minStartDate, maxEndDate, feedVersion, configRev);
+
     }
 
     private static String getConvertedFeedVersion(FeedInfo feedInfo){
@@ -120,11 +120,14 @@ public class DatedGtfsService {
 
         try{
             String[] feedVersionArray = feedVersion.split(regex);
-            return buildRegexFeedVersion(feedVersionArray);
+            feedVersion = buildRegexFeedVersion(feedVersionArray);
+            if(feedVersion == null){
+                return feedVersion;
+            }
         } catch (Exception e){
-            return feedVersion;
+            e.printStackTrace();
         }
-
+        return feedVersion;
     }
 
     private static String buildRegexFeedVersion(String[] feedVersionArray) throws Exception{
@@ -134,10 +137,6 @@ public class DatedGtfsService {
                                 .collect(Collectors.toList());
 
         StringBuilder sb = new StringBuilder();
-       /* for(Integer index : indices){
-            sb.append("_");
-            sb.append(feedVersionArray[index]);
-        }*/
 
         for(int i=0; i < indices.size(); i++){
             if(i>0){
