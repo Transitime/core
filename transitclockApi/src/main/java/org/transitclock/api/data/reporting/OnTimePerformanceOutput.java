@@ -43,8 +43,6 @@ public class OnTimePerformanceOutput {
     private static Map<String, Integer> getOTPLabelsAndCounts(List<IpcArrivalDepartureScheduleAdherence> arrivalDepartures,
                                                               int minEarlySec, int minLateSec){
 
-        minLateSec = -1 * minLateSec;
-
         Map<String, Integer> otpLabelsAndCountsMap = new LinkedHashMap<>();
         otpLabelsAndCountsMap.put(EARLY, 0);
         otpLabelsAndCountsMap.put(LATE, 0);
@@ -56,7 +54,7 @@ public class OnTimePerformanceOutput {
 
         for(IpcArrivalDeparture ad : arrivalDepartures) {
             if(ad.isArrival()){
-                if (ad.getScheduledAdherence().getTemporalDifference() < minLateSec) {
+                if (ad.getScheduledAdherence().isLaterThan(minLateSec)) {
                     lateCount = otpLabelsAndCountsMap.get(LATE);
                     otpLabelsAndCountsMap.put(LATE, lateCount + 1);
                 } else {
