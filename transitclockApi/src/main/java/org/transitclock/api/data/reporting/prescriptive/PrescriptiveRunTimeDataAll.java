@@ -12,6 +12,12 @@ public class PrescriptiveRunTimeDataAll {
     @XmlElement
     private String routeShortName;
 
+    @XmlElement
+    private String currentOnTime;
+
+    @XmlElement
+    private String expectedOnTime;
+
     public PrescriptiveRunTimeDataAll() {
     }
 
@@ -25,5 +31,21 @@ public class PrescriptiveRunTimeDataAll {
 
     public void setRouteShortName(String routeShortName) {
         this.routeShortName = routeShortName;
+    }
+
+    public String getCurrentOnTime() {
+        return currentOnTime;
+    }
+
+    public void setCurrentOnTime(String currentOnTime) {
+        this.currentOnTime = currentOnTime;
+    }
+
+    public String getExpectedOnTime() {
+        return expectedOnTime;
+    }
+
+    public void setExpectedOnTime(String expectedOnTime) {
+        this.expectedOnTime = expectedOnTime;
     }
 }

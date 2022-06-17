@@ -24,28 +24,39 @@ public class OnTimePerformanceService {
             String routeIdOrShortName, ServiceType serviceType, boolean timePointsOnly,
             String headsign, boolean readOnly) throws Exception {
 
-        String routeShortName = getRouteShortName(routeIdOrShortName);
-
-        ArrivalDepartureQuery.Builder adBuilder = new ArrivalDepartureQuery.Builder();
-        ArrivalDepartureQuery adQuery = adBuilder
-                                        .beginDate(beginDate)
-                                        .endDate(endDate)
-                                        .beginTime(beginTime)
-                                        .endTime(endTime)
-                                        .routeShortName(routeShortName)
-                                        .serviceType(serviceType)
-                                        .timePointsOnly(timePointsOnly)
-                                        .scheduledTimesOnly(true)
-                                        .readOnly(readOnly)
-                                        .build();
-
-        List<ArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesFromDb(adQuery);
         List<IpcArrivalDepartureScheduleAdherence> ipcArrivalDepartures = new ArrayList<>();
+
+        List<ArrivalDeparture> arrivalDepartures = getArrivalsDepartures(beginDate, endDate, beginTime, endTime,
+                routeIdOrShortName, serviceType, timePointsOnly, headsign, readOnly);
 
         for(ArrivalDeparture arrivalDeparture : arrivalDepartures){
             IpcArrivalDepartureScheduleAdherence ipcArrivalDeparture = new IpcArrivalDepartureScheduleAdherence(arrivalDeparture);
             ipcArrivalDepartures.add(ipcArrivalDeparture);
         }
         return ipcArrivalDepartures;
+    }
+
+    public List<ArrivalDeparture> getArrivalsDepartures(
+            LocalDate beginDate, LocalDate endDate, LocalTime beginTime, LocalTime endTime,
+            String routeIdOrShortName, ServiceType serviceType, boolean timePointsOnly,
+            String headsign, boolean readOnly) throws Exception {
+
+        String routeShortName = getRouteShortName(routeIdOrShortName);
+
+        ArrivalDepartureQuery.Builder adBuilder = new ArrivalDepartureQuery.Builder();
+        ArrivalDepartureQuery adQuery = adBuilder
+                .beginDate(beginDate)
+                .endDate(endDate)
+                .beginTime(beginTime)
+                .endTime(endTime)
+                .routeShortName(routeShortName)
+                .serviceType(serviceType)
+                .timePointsOnly(timePointsOnly)
+                .scheduledTimesOnly(true)
+                .readOnly(readOnly)
+                .build();
+
+        List<ArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesFromDb(adQuery);
+        return arrivalDepartures;
     }
 }

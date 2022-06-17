@@ -31,4 +31,11 @@ public class NumberFormatter {
         return Float.isNaN(value) ?
                 null : String.valueOf(MathUtils.round(value, precision));
     }
+
+    public static String getFractionAsPercentage(Double value){
+        if(value == null){
+            return "0%";
+        }
+        return String.valueOf(Math.round(value * 100)) + "%";
+    }
 }

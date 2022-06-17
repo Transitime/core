@@ -10,7 +10,7 @@ import java.util.List;
 public class PrescriptiveRunTimeHelper {
 
     private static final DoubleConfigValue prescriptiveDwellTime = new DoubleConfigValue(
-                "transitclock.runTime.prescriptiveDwellTimePercentile", 70d,
+                "transitclock.runTime.prescriptiveDwellTimePercentile", 60d,
          "The dwellTime percentile that prescriptive runtime algorithm uses when calculating schedule adjustments");
 
     private static Double getDwellTimePercentile(){

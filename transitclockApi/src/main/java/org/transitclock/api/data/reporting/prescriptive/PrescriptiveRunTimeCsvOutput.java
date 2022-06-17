@@ -5,21 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import org.transitclock.api.data.reporting.ReportDataFormatter;
-import org.transitclock.ipc.data.IpcPrescriptiveRunTime;
-import org.transitclock.ipc.data.IpcPrescriptiveRunTimesForTimeBands;
 
-import javax.json.JsonArray;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static java.lang.System.out;
 
 
 public class PrescriptiveRunTimeCsvOutput implements Serializable {

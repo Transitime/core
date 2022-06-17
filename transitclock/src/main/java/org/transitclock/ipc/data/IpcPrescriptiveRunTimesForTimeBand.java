@@ -8,14 +8,19 @@ import java.util.List;
 public class IpcPrescriptiveRunTimesForTimeBand implements Serializable {
     private final String startTime;
     private final String endTime;
+    private final double currentOtp;
+    private final double expectedOtp;
     private final List<IpcPrescriptiveRunTime> runTimeByStopPathId;
 
     public IpcPrescriptiveRunTimesForTimeBand(String startTime,
                                               String endTime,
-                                              List<IpcPrescriptiveRunTime> runTimeByStopPathId,
-                                              List<IpcPrescriptiveRunTime> scheduledRunTimeByStopPathId) {
+                                              double currentOtp,
+                                              double expectedOtp,
+                                              List<IpcPrescriptiveRunTime> runTimeByStopPathId) {
         this.startTime = startTime;
         this.endTime = endTime;
+        this.currentOtp = currentOtp;
+        this.expectedOtp = expectedOtp;
         this.runTimeByStopPathId = ListUtils.unmodifiableList(runTimeByStopPathId);
     }
 
@@ -25,6 +30,14 @@ public class IpcPrescriptiveRunTimesForTimeBand implements Serializable {
 
     public String getEndTime() {
         return endTime;
+    }
+
+    public double getCurrentOtp() {
+        return currentOtp;
+    }
+
+    public double getExpectedOtp() {
+        return expectedOtp;
     }
 
     public List<IpcPrescriptiveRunTime> getRunTimeByStopPathId() {

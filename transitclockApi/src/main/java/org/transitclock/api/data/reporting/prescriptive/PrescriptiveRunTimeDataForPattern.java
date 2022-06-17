@@ -1,7 +1,7 @@
 package org.transitclock.api.data.reporting.prescriptive;
 
 import org.transitclock.ipc.data.IpcPrescriptiveRunTimesForTimeBand;
-import org.transitclock.ipc.data.IpcPrescriptiveRunTimesForTimeBands;
+import org.transitclock.ipc.data.IpcPrescriptiveRunTimesForPattern;
 import org.transitclock.ipc.data.IpcStopPath;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -17,9 +17,13 @@ public class PrescriptiveRunTimeDataForPattern {
     @XmlElement(name = "stop_names")
     private List<String> stopNames;
 
+    private double currentOtp;
+
+    private double expectedOtp;
+
     public PrescriptiveRunTimeDataForPattern() {}
 
-    public PrescriptiveRunTimeDataForPattern(IpcPrescriptiveRunTimesForTimeBands prescriptiveRunTimeBands) {
+    public PrescriptiveRunTimeDataForPattern(IpcPrescriptiveRunTimesForPattern prescriptiveRunTimeBands) {
         this.stopNames = prescriptiveRunTimeBands.getTimePoints().stream()
                                                             .map(IpcStopPath::getStopName)
                                                             .collect(Collectors.toList());

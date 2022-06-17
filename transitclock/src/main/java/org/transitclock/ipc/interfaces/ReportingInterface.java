@@ -19,12 +19,12 @@ public interface ReportingInterface extends Remote {
 
     List<IpcDatedGtfs> getDatedGtfs() throws Exception;
 
-    List<IpcPrescriptiveRunTimesForTimeBands> getPrescriptiveRunTimeBands(LocalDate beginDate,
-                                                                          LocalDate endDate,
-                                                                          String routeIdOrShortName,
-                                                                          ServiceType serviceType,
-                                                                          int configRev,
-                                                                          boolean readOnly) throws Exception;
+    IpcPrescriptiveRunTimesForPatterns getPrescriptiveRunTimeBands(LocalDate beginDate,
+                                                                        LocalDate endDate,
+                                                                        String routeIdOrShortName,
+                                                                        ServiceType serviceType,
+                                                                        int configRev,
+                                                                        boolean readOnly) throws Exception;
 
 
     List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForOtp(LocalDate beginDate, LocalDate endDate,

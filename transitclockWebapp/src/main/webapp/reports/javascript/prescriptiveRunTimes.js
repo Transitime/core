@@ -84,7 +84,7 @@ $("#submit").click(function() {
                 $(".image-container").addClass("d-none");
                 if (adjustmentsSuccess) {
                     updateParamHeader(requestParams);
-                    generatePrescriptiveRunTimesTable(response.data, response.routeShortName);
+                    generatePrescriptiveRunTimesTable(response);
                 } else {
                     alert("No Prescriptive RunTimes available for selected criteria.");
                 }
@@ -166,7 +166,13 @@ function getParams() {
 }
 
 // SUBMIT - Show Prescriptive RunTimes
-function generatePrescriptiveRunTimesTable(data, routeName) {
+function generatePrescriptiveRunTimesTable(response) {
+
+    var data = response.data;
+    var routeName = response.routeShortName;
+    var currentOnTime = response.currentOnTime;
+    var expectedOnTime = response.expectedOnTime;
+
 
     $(".adjustment-details").html('');
 
@@ -256,9 +262,8 @@ function generatePrescriptiveRunTimesTable(data, routeName) {
         currentTable += '</tbody></table>';
 
         resultObject.runTimeTables.push(runTimeTable);
-
-        //$("#current_otp").html(response.current_otp);
-        //$("#expected_otp").html(response.expected_otp);
+        $("#current_otp").html(currentOnTime);
+        $("#expected_otp").html(expectedOnTime);
         $(".adjustment-details").append(currentTable);
     });
 

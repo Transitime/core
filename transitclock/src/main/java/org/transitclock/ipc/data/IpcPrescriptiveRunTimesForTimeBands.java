@@ -1,60 +1,48 @@
 package org.transitclock.ipc.data;
 
+import org.apache.commons.collections.ListUtils;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Prescriptive RunTime Bands
- */
 public class IpcPrescriptiveRunTimesForTimeBands implements Serializable {
-    private String routeShortName;
-    private List<IpcStopPath> timePoints;
+    private double currentOnTime = 0;
+    private double expectedOnTime = 0;
+    private double totalRunTimes = 0;
     private List<IpcPrescriptiveRunTimesForTimeBand> runTimesForTimeBands = new ArrayList<>();
-    private Double currentOtp;
-    private Double expectedOtp;
 
-    public IpcPrescriptiveRunTimesForTimeBands(List<IpcStopPath> timePoints) {
-        this.timePoints = timePoints;
+    public IpcPrescriptiveRunTimesForTimeBands() {}
+
+    public double getCurrentOnTime() {
+        return currentOnTime;
     }
 
-    public List<IpcStopPath> getTimePoints() {
-        return timePoints;
+    public double getExpectedOnTime() {
+        return expectedOnTime;
     }
 
-    public void setTimePoints(List<IpcStopPath> timePoints) {
-        this.timePoints = timePoints;
+    public double getTotalRunTimes() {
+        return totalRunTimes;
+    }
+
+    public void addCurrentOnTime(double currentOnTime) {
+        this.currentOnTime += currentOnTime;
+    }
+
+    public void addExpectedOnTime(double expectedOnTime) {
+        this.expectedOnTime += expectedOnTime;
+    }
+
+    public void addTotalRunTime(double totalRunTimes) {
+        this.totalRunTimes += totalRunTimes;
     }
 
     public List<IpcPrescriptiveRunTimesForTimeBand> getRunTimesForTimeBands() {
         return runTimesForTimeBands;
     }
 
-    public void setRunTimesForTimeBands(List<IpcPrescriptiveRunTimesForTimeBand> runTimesForTimeBands) {
-        this.runTimesForTimeBands = runTimesForTimeBands;
-    }
-
-    public Double getCurrentOtp() {
-        return currentOtp;
-    }
-
-    public void setCurrentOtp(Double currentOtp) {
-        this.currentOtp = currentOtp;
-    }
-
-    public Double getExpectedOtp() {
-        return expectedOtp;
-    }
-
-    public void setExpectedOtp(Double expectedOtp) {
-        this.expectedOtp = expectedOtp;
-    }
-
-    public String getRouteShortName() {
-        return routeShortName;
-    }
-
-    public void setRouteShortName(String routeShortName) {
-        this.routeShortName = routeShortName;
+    public void addRunTimesForTimeBands(IpcPrescriptiveRunTimesForTimeBand runTimesForTimeBand) {
+        runTimesForTimeBands.add(runTimesForTimeBand);
     }
 }

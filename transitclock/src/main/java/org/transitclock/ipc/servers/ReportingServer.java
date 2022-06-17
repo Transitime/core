@@ -10,7 +10,6 @@ import org.transitclock.reporting.service.OnTimePerformanceService;
 import org.transitclock.reporting.service.RunTimeService;
 import org.transitclock.reporting.service.SpeedMapService;
 import org.transitclock.reporting.service.runTime.*;
-import org.transitclock.reporting.service.runTime.prescriptive.PrescriptiveRunTimeScheduleService;
 import org.transitclock.reporting.service.runTime.prescriptive.PrescriptiveRunTimeService;
 
 import javax.inject.Inject;
@@ -173,12 +172,12 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
      * @throws Exception
      */
     @Override
-    public List<IpcPrescriptiveRunTimesForTimeBands> getPrescriptiveRunTimeBands(LocalDate beginDate,
-                                                                                 LocalDate endDate,
-                                                                                 String routeIdOrShortName,
-                                                                                 ServiceType serviceType,
-                                                                                 int configRev,
-                                                                                 boolean readOnly) throws Exception {
+    public IpcPrescriptiveRunTimesForPatterns getPrescriptiveRunTimeBands(LocalDate beginDate,
+                                                                               LocalDate endDate,
+                                                                               String routeIdOrShortName,
+                                                                               ServiceType serviceType,
+                                                                               int configRev,
+                                                                               boolean readOnly) throws Exception {
 
         return prescriptiveRunTimeService.getPrescriptiveRunTimeBands(beginDate, endDate, routeIdOrShortName,
                                                                         serviceType, configRev, readOnly);

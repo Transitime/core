@@ -1,5 +1,6 @@
 package org.transitclock.api.data.reporting.prescriptive;
 
+import org.transitclock.api.utils.NumberFormatter;
 import org.transitclock.ipc.data.IpcPrescriptiveRunTimesForTimeBand;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -50,6 +51,9 @@ public class PrescriptiveRunTimeAdjustment {
 
         this.totalOriginal = originalTimes.stream().mapToLong(Long::longValue).sum();
         this.totalAdjusted = adjustedTimes.stream().mapToLong(Long::longValue).sum();
+
+        this.currentOtp = NumberFormatter.getFractionAsPercentage(timeBand.getCurrentOtp());
+        this.expectedOtp = NumberFormatter.getFractionAsPercentage(timeBand.getExpectedOtp());
 
     }
 

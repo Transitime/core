@@ -3,7 +3,6 @@ package org.transitclock.api.rootResources;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.apache.commons.lang3.StringUtils;
-import org.transitclock.api.data.ApiStopTimes;
 import org.transitclock.api.data.*;
 import org.transitclock.api.data.reporting.OnTimePerformanceOutput;
 import org.transitclock.api.data.reporting.RouteRunTimeOutput;
@@ -599,7 +598,7 @@ public class ReportingApi {
                 serviceTypeEnum = ServiceType.valueOf(serviceType.toUpperCase());
             }
 
-            List<IpcPrescriptiveRunTimesForTimeBands> ipcPrescriptiveRunTimesForTimebands =
+            IpcPrescriptiveRunTimesForPatterns ipcPrescriptiveRunTimesForPatterns =
                     reportingInterface.getPrescriptiveRunTimeBands(
                         getDate(beginDate),
                         getDate(endDate),
@@ -609,7 +608,7 @@ public class ReportingApi {
                         useReadOnlyDb()
                     );
 
-            Object response = PrescriptiveRunTimeOutput.getRunTimes(ipcPrescriptiveRunTimesForTimebands);
+            Object response = PrescriptiveRunTimeOutput.getRunTimes(ipcPrescriptiveRunTimesForPatterns);
 
             return stdParameters.createResponse(response);
         } catch (Exception e) {
