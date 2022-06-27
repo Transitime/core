@@ -42,14 +42,11 @@ public class DatedGtfsService {
 
             // Current Date Range
             String feedVersion = getConvertedFeedVersion(currentFeedInfo);
-            currentDateRangeForVersion = datesForFeedVersion.get(feedVersion);
+            //currentDateRangeForVersion = datesForFeedVersion.get(feedVersion);
+            currentDateRangeForVersion = getDateRangeForFeedInfo(currentFeedInfo, feedVersion);
 
             // First Date Range for this version
-            if(currentDateRangeForVersion == null){
-                currentDateRangeForVersion = getDateRangeForFeedInfo(currentFeedInfo, feedVersion);
-            }
-            // Found existing Date Range for this version
-            else {
+            if(datesForFeedVersion.containsKey(feedVersion)){
                 // Reconfigure start and end date by comparing to next and prev date range
                 currentDateRangeForVersion = getDateRangeForFeedInfo(currentDateRangeForVersion,
                                                                      prevDateRangeForVersion);
@@ -94,7 +91,7 @@ public class DatedGtfsService {
         LocalDate prevEndDate = prevDateRangeForVersion.getEndDate();
 
         LocalDate currentStartDate = currentDateRangeForVersion.getStartDate();
-        LocalDate currentEndDate = currentDateRangeForVersion.getStartDate();
+        LocalDate currentEndDate = currentDateRangeForVersion.getEndDate();
 
         LocalDate minStartDate = prevStartDate;
         LocalDate maxEndDate = prevEndDate;
@@ -107,7 +104,7 @@ public class DatedGtfsService {
         }
 
         if(!currentEndDate.isBefore(maxEndDate)){
-            maxEndDate = currentStartDate;
+            maxEndDate = currentEndDate;
             configRev = currentDateRangeForVersion.getConfigRev();
         }
 
