@@ -101,10 +101,10 @@ public class PrescriptiveRunTimeState {
     }
 
 
-    public void createPrescriptiveRunTimeForTimePoint() {
+    public void createPrescriptiveRunTimeForTimePoint(boolean isScheduledOnly) {
         Double scheduleRunTime = getScheduledRunTime();
         Double scheduleDwellTime = getScheduledDwellTime();
-        Double runTimeAdjustment = getRunTimeAdjustment(scheduleRunTime);
+        Double runTimeAdjustment = getRunTimeAdjustment(scheduleRunTime, isScheduledOnly);
         updateOnTimeCounts(scheduleRunTime, scheduleDwellTime, runTimeAdjustment);
         IpcPrescriptiveRunTime ipcPrescriptiveRunTime = new IpcPrescriptiveRunTime(timePointStatistics.getStopPathId(),
                                                                                     timePointStatistics.getStopName(),
@@ -146,8 +146,8 @@ public class PrescriptiveRunTimeState {
     }
 
 
-    private Double getRunTimeAdjustment(Double scheduleRunTime) {
-        if (timePointStatistics.isFirstStop()) {
+    private Double getRunTimeAdjustment(Double scheduleRunTime, boolean isScheduledOnly) {
+        if (isScheduledOnly || timePointStatistics.isFirstStop()) {
             return 0d;
         }
         Double currentFixedTime = getCurrentTimePointFixedTime();

@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class TimePointRunTimeProcessor {
+    Boolean isScheduledOnly = null;
     Map<StopPathRunTimeKey, StopPath> stopPathsMap = new LinkedHashMap<>();
     Map<StopPathRunTimeKey, StopPath> timePointStopPathsMap = new LinkedHashMap<>();
     Map<StopPathRunTimeKey, TimePointStatistics> timePointStatsMap = new HashMap<>();
@@ -159,5 +160,20 @@ public class TimePointRunTimeProcessor {
 
     public Map<Integer, ScheduleTime> getScheduleTimesByStopPathIndexMap() {
         return scheduleTimesByStopPathIndexMap;
+    }
+
+    public void updateScheduledOnlyStatus(boolean isScheduledOnly){
+        if(this.isScheduledOnly == null){
+            this.isScheduledOnly = isScheduledOnly;
+        } else {
+            this.isScheduledOnly = this.isScheduledOnly && isScheduledOnly;
+        }
+    }
+
+    public boolean getScheduledOnlyStatus(){
+        if(isScheduledOnly == null){
+            return false;
+        }
+        return isScheduledOnly;
     }
 }

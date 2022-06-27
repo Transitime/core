@@ -109,20 +109,20 @@ public class RunTimeService {
      * Checks to make sure that the scheduled trip id doesn't already exist in the list of runtimes
      *
      * @param rtQuery
-     * @param routeTrips
+     * @param scheduledRouteTrips
      * @return
      */
     public List<RunTimesForRoutes> getScheduledRunTimesForRoutes(RunTimeForRouteQuery rtQuery,
-                                                                 List<Trip> routeTrips) {
+                                                                 List<Trip> scheduledRouteTrips) {
 
         List<RunTimesForRoutes> scheduledRunTimesForRoutes = new ArrayList<>();
 
         LocalDate tripDate = rtQuery.getBeginDate();
         ServiceType serviceType = rtQuery.getServiceType();
 
-        for(Trip trip : routeTrips){
-            RunTimesForRoutes runTimesForRoutes = new RunTimesForRoutes(trip, serviceType, tripDate);
-            List<RunTimesForStops> runTimesForStops = getScheduledRunTimesForStops(trip, tripDate, runTimesForRoutes);
+        for(Trip scheduledTrip : scheduledRouteTrips){
+            RunTimesForRoutes runTimesForRoutes = new RunTimesForRoutes(scheduledTrip, serviceType, tripDate);
+            List<RunTimesForStops> runTimesForStops = getScheduledRunTimesForStops(scheduledTrip, tripDate, runTimesForRoutes);
             runTimesForRoutes.setScheduled(true);
             runTimesForRoutes.setRunTimesForStops(runTimesForStops);
             scheduledRunTimesForRoutes.add(runTimesForRoutes);

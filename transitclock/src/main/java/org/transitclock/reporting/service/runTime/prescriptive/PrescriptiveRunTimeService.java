@@ -98,6 +98,9 @@ public class PrescriptiveRunTimeService {
         Map<String, Set<ServiceType>> serviceTypesByServiceId =
                 ServiceTypeUtil.getServiceTypesByIdForCalendars(configRev, beginDate, endDate);
 
+        // Get all trips for provided Route grouped by TripPatternId
+        Map<String, List<Trip>> tripsByTripPatternId = getTripsForRouteByTripPattern(routeIdOrShortName, configRev);
+
         // Get list of all tripPatterns for Route
         // Go through tripPatterns and generate runtimes for tripPattern
         List<TripPattern> tripPatterns = TripPattern.getTripPatternsForRoute(routeShortName, configRev, readOnly);
@@ -119,7 +122,8 @@ public class PrescriptiveRunTimeService {
 
             // Gets new prescriptive runtimes for timebands
             IpcPrescriptiveRunTimesForTimeBands runTimesForTimeBands = getPrescriptiveRunTimesForTimeBands(timebandsForTripPattern,
-                    timePoints, serviceTypesByServiceId, routeShortName, tripPattern, serviceType, beginDate, endDate, configRev, readOnly);
+                    tripsByTripPatternId, timePoints, serviceTypesByServiceId, routeShortName, tripPattern, serviceType,
+                    beginDate, endDate, configRev, readOnly);
 
 
             IpcPrescriptiveRunTimesForPattern prescriptiveRunTimesForPattern =
@@ -183,23 +187,23 @@ public class PrescriptiveRunTimeService {
      * @throws Exception
      */
     private IpcPrescriptiveRunTimesForTimeBands getPrescriptiveRunTimesForTimeBands(TimebandsForTripPattern timebandsByPattern,
-                                                                                         List<IpcStopPath> timePoints,
-                                                                                         Map<String, Set<ServiceType>> serviceTypesByServiceId,
-                                                                                         String routeIdOrShortName,
-                                                                                         TripPattern tripPattern,
-                                                                                         ServiceType serviceType,
-                                                                                         LocalDate beginDate,
-                                                                                         LocalDate endDate,
-                                                                                         int configRev,
-                                                                                         boolean readOnly) throws Exception {
+                                                                                    Map<String, List<Trip>> tripsByTripPatternId,
+                                                                                     List<IpcStopPath> timePoints,
+                                                                                     Map<String, Set<ServiceType>> serviceTypesByServiceId,
+                                                                                     String routeIdOrShortName,
+                                                                                     TripPattern tripPattern,
+                                                                                     ServiceType serviceType,
+                                                                                     LocalDate beginDate,
+                                                                                     LocalDate endDate,
+                                                                                     int configRev,
+                                                                                     boolean readOnly) throws Exception {
 
         IpcPrescriptiveRunTimesForTimeBands prescriptiveRunTimesForTimeBands = new IpcPrescriptiveRunTimesForTimeBands();
 
         // If timeband is found add it to timebands list
         if(timebandsByPattern != null){
-
-            // Get all trips for provided Route grouped by TripPatternId
-            Map<String, List<Trip>> tripsByTripPatternId = getTripsForRouteByTripPattern(routeIdOrShortName, configRev);
+            // Get all trips for trip pattern
+            List<Trip> tripsForTripPattern = tripsByTripPatternId.get(tripPattern.getId());
 
             // For each timeband create an IpcPrescriptiveRunTimeBand
             // this includes timeband start time, timeband end time and timepoint run time info
@@ -221,9 +225,6 @@ public class PrescriptiveRunTimeService {
                                                                   .configRev(configRev)
                                                                   .readOnly(readOnly)
                                                                   .build();
-
-
-                List<Trip> tripsForTripPattern = tripsByTripPatternId.get(tripPattern.getId());
 
                 // Get timepoint specific runtime info
                 PrescriptiveRunTimeStates prescriptiveRunTimeStates =
@@ -360,19 +361,20 @@ public class PrescriptiveRunTimeService {
 
         // Get list of applicable scheduled trips
         List<Trip> singleTripForSampleRunTime = new ArrayList<>();
-        Map<Integer, AvgScheduleTime> allTripScheduleTimesByIndex = new LinkedHashMap<>();
+        Map<Integer, AvgScheduleTime> allTripScheduleTimesByStopIndex = new LinkedHashMap<>();
 
         for(Trip trip : trips){
+
             if(includeTripAsScheduledRunTime(trip, rtQuery, serviceTypesByServiceId)){
                 if(allowSingleTripForRunTime(singleTripForSampleRunTime, existingRunTimeTripIds, trip)){
                     singleTripForSampleRunTime.add(trip);
                 }
-                updateTripScheduleTimes(allTripScheduleTimesByIndex, trip.getScheduleTimes());
+                updateTripScheduleTimes(allTripScheduleTimesByStopIndex, trip.getScheduleTimes());
             }
         }
 
         // Average Schedule Times for all valid trips
-        List<ScheduleTime> avgTripScheduleTimes = getAvgTripScheduleTimes(allTripScheduleTimesByIndex);
+        List<ScheduleTime> avgTripScheduleTimesPerStop = getAvgTripScheduleTimes(allTripScheduleTimesByStopIndex);
 
         // Supplement realtime runTime data with scheduled runTime data as necessary
         addScheduledTripRunTimeToResults(singleTripForSampleRunTime, rtQuery, runTimesForRoutes);
@@ -380,16 +382,14 @@ public class PrescriptiveRunTimeService {
         // Get list of all runTimes for scheduled trips NOT included in the original historical results
         // Goal here is to include runTime information for trips that never got captured by the runtime query
         try{
+            // Put RunTimes and StopPaths into TimePoint RunTime Processor
+            // Groups them into timepoints and gets runtime info for timepoints
             TimePointRunTimeProcessor timePointRunTimeProcessor =
                     getTimePointRunTimeProcessorWithStopPaths(runTimesForRoutes, tripPattern.getStopPaths());
 
-
-            Map<StopPathRunTimeKey, StopPath> timePointStopPaths = timePointRunTimeProcessor.getTimePointStopPaths();
-
-            // Realtime
-            Map<StopPathRunTimeKey, TimePointStatistics> timePointsStatistics = timePointRunTimeProcessor.getSortedTimePointsStatistics();
+            // Create Prescriptive RunTimeState using timepoint stats and stop paths info
             PrescriptiveRunTimeState prescriptiveRunTimeState =
-                    createPrescriptiveRunTimeState(timePointsStatistics, timePointStopPaths, avgTripScheduleTimes, arrivalDepartures);
+                    createPrescriptiveRunTimeState(timePointRunTimeProcessor, avgTripScheduleTimesPerStop, arrivalDepartures);
 
             if(prescriptiveRunTimeState != null){
                 return new PrescriptiveRunTimeStates(prescriptiveRunTimeState);
@@ -424,12 +424,13 @@ public class PrescriptiveRunTimeService {
         return avgScheduleTimes;
     }
 
-    private void addScheduledTripRunTimeToResults(List<Trip> filteredRouteTrip,
+    private void addScheduledTripRunTimeToResults(List<Trip> singleTripForSampleRunTime,
                                                   RunTimeForRouteQuery rtQuery,
                                                   List<RunTimesForRoutes> results){
 
-        if(!filteredRouteTrip.isEmpty()) {
-            List<RunTimesForRoutes> missingTripRunTimesForRoutes = runTimeService.getScheduledRunTimesForRoutes(rtQuery, filteredRouteTrip);
+        if(!singleTripForSampleRunTime.isEmpty()) {
+            List<RunTimesForRoutes> missingTripRunTimesForRoutes =
+                    runTimeService.getScheduledRunTimesForRoutes(rtQuery, singleTripForSampleRunTime);
             if(!missingTripRunTimesForRoutes.isEmpty()) {
                 results.addAll(missingTripRunTimesForRoutes);
             }
@@ -451,7 +452,7 @@ public class PrescriptiveRunTimeService {
                                                   Map<String, Set<ServiceType>> serviceTypesByServiceId) {
 
 
-        if(trip.getStartTime() < rtQuery.getBeginTime() || trip.getEndTime() > rtQuery.getEndTime()) {
+        if(trip.getStartTime() < rtQuery.getBeginTime() || trip.getStartTime() > rtQuery.getEndTime()) {
             return false;
         }
 
@@ -467,13 +468,16 @@ public class PrescriptiveRunTimeService {
     private boolean allowSingleTripForRunTime(List<Trip> singleTripForSampleRunTime,
                                               Set<String> existingRunTimeTripIds,
                                               Trip trip){
-        if(singleTripForSampleRunTime.isEmpty()){
+        // We already have a single trip, skip
+        if(!singleTripForSampleRunTime.isEmpty()){
             return false;
         }
-        if(existingRunTimeTripIds.size() <= 1){
+        // We have more than 1 run time, don't need a sample schedule run time
+        if(existingRunTimeTripIds.size() > 1){
             return false;
         }
-        if(!existingRunTimeTripIds.contains(trip.getId())){
+        // We already have this trip id in our list of historical runtimes
+        if(existingRunTimeTripIds.contains(trip.getId())){
             return false;
         }
 
@@ -495,6 +499,7 @@ public class PrescriptiveRunTimeService {
 
         for(RunTimesForRoutes runTimesForRoute : runTimesForRoutes){
             processor.addRunTimesForStops(runTimesForRoute.getRunTimesForStops());
+            processor.updateScheduledOnlyStatus(runTimesForRoute.isScheduled());
         }
 
         return processor;
@@ -503,15 +508,19 @@ public class PrescriptiveRunTimeService {
     /**
      * Calculates the suggested schedule modifications by retrieving appropriate variable, dwellTime, and remainder
      * for each timepoint segment (based on their index) and applying that to the scheduled times.
-     * @param timePointsStatistics
-     * @param timePointStopPaths
+     * @param timePointRunTimeProcessor
      * @param scheduleTimes
+     * @param arrivalDepartures
      * @return
      */
-    private PrescriptiveRunTimeState createPrescriptiveRunTimeState(Map<StopPathRunTimeKey, TimePointStatistics> timePointsStatistics,
-                                                                    Map<StopPathRunTimeKey, StopPath> timePointStopPaths,
+    private PrescriptiveRunTimeState createPrescriptiveRunTimeState(TimePointRunTimeProcessor timePointRunTimeProcessor,
                                                                     List<ScheduleTime> scheduleTimes,
                                                                     List<ArrivalDeparture> arrivalDepartures){
+
+        // Get TimePoint stop paths, TimePoint runtime stats, and scheduledOnly info from TimePointProcessor
+        Map<StopPathRunTimeKey, StopPath> timePointStopPaths = timePointRunTimeProcessor.getTimePointStopPaths();
+        Map<StopPathRunTimeKey, TimePointStatistics> timePointsStatistics = timePointRunTimeProcessor.getSortedTimePointsStatistics();
+        boolean isScheduledOnly = timePointRunTimeProcessor.getScheduledOnlyStatus();
 
         Map<Integer, ScheduleTime> scheduleTimesByStopPathIndexMap = createScheduledTimesGroupedById(scheduleTimes);
 
@@ -528,10 +537,9 @@ public class PrescriptiveRunTimeService {
                 return null;
             } else {
                 state.updateScheduleAdjustments(timePointStatistics, prescriptiveAvgIncludeFirstStop.getValue());
-                state.createPrescriptiveRunTimeForTimePoint();
+                state.createPrescriptiveRunTimeForTimePoint(isScheduledOnly);
             }
         }
-
         return state;
     }
 
