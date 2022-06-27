@@ -20,7 +20,7 @@ public class DatedGtfsService {
 
     private static final StringConfigValue feedInfoVersionIndices = new StringConfigValue(
             "transitclock.runTime.feedInfoVersionIndices",
-            "1,2",
+            "1",
             "Comma separated list of indices that make up feedVersion");
 
     private static final StringConfigValue feedInfoNameIndices = new StringConfigValue(
@@ -35,6 +35,7 @@ public class DatedGtfsService {
 
         DatedGtfs prevDateRangeForVersion = null;
 
+        // Loop through feed info
         for(int i=0; i < feedInfosCount; i++){
             FeedInfo currentFeedInfo = feedInfos.get(i);
             DatedGtfs currentDateRangeForVersion;
@@ -114,6 +115,12 @@ public class DatedGtfsService {
 
     }
 
+    /**
+     * Get feed version from feedInfo
+     * Use configurable regex to parse feedVersion
+     * @param feedInfo
+     * @return
+     */
     private static String getConvertedFeedVersion(FeedInfo feedInfo){
         String feedVersion = feedInfo.getFeedVersion();
         String regex = feedInfoVersionRegex.getValue();
@@ -130,6 +137,13 @@ public class DatedGtfsService {
         return feedVersion;
     }
 
+    /**
+     * Use configurable list of indices to determine which indices from the split FeedInfo FeedVersion
+     * makes up the trimmed down feedVersion
+     * @param feedVersionArray
+     * @return
+     * @throws Exception
+     */
     private static String buildRegexFeedVersion(String[] feedVersionArray) throws Exception{
         String[] indicesConfig = feedInfoVersionIndices.toString().split(",");
         List<Integer> indices = Arrays.stream(indicesConfig)
@@ -149,22 +163,4 @@ public class DatedGtfsService {
         return sb.toString();
     }
 
-    private static String buildRegexFeedName(String[] feedNameArray) throws Exception{
-        String[] nameIndices = feedInfoNameIndices.toString().split(",");
-        List<Integer> indices = Arrays.stream(nameIndices)
-                                .map(Integer::parseInt)
-                                .collect(Collectors.toList());
-
-        StringBuilder sb = new StringBuilder();
-
-        for(int i=0; i < indices.size(); i++){
-            if(i>0){
-                sb.append("-");
-            }
-            sb.append(feedNameArray[indices.get(i)]);
-
-        }
-
-        return sb.toString();
-    }
 }
