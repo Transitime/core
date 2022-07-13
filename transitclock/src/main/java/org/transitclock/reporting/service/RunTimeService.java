@@ -43,6 +43,13 @@ public class RunTimeService {
     @Inject
     private RunTimeRoutesDao dao;
 
+    public RunTimeRoutesDao getDao() {
+        return dao;
+    }
+
+    public void setDao(RunTimeRoutesDao dao) {
+        this.dao = dao;
+    }
 
     /**
      * Get summary information for RunTimes

@@ -59,8 +59,8 @@ public class DwellTimeUtil {
 
     public static Long calculateFirstStopDwellTime(Integer scheduledStartTime, Long departureTime){
             long tripStartTimeMsecs = scheduledStartTime * 1000;
-            long msecsIntoDay =
-                    Core.getInstance().getTime().getMsecsIntoDay(new Date(departureTime), tripStartTimeMsecs);
+            Time time = Core.getInstance().getTime();
+            long msecsIntoDay = time.getMsecsIntoDay(new Date(departureTime), tripStartTimeMsecs);
             if (msecsIntoDay < tripStartTimeMsecs) {
                 return 0l;
             } else {

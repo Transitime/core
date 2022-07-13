@@ -64,6 +64,19 @@ public class RunTimesForStops implements Serializable {
     @Transient
     boolean firstStopDwellSet = false;
 
+    @Transient
+    private String vehicleId;
+
+    @Transient
+    private String tripId;
+
+    @Transient
+    private Date startTime;
+
+    @Transient
+    private Integer configRev;
+
+
 
     public RunTimesForStops() {}
 
@@ -88,6 +101,28 @@ public class RunTimesForStops implements Serializable {
         this.speed = speed;
         this.lastStop = lastStop;
         this.timePoint = timePoint;
+    }
+
+    public RunTimesForStops(String stopPathId,
+                            int stopPathIndex,
+                            Date time,
+                            Date prevStopDepartureTime,
+                            Integer scheduledTime,
+                            Integer scheduledPrevStopArrivalTime,
+                            Long dwellTime,
+                            Double speed,
+                            Boolean lastStop,
+                            Boolean timePoint,
+                            String vehicleId,
+                            String tripId,
+                            Date startTime,
+                            Integer configRev) {
+        this(stopPathId, stopPathIndex, time, prevStopDepartureTime, scheduledTime, scheduledPrevStopArrivalTime, dwellTime,
+                speed, lastStop, timePoint);
+        this.vehicleId = vehicleId;
+        this.tripId = tripId;
+        this.startTime = startTime;
+        this.configRev = configRev;
     }
 
 

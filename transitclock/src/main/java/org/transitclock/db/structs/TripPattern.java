@@ -186,6 +186,30 @@ public class TripPattern implements Serializable, Lifecycle {
 			this.stopPathsMap.put(stopPath.getStopId(), stopPath);
 		}
 	}
+
+	public TripPattern(int configRev,
+					   String tripPatternId,
+					   String directionId,
+					   String headsign,
+					   String routeId,
+					   String routeShortName,
+					   String shapeId,
+					   Extent extent,
+					   List<StopPath> stopPaths) {
+		this.configRev = configRev;
+		this.id = tripPatternId;
+		this.directionId = directionId;
+		this.headsign = headsign;
+		this.routeId = routeId;
+		this.routeShortName = routeShortName;
+		this.shapeId = shapeId;
+		this.stopPaths = stopPaths;
+		this.extent = extent;
+
+		for (StopPath stopPath : stopPaths) {
+			this.stopPathsMap.put(stopPath.getStopId(), stopPath);
+		}
+	}
 	
 	/**
 	 * Hibernate requires a not-arg constructor

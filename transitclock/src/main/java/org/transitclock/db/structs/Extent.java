@@ -66,6 +66,13 @@ public class Extent implements Serializable {
 	 */
 	public Extent() {		
 	}
+
+	public Extent(double minLat, double maxLat, double minLon, double maxLon) {
+		this.minLat = minLat;
+		this.maxLat = maxLat;
+		this.minLon = minLon;
+		this.maxLon = maxLon;
+	}
 	
 	/**
 	 * Once an Extent has been constructed need to simply add

@@ -99,7 +99,7 @@ public class RunTimeLoader {
 
   }
 
-  private Block getBlock(Session session, int configRev, String serviceId, String blockId){
+  public Block getBlock(Session session, int configRev, String serviceId, String blockId){
     String key = hashBlock(serviceId, blockId);
     Map<String, Block> blocksByServiceAndBlockId = blocksForConfigRev.get(configRev);
     if(blocksByServiceAndBlockId == null){

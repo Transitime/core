@@ -19,15 +19,11 @@ public class OnTimePerformanceService {
     private static final Logger logger =
             LoggerFactory.getLogger(OnTimePerformanceService.class);
 
-    public List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForOtp(
-            LocalDate beginDate, LocalDate endDate, LocalTime beginTime, LocalTime endTime,
-            String routeIdOrShortName, ServiceType serviceType, boolean timePointsOnly,
-            String headsign, boolean readOnly) throws Exception {
+    public List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForOtp(ArrivalDepartureQuery query) throws Exception {
 
         List<IpcArrivalDepartureScheduleAdherence> ipcArrivalDepartures = new ArrayList<>();
 
-        List<ArrivalDeparture> arrivalDepartures = getArrivalsDepartures(beginDate, endDate, beginTime, endTime,
-                routeIdOrShortName, serviceType, timePointsOnly, headsign, readOnly);
+        List<ArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesFromDb(query);
 
         for(ArrivalDeparture arrivalDeparture : arrivalDepartures){
             IpcArrivalDepartureScheduleAdherence ipcArrivalDeparture = new IpcArrivalDepartureScheduleAdherence(arrivalDeparture);
@@ -36,10 +32,16 @@ public class OnTimePerformanceService {
         return ipcArrivalDepartures;
     }
 
-    public List<ArrivalDeparture> getArrivalsDepartures(
-            LocalDate beginDate, LocalDate endDate, LocalTime beginTime, LocalTime endTime,
-            String routeIdOrShortName, ServiceType serviceType, boolean timePointsOnly,
-            String headsign, boolean readOnly) throws Exception {
+    public List<ArrivalDeparture> getArrivalsDepartures(LocalDate beginDate,
+                                                        LocalDate endDate,
+                                                        LocalTime beginTime,
+                                                        LocalTime endTime,
+                                                        String routeIdOrShortName,
+                                                        ServiceType serviceType,
+                                                        boolean timePointsOnly,
+                                                        String headsign,
+                                                        String tripPatternId,
+                                                        boolean readOnly) throws Exception {
 
         String routeShortName = getRouteShortName(routeIdOrShortName);
 
@@ -52,6 +54,7 @@ public class OnTimePerformanceService {
                 .routeShortName(routeShortName)
                 .serviceType(serviceType)
                 .timePointsOnly(timePointsOnly)
+                .tripPatternId(tripPatternId)
                 .scheduledTimesOnly(true)
                 .readOnly(readOnly)
                 .build();

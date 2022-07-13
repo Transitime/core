@@ -30,6 +30,21 @@ public class PrescriptiveTimebandService {
     @Inject
     private PrescriptiveRuntimeClusteringService clusteringService;
 
+    public RunTimeService getRunTimeService() {
+        return runTimeService;
+    }
+
+    public void setRunTimeService(RunTimeService runTimeService) {
+        this.runTimeService = runTimeService;
+    }
+
+    public PrescriptiveRuntimeClusteringService getClusteringService() {
+        return clusteringService;
+    }
+
+    public void setClusteringService(PrescriptiveRuntimeClusteringService clusteringService) {
+        this.clusteringService = clusteringService;
+    }
 
     /**
      * Get list of historical runtimes
@@ -93,7 +108,6 @@ public class PrescriptiveTimebandService {
                                                                 int configRev) {
 
         List<RunTimeData> existingRunTimeData = runTimesForRoutes.stream().map(rt -> new RunTimeData(rt)).collect(Collectors.toList());
-        //List<RunTimeData> existingRunTimeData = new ArrayList<>();
 
         List<RunTimeData> missingRunTimeData = getMissingRunTimesForRoutesAsRunTimeData(runTimesForRoutes,
                 routeShortName, serviceType, beginDate, endDate, configRev);
@@ -117,7 +131,7 @@ public class PrescriptiveTimebandService {
      * @param configRev
      * @return
      */
-    private List<RunTimeData> getMissingRunTimesForRoutesAsRunTimeData(List<RunTimesForRoutes> runTimesForRoutes,
+    protected List<RunTimeData> getMissingRunTimesForRoutesAsRunTimeData(List<RunTimesForRoutes> runTimesForRoutes,
                                                                        String routeShortName,
                                                                        ServiceType serviceType,
                                                                        LocalDate beginDate,
@@ -130,17 +144,14 @@ public class PrescriptiveTimebandService {
                                                                          .map(rt -> rt.getTripId())
                                                                          .collect(Collectors.toSet());
 
-        //Set<String> existingRunTimeDataTripIds = new HashSet<>();
-
-        Set<Integer> configRevs = new HashSet<>();
-        configRevs.add(configRev);
-        TripQuery tripQuery = new TripQuery.Builder(routeShortName, configRevs).build();
-
         // Get Service Types for all Service Ids
         Map<String, Set<ServiceType>> serviceTypesByServiceId =
                 ServiceTypeUtil.getServiceTypesByIdForCalendars(configRev, beginDate, endDate);
 
         // Get list of Trips for selected Service Period
+        Set<Integer> configRevs = new HashSet<>();
+        configRevs.add(configRev);
+        TripQuery tripQuery = new TripQuery.Builder(routeShortName, configRevs).build();
         List<Trip> trips = Trip.getTripsFromDb(tripQuery);
 
         for(Trip trip : trips){

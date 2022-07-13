@@ -3,6 +3,7 @@ package org.transitclock.ipc.servers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.core.ServiceType;
+import org.transitclock.db.query.ArrivalDepartureQuery;
 import org.transitclock.ipc.data.*;
 import org.transitclock.ipc.interfaces.ReportingInterface;
 import org.transitclock.ipc.rmi.AbstractServer;
@@ -17,6 +18,7 @@ import java.time.*;
 import java.util.*;
 
 import static java.util.stream.Collectors.groupingBy;
+import static org.transitclock.ipc.util.GtfsDbDataUtil.getRouteShortName;
 
 /**
  * @author carabalb
@@ -178,8 +180,8 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                                                                ServiceType serviceType,
                                                                                int configRev,
                                                                                boolean readOnly) throws Exception {
-
-        return prescriptiveRunTimeService.getPrescriptiveRunTimeBands(beginDate, endDate, routeIdOrShortName,
+        String routeShortName = getRouteShortName(routeIdOrShortName);
+        return prescriptiveRunTimeService.getPrescriptiveRunTimeBands(beginDate, endDate, routeShortName,
                                                                         serviceType, configRev, readOnly);
     }
 
@@ -197,8 +199,22 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                                                                   String headsign,
                                                                                   boolean readOnly) throws Exception{
 
-        return onTimePerformanceService.getArrivalsDeparturesForOtp(beginDate, endDate, beginTime, endTime,
-                routeIdOrShortName, serviceType, timePointsOnly, headsign, readOnly);
+        String routeShortName = getRouteShortName(routeIdOrShortName);
+
+        ArrivalDepartureQuery.Builder adBuilder = new ArrivalDepartureQuery.Builder();
+        ArrivalDepartureQuery adQuery = adBuilder
+                .beginDate(beginDate)
+                .endDate(endDate)
+                .beginTime(beginTime)
+                .endTime(endTime)
+                .serviceType(serviceType)
+                .timePointsOnly(timePointsOnly)
+                .scheduledTimesOnly(true)
+                .routeShortName(routeShortName)
+                .readOnly(readOnly)
+                .build();
+
+        return onTimePerformanceService.getArrivalsDeparturesForOtp(adQuery);
     }
 
     @Override

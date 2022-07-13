@@ -6,9 +6,24 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.transitclock.core.ServiceType;
 import org.transitclock.core.dwell.DwellTimeUtil;
 import org.transitclock.db.hibernate.HibernateUtils;
+import org.transitclock.utils.MapKey;
 import org.transitclock.utils.Time;
 
-import javax.persistence.*;
+import javax.persistence.Id;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Index;
+import javax.persistence.Column;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Enumerated;
+import javax.persistence.EnumType;
+import javax.persistence.OneToMany;
+import javax.persistence.FetchType;
+import javax.persistence.CascadeType;
+import javax.persistence.Transient;
+
+
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -139,7 +154,9 @@ public class RunTimesForRoutes implements Serializable {
                              String vehicleId,
                              ServiceType serviceType,
                              Long dwellTime,
-                             Integer startStopIndex) {
+                             Integer startStopIndex,
+                             Integer expectedLastStopPathIndex,
+                             Integer actualLastStopPathIndex) {
         this.configRev = configRev;
         this.serviceId = serviceId;
         this.directionId = directionId;
@@ -155,6 +172,9 @@ public class RunTimesForRoutes implements Serializable {
         this.vehicleId = vehicleId;
         this.serviceType = serviceType;
         this.dwellTime = dwellTime;
+        this.startStopPathIndex = startStopIndex;
+        this.expectedLastStopPathIndex = expectedLastStopPathIndex;
+        this.actualLastStopPathIndex = actualLastStopPathIndex;
     }
 
     public int getConfigRev() {
@@ -359,6 +379,10 @@ public class RunTimesForRoutes implements Serializable {
 
     public void setScheduled(boolean scheduled) {
         isScheduled = scheduled;
+    }
+
+    public MapKey getKey(){
+        return new MapKey(configRev, vehicleId, tripId, startTime);
     }
 
     @Override

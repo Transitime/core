@@ -208,8 +208,14 @@ public class Trip implements Lifecycle, Serializable {
 	 * @param titleFormatter
 	 *            So can fix titles associated with trip
 	 */
-	public Trip(int configRev, GtfsTrip gtfsTrip, String properRouteId,
-			String routeShortName, String unprocessedHeadsign, TitleFormatter titleFormatter) {
+	public Trip(int configRev,
+				GtfsTrip gtfsTrip,
+				String properRouteId,
+				String routeShortName,
+				String unprocessedHeadsign,
+				TitleFormatter titleFormatter,
+				String tripPatternId) {
+
 		this.configRev = configRev;
 		this.tripId = gtfsTrip.getTripId();
 		this.tripShortName = gtfsTrip.getTripShortName();
@@ -244,6 +250,16 @@ public class Trip implements Lifecycle, Serializable {
 		// Not a frequency based trip with an exact time so remember such
 		this.exactTimesHeadway = false;
 		this.boardingType = gtfsTrip.getBoardingType();
+		this.tripPatternId = tripPatternId;
+	}
+
+	public Trip(int configRev,
+				GtfsTrip gtfsTrip,
+				String properRouteId,
+				String routeShortName,
+				String unprocessedHeadsign,
+				TitleFormatter titleFormatter) {
+		this(configRev, gtfsTrip, properRouteId, routeShortName, unprocessedHeadsign, titleFormatter, null);
 	}
 
 	/**

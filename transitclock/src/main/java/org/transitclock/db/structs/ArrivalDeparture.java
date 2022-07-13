@@ -264,9 +264,9 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 	 * @param stopPathIndex
 	 * @param isArrival
 	 */
-	protected ArrivalDeparture(int configRev, String vehicleId, Date time, Date avlTime, Block block,
+	public ArrivalDeparture(int configRev, String vehicleId, Date time, Date avlTime, Block block,
 							   int tripIndex, int stopPathIndex, boolean isArrival, Date freqStartTime, Long dwellTime,
-							   String stopPathId, boolean scheduleAdherenceStop) {
+							   String stopPathId, boolean scheduleAdherenceStop, Date scheduledTime) {
 		this.vehicleId = vehicleId;
 		this.time = time;
 		this.avlTime = avlTime;
@@ -336,7 +336,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 			/* have to do this as they are final */
 			this.stopPathLength=0;
 			this.gtfsStopSeq=0;
-			this.scheduledTime=null;
+			this.scheduledTime=scheduledTime;
 			this.tripId="";
 			this.stopId="";
 			this.serviceId = "";
@@ -344,11 +344,19 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 			this.tripPatternId = null;
 		}
 	}
+
+	public ArrivalDeparture(int configRev, String vehicleId, Date time, Date avlTime, Block block,
+							int tripIndex, int stopPathIndex, boolean isArrival, Date freqStartTime, Long dwellTime,
+							String stopPathId, boolean scheduleAdherenceStop) {
+		this(configRev, vehicleId, time, avlTime, block, tripIndex, stopPathIndex,isArrival, freqStartTime,
+				dwellTime, stopPathId, scheduleAdherenceStop, null);
+	}
+
 	protected ArrivalDeparture(String vehicleId, Date time, Date avlTime, Block block,
 							   int tripIndex, int stopPathIndex, boolean isArrival, Date freqStartTime, Long dwellTime,
 							   String stopPathId, boolean scheduleAdherenceStop) {
-		
-		this(Core.getInstance().getDbConfig().getConfigRev(),vehicleId, time, avlTime, block, 
+
+		this(Core.getInstance().getDbConfig().getConfigRev(),vehicleId, time, avlTime, block,
 				tripIndex, stopPathIndex, isArrival, freqStartTime, dwellTime, stopPathId, scheduleAdherenceStop);
 	}
 	public Date getFreqStartTime() {
