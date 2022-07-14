@@ -123,23 +123,18 @@ public class PrescriptiveRunTimeState {
         List<ArrivalDeparture> arrivalDepartures = arrivalDeparturesByStopPath.get(timePointStatistics.getStopPathId());
         if(arrivalDepartures != null && scheduleRunTime > 0){
             for(ArrivalDeparture ad: arrivalDepartures){
-                if(ad.isArrival()){
-                    if(ad.getScheduleAdherence().getTemporalDifference() > maxLateTime){
-                        currentOnTime++;
-                    }
-                    if((ad.getScheduledTime() + adjustment) - ad.getTime() > maxLateTime){
-                        expectedOnTime++;
-                    }
-                }
                 if(ad.isDeparture()){
-                    if(ad.getScheduleAdherence().getTemporalDifference() < maxEarlyTime){
+                    if(ad.getScheduleAdherence().getTemporalDifference() < maxEarlyTime &&
+                            ad.getScheduleAdherence().getTemporalDifference() > maxLateTime){
                         currentOnTime++;
                     }
-                    if((ad.getScheduledTime() + adjustment) - ad.getTime() < maxEarlyTime){
+                    if((ad.getScheduledTime() + adjustment) - ad.getTime() < maxEarlyTime &&
+                            (ad.getScheduledTime() + adjustment) - ad.getTime() > maxLateTime){
                         expectedOnTime++;
                     }
+                    totalRunTimes++;
                 }
-                totalRunTimes++;
+
             }
 
         }
