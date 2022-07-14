@@ -1,0 +1,4 @@
+"id","configRev","directionId","maxLat","maxLon","minLat","minLon","headsign","routeId","routeShortName","shapeId"
+"shape_138461_16810_to_33237_51ad8b9a","12","0","32.784389","-96.803001","32.772579","-96.916336","28 DOWNTOWN DALLAS","24342","028","138461"
+"shape_138462_33237_to_16810_c8f2fa30","12","1","32.785386","-96.803036","32.771053","-96.916336","28 SINGLETON BOULEVARD","24342","028","138462"
+"shape_138463_16808_to_16810_18c283d1","12","1","32.778167","-96.91446","32.771053","-96.916336","28 DOWNTOWN DALLAS to WALTON WALKER @ SINGLETON - N - NS","24342","028","138463"

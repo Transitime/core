@@ -2,10 +2,8 @@ package org.transitclock.core.reporting.dao;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
-import org.transitclock.core.reporting.RunTimeLoaderTest;
-import org.transitclock.db.structs.Calendar;
+import org.junit.Assert;
 import org.transitclock.db.structs.CalendarDate;
-import org.transitclock.gtfs.gtfsStructs.GtfsCalendar;
 import org.transitclock.gtfs.gtfsStructs.GtfsCalendarDate;
 
 import java.io.*;
