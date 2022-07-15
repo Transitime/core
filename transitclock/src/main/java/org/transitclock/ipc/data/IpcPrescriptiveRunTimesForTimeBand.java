@@ -10,18 +10,21 @@ public class IpcPrescriptiveRunTimesForTimeBand implements Serializable {
     private final String endTime;
     private final double currentOtp;
     private final double expectedOtp;
+    private final String tripPatternId;
     private final List<IpcPrescriptiveRunTime> runTimeByStopPathId;
 
     public IpcPrescriptiveRunTimesForTimeBand(String startTime,
                                               String endTime,
                                               double currentOtp,
                                               double expectedOtp,
-                                              List<IpcPrescriptiveRunTime> runTimeByStopPathId) {
+                                              List<IpcPrescriptiveRunTime> runTimeByStopPathId,
+                                              String tripPatternId) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.currentOtp = currentOtp;
         this.expectedOtp = expectedOtp;
         this.runTimeByStopPathId = ListUtils.unmodifiableList(runTimeByStopPathId);
+        this.tripPatternId = tripPatternId;
     }
 
     public String getStartTime() {
@@ -44,4 +47,7 @@ public class IpcPrescriptiveRunTimesForTimeBand implements Serializable {
         return runTimeByStopPathId;
     }
 
+    public String getTripPatternId() {
+        return tripPatternId;
+    }
 }

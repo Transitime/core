@@ -305,6 +305,16 @@ public class RunTimesForRoutes implements Serializable {
         this.runTimesForStops = runTimesForStops;
     }
 
+    public void setRunTimesForStopsAndMap(List<RunTimesForStops> runTimesForStops) {
+        for(RunTimesForStops rtfs : runTimesForStops){
+            if(rtfs.getRunTimesForRoutes() == null){
+                rtfs.setRunTimesForRoutes(this);
+            }
+        }
+        this.runTimesForStops = runTimesForStops;
+
+    }
+
     public Integer getStartStopPathIndex() {
         return startStopPathIndex;
     }

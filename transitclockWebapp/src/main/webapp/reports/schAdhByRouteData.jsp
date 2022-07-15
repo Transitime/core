@@ -43,10 +43,10 @@ String allowableLateMinutesStr = "'" + SqlUtils.convertMinutesToSecs(allowableLa
 
 String sql =
 	"SELECT " 
-	+ "     COUNT(CASE WHEN " + epochCommandPre + "(scheduledTime-time) > " + allowableEarlyMinutesStr + " THEN 1 ELSE null END) as early, \n"
-	+ "     COUNT(CASE WHEN " + epochCommandPre + "(scheduledTime-time) <= " + allowableEarlyMinutesStr + " AND " + epochCommandPre + "(time-scheduledTime) <= "
+	+ "     COUNT(CASE WHEN " + epochCommandPre + "(scheduledTime) -" + epochCommandPre + "(time) > " + allowableEarlyMinutesStr + " THEN 1 ELSE null END) as early, \n"
+	+ "     COUNT(CASE WHEN " + epochCommandPre + "(scheduledTime) -" + epochCommandPre + "(time) <= " + allowableEarlyMinutesStr + " AND " + epochCommandPre + "(time) -" + epochCommandPre + "(scheduledTime) <= "
 				+ allowableLateMinutesStr + " THEN 1 ELSE null END) AS ontime, \n" 
-    + "     COUNT(CASE WHEN " + epochCommandPre + "(time-scheduledTime) > " + allowableLateMinutesStr + " THEN 1 ELSE null END) AS late, \n"
+    + "     COUNT(CASE WHEN " + epochCommandPre + "(time) -" + epochCommandPre + "(scheduledTime) > " + allowableLateMinutesStr + " THEN 1 ELSE null END) AS late, \n"
     + "     COUNT(*) AS total, \n"
     + "     r.name \n"
     + "FROM ArrivalsDepartures ad, Routes r \n"

@@ -11,9 +11,8 @@ import org.transitclock.db.query.ArrivalDepartureQuery;
 import org.transitclock.db.query.RunTimeForRouteQuery;
 import org.transitclock.db.query.TripQuery;
 import org.transitclock.db.structs.*;
-import org.transitclock.ipc.data.IpcPrescriptiveRunTimesForPattern;
-import org.transitclock.ipc.data.IpcPrescriptiveRunTimesForPatterns;
-import org.transitclock.ipc.data.IpcPrescriptiveRunTimesForTimeBand;
+import org.transitclock.db.structs.Calendar;
+import org.transitclock.ipc.data.*;
 import org.transitclock.reporting.dao.RunTimeRoutesDao;
 import org.transitclock.reporting.service.RunTimeService;
 import org.transitclock.reporting.service.runTime.prescriptive.PrescriptiveRunTimeService;
@@ -27,9 +26,9 @@ import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.time.LocalTime;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
@@ -49,6 +48,8 @@ public class PrescriptiveRunTimesTest extends AbstractPrescriptiveRunTimesTests{
     private static final DecimalFormat df = new DecimalFormat("0.00");
     private static LocalDate beginDate = LocalDate.now();
     private static LocalDate endDate = LocalDate.now();
+    private static LocalTime beginTime = LocalTime.now();
+    private static LocalTime endTime = LocalTime.now();
     private static ServiceType serviceType = ServiceType.WEEKDAY;
     private static boolean readOnly = true;
 
@@ -87,7 +88,7 @@ public class PrescriptiveRunTimesTest extends AbstractPrescriptiveRunTimesTests{
         String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
         String routeShortName = "001";
         Integer configRev = 12;
-        Double minExpected = 64d;
+        Double minExpected = 71d;
         routeTest(servicePeriod, routeShortName, configRev, minExpected);
     }
 
@@ -96,7 +97,7 @@ public class PrescriptiveRunTimesTest extends AbstractPrescriptiveRunTimesTests{
         String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
         String routeShortName = "003";
         Integer configRev = 12;
-        Double minExpected = 58d;
+        Double minExpected = 74d;
         routeTest(servicePeriod, routeShortName, configRev, minExpected);
     }
 
@@ -105,7 +106,7 @@ public class PrescriptiveRunTimesTest extends AbstractPrescriptiveRunTimesTests{
         String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
         String routeShortName = "015";
         Integer configRev = 12;
-        Double minExpected = 55d;
+        Double minExpected = 67d;
         routeTest(servicePeriod, routeShortName, configRev, minExpected);
     }
 
@@ -114,11 +115,57 @@ public class PrescriptiveRunTimesTest extends AbstractPrescriptiveRunTimesTests{
         String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
         String routeShortName = "028";
         Integer configRev = 12;
-        Double minExpected = 59d;
+        Double minExpected = 69d;
         routeTest(servicePeriod, routeShortName, configRev, minExpected);
     }
 
-    public void routeTest(String servicePeriod, String routeShortName, Integer configRev, Double minExpected) throws Exception {
+    @Test
+    public void prescriptiveRunTimeServiceTest_Service_171_Route_105() throws Exception {
+        String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
+        String routeShortName = "105";
+        Integer configRev = 12;
+        Double minExpected = 70d;
+        routeTest(servicePeriod, routeShortName, configRev, minExpected);
+    }
+
+    @Test
+    public void prescriptiveRunTimeServiceTest_Service_171_Route_207() throws Exception {
+        String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
+        String routeShortName = "207";
+        Integer configRev = 12;
+        Double minExpected = 65d;
+        routeTest(servicePeriod, routeShortName, configRev, minExpected);
+    }
+
+    @Test
+    public void prescriptiveRunTimeServiceTest_Service_171_Route_305() throws Exception {
+        String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
+        String routeShortName = "305";
+        Integer configRev = 12;
+        Double minExpected = 58d;
+        routeTest(servicePeriod, routeShortName, configRev, minExpected);
+    }
+
+    @Test
+    public void prescriptiveRunTimeServiceTest_Service_171_Route_308() throws Exception {
+        String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
+        String routeShortName = "308";
+        Integer configRev = 12;
+        Double minExpected = 46d;
+        routeTest(servicePeriod, routeShortName, configRev, minExpected);
+    }
+
+
+    @Test
+    public void prescriptiveRunTimeServiceTest_Service_171_Route_378() throws Exception {
+        String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
+        String routeShortName = "378";
+        Integer configRev = 12;
+        Double minExpected = 72d;
+        routeTest(servicePeriod, routeShortName, configRev, minExpected);
+    }
+
+    private IpcPrescriptiveRunTimesForPatterns routeTest(String servicePeriod, String routeShortName, Integer configRev, Double minExpected) throws Exception {
         setServicePeriod(servicePeriod);
 
         // Data
@@ -182,15 +229,14 @@ public class PrescriptiveRunTimesTest extends AbstractPrescriptiveRunTimesTests{
             System.out.println(System.lineSeparator() + currentTripPattern.getRouteShortName() + " - " + currentTripPattern.getHeadsign());
             System.out.println("----------------------------------------------------");
 
-            for(int j=0; j < timebands.size(); j++){
-                IpcPrescriptiveRunTimesForTimeBand timeband = timebands.get(j);
-                if(j == 0){
-                    Assert.assertEquals("00:00", timeband.getStartTime());
-                }
+            for(int idx=0; idx < timebands.size(); idx++){
+                IpcPrescriptiveRunTimesForTimeBand timeband = timebands.get(idx);
+
+                Assert.assertEquals(Boolean.TRUE, hasValidFirstTime(idx, timeband, trips));
+
                 System.out.println(System.lineSeparator() + timeband.getStartTime() + " - " + timeband.getEndTime());
                 System.out.println("Current OTP: " + getFormattedPercentOutput(timeband.getCurrentOtp() * 100));
                 System.out.println("Expected OTP: " + getFormattedPercentOutput(timeband.getExpectedOtp() * 100));
-                //Assert.assertTrue(timeband.getExpectedOtp() * 100 > 50);
             }
 
             patterns.get(i).getRunTimesForTimeBands();
@@ -213,6 +259,7 @@ public class PrescriptiveRunTimesTest extends AbstractPrescriptiveRunTimesTests{
         System.out.println("-----------------------------------------------------");
         System.out.println("Overall Current OTP: " + currentFormattedOverallOtp);
         System.out.println("Overall Expected OTP: " + expectedFormattedOverallOtp);
+        System.out.println("Minimum Expected OTP: " + minExpected);
 
         if(minExpected != null){
             if(expectedOverallOtp < minExpected){
@@ -220,11 +267,28 @@ public class PrescriptiveRunTimesTest extends AbstractPrescriptiveRunTimesTests{
             }
         }
 
+        return timeBands;
+
+    }
+
+    private boolean hasValidFirstTime(int idx,
+                                   IpcPrescriptiveRunTimesForTimeBand timeband,
+                                   List<Trip> trips) {
+        if(idx == 0 && !timeband.getStartTime().equals("00:00")){
+            for(Trip trip: trips){
+                if(trip.getTripPatternId().equals(timeband.getTripPatternId()) &&
+                        trip.getStartTime() < TimeUnit.HOURS.toSeconds(7)){
+                    System.out.println("Timeband startTime is after midnight but found a trip start time before cut-off " +
+                            Time.formatSecondsIntoDay(trip.getStartTime()));
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private String getFormattedPercentOutput(double doubleVal){
         return df.format(doubleVal) + "%";
     }
-
 
 }

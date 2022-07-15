@@ -45,7 +45,7 @@ public abstract class AbstractPrescriptiveRunTimesTests {
         for(RunTimesForRoutes runTimesForRoute : runTimesForRoutes){
             List<RunTimesForStops> runTimesForStops = runTimesForStopByRouteKey.get(runTimesForRoute.getKey());
             if(runTimesForStops != null){
-                runTimesForRoute.setRunTimesForStops(runTimesForStops);
+                runTimesForRoute.setRunTimesForStopsAndMap(runTimesForStops);
             }
         }
         return runTimesForRoutes;

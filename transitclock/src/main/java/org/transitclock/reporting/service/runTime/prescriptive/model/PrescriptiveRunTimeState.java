@@ -5,6 +5,7 @@ import org.transitclock.db.structs.ScheduleTime;
 import org.transitclock.ipc.data.IpcPrescriptiveRunTime;
 import org.transitclock.ipc.data.IpcRunTime;
 import org.transitclock.reporting.TimePointStatistics;
+import org.transitclock.statistics.StatisticsV2;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -24,8 +25,13 @@ public class PrescriptiveRunTimeState {
 
     // OtpStates
     private double currentOnTime;
-    private double expectedOnTime;
+    private double currentExpectedOnTime;
+    private double totalCurrentOnTime;
+    private double totalExpectedOnTime;
     private double totalRunTimes;
+
+    private double plusExpectedOnTime;
+    private double minusExpectedOnTime;
 
     private TimePointStatistics timePointStatistics;
 
@@ -33,20 +39,31 @@ public class PrescriptiveRunTimeState {
     private Double currentTimePointDwellTime = 0d;
     private Double currentTimePointVariableTime = 0d;
     private Double currentTimePointRemainder = 0d;
+
+    private Double currentTimePointAvgRunTime = 0d;
+
     private Integer previousTimePointStopPathIndex = 0;
+    private final double adjustedTimePositiveError;
+    private final double adjustedTimeNegativeError;
+
 
     private int currentTimePointIndex = 1;
 
     public PrescriptiveRunTimeState(Map<Integer, ScheduleTime> scheduleTimesByStopPathIndexMap,
-                                    Map<String, List<ArrivalDeparture>> arrivalDeparturesByStopPath) {
+                                    Map<String, List<ArrivalDeparture>> arrivalDeparturesByStopPath,
+                                    double adjustedTimePositiveError,
+                                    double adjustedTimeNegativeError) {
         this.scheduleTimesByStopPathIndexMap = scheduleTimesByStopPathIndexMap;
         this.arrivalDeparturesByStopPath = arrivalDeparturesByStopPath;
+        this.adjustedTimePositiveError = adjustedTimePositiveError;
+        this.adjustedTimeNegativeError = adjustedTimeNegativeError;
     }
 
     private void resetForNewTimePoint() {
         currentTimePointFixedTime = 0d;
         currentTimePointDwellTime = 0d;
         currentTimePointVariableTime = 0d;
+        currentTimePointAvgRunTime = 0d;
         if (!timePointStatistics.isFirstStop()) {
             currentTimePointIndex++;
             previousTimePointStopPathIndex = timePointStatistics.getStopPathIndex();
@@ -78,6 +95,23 @@ public class PrescriptiveRunTimeState {
             addDwellTime(getDwellPercentileValue(allDwellTimes, isLastStop));
             addVariableTime(getVariablePercentileValue(fixedTime, allRunTimes, getCurrentTimePointIndex(), isLastStop));
             addRemainder(getRemainderPercentileValue(fixedTime, allRunTimes, getCurrentTimePointIndex(), isLastStop));
+
+            double runTimeStdDev = StatisticsV2.getStdDev(allRunTimes, timePointStatistics.getAverageRunTime());
+            double dwellTimeStdDev = StatisticsV2.getStdDev(allDwellTimes, timePointStatistics.getAverageDwellTime());
+
+            Double avgDwellTime = timePointStatistics.getAverageDwellTime();
+            Double dwellPercentile = getPercentileValue(allDwellTimes, 65);
+
+
+            Double dwellTime = avgDwellTime;
+
+            if(dwellPercentile > avgDwellTime - (dwellTimeStdDev * 1f) &&
+                    dwellPercentile < avgDwellTime +  (dwellTimeStdDev * 1f)){
+                dwellTime = dwellPercentile;
+            }
+
+            addAvgRunTime(timePointStatistics.getAverageRunTime() + dwellTime);
+
         }else if(includeFirstStopDwell) {
             avgDwell += timePointStatistics.getAverageDwellTime();
         }
@@ -100,12 +134,33 @@ public class PrescriptiveRunTimeState {
         currentTimePointRemainder += remainderTime;
     }
 
+    public void addAvgRunTime(Double avgRunTime){
+        currentTimePointAvgRunTime +=avgRunTime;
+    }
+
 
     public void createPrescriptiveRunTimeForTimePoint(boolean isScheduledOnly) {
         Double scheduleRunTime = getScheduledRunTime();
         Double scheduleDwellTime = getScheduledDwellTime();
         Double runTimeAdjustment = getRunTimeAdjustment(scheduleRunTime, isScheduledOnly);
-        updateOnTimeCounts(scheduleRunTime, scheduleDwellTime, runTimeAdjustment);
+
+        updateCurrentOnTimeCounts(scheduleRunTime, scheduleDwellTime, runTimeAdjustment);
+
+        boolean isCurrentExpectedOtpBetter = currentExpectedOnTime >= currentOnTime;
+
+        // Compares Performance of Adjusted vs Existing
+        // If the existing schedule is better than don't adjust the time
+        updateTotalOnTimeCounts(isCurrentExpectedOtpBetter);
+        runTimeAdjustment = getUpdatedRunTimeAdjustmentForCurrentCounts(isCurrentExpectedOtpBetter, runTimeAdjustment);
+
+        if(currentExpectedOnTime < currentOnTime){
+            runTimeAdjustment = 0d;
+        }
+
+        runTimeAdjustment = 0d;
+
+
+
         IpcPrescriptiveRunTime ipcPrescriptiveRunTime = new IpcPrescriptiveRunTime(timePointStatistics.getStopPathId(),
                                                                                     timePointStatistics.getStopName(),
                                                                                     timePointStatistics.getStopPathIndex(),
@@ -116,27 +171,58 @@ public class PrescriptiveRunTimeState {
         resetForNewTimePoint();
     }
 
-    private void updateOnTimeCounts(Double scheduleRunTime, Double scheduledDwellTime, Double adjustment){
+    private Double getUpdatedRunTimeAdjustmentForCurrentCounts(boolean isCurrentExpectedOtpBetter,
+                                                               Double runTimeAdjustment) {
+        if(isCurrentExpectedOtpBetter){
+            return runTimeAdjustment;
+        }
+        return 0d;
+    }
+
+    private void updateTotalOnTimeCounts(boolean isCurrentExpectedOtpBetter) {
+        totalCurrentOnTime += currentOnTime;
+        if(isCurrentExpectedOtpBetter){
+            totalExpectedOnTime += currentExpectedOnTime;
+        } else {
+            totalExpectedOnTime += currentOnTime;
+        }
+    }
+
+    private void updateCurrentOnTimeCounts(Double scheduleRunTime, Double scheduledDwellTime, Double adjustment){
         Long maxEarlyTime = TimeUnit.MINUTES.toMillis(1);
         Long maxLateTime = TimeUnit.MINUTES.toMillis(-5);
+
+        // reset current ontime counts
+        currentOnTime = 0;
+        currentExpectedOnTime = 0;
+
+        double positiveErrorBuffer = adjustment + adjustedTimePositiveError;
 
         List<ArrivalDeparture> arrivalDepartures = arrivalDeparturesByStopPath.get(timePointStatistics.getStopPathId());
         if(arrivalDepartures != null && scheduleRunTime > 0){
             for(ArrivalDeparture ad: arrivalDepartures){
                 if(ad.isDeparture()){
-                    if(ad.getScheduleAdherence().getTemporalDifference() < maxEarlyTime &&
-                            ad.getScheduleAdherence().getTemporalDifference() > maxLateTime){
+                    boolean currentIsOntime = ad.getScheduleAdherence().getTemporalDifference() < maxEarlyTime &&
+                            ad.getScheduleAdherence().getTemporalDifference() > maxLateTime;
+
+                    boolean expectedIsOntime = (ad.getScheduledTime() + adjustment) - ad.getTime() < maxEarlyTime &&
+                            (ad.getScheduledTime() + adjustment) - ad.getTime() > maxLateTime;
+
+                    boolean expectedIsNotEarly =  ad.getScheduleAdherence().getTemporalDifference() < maxEarlyTime;
+
+                    boolean expectedIsNotLate = (ad.getScheduledTime() + adjustment) - ad.getTime() > maxLateTime
+                            || (ad.getScheduledTime() + positiveErrorBuffer) - ad.getTime() > maxLateTime;
+
+                    if(currentIsOntime){
                         currentOnTime++;
                     }
-                    if((ad.getScheduledTime() + adjustment) - ad.getTime() < maxEarlyTime &&
-                            (ad.getScheduledTime() + adjustment) - ad.getTime() > maxLateTime){
-                        expectedOnTime++;
+                    if(expectedIsNotEarly && expectedIsNotLate){
+                        currentExpectedOnTime++;
                     }
+
                     totalRunTimes++;
                 }
-
             }
-
         }
     }
 
@@ -149,7 +235,11 @@ public class PrescriptiveRunTimeState {
         Double currentTimePointVariableTime = getCurrentTimePointVariableTime();
         Double currentTimePointDwellTime = getCurrentTimePointDwellTime();
 
-        Double adjustment = (currentFixedTime + currentTimePointVariableTime + currentTimePointDwellTime) - scheduleRunTime;
+        //Double newRunTime = currentFixedTime + currentTimePointVariableTime + currentTimePointDwellTime;
+        Double newRunTime =getCurrentTimePointAvgRunTime();
+
+        Double adjustment = newRunTime - scheduleRunTime;
+
         return adjustment;
     }
 
@@ -192,6 +282,10 @@ public class PrescriptiveRunTimeState {
         return currentTimePointDwellTime;
     }
 
+    private Double getCurrentTimePointAvgRunTime() {
+        return currentTimePointAvgRunTime;
+    }
+
     public List<IpcPrescriptiveRunTime> getPrescriptiveRunTimes() {
         return new ArrayList<>(ipcPrescriptiveRunTimesByStopPathIndex.values());
     }
@@ -201,19 +295,19 @@ public class PrescriptiveRunTimeState {
     }
 
     public double getCurrentOnTimeFraction() {
-        return currentOnTime/totalRunTimes;
+        return totalCurrentOnTime/totalRunTimes;
     }
 
     public double getExpectedOnTimeFraction() {
-        return expectedOnTime/totalRunTimes;
+        return totalExpectedOnTime/totalRunTimes;
     }
 
     public double getCurrentOnTime() {
-        return currentOnTime;
+        return totalCurrentOnTime;
     }
 
     public double getExpectedOnTime() {
-        return expectedOnTime;
+        return totalExpectedOnTime;
     }
 
     public double getTotalRunTimes() {

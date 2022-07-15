@@ -116,7 +116,8 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
                                         ServiceType serviceType,
                                         boolean readOnly) throws Exception {
 
-        return runTimeService.getRunTimeSummary(beginDate, endDate, beginTime, endTime, routeIdOrShortName, headsign,
+        String routeShortName = getRouteShortName(routeIdOrShortName);
+        return runTimeService.getRunTimeSummary(beginDate, endDate, beginTime, endTime, routeShortName, headsign,
                                                 directionId, tripPatternId, serviceType, readOnly);
     }
 

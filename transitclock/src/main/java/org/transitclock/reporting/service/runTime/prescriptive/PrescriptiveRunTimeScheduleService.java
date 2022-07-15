@@ -1,16 +1,7 @@
 package org.transitclock.reporting.service.runTime.prescriptive;
 
-import org.apache.commons.collections.map.HashedMap;
-import org.transitclock.applications.Core;
 import org.transitclock.core.ServiceType;
-import org.transitclock.core.ServiceTypeUtil;
-import org.transitclock.db.structs.*;
-import org.transitclock.db.structs.Calendar;
-import org.transitclock.gtfs.DbConfig;
-import org.transitclock.ipc.data.IpcPrescriptiveRunTime;
 import org.transitclock.ipc.data.IpcStopTime;
-import org.transitclock.reporting.service.runTime.PrescriptiveAdjustmentResult;
-import org.transitclock.reporting.service.runTime.prescriptive.model.PrescriptiveRunTimeState;
 
 import javax.inject.Inject;
 import java.time.LocalTime;

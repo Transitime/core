@@ -57,7 +57,7 @@ public class RunTimeService {
      * @param endDate
      * @param beginTime
      * @param endTime
-     * @param routeIdOrShortName
+     * @param routeShortName
      * @param headsign
      * @param tripPatternId
      * @param serviceType
@@ -69,14 +69,12 @@ public class RunTimeService {
                                         LocalDate endDate,
                                         LocalTime beginTime,
                                         LocalTime endTime,
-                                        String routeIdOrShortName,
+                                        String routeShortName,
                                         String headsign,
                                         String directionId,
                                         String tripPatternId,
                                         ServiceType serviceType,
                                         boolean readOnly) throws Exception {
-
-        String routeShortName = getRouteShortName(routeIdOrShortName);
 
         RunTimeForRouteQuery.Builder rtBuilder = new RunTimeForRouteQuery.Builder();
         RunTimeForRouteQuery rtQuery = rtBuilder

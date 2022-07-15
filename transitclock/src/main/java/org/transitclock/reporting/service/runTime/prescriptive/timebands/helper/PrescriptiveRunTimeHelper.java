@@ -10,28 +10,29 @@ import java.util.List;
 public class PrescriptiveRunTimeHelper {
 
     private static final DoubleConfigValue prescriptiveDwellTime = new DoubleConfigValue(
-                "transitclock.runTime.prescriptiveDwellTimePercentile", 60d,
+                "transitclock.runTime.prescriptiveDwellTimePercentile", 50d,
          "The dwellTime percentile that prescriptive runtime algorithm uses when calculating schedule adjustments");
 
     private static Double getDwellTimePercentile(){
-        return prescriptiveDwellTime.getValue();
+        return 65d;
+        //return prescriptiveDwellTime.getValue();
     }
 
     public static Double getVariablePercentileValue(Double fixedTime, List<Double> runTimeValues, int currentIndex, boolean isLastStop){
         if(isLastStop){
-            return getVariable(fixedTime, getPercentileValue(runTimeValues, 45));
+            return getVariable(fixedTime, getPercentileValue(runTimeValues, 65));
         }
         switch(currentIndex){
             case 1:
-                return getVariable(fixedTime, getPercentileValue(runTimeValues, 20));
-            case 2:
-                return getVariable(fixedTime, getPercentileValue(runTimeValues, 30));
-            case 3:
-                return getVariable(fixedTime, getPercentileValue(runTimeValues, 35));
-            case 4:
                 return getVariable(fixedTime, getPercentileValue(runTimeValues, 40));
+            case 2:
+                return getVariable(fixedTime, getPercentileValue(runTimeValues, 50));
+            /*case 3:
+                return getVariable(fixedTime, getPercentileValue(runTimeValues, 55));
+            case 4:
+                return getVariable(fixedTime, getPercentileValue(runTimeValues, 60));*/
             default:
-                return getVariable(fixedTime, getPercentileValue(runTimeValues, 45));
+                return getVariable(fixedTime, getPercentileValue(runTimeValues, 60));
         }
     }
 
@@ -45,13 +46,11 @@ public class PrescriptiveRunTimeHelper {
         }
         switch(currentIndex){
             case 1:
-                return getVariable(fixedTime, getPercentileValue(runTimeValues, 20));
-            case 2:
                 return getVariable(fixedTime, getPercentileValue(runTimeValues, 15));
-            case 3:
+            /*case 2:
                 return getVariable(fixedTime, getPercentileValue(runTimeValues, 10));
-            case 4:
-                return getVariable(fixedTime, getPercentileValue(runTimeValues, 5));
+            case 3:
+                return getVariable(fixedTime, getPercentileValue(runTimeValues, 5));*/
             default:
                 return 0d;
         }

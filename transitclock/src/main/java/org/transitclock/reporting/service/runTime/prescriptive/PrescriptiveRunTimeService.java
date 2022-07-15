@@ -70,6 +70,27 @@ public class PrescriptiveRunTimeService {
             false,
             "Whether or not to include the first stop dwell time in the prescriptive runtime avg calculation.");
 
+    private static final DoubleConfigValue adjustedTimePositiveError = new DoubleConfigValue(
+            "transitclock.runTime.prescriptivePositiveErrorSec",
+            20d,
+            "Whether or not to include the first stop dwell time in the prescriptive runtime avg calculation.");
+
+    private Double getAdjustedTimePositiveError(){
+        //return 60d;
+        return adjustedTimePositiveError.getValue() * 1000;
+    }
+
+    private static final DoubleConfigValue adjustedTimeNegativeError = new DoubleConfigValue(
+            "transitclock.runTime.prescriptivePositiveErrorSec",
+            20d,
+            "Negative error threshold for prescriptive adjustment. Accounts for driver schedule adjustments" +
+                    "for new schedule.");
+
+    private Double getAdjustedTimeNegativeError(){
+        //return 60d;
+        return adjustedTimeNegativeError.getValue() * 1000;
+    }
+
 
     private static final Logger logger = LoggerFactory.getLogger(PrescriptiveRunTimeService.class);
 
@@ -264,7 +285,8 @@ public class PrescriptiveRunTimeService {
                                                                adjustedEndTime.toString(),
                                                                prescriptiveRunTimeState.getCurrentOnTimeFraction(),
                                                                prescriptiveRunTimeState.getExpectedOnTimeFraction(),
-                                                               prescriptiveRunTimeState.getPrescriptiveRunTimes());
+                                                               prescriptiveRunTimeState.getPrescriptiveRunTimes(),
+                                                               tripPattern.getId());
 
                 //add timeband to our timebands list
                 prescriptiveRunTimesForTimeBands.addRunTimesForTimeBands(prescriptiveRunTimeBand);
@@ -551,11 +573,16 @@ public class PrescriptiveRunTimeService {
         Map<StopPathRunTimeKey, TimePointStatistics> timePointsStatistics = timePointRunTimeProcessor.getSortedTimePointsStatistics();
         boolean isScheduledOnly = timePointRunTimeProcessor.getScheduledOnlyStatus();
 
+        if(scheduleTimes.size() == 0){
+            System.out.println("test");
+        }
+
         Map<Integer, ScheduleTime> scheduleTimesByStopPathIndexMap = createScheduledTimesGroupedById(scheduleTimes);
 
         Map<String, List<ArrivalDeparture>> arrivalDeparturesByStopPath = getArrivalDeparturesByStopPath(arrivalDepartures);
 
-        PrescriptiveRunTimeState state = new PrescriptiveRunTimeState(scheduleTimesByStopPathIndexMap, arrivalDeparturesByStopPath);
+        PrescriptiveRunTimeState state = new PrescriptiveRunTimeState(scheduleTimesByStopPathIndexMap,
+                arrivalDeparturesByStopPath, getAdjustedTimePositiveError(), getAdjustedTimeNegativeError());
 
         for(Map.Entry<StopPathRunTimeKey, StopPath> timePointStopPath : timePointStopPaths.entrySet()) {
             StopPathRunTimeKey key = timePointStopPath.getKey();
@@ -613,6 +640,9 @@ public class PrescriptiveRunTimeService {
      * @return
      */
     private Map<Integer, ScheduleTime> createScheduledTimesGroupedById(List<ScheduleTime> scheduleTimes){
+        if(scheduleTimes.size() == 0){
+            System.out.println("bad");
+        }
         return IntStream.range(0, scheduleTimes.size())
                 .boxed()
                 .collect(Collectors.toMap(Function.identity(), scheduleTimes::get));
