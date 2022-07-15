@@ -153,14 +153,6 @@ public class PrescriptiveRunTimeState {
         updateTotalOnTimeCounts(isCurrentExpectedOtpBetter);
         runTimeAdjustment = getUpdatedRunTimeAdjustmentForCurrentCounts(isCurrentExpectedOtpBetter, runTimeAdjustment);
 
-        if(currentExpectedOnTime < currentOnTime){
-            runTimeAdjustment = 0d;
-        }
-
-        runTimeAdjustment = 0d;
-
-
-
         IpcPrescriptiveRunTime ipcPrescriptiveRunTime = new IpcPrescriptiveRunTime(timePointStatistics.getStopPathId(),
                                                                                     timePointStatistics.getStopName(),
                                                                                     timePointStatistics.getStopPathIndex(),
