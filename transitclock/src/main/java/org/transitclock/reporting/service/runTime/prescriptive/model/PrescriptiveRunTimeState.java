@@ -194,21 +194,20 @@ public class PrescriptiveRunTimeState {
         if(arrivalDepartures != null && scheduleRunTime > 0){
             for(ArrivalDeparture ad: arrivalDepartures){
                 if(ad.isDeparture()){
-                    boolean currentIsOntime = ad.getScheduleAdherence().getTemporalDifference() < maxEarlyTime &&
+                    boolean currentIsOnTime = ad.getScheduleAdherence().getTemporalDifference() < maxEarlyTime &&
                             ad.getScheduleAdherence().getTemporalDifference() > maxLateTime;
-
-                    boolean expectedIsOntime = (ad.getScheduledTime() + adjustment) - ad.getTime() < maxEarlyTime &&
-                            (ad.getScheduledTime() + adjustment) - ad.getTime() > maxLateTime;
 
                     boolean expectedIsNotEarly =  ad.getScheduleAdherence().getTemporalDifference() < maxEarlyTime;
 
                     boolean expectedIsNotLate = (ad.getScheduledTime() + adjustment) - ad.getTime() > maxLateTime
                             || (ad.getScheduledTime() + positiveErrorBuffer) - ad.getTime() > maxLateTime;
 
-                    if(currentIsOntime){
+                    boolean expectedIsOnTime = adjustment == 0 ? currentIsOnTime : expectedIsNotEarly && expectedIsNotLate;
+
+                    if(currentIsOnTime){
                         currentOnTime++;
                     }
-                    if(expectedIsNotEarly && expectedIsNotLate){
+                    if(expectedIsOnTime){
                         currentExpectedOnTime++;
                     }
 
