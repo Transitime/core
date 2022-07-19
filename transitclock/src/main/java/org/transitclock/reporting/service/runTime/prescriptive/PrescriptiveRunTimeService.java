@@ -143,6 +143,7 @@ public class PrescriptiveRunTimeService {
         List<TripPattern> tripPatterns = getTripPatternsForRoute(routeShortName, configRev, readOnly);
 
         for (TripPattern tripPattern : tripPatterns) {
+
             // Populate Timepoints for trip pattern
             List<IpcStopPath> timePoints = new ArrayList<>();
             for (StopPath timePoint : tripPattern.getScheduleAdhStopPaths()) {
@@ -155,7 +156,12 @@ public class PrescriptiveRunTimeService {
             TimebandsForTripPattern timebandsForTripPattern = timebandsForTripPatternByPatternId.get(tripPattern.getId());
 
             // Add adjusted list of timebands
-            fillAdjustedTimeBandTimes(timebandsForTripPattern.getTimebandTimes());
+            try{
+                fillAdjustedTimeBandTimes(timebandsForTripPattern.getTimebandTimes());
+            } catch (Exception e){
+                e.printStackTrace();
+                continue;
+            }
 
             // Gets new prescriptive runtimes for timebands
             IpcPrescriptiveRunTimesForTimeBands runTimesForTimeBands = getPrescriptiveRunTimesForTimeBands(timebandsForTripPattern,
@@ -185,41 +191,67 @@ public class PrescriptiveRunTimeService {
         // Set Adjusted From Times
         int timebandSize = timebandTimes.size();
         int lastTimebandIndex = timebandSize - 1;
+        // Set Adjusted Start Times
         for(int i=0; i<timebandSize; i++){
-            if(i==0 && timebandTimes.get(i).getStartTime().getHour() < 7){
-                timebandTimes.get(i).setAdjustedStartTime(LocalTime.MIDNIGHT);
+            boolean isFirstTimeBand = i == 0;
+            TimebandTime currentTimeBandTime = timebandTimes.get(i);
+            LocalTime adjustedBeginTime = getAdjustedBeginTime(currentTimeBandTime, isFirstTimeBand);
+            currentTimeBandTime.setAdjustedStartTime(adjustedBeginTime);
+        }
+
+        // Set Adjusted End Times
+        for(int i=0; i<timebandSize; i++){
+            boolean isLastTimeBand = i == lastTimebandIndex;
+            boolean hasSingleTimeBandTime = timebandSize == 1;
+            TimebandTime currentTimeBandTime = timebandTimes.get(i);
+            TimebandTime nextTimeBandTime = isLastTimeBand ? null : timebandTimes.get(i + 1);
+            LocalTime adjustedEndTime = getAdjustedEndTime(currentTimeBandTime, nextTimeBandTime, isLastTimeBand, hasSingleTimeBandTime);
+            currentTimeBandTime.setAdjustedEndTime(adjustedEndTime);
+        }
+    }
+
+    private LocalTime getAdjustedBeginTime(TimebandTime timebandTime, boolean isFirstTimeBand){
+        LocalTime adjustedBeginTime;
+
+        if(isFirstTimeBand && timebandTime.getStartTime().getHour() < 7){
+            adjustedBeginTime = LocalTime.MIDNIGHT;
+        } else {
+
+            int minute = timebandTime.getStartTime().getMinute();
+            if (minute < 15) {
+                adjustedBeginTime = timebandTime.getStartTime().truncatedTo(ChronoUnit.HOURS);
+            } else if (minute >= 15 && minute < 45) {
+                adjustedBeginTime = timebandTime.getStartTime().withMinute(30);
+            } else if (minute >= 45) {
+                adjustedBeginTime = timebandTime.getStartTime().plusHours(1).truncatedTo(ChronoUnit.HOURS);
             } else {
-                int minute = timebandTimes.get(i).getStartTime().getMinute();
-                LocalTime adjustedEndTime;
-                if(minute < 15){
-                    adjustedEndTime = timebandTimes.get(i).getStartTime().truncatedTo(ChronoUnit.HOURS);
-                } else if(minute >= 15 &&  minute < 45){
-                    adjustedEndTime = timebandTimes.get(i).getStartTime().withMinute(30);
-                } else if(minute >= 45){
-                    adjustedEndTime = timebandTimes.get(i).getStartTime().plusHours(1).truncatedTo(ChronoUnit.HOURS);
-                } else {
-                    adjustedEndTime = timebandTimes.get(i).getStartTime();
-                }
-                timebandTimes.get(i).setAdjustedStartTime(adjustedEndTime);
+                adjustedBeginTime = timebandTime.getStartTime();
             }
         }
-        // Set adjusted To Times
-        for(int i=0; i<timebandSize; i++){
-            if(i < lastTimebandIndex){
-                timebandTimes.get(i).setAdjustedEndTime(timebandTimes.get(i+1).getAdjustedStartTime());
-            }else {
-                timebandTimes.get(i).setAdjustedEndTime(LocalTime.of(3,0));
-            }
+
+        return adjustedBeginTime;
+    }
+
+    private LocalTime getAdjustedEndTime(TimebandTime currentTimeBandTime,
+                                         TimebandTime nextTimeBandTime,
+                                         boolean isLastBandTime,
+                                         boolean hasSingleTimeBandTime){
+        if(hasSingleTimeBandTime){
+            return getAdjustedBeginTime(currentTimeBandTime, false).plusHours(1);
         }
+        if(isLastBandTime){
+            return LocalTime.of(3,0);
+        }
+        return nextTimeBandTime.getAdjustedStartTime();
     }
 
     /**
      * Gets new prescriptive runtimes for timebands
      * @param timebandsByPattern
+     * @param tripsByTripPatternId
      * @param timePoints
-     * @param routeIdOrShortName
-     * @param tripPattern
-     * @param serviceType
+     * @param serviceTypesByServiceId
+     * @param routeShortName
      * @param beginDate
      * @param endDate
      * @param configRev
@@ -409,6 +441,8 @@ public class PrescriptiveRunTimeService {
         // Get list of all unique trip ids in runTimes results
         Set<String> existingRunTimeTripIds = runTimesForRoutes.stream().map(rt -> rt.getTripId()).collect(Collectors.toSet());
 
+
+
         // Get list of applicable scheduled trips
         List<Trip> singleTripForSampleRunTime = new ArrayList<>();
         Map<Integer, AvgScheduleTime> allTripScheduleTimesByStopIndex = new LinkedHashMap<>();
@@ -422,7 +456,7 @@ public class PrescriptiveRunTimeService {
             }
         }
 
-        // Average Schedule Times for all valid trips
+        // Average Schedule Times for all valid schedule trips
         List<ScheduleTime> avgTripScheduleTimesPerStop = getAvgTripScheduleTimes(allTripScheduleTimesByStopIndex);
 
         // Supplement realtime runTime data with scheduled runTime data as necessary
@@ -467,6 +501,12 @@ public class PrescriptiveRunTimeService {
         }
     }
 
+    /**
+     * Get a combined list of avg ScheduleTimes for all applicable scheduled trips
+     * Used when calculating runTime for schedule trips
+     * @param allTripScheduleTimesByIndex
+     * @return
+     */
     private List<ScheduleTime> getAvgTripScheduleTimes(Map<Integer, AvgScheduleTime> allTripScheduleTimesByIndex) {
         List<ScheduleTime> avgScheduleTimes = new ArrayList<>();
         for(AvgScheduleTime avgScheduleTime : allTripScheduleTimesByIndex.values()){
@@ -475,6 +515,13 @@ public class PrescriptiveRunTimeService {
         return avgScheduleTimes;
     }
 
+    /**
+     * Takes sample trip and creates single scheduledRunTime
+     * Proceeds to add scheduledRunTime to list of actual runtimes (if available)
+     * @param singleTripForSampleRunTime
+     * @param rtQuery
+     * @param results
+     */
     private void addScheduledTripRunTimeToResults(List<Trip> singleTripForSampleRunTime,
                                                   RunTimeForRouteQuery rtQuery,
                                                   List<RunTimesForRoutes> results){
@@ -503,7 +550,11 @@ public class PrescriptiveRunTimeService {
                                                   Map<String, Set<ServiceType>> serviceTypesByServiceId) {
 
 
-        if(trip.getStartTime() < rtQuery.getBeginTime() || trip.getStartTime() > rtQuery.getEndTime()) {
+        try {
+            if (trip.getStartTime() % 86400 < rtQuery.getBeginTime() || trip.getStartTime() % 86400 > rtQuery.getEndTime()) {
+                return false;
+            }
+        }catch (Exception e){
             return false;
         }
 
@@ -528,9 +579,9 @@ public class PrescriptiveRunTimeService {
             return false;
         }
         // We already have this trip id in our list of historical runtimes
-        if(existingRunTimeTripIds.contains(trip.getId())){
+        /*if(existingRunTimeTripIds.contains(trip.getId())){
             return false;
-        }
+        }*/
 
         return true;
     }
@@ -573,9 +624,6 @@ public class PrescriptiveRunTimeService {
         Map<StopPathRunTimeKey, TimePointStatistics> timePointsStatistics = timePointRunTimeProcessor.getSortedTimePointsStatistics();
         boolean isScheduledOnly = timePointRunTimeProcessor.getScheduledOnlyStatus();
 
-        if(scheduleTimes.size() == 0){
-            System.out.println("test");
-        }
 
         Map<Integer, ScheduleTime> scheduleTimesByStopPathIndexMap = createScheduledTimesGroupedById(scheduleTimes);
 
