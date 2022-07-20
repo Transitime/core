@@ -98,8 +98,8 @@
                 <!-- OTP Info -->
                 <div class="row toggle-chart mb-1">
                     <div class="col-sm-4">
-                        <label class="col-sm-6 col-form-label m-bt-20">(Old) Schedule Adherence: <span  class="fw-light" id="current_otp"></span></label>
-                        <label class=" col-sm-6 col-form-label bg-secondary-light m-bt-20">(New) Minimum Schedule Adherence: <span  class="fw-light" id="expected_otp"></span></label>
+                        <label class="col-sm-6 col-form-label m-bt-20">Current OTP: <span  class="fw-light" id="current_otp"></span></label>
+                        <label class=" col-sm-6 col-form-label bg-secondary-light m-bt-20">Projected OTP: <span  class="fw-light" id="expected_otp"></span></label>
                     </div>
                     <div class="col-sm-4"></div>
                     <div class="col-sm-4">
