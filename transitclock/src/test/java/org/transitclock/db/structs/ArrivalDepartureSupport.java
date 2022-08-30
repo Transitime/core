@@ -112,7 +112,8 @@ public class ArrivalDepartureSupport extends StructSupport {
             toLong(split, freqStartTime),
             toLong(split, dwellTime),
             split[tripPatternId],
-            split[stopPathId]
+            split[stopPathId],
+            false
 );
     return builder.create();
 

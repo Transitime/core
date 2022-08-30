@@ -14,24 +14,57 @@
     </autoBlockAssigner>
     <core>
         <agencyId>1</agencyId>
-        <maxPredictionTimeForDbSecs>900</maxPredictionTimeForDbSecs>
+        <maxPredictionTimeForDbSecs>2700</maxPredictionTimeForDbSecs>
         <exclusiveBlockAssignments>true</exclusiveBlockAssignments>
         <integrationTest>true</integrationTest>
         <matchHistoryMaxSize>40</matchHistoryMaxSize>
         <allowableLateSecondsForInitialMatching>2700</allowableLateSecondsForInitialMatching>
+        <maxHeadingOffsetFromSegment>120</maxHeadingOffsetFromSegment>
+        <predictionGeneratorClass>org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman.KalmanPredictionGeneratorImpl</predictionGeneratorClass>
+        <predictiongenerator>
+            <biasadjuster></biasadjuster>
+        </predictiongenerator>
+        <fillHistoricalCaches>true</fillHistoricalCaches>
+        <maxPredictionsTimeSecs>1800</maxPredictionsTimeSecs>
+        <terminatePredictionsAtTripEnd>true</terminatePredictionsAtTripEnd>
+        <allowableEarlyForLayoverSeconds>1800</allowableEarlyForLayoverSeconds>
+        <allowableEarlySecondsForInitialMatching>1200</allowableEarlySecondsForInitialMatching>
+        <allowableEarlyTimeForEarlyDepartureSecs>180</allowableEarlyTimeForEarlyDepartureSecs>
+        <allowableLateSeconds>2700</allowableLateSeconds>
+        <allowableNumberOfBadMatches>4</allowableNumberOfBadMatches>
+        <afterStopDistance>50</afterStopDistance>
+        <beforeStopDistance>66</beforeStopDistance>
+        <strictTripAssignmentMatch>true</strictTripAssignmentMatch>
+        <distanceFromLayoverForEarlyDeparture>250</distanceFromLayoverForEarlyDeparture>
+        <layoverDistance>1000</layoverDistance>
+        <longDistanceDeadheadingSpeed>20</longDistanceDeadheadingSpeed>
+        <matchHistoryMaxSize>40</matchHistoryMaxSize>
+        <maxHeadingOffsetFromSegment>120</maxHeadingOffsetFromSegment>
+        <minDistanceForDelayed>100</minDistanceForDelayed>
+        <minDistanceForNoProgress>100</minDistanceForNoProgress>
+        <shortDistanceDeadheadingSpeed>10</shortDistanceDeadheadingSpeed>
+        <timeForDeterminingDelayedSecs>300</timeForDeterminingDelayedSecs>
+        <timeForDeterminingNoProgress>360000</timeForDeterminingNoProgress>
+        <useArrivalPredictionsForNormalStops>false</useArrivalPredictionsForNormalStops>
+
     </core>
     <avl>
-       <csvAvlFeedFileName>sample.csv</csvAvlFeedFileName>
-    	<maxSpeed>40</maxSpeed>
+       <maxSpeed>50</maxSpeed>
+        <serviceIdSuffix>true</serviceIdSuffix>
     </avl>
-
+    <apc>
+        <cacheBinMinutes>15</cacheBinMinutes>
+    </apc>
     <find>
         <!--  Used to match the last stop of a vehicle to a time. Comments in VechiclesServer. Times are in milliseconds -->
         <dwelltime>30000</dwelltime>
         <fuzzytime>180000</fuzzytime>
     </find>
-
+    <db>
+        <validateQuery>CALL NOW()</validateQuery>
+        <batchSize>1000</batchSize>
+    </db>
     <hibernate>
-        <configFile>src/main/resources/hsql_integration_test_hibernate.cfg.xml</configFile>
+    <configFile>classpath:hsql_integration_test_hibernate.cfg.xml</configFile>
     </hibernate>
 </transitclock>

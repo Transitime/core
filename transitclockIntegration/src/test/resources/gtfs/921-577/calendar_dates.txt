@@ -1,0 +1,2 @@
+service_id,date,exception_type
+MAR22-MVS-BUS-Weekday-06,20220530,2

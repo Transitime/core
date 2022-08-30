@@ -23,10 +23,8 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -161,8 +159,17 @@ public class ConfigFileReader {
 				// ConfigValue class. The reason only do this if the system 
 				// property hasn't been set yet is so that parameters set on 
 				// the system command line will take precedence.
-				if (System.getProperty(propertyName) == null)
+				if (System.getProperty(propertyName) == null) {
 					System.setProperty(propertyName, value);
+				} else {
+					if (!value.equals(System.getProperty(propertyName))) {
+						// log a possible configuration issue
+						// by documentation this is allowed as system properties
+						// take precedence
+						System.out.println("NOT OVERWRITING Property: " + propertyName + "=" + value
+								+ " with existing val=" + System.getProperty(propertyName));
+					}
+				}
 			}
 
 			// Done with this part of the tree so take the current node name from the list
@@ -208,19 +215,33 @@ public class ConfigFileReader {
 	 */
 	public static void readXmlConfigFile(String fileName) 
 			throws ConfigException {
-		File xmlFile = new File(fileName);
+		Document doc = null;
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		Document doc;
+
 		try {
+			File xmlFile;
+			if (fileName.startsWith("classpath:")) {
+				URL resource = ConfigFileReader.class.getClassLoader().getResource(fileName.substring("classpath:".length()));
+				if (resource == null)
+					throw new ConfigException("file not found in classpath; fileName=" + fileName);
+				xmlFile = new File(resource.getFile());
+			} else {
+				xmlFile = new File(fileName);
+			}
+
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			doc = dBuilder.parse(xmlFile);
 		} catch (Exception e) {
-			System.err.println("Error parasing XML file \"" + fileName + "\" : " + 
+			System.err.println("Error parsing XML file \"" + fileName + "\" : " +
 					e.getMessage());
-			
+
 			throw new ConfigException(e);
 		}
-		
+
+		if (doc == null) {
+			throw new ConfigException("init failed for file " + fileName);
+		}
+
 		// So text strings separated by newlines are not 
 		// considered separate text nodes
 		doc.getDocumentElement().normalize();
@@ -401,8 +422,10 @@ public class ConfigFileReader {
 		for (String fileName : configFiles) {
 			try {
 				// Read in and process the config file
+				System.out.println("loading config " + fileName);
 				processConfig(fileName);
 			} catch (ConfigException | ConfigParamException e) {
+				System.err.println("error loading config " + fileName);
 				e.printStackTrace();
 			}
 		}

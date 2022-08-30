@@ -60,9 +60,8 @@
      <property name="hibernate.order_inserts">true</property>
      <property name="hibernate.order_updates">true</property>
      <property name="hibernate.connection.autocommit">true</property>
-     <property name="hibernate.hbm2ddl.auto">create</property>
+     <property name="hibernate.hbm2ddl.auto">update</property>
 
- 
    <!-- Configure db settings. Currently commented out because this
         can be done programmatically by HibernateUtils using
         command line arguments so that some apps, like the 

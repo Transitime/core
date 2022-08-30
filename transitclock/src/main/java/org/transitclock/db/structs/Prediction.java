@@ -271,6 +271,8 @@ public class Prediction implements Serializable {
 				+ "]";
 	}
 
+	public Long getId() { return id; }
+
 	public Date getPredictionTime() {
 		return predictionTime;
 	}
@@ -278,6 +280,8 @@ public class Prediction implements Serializable {
 	public Date getAvlTime() {
 		return avlTime;
 	}
+
+	public int getConfigRev() { return configRev; }
 	
 	public Date getCreationTime() {
 		return creationTime;

@@ -15,13 +15,16 @@ public class ApcCacheTest extends ApcTest {
 
   @Before
   public void setupClass() throws Exception {
-    SingletonSupport.createTestCore("CDT");
+    SingletonSupport.createTestCore("America/Chicago");
 
   }
 
   @Test
   public void createBinKeys() throws Exception {
-    ApcCache aggregator = new ApcCache("CDT");
+    String readTz = "America/New_York"; // data is spread across various timezones
+    String runTz = "America/Chicgao";
+
+    ApcCache aggregator = new ApcCache(runTz);
     List<ApcReport> matches = loadMatches();
 
     Map<String, ApcEvents> routeCache = aggregator.populateRouteCache(matches);
@@ -32,8 +35,8 @@ public class ApcCacheTest extends ApcTest {
     assertNotNull(binKeys);
     assertEquals(1, binKeys.size());
     List<ApcReport> sortedRecords = apcEvents.getSortedRecords();
-    assertEquals(toDate("2021-04-21", "16:19:32", null).getTime(), apcEvents.getSortedRecords().get(0).getArrivalDeparture().getTime());
-    assertEquals(toDate("2021-04-21", "16:15:00", null).getTime(), binKeys.get(0).getTime());
+    assertEquals(toDate("2021-04-21", "16:19:32", readTz).getTime(), apcEvents.getSortedRecords().get(0).getArrivalDeparture().getTime());
+    assertEquals(toDate("2021-04-21", "16:15:00", readTz).getTime(), binKeys.get(0).getTime());
     assertEquals("755", binKeys.get(0).getRouteId());
     assertEquals("17840", binKeys.get(0).getStopId());
 
@@ -42,14 +45,14 @@ public class ApcCacheTest extends ApcTest {
     binKeys = aggregator.createBinKeys(routeCache, secondHash);
     assertNotNull(binKeys);
     assertEquals(10, binKeys.size());
-    assertEquals(toDate("2021-04-22", "02:17:45", null).getTime(), apcEvents.getSortedRecords().get(0).getArrivalDeparture().getTime());
-    assertEquals(toDate("2021-04-22", "02:15:00", null).getTime(), binKeys.get(0).getTime());
+    assertEquals(toDate("2021-04-22", "02:17:45", readTz).getTime(), apcEvents.getSortedRecords().get(0).getArrivalDeparture().getTime());
+    assertEquals(toDate("2021-04-22", "02:15:00", readTz).getTime(), binKeys.get(0).getTime());
     assertEquals("4", binKeys.get(0).getRouteId());
     assertEquals("17928", binKeys.get(0).getStopId());
 
     // if this changes the sorting is not stable
-    assertEquals(toDate("2021-04-22", "00:29:55", null).getTime(), apcEvents.getSortedRecords().get(1).getArrivalDeparture().getTime());
-    assertEquals(toDate("2021-04-22", "00:15:00", null).getTime(), binKeys.get(1).getTime());
+    assertEquals(toDate("2021-04-22", "00:29:55", readTz).getTime(), apcEvents.getSortedRecords().get(1).getArrivalDeparture().getTime());
+    assertEquals(toDate("2021-04-22", "00:15:00", readTz).getTime(), binKeys.get(1).getTime());
     assertEquals("4", binKeys.get(1).getRouteId());
     assertEquals("17928", binKeys.get(1).getStopId());
 
@@ -60,7 +63,7 @@ public class ApcCacheTest extends ApcTest {
     apcEvents = routeCache.get(largeHash);
     assertEquals(127, apcEvents.getSortedRecords().size());
     ApcReport apcReport = apcEvents.getSortedRecords().get(0);
-    assertEquals(toDate("2021-04-22", "05:56:35", null).getTime(), apcEvents.getSortedRecords().get(0).getArrivalDeparture().getTime());
+    assertEquals(toDate("2021-04-22", "05:56:35", readTz).getTime(), apcEvents.getSortedRecords().get(0).getArrivalDeparture().getTime());
 
     ApcCacheElement apcCacheElement = aggregator.movingAverage(routeCache, largeHash, binKeys.get(0));
     assertNotNull(apcCacheElement);

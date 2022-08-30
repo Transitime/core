@@ -71,6 +71,7 @@
         stopPathLength float,
         tripIndex integer,
         tripPatternId varchar(120),
+        scheduleAdherenceStop bit(1),
         primary key (vehicleId, tripId, time, stopId, isArrival, gtfsStopSeq)
     );
 
@@ -533,6 +534,7 @@
         travelTimes_id integer,
         tripPattern_id varchar(120),
         tripPattern_configRev integer,
+        boardingType integer,
         primary key (tripId, startTime, configRev)
     );
 
@@ -543,6 +545,11 @@
         description varchar(255),
         nonPassengerVehicle bit,
         trackerId varchar(60),
+        bikeCapacity integer,
+        doorCount integer,
+        doorWidth varchar(10),
+        lowFloor integer,
+        wheelchairAccess varchar(10),
         type integer,
         primary key (id)
     );
@@ -585,6 +592,17 @@
         tripShortName varchar(60),
         primary key (vehicleId, avlTime)
     );
+
+    create table RouteDirections (
+         id integer,
+         routeShortName varchar(60),
+         directionId varchar(60),
+         directionName varchar(60),
+         configRev integer
+
+    );
+
+
 
     create index ArrivalsDeparturesTimeIndex on ArrivalsDepartures (time);
 
