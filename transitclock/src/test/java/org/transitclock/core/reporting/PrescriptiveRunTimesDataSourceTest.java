@@ -28,6 +28,10 @@ public class PrescriptiveRunTimesDataSourceTest extends AbstractPrescriptiveRunT
 
     private MockedStatic<Core> singletonCore;
 
+    private static final String SERVICE_PERIOD_169 = "169 - 2022-04-18 - 2022-06-12";
+
+    private static final String SERVICE_PERIOD_171 = "171 - 2022-06-13 - 2022-09-11";
+
     @Before
     public void setup() {
         // Mock Core
@@ -40,8 +44,6 @@ public class PrescriptiveRunTimesDataSourceTest extends AbstractPrescriptiveRunT
         singletonCore = mockStatic(Core.class);
         singletonCore.when(() -> Core.getInstance()).thenReturn(mockCore);
 
-        String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
-        setServicePeriod(servicePeriod);
     }
 
     @After
@@ -53,14 +55,14 @@ public class PrescriptiveRunTimesDataSourceTest extends AbstractPrescriptiveRunT
     @Test
     public void processRunTimesForRoutesTest() throws IOException, ParseException {
         String routeShortName = "015";
-        List<RunTimesForRoutes> runTimesForRoutes = getRunTimesForRoutes(routeShortName);
+        List<RunTimesForRoutes> runTimesForRoutes = getRunTimesForRoutes(routeShortName, SERVICE_PERIOD_171);
         Assert.assertEquals(1131, runTimesForRoutes.size());
     }
 
     @Test
     public void processArrivalDeparturesTest() throws IOException, ParseException {
         String routeShortName = "015";
-        List<ArrivalDeparture> arrivalDepartures = getArrivalDepartures(routeShortName);
+        List<ArrivalDeparture> arrivalDepartures = getArrivalDepartures(routeShortName, SERVICE_PERIOD_171);
         Assert.assertEquals(11046, arrivalDepartures.size());
     }
 
@@ -68,7 +70,7 @@ public class PrescriptiveRunTimesDataSourceTest extends AbstractPrescriptiveRunT
     public void onTimePerformanceTest() throws Exception {
         String routeShortName = "001";
 
-        List<ArrivalDeparture> arrivalDepartures = getArrivalDepartures(routeShortName);
+        List<ArrivalDeparture> arrivalDepartures = getArrivalDepartures(routeShortName, SERVICE_PERIOD_171);
         Assert.assertEquals(25892, arrivalDepartures.size());
 
         List<ArrivalDeparture> departures = filterDeparturesOnly(arrivalDepartures);
@@ -128,14 +130,14 @@ public class PrescriptiveRunTimesDataSourceTest extends AbstractPrescriptiveRunT
     @Test
     public void processCalendarsTest() throws IOException, ParseException {
         String routeShortName = "015";
-        List<org.transitclock.db.structs.Calendar> calendars = getCalendars(routeShortName);
+        List<org.transitclock.db.structs.Calendar> calendars = getCalendars(routeShortName, SERVICE_PERIOD_171);
         Assert.assertEquals(9, calendars.size());
     }
 
     @Test
     public void processCalendarDatesTest() throws IOException, ParseException {
         String routeShortName = "015";
-        List<CalendarDate> calendarDates = getCalendarDates(routeShortName);
+        List<CalendarDate> calendarDates = getCalendarDates(routeShortName, SERVICE_PERIOD_171);
         Assert.assertEquals(135, calendarDates.size());
     }
 
@@ -143,7 +145,7 @@ public class PrescriptiveRunTimesDataSourceTest extends AbstractPrescriptiveRunT
     public void processTripsTest() throws IOException, ParseException {
         String routeShortName = "015";
 
-        List<Trip> trips = getTripsWithScheduleTimes(routeShortName);
+        List<Trip> trips = getTripsWithScheduleTimes(routeShortName, SERVICE_PERIOD_171);
 
         Assert.assertEquals(272, trips.size());
 
@@ -158,7 +160,7 @@ public class PrescriptiveRunTimesDataSourceTest extends AbstractPrescriptiveRunT
     @Test
     public void processTripPattern() throws IOException, ParseException {
         String routeShortName = "015";
-        List<TripPattern> tripPatterns = getTripPatternsWithStopPaths(routeShortName);
+        List<TripPattern> tripPatterns = getTripPatternsWithStopPaths(routeShortName, SERVICE_PERIOD_171);
 
         Assert.assertEquals(2, tripPatterns.size());
 
@@ -170,14 +172,15 @@ public class PrescriptiveRunTimesDataSourceTest extends AbstractPrescriptiveRunT
     @Test
     public void runTimeServiceTest() throws Exception {
         String routeShortName = "015";
-        List<RunTimesForRoutes> runTimesForRoutes = getRunTimesForRoutes(routeShortName);
+        List<RunTimesForRoutes> runTimesForRoutes = getRunTimesForRoutes(routeShortName, SERVICE_PERIOD_171);
 
         // Mock RunTimeService
         RunTimeService runTimeService = spy(RunTimeService.class);
 
         // Mock RunTimeRoutesDao
         RunTimeRoutesDao runTimeRoutesDao = mock(RunTimeRoutesDao.class);
-        when(runTimeRoutesDao.getRunTimesForRoutes(any(RunTimeForRouteQuery.class))).thenReturn(getRunTimesForRoutes(routeShortName));
+        when(runTimeRoutesDao.getRunTimesForRoutes(any(RunTimeForRouteQuery.class)))
+                             .thenReturn(getRunTimesForRoutes(routeShortName, SERVICE_PERIOD_171));
 
         // RunTimeService Inject Mocked Classes
         runTimeService.setDao(runTimeRoutesDao);
@@ -188,5 +191,20 @@ public class PrescriptiveRunTimesDataSourceTest extends AbstractPrescriptiveRunT
 
         Assert.assertEquals(1131, runTimesForRoutes.size());
         Assert.assertEquals(689, filteredRunTimesForRoutes.size());
+    }
+
+    @Test
+    public void processFeedInfo() throws IOException, ParseException {
+        String servicePeriod = "169 - 2022-04-18 - 2022-06-12";
+        String feedVersion = "V310-166-165-20220124";
+
+        String routeShortName = "";
+        List<FeedInfo> feedInfoList = getFeedInfo( servicePeriod);
+
+        Assert.assertEquals(17, feedInfoList.size());
+
+        FeedInfo feedInfo = feedInfoList.get(0);
+        Assert.assertEquals(feedVersion, feedInfo.getFeedVersion());
+
     }
 }

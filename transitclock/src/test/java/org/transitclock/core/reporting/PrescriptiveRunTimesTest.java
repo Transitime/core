@@ -6,7 +6,6 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.transitclock.applications.Core;
 import org.transitclock.core.ServiceType;
-import org.transitclock.core.reporting.dao.*;
 import org.transitclock.db.query.ArrivalDepartureQuery;
 import org.transitclock.db.query.RunTimeForRouteQuery;
 import org.transitclock.db.query.TripQuery;
@@ -18,17 +17,17 @@ import org.transitclock.reporting.service.RunTimeService;
 import org.transitclock.reporting.service.runTime.prescriptive.PrescriptiveRunTimeService;
 import org.transitclock.reporting.service.runTime.prescriptive.PrescriptiveTimebandService;
 import org.transitclock.reporting.service.runTime.prescriptive.timebands.PrescriptiveRuntimeClusteringService;
-import org.transitclock.utils.MapKey;
 import org.transitclock.utils.Time;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.text.MessageFormat;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
@@ -84,11 +83,21 @@ public class PrescriptiveRunTimesTest extends AbstractPrescriptiveRunTimesTests{
     }
 
     @Test
+    public void prescriptiveRunTimeServiceTest_Service_171_Route_001_Single() throws Exception {
+        String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
+        String routeShortName = "001";
+        Integer configRev = 12;
+        Double minExpected = 87d;
+        setRouteFileName("001-singleRunTime");
+        routeTest(servicePeriod, routeShortName, configRev, minExpected);
+    }
+
+    @Test
     public void prescriptiveRunTimeServiceTest_Service_171_Route_001() throws Exception {
         String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
         String routeShortName = "001";
         Integer configRev = 12;
-        Double minExpected = 71d;
+        Double minExpected = 86d;
         routeTest(servicePeriod, routeShortName, configRev, minExpected);
     }
 
@@ -97,7 +106,7 @@ public class PrescriptiveRunTimesTest extends AbstractPrescriptiveRunTimesTests{
         String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
         String routeShortName = "003";
         Integer configRev = 12;
-        Double minExpected = 74d;
+        Double minExpected = 88d;
         routeTest(servicePeriod, routeShortName, configRev, minExpected);
     }
 
@@ -106,7 +115,7 @@ public class PrescriptiveRunTimesTest extends AbstractPrescriptiveRunTimesTests{
         String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
         String routeShortName = "015";
         Integer configRev = 12;
-        Double minExpected = 67d;
+        Double minExpected = 84d;
         routeTest(servicePeriod, routeShortName, configRev, minExpected);
     }
 
@@ -115,7 +124,7 @@ public class PrescriptiveRunTimesTest extends AbstractPrescriptiveRunTimesTests{
         String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
         String routeShortName = "028";
         Integer configRev = 12;
-        Double minExpected = 69d;
+        Double minExpected = 86d;
         routeTest(servicePeriod, routeShortName, configRev, minExpected);
     }
 
@@ -124,7 +133,7 @@ public class PrescriptiveRunTimesTest extends AbstractPrescriptiveRunTimesTests{
         String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
         String routeShortName = "105";
         Integer configRev = 12;
-        Double minExpected = 70d;
+        Double minExpected = 86d;
         routeTest(servicePeriod, routeShortName, configRev, minExpected);
     }
 
@@ -133,7 +142,7 @@ public class PrescriptiveRunTimesTest extends AbstractPrescriptiveRunTimesTests{
         String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
         String routeShortName = "207";
         Integer configRev = 12;
-        Double minExpected = 65d;
+        Double minExpected = 83d;
         routeTest(servicePeriod, routeShortName, configRev, minExpected);
     }
 
@@ -142,7 +151,7 @@ public class PrescriptiveRunTimesTest extends AbstractPrescriptiveRunTimesTests{
         String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
         String routeShortName = "305";
         Integer configRev = 12;
-        Double minExpected = 58d;
+        Double minExpected = 75d;
         routeTest(servicePeriod, routeShortName, configRev, minExpected);
     }
 
@@ -151,7 +160,7 @@ public class PrescriptiveRunTimesTest extends AbstractPrescriptiveRunTimesTests{
         String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
         String routeShortName = "308";
         Integer configRev = 12;
-        Double minExpected = 46d;
+        Double minExpected = 73d;
         routeTest(servicePeriod, routeShortName, configRev, minExpected);
     }
 
@@ -161,20 +170,24 @@ public class PrescriptiveRunTimesTest extends AbstractPrescriptiveRunTimesTests{
         String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
         String routeShortName = "378";
         Integer configRev = 12;
-        Double minExpected = 72d;
+        Double minExpected = 86d;
         routeTest(servicePeriod, routeShortName, configRev, minExpected);
     }
 
-    private IpcPrescriptiveRunTimesForPatterns routeTest(String servicePeriod, String routeShortName, Integer configRev, Double minExpected) throws Exception {
-        setServicePeriod(servicePeriod);
+    private IpcPrescriptiveRunTimesForPatterns routeTest(String servicePeriod,
+                                                         String routeShortName,
+                                                         Integer configRev,
+                                                         Double minExpected) throws Exception {
 
         // Data
-        List<RunTimesForRoutes> runTimesForRoutes = getRunTimesForRoutes(routeShortName);
-        List<ArrivalDeparture> arrivalDepartures = getArrivalDepartures(routeShortName);
-        List<Calendar> calendars = getCalendars(routeShortName);
-        List<CalendarDate> calendarDates = getCalendarDates(routeShortName);
-        List<TripPattern> tripPatterns = getTripPatternsWithStopPaths(routeShortName);
-        List<Trip> trips = getTripsWithScheduleTimes(routeShortName);
+        List<RunTimesForRoutes> runTimesForRoutes = getRunTimesForRoutes(routeShortName, servicePeriod);
+        List<ArrivalDeparture> arrivalDepartures = getArrivalDepartures(routeShortName, servicePeriod);
+        List<Calendar> calendars = getCalendars(routeShortName, servicePeriod);
+        List<CalendarDate> calendarDates = getCalendarDates(routeShortName, servicePeriod);
+        List<TripPattern> tripPatterns = getTripPatternsWithStopPaths(routeShortName, servicePeriod);
+        List<Trip> trips = getTripsWithScheduleTimes(routeShortName, servicePeriod);
+
+        addTripPatternsToTrips(tripPatterns, trips);
 
         // Mock RunTimeRoutesDao
         RunTimeRoutesDao runTimeRoutesDao = mock(RunTimeRoutesDao.class);
@@ -271,9 +284,19 @@ public class PrescriptiveRunTimesTest extends AbstractPrescriptiveRunTimesTests{
 
     }
 
+    private void addTripPatternsToTrips(List<TripPattern> tripPatterns, List<Trip> trips) {
+        Map<String, TripPattern> tripPatternMap = tripPatterns.stream()
+                                                              .collect(Collectors.toMap(TripPattern::getId, Function.identity()));
+        for(Trip trip : trips){
+            if(tripPatternMap.containsKey(trip.getTripPatternId())){
+                trip.setTripPattern(tripPatternMap.get(trip.getTripPatternId()));
+            }
+        }
+    }
+
     private boolean hasValidFirstTime(int idx,
-                                   IpcPrescriptiveRunTimesForTimeBand timeband,
-                                   List<Trip> trips) {
+                                      IpcPrescriptiveRunTimesForTimeBand timeband,
+                                      List<Trip> trips) {
         if(idx == 0 && !timeband.getStartTime().equals("00:00")){
             for(Trip trip: trips){
                 if(trip.getTripPatternId().equals(timeband.getTripPatternId()) &&

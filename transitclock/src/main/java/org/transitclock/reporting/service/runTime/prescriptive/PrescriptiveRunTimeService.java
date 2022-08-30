@@ -441,17 +441,20 @@ public class PrescriptiveRunTimeService {
         // Get list of all unique trip ids in runTimes results
         Set<String> existingRunTimeTripIds = runTimesForRoutes.stream().map(rt -> rt.getTripId()).collect(Collectors.toSet());
 
-
-
         // Get list of applicable scheduled trips
         List<Trip> singleTripForSampleRunTime = new ArrayList<>();
         Map<Integer, AvgScheduleTime> allTripScheduleTimesByStopIndex = new LinkedHashMap<>();
 
+        // Loop through trips for trip pattern and time range and get running avg of all trip runtimes by stop index
+        // Also adds a single scheduled trip to the realtime runtime data if only 1 runTime data sample is available
         for(Trip trip : trips){
             if(includeTripAsScheduledRunTime(trip, rtQuery, serviceTypesByServiceId)){
-                if(allowSingleTripForRunTime(singleTripForSampleRunTime, existingRunTimeTripIds, trip)){
+                // Supplement realtime runtime with schedule data if only 1 data sample is available
+                if(allowSingleTripForRunTime(singleTripForSampleRunTime, existingRunTimeTripIds)){
                     singleTripForSampleRunTime.add(trip);
                 }
+                // Updates running avg of stopPath running time
+                // Necessary to compare and calculate scheduled running time for custom time windows
                 updateTripScheduleTimes(allTripScheduleTimesByStopIndex, trip.getScheduleTimes());
             }
         }
@@ -459,9 +462,11 @@ public class PrescriptiveRunTimeService {
         // Average Schedule Times for all valid schedule trips
         List<ScheduleTime> avgTripScheduleTimesPerStop = getAvgTripScheduleTimes(allTripScheduleTimesByStopIndex);
 
+        // CASE 1 : Has at least 1 complete realtime runTime result
         // Supplement realtime runTime data with scheduled runTime data as necessary
         addScheduledTripRunTimeToResults(singleTripForSampleRunTime, rtQuery, runTimesForRoutes);
 
+        // CASE 2: Has 0 complete realtime runTime results for timeband
         // Get list of all runTimes for scheduled trips NOT included in the original historical results
         // Goal here is to include runTime information for trips that never got captured by the runtime query
         if(avgTripScheduleTimesPerStop.size() > 0) {
@@ -568,8 +573,7 @@ public class PrescriptiveRunTimeService {
     }
 
     private boolean allowSingleTripForRunTime(List<Trip> singleTripForSampleRunTime,
-                                              Set<String> existingRunTimeTripIds,
-                                              Trip trip){
+                                              Set<String> existingRunTimeTripIds){
         // We already have a single trip, skip
         if(!singleTripForSampleRunTime.isEmpty()){
             return false;
@@ -578,10 +582,6 @@ public class PrescriptiveRunTimeService {
         if(existingRunTimeTripIds.size() > 1){
             return false;
         }
-        // We already have this trip id in our list of historical runtimes
-        /*if(existingRunTimeTripIds.contains(trip.getId())){
-            return false;
-        }*/
 
         return true;
     }
@@ -608,8 +608,7 @@ public class PrescriptiveRunTimeService {
     }
 
     /**
-     * Calculates the suggested schedule modifications by retrieving appropriate variable, dwellTime, and remainder
-     * for each timepoint segment (based on their index) and applying that to the scheduled times.
+     * Calculates the suggested schedule modifications
      * @param timePointRunTimeProcessor
      * @param scheduleTimes
      * @param arrivalDepartures

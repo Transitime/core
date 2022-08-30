@@ -10,12 +10,11 @@ import java.util.List;
 public class PrescriptiveRunTimeHelper {
 
     private static final DoubleConfigValue prescriptiveDwellTime = new DoubleConfigValue(
-                "transitclock.runTime.prescriptiveDwellTimePercentile", 50d,
+                "transitclock.runTime.prescriptiveDwellTimePercentile", 65d,
          "The dwellTime percentile that prescriptive runtime algorithm uses when calculating schedule adjustments");
 
     private static Double getDwellTimePercentile(){
-        return 65d;
-        //return prescriptiveDwellTime.getValue();
+        return prescriptiveDwellTime.getValue();
     }
 
     public static Double getVariablePercentileValue(Double fixedTime, List<Double> runTimeValues, int currentIndex, boolean isLastStop){
@@ -56,8 +55,7 @@ public class PrescriptiveRunTimeHelper {
         }
     }
 
-    public static Double getDwellPercentileValue(List<Double> dwellValues, boolean isLastStop){
-        // You still want the dwell time for all the stops leading up to the last stop.
+    public static Double getDwellPercentileValue(List<Double> dwellValues){
         return getPercentileValue(dwellValues, getDwellTimePercentile());
     }
 
