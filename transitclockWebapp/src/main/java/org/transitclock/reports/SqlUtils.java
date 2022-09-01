@@ -20,6 +20,7 @@ import java.text.ParseException;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.transitclock.db.webstructs.WebAgency;
 import org.transitclock.utils.Time;
 
@@ -204,8 +205,10 @@ public class SqlUtils {
 		} else { // Not using dateRange so must be using beginDate and numDays params
 			String beginDate = request.getParameter("beginDate");
 			throwOnSqlInjection(beginDate);
-			
+
 			String numDaysStr = request.getParameter("numDays");
+			numDaysStr = StringUtils.isEmpty(numDaysStr) ? "1" : numDaysStr;
+
 			throwOnSqlInjection(numDaysStr);
 			
 			// Limit number of days to maxNumDays to prevent queries that are 
