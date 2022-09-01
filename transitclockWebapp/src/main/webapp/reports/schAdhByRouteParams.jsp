@@ -16,9 +16,9 @@
 </head>
 <body>
 <%@include file="/template/header.jsp" %>
-<div id="title">
+<h4>
     Select Parameters for Schedule Adherence by Route Chart
-</div>
+</h4>
 
 <div id="mainDiv">
     <form action="schAdhByRouteChart.jsp" method="POST">
@@ -50,7 +50,7 @@
                    size="1"
                    type="text"
                    placeholder="minutes"
-                   value="4.0"/>
+                   value="5.0"/>
         </div>
 
         <jsp:include page="params/submitReport.jsp"/>

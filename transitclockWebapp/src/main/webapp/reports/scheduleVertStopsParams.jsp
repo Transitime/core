@@ -18,9 +18,9 @@
 
 <%@include file="/template/header.jsp" %>
 
-<div id="title">
+<h4>
     Select Parameters for Schedule Report
-</div>
+</h4>
 
 <div id="mainDiv">
     <form action="scheduleVertStopsReport.jsp" method="POST">

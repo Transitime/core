@@ -28,8 +28,10 @@ String allowableLateStr = request.getParameter("allowableLate");
 if (allowableLateStr == null || allowableLateStr.isEmpty())
 	allowableLateStr = "4.0";
 String allowableLateMinutesStr = "'" + SqlUtils.convertMinutesToSecs(allowableLateStr) + " seconds'";
-    		   
-String sql =
+
+	String timeRequest = SqlUtils.timeRangeClause(request, "ad.time", 7);
+
+	String sql =
 	"SELECT " 
 	+ "     COUNT(CASE WHEN scheduledTime-time > " + allowableEarlyMinutesStr + " THEN 1 ELSE null END) as early, \n"
 	+ "     COUNT(CASE WHEN scheduledTime-time <= " + allowableEarlyMinutesStr + " AND time-scheduledTime <= " 
@@ -47,7 +49,7 @@ String sql =
     + " AND ad.scheduledTime IS NOT NULL \n"
     // Specifies which routes to provide data for
     + SqlUtils.routeClause(request, "ad") + "\n"
-    + SqlUtils.timeRangeClause(request, "ad.time", 7) + "\n"
+    + timeRequest + "\n"
     // Grouping and ordering is a bit complicated since might also be looking
     // at old arrival/departure data that doen't have stoporder defined. Also,
     // when configuration changes happen then the stop order can change. 

@@ -83,42 +83,48 @@
     String currentDateStr = org.transitclock.utils.Time.dateStr(new java.util.Date());
 %>
 
-<div class="row">
-    <label class="col-sm-12 col-form-label">Date</label>
-    <div class="col-sm-12 d-flex justify-content-between date-icon-wrapper align-items-center">
-
-    <input type="text" id="beginDate" name="beginDate" class="form-control beginDate"
-           title="The first day of the range you want to examine data for.
-    	<br><br> Begin date must be before the end date." />
+<div class="row param">
+    <div class="col-sm-6 label">Date:</div>
+    <div class="col-sm-6 d-flex justify-content-between date-icon-wrapper align-items-center">
+        <input type="text" id="beginDate" style="margin-right: 7px;" name="beginDate" class="form-control beginDate"
+               title="The first day of the range you want to examine data for.
+            <br><br> Begin date must be before the end date." />
         <i class="bi bi-calendar3 calendar-icon"></i>
     </div>
 </div>
 
 
-<div class="row  align-items-center time-place-holder">
-    <label class="time-label col-form-label"  for="beginTime">Begin Time</label>
-
-    <input type="text" class="form-control time-input time-input-box"
-           id="beginTime" name="beginTime"
-           title="Optional begin time of day to limit query to. Useful if
-    	    want to see result just for rush hour, for example. Leave blank
-    		if want data for entire day.
-    		<br/><br/>Format: hh:mm, as in '07:00' for 7AM."
-           size="3"
-           placeholder="(hh:mm)"
-           value=""
-    />
-    <label class="time-label end-label  text-center col-form-label p-0"   for="endTime">End Time</label>
-
-    <input type="text" class="form-control time-input time-input-box"
-           id="endTime" name="endTime"
-           title="Optional end time of day to limit query to. Useful if
-    	    want to see result just for rush hour, for example. Leave blank
-    		if want data for entire day.
-    		<br/><br/>Format: hh:mm, as in '09:00' for 9AM.
-    		Use '23:59' for midnight."
-           size="3"
-           placeholder="(hh:mm)"
-           value=""
-    />
+<div class="row time-place-holder param">
+    <div class="col-sm-6 label">Begin Time:</div>
+    <div class="col-sm-6">
+        <input type="text" class="form-control time-input time-input-box"
+               id="beginTime" name="beginTime"
+               title="Optional begin time of day to limit query to. Useful if
+                want to see result just for rush hour, for example. Leave blank
+                if want data for entire day.
+                <br/><br/>Format: hh:mm, as in '07:00' for 7AM."
+               size="3"
+               placeholder="(hh:mm)"
+               value=""
+        />
+    </div>
 </div>
+
+<div class="row  align-items-center time-place-holder param">
+    <div class="col-sm-6 label">End Time:</div>
+    <div class="col-sm-6">
+        <input type="text" class="form-control time-input time-input-box"
+               id="endTime" name="endTime"
+               title="Optional end time of day to limit query to. Useful if
+                want to see result just for rush hour, for example. Leave blank
+                if want data for entire day.
+                <br/><br/>Format: hh:mm, as in '09:00' for 9AM.
+                Use '23:59' for midnight."
+               size="3"
+               placeholder="(hh:mm)"
+               value=""
+        />
+    </div>
+</div>
+
+<input type="hidden" id="custId" name="custId" value="3487">

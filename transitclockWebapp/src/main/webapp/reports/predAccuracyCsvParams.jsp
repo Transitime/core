@@ -18,9 +18,9 @@
 
 <%@include file="/template/header.jsp" %>
 
-<div id="title">
+<h4>
     Select Parameters for Prediction Accuracy CSV Download
-</div>
+</h4>
 
 <div id="mainDiv">
     <form action="predAccuracyCsv.jsp" method="POST">

@@ -16,11 +16,13 @@
 </head>
 <body>
 <%@include file="/template/header.jsp" %>
-<div id="title">
+
+<h4>
     Select Parameters for Schedule Adherence by Stop Chart
-</div>
+</h4>
 
 <div id="mainDiv">
+
     <form action="schAdhByStopChart.jsp" method="POST">
         <%-- For passing agency param to the report --%>
         <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
@@ -50,8 +52,9 @@
                    size="1"
                    type="text"
                    placeholder="minutes"
-                   value="4.0"/>
+                   value="5.0"/>
         </div>
+
 
         <jsp:include page="params/submitReport.jsp" />
     </form>

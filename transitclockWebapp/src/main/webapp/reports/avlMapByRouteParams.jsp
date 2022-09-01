@@ -17,9 +17,9 @@
 
 <%@include file="/template/header.jsp" %>
 
-<div id="title">
+<h4>
    Select Parameters for Displaying AVL Data in Map by Route
-</div>
+</h4>
    
 <div id="mainDiv">
 <form action="avlMap.jsp" method="POST">

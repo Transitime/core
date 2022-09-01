@@ -51,13 +51,11 @@ label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-rig
 
 /* updated css */
 #title,  .header-title {
-
-
     margin-top: 40px;
     margin-bottom: 2px;
     font-weight: normal;
     text-align: center;
-    background: #019932;
+    background: #1e3f78;
     color: white;
     padding: 8px;
     font-size: 24px;
@@ -157,7 +155,7 @@ select:not(.datepick-month-year):not(.datepick-month-year) {
 
 input#submit, button#submit {
     margin: 24px;
-    background-color: #029932;
+    background-color: #1e3f78;
     cursor: pointer;
     width: 210px;
     padding: 5px 0px;
@@ -1293,5 +1291,13 @@ body.loader:after {
     display: inline-block;
 }
 
+h4{
+    font-weight: normal;
+    color: #1E3F78;
+    font-size: 28px;
+    text-align: center;
+    padding-top: 1em;
+    padding-bottom: .25em;
+}
 
 /***/

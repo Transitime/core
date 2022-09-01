@@ -18,9 +18,9 @@
 
 <%@include file="/template/header.jsp" %>
 
-<div id="title">
+<h4>
     Select Parameters for Prediction Accuracy Intervals Chart
-</div>
+</h4>
 
 <div id="mainDiv">
     <form action="predAccuracyIntervalsChart.jsp" method="POST">
