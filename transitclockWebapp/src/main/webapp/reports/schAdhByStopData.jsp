@@ -17,8 +17,20 @@
     pageEncoding="ISO-8859-1"%>
 <%@ page import="org.transitclock.reports.GenericJsonQuery" %>
 <%@ page import="org.transitclock.reports.SqlUtils" %>
+<%@ page import="org.transitclock.db.webstructs.WebAgency" %>
 <%
 try {
+
+String agencyId = request.getParameter("a");
+WebAgency agency = WebAgency.getCachedWebAgency(agencyId);
+String dbtype = agency.getDbType();
+boolean isMysql = "mysql".equals(dbtype);
+
+String epochCommandPre = "";
+if (isMysql) {
+	epochCommandPre = "UNIX_TIMESTAMP";
+}
+
 String allowableEarlyStr = request.getParameter("allowableEarly");
 if (allowableEarlyStr == null || allowableEarlyStr.isEmpty())
 	allowableEarlyStr = "1.0";
@@ -33,10 +45,10 @@ String allowableLateMinutesStr = "'" + SqlUtils.convertMinutesToSecs(allowableLa
 
 	String sql =
 	"SELECT " 
-	+ "     COUNT(CASE WHEN scheduledTime-time > " + allowableEarlyMinutesStr + " THEN 1 ELSE null END) as early, \n"
-	+ "     COUNT(CASE WHEN scheduledTime-time <= " + allowableEarlyMinutesStr + " AND time-scheduledTime <= " 
-				+ allowableLateMinutesStr + " THEN 1 ELSE null END) AS ontime, \n" 
-    + "     COUNT(CASE WHEN time-scheduledTime > " + allowableLateMinutesStr + " THEN 1 ELSE null END) AS late, \n" 
+	+ "     COUNT(CASE WHEN " + epochCommandPre + "(scheduledTime) -" + epochCommandPre + "(time) > " + allowableEarlyMinutesStr + " THEN 1 ELSE null END) as early, \n"
+	+ "     COUNT(CASE WHEN " + epochCommandPre + "(scheduledTime) -" + epochCommandPre + "(time) <= " + allowableEarlyMinutesStr + " AND " + epochCommandPre + "(time) -" + epochCommandPre + "(scheduledTime) <= "
+			+ allowableLateMinutesStr + " THEN 1 ELSE null END) AS ontime, \n"
+    + "     COUNT(CASE WHEN " + epochCommandPre + "(time) -" + epochCommandPre + "(scheduledTime) > " + allowableLateMinutesStr + " THEN 1 ELSE null END) AS late, \n"
     + "     COUNT(*) AS total, \n"
     + "     s.name AS stop_name, \n"
     + "     ad.directionid AS direction_id \n"
@@ -65,8 +77,7 @@ String allowableLateMinutesStr = "'" + SqlUtils.convertMinutesToSecs(allowableLa
 // Just for debugging
 System.out.println("\nFor schedule adherence by stop query sql=\n" + sql);
     		
-// Do the query and return result in JSON format    
-String agencyId = request.getParameter("a");
+// Do the query and return result in JSON format
 String jsonString = GenericJsonQuery.getJsonString(agencyId, sql);
 response.setContentType("application/json");
 response.setHeader("Access-Control-Allow-Origin", "*");
