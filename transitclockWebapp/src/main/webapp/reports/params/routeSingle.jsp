@@ -49,9 +49,19 @@ $.getJSON(apiUrlPrefix + "/command/routes",
  	
 </script>
 
+
+<%--
     <div id="routesDiv"  class="param">
       <label for="route">Route:</label>
-      <select id="route" name="r" style="width: 380px" 
+      <select id="route" name="r" style="width: 380px"
       	title="Select which route you want data for. " ></select>
+    </div>--%>
+
+    <div class="row param">
+        <div class="col-sm-5 label">Route:</div>
+        <div class="col-sm-7">
+            <select type="text" id="route" class="form-control time-input time-input-box"
+                    name="r" title="Select which route you want data for. " ></select>
+        </div>
     </div>
-    
+

@@ -84,8 +84,8 @@
 %>
 
 <div class="row param">
-    <div class="col-sm-6 label">Date:</div>
-    <div class="col-sm-6 d-flex justify-content-between date-icon-wrapper align-items-center">
+    <div class="col-sm-5 label">Date:</div>
+    <div class="col-sm-7 d-flex justify-content-between date-icon-wrapper align-items-center">
         <input type="text" id="beginDate" style="margin-right: 7px;" name="beginDate" class="form-control beginDate"
                title="The first day of the range you want to examine data for.
             <br><br> Begin date must be before the end date." />
@@ -95,8 +95,8 @@
 
 
 <div class="row time-place-holder param">
-    <div class="col-sm-6 label">Begin Time:</div>
-    <div class="col-sm-6">
+    <div class="col-sm-5 label">Begin Time:</div>
+    <div class="col-sm-7">
         <input type="text" class="form-control time-input time-input-box"
                id="beginTime" name="beginTime"
                title="Optional begin time of day to limit query to. Useful if
@@ -111,8 +111,8 @@
 </div>
 
 <div class="row  align-items-center time-place-holder param">
-    <div class="col-sm-6 label">End Time:</div>
-    <div class="col-sm-6">
+    <div class="col-sm-5 label">End Time:</div>
+    <div class="col-sm-7">
         <input type="text" class="form-control time-input time-input-box"
                id="endTime" name="endTime"
                title="Optional end time of day to limit query to. Useful if
