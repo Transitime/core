@@ -57,7 +57,7 @@
 
             <br>
             <jsp:include page="params/vehicle.jsp" />
-            <jsp:include page="params/fromDateNumDaysTime.jsp" />
+            <jsp:include page="params/fromDateNumDaysTimeSidePanel.jsp" />
 
             <div class="row">
                 <label class="col-sm-7 col-form-label">Allowable late (mins)</label>
@@ -142,6 +142,6 @@
     var request = {<%= WebUtils.getAjaxDataString(request) %>},
         contextPath = "<%= request.getContextPath() %>";
 </script>
-<script src="<%= request.getContextPath() %>/map/javascript/avlMap.js"></script>
+<script src="<%= request.getContextPath() %>/map/javascript/avlMap.js" defer></script>
 </body>
 </html>

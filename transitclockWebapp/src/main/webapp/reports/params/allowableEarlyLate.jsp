@@ -5,6 +5,7 @@
   Time: 1:05 PM
   To change this template use File | Settings | File Templates.
 --%>
+<%@ page import="org.transitclock.reports.ReportsConfig" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <div class="row param">
   <div class="col-sm-5 label">Allowable Early:</div>
@@ -16,7 +17,8 @@
            size="1"
            type="text"
            placeholder="minutes"
-           value="1.0"/>
+           value=<% out.print(ReportsConfig.getDefaultAllowableEarlyMinutes()); %>
+         />
   </div>
 </div>
 
@@ -30,6 +32,7 @@
            size="1"
            type="text"
            placeholder="minutes"
-           value="5.0"/>
+           value=<% out.print(ReportsConfig.getDefaultAllowableLateMinutes()); %>
+       />
   </div>
 </div>

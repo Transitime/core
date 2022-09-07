@@ -51,6 +51,17 @@ public class WebUtils {
 					8080,
 					"The port of the api tier.  The default is typical");
 
+
+	private static StringConfigValue headerBrandingText =
+			new StringConfigValue(
+					"transitclock.web.headerBrandingText",
+					"The",
+					"Optional branding text included in the Header of the Web application");
+
+	public static String getHeaderBrandingText() {
+		return headerBrandingText.getValue();
+	}
+
 	protected static Integer getApiPort() {
 		return apiPort.getValue();
 	}

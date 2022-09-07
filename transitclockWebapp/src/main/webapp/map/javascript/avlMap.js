@@ -17,7 +17,7 @@ var routeOptions = {
     fillOpacity: 1,
 };
 
-var routePolylineOptions = {clickable: false, color: "#00f", opacity: 0.5, weight: 4};
+var routePolylineOptions = {clickable: false, color: "#00f", opacity: 0.4, weight: 2, dashArray: '3, 3'};
 
 var stopPopupOptions = {closeButton: false};
 
@@ -46,7 +46,9 @@ function drawAvlMarker(avl) {
           }),
           angle: avl.heading,
           title: tooltip
-      }).addTo(vehicleGroup); 
+      }).addTo(vehicleGroup);
+	  avlMarker.setOpacity(1);
+	  avlMarker.setZIndexOffset(-1);
 	
   	// Create popup with detailed info
 
@@ -57,8 +59,14 @@ function drawAvlMarker(avl) {
 	for (var i = 0; i < labels.length; i++) {
 		var label = $("<b />").text(labels[i] + ": ");
 		var value = $("<div />").attr("class", "vehicle-value").text('N/A');
-		if(avl[keys[i]]){
-			value = $("<div />").attr("class", "vehicle-value").text(avl[keys[i]]);
+
+		var text = avl[keys[i]];
+		if(text){
+			var key = keys[i];
+			if(key == 'schedAdh'){
+				text += ' Minutes';
+			}
+			value = $("<div />").attr("class", "vehicle-value").text(text);
 		}
 		table.append( $("<div />").attr("class", "vehicle-item").append(label, value) )
 	}
@@ -249,8 +257,7 @@ var map = L.map('map');
 L.control.scale({metric: false}).addTo(map);
 L.tileLayer(mapTileUrl, {
  attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
- maxZoom: 19
-}).addTo(map);
+ maxZoom: 19}).addTo(map);
 
 //fit map to agency boundaries.
 $.getJSON(apiUrlPrefix + "/command/agencyGroup", function(agencies) {
@@ -305,6 +312,7 @@ $("#route").change(function(evt) { drawRoute(evt.target.value) });
 
 // draw AVL data when submit button is clicked
 $("#submit").on("click", function() {
+	animationGroup.clearLayers();
 
 	if ($("#early").val() > 1440) {
 		$("#early").val(1440);
@@ -411,8 +419,8 @@ function drawRoute(route) {
 /* Animation controls */
 
 var busIcon = L.icon({
-	iconUrl: '/web/maps/images/bus-24.png',
-	iconRetinaUrl: '/web/maps/images/bus-24.png',
+	iconUrl: '/web/maps/images/bus-24NotNew.png',
+	iconRetinaUrl: '/web/maps/images/bus-24NotNew.png',
 	iconSize: [25, 25],
 	iconAnchor: [13, 13],
 	popupAnchor: [0, -13],

@@ -1300,4 +1300,11 @@ h4{
     padding-bottom: .25em;
 }
 
+.params-description {
+    color: #777777;
+    font-size: 1em;
+    padding-top: .25em;
+    padding-bottom: .75em;
+}
+
 /***/

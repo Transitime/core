@@ -21,36 +21,36 @@ div.avlMarker {
   height:7px;
 }
 
-div.avlTriangle {
+.avlTriangle {
   width: 0px;
   height: 0px;
-  border-bottom: 10px solid blue;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent
+  border-bottom: 12px solid blue;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent
 }
 
 div.avlTriangleon-time {
     width: 0px;
     height: 0px;
-    border-bottom: 10px solid #37E627;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent
+    border-bottom: 12px solid #5ec54d;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent
 }
 
 div.avlTrianglelate {
   width: 0px;
   height: 0px;
-  border-bottom: 10px solid #ff2000;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent
+  border-bottom: 12px solid #f5e712;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent
 }
 
 div.avlTriangleearly {
   width: 0px;
   height: 0px;
-  border-bottom: 10px solid #fffe00;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent
+  border-bottom: 12px solid #d52f0f;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent
 }
 
 .popupTable {

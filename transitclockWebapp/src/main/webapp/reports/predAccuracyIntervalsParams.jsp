@@ -34,63 +34,9 @@
 
         <jsp:include page="params/predictionSource.jsp" />
 
-        <div class="param">
-            <label for="predictionType">Prediction Type:</label>
-            <select id="predictionType" name="predictionType"
-                    title="Specifies whether or not to show prediction accuracy for
-     	predictions that were affected by a layover. Select 'All' to show
-     	data for predictions, 'Affected by layover' to only see data where
-     	predictions affected by when a driver is scheduled to leave a layover,
-     	or 'Not affected by layover' if you only want data for predictions
-     	that were not affected by layovers.">
-                <option value="">All</option>
-                <option value="AffectedByWaitStop">Affected by layover</option>
-                <option value="NotAffectedByWaitStop">Not affected by layover</option>
-            </select>
-        </div>
+        <jsp:include page="params/predictionType.jsp" />
 
-        <div class="param">
-            <label for="intervalsType">Intervals Type:</label>
-            <select id="intervalsType" name="intervalsType"
-                    title="Specifies the type of graph to be displayed. By selecting
-     		'Percentage only' the charge will display the prediction accuracy
-     		range that is within the percentages specified below. By selecting
-     		'Standard Deviation only' the chart will display the prediction
-     		accuracy range for predictions within a standard deviation of the
-     		mean. This method is experimental and might be removed. By
-     		selecting 'Percentage only and Standard Deviation' the chart will
-     		display both a percentage interval and a standard deviation
-     		interval.">
-                <option value="PERCENTAGE">Percentage only</option>
-                <option value="STD_DEV">Standard Deviation only</option>
-                <option value="BOTH">Percentage only and Standard Deviation</option>
-            </select>
-        </div>
-
-        <div class="param">
-            <label for="intervalPercentage1">Interval Percentage 1:</label>
-            <input id="intervalPercentage1" name="intervalPercentage1"
-                   title="For when using a 'Percentage' interval type. Specifies the
-    	       percent of predictions that should lie within the minimum
-    	       and maximum intervals."
-                   type="number"
-                   value="70"
-                   min="0"
-                   placeholder="%"
-                   max="100"/>
-        </div>
-
-        <div class="param">
-            <label for="intervalPercentage2">Interval Percentage 2:</label>
-            <input id="intervalPercentage2" name="intervalPercentage2"
-                   title="Optional value for when using a 'Percentage' interval type.
-    		Specifies a second percent of predictions that should lie within
-    		the minimum and maximum intervals."
-                   type="number"
-                   min="0"
-                   placeholder="%"
-                   max="100"/>
-        </div>
+        <jsp:include page="params/intervals.jsp" />
 
         <jsp:include page="params/submitReport.jsp" />
     </form>

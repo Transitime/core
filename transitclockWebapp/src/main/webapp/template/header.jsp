@@ -1,4 +1,4 @@
-
+<%@ page import="org.transitclock.utils.web.WebUtils" %>
 
 
 <%-- Loading nav header --%>
@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="<%= request.getContextPath() %>/css/nav-header.css">
 <nav class="navbar navbar-expand-lg navbar-light bg-light transit-clock-theme">
     <div class="container-fluid">
-        <a class="navbar-brand" href="/web">The Transit Clock </a>
+        <a class="navbar-brand" href="/web"><% out.print(WebUtils.getHeaderBrandingText()); %> Transit Clock</a>
         <!--
         <div id="header"><a href="/web">The Transit Clock - new nav</a></div>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">

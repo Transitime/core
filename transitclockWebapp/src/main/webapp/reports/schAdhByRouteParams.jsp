@@ -19,10 +19,14 @@
 <h4>
     Select Parameters for Schedule Adherence by Route Chart
 </h4>
-
 <div id="mainDiv">
+    <div class="params-description">
+        Checks the schedule adherence of every stop (including time-points) for both Arrival and Departure records
+        and shows the total schedule adherence for the selected route and time period.
+    </div>
     <form action="schAdhByRouteChart.jsp" method="POST">
         <%-- For passing agency param to the report --%>
+
         <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
 
         <jsp:include page="params/routeSingle.jsp"/>

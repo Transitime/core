@@ -73,7 +73,7 @@
                 <jsp:include page="params/routeAllOrSingleNew.jsp" />
             </div>
 
-            <jsp:include page="params/fromDateNumDaysTime.jsp" />
+            <jsp:include page="params/fromDateNumDaysTimeSidePanel.jsp" />
 
 
             <div class="row">

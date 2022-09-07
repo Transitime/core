@@ -69,7 +69,7 @@
 
             </div>
 
-            <jsp:include page="params/fromDateNumDaysTime.jsp" />
+            <jsp:include page="params/fromDateNumDaysTimeSidePanel.jsp" />
 
             <div class="row">
                 <label class="col-sm-12 col-form-label">Service Day Type</label>
