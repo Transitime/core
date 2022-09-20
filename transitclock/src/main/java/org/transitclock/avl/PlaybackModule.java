@@ -170,8 +170,8 @@ public class PlaybackModule extends Module {
 		long end = dbReadBeginTime + DB_POLLING_TIME_MSEC;
 
 		List<AvlReport> avlReports = null;
-		if (playbackVehicleId.getValue() == null
-				|| playbackVehicleId.getValue().length() == 0) {
+		if (playbackVehicleId.getValue() != null
+				&& playbackVehicleId.getValue().length() > 0) {
 			logger.info("PlaybackModule getting batch of AVLReports for " +
 											"between beginTime={} and endTime={} " +
 											"and vehicleId={}",
