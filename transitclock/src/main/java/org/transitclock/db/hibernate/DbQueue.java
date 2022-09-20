@@ -312,7 +312,7 @@ public class DbQueue<T> {
 				Throwable cause = HibernateUtils.getRootCause(e);
 				logger.error("{} for database for project={} when batch writing "
 						+ "objects: {}. Will try to write each object "
-						+ "from batch individually. {}", 
+						+ "from batch individually. {} {}",
 						e.getClass().getSimpleName(), projectId,
 						cause.getMessage(), additionaInfo);
 			}

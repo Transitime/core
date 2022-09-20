@@ -419,7 +419,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 	 * @param tripPatternId
 	 * @param stopPathId
 	 */
-	private ArrivalDeparture(String vehicleId,
+	protected ArrivalDeparture(String vehicleId,
 													 long time,
 													 long avlTime,
 													 Block block,
@@ -441,10 +441,11 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 													 Long freqStartTime,
 													 Long dwellTime,
 													 String tripPatternId,
-													 String stopPathId) {
+													 String stopPathId,
+							 						 boolean scheduleAdherenceStop) {
 		this.vehicleId = vehicleId;
 		this.time = new Date(time);
-		this.avlTime = new Date(time);
+		this.avlTime = new Date(avlTime);
 		this.block = block;
 		this.directionId = directionId;
 		this.tripIndex = tripIndex;
@@ -469,7 +470,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 		this.dwellTime = dwellTime;
 		this.tripPatternId = tripPatternId;
 		this.stopPathId = stopPathId;
-		this.scheduleAdherenceStop = false;
+		this.scheduleAdherenceStop = scheduleAdherenceStop;
 	}
 
 	/**
@@ -1595,6 +1596,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 		Long dwellTime;
 		String tripPatternId;
 		String stopPathId;
+		boolean scheduleAdherenceStop;
 		public Builder(String vehicleId,
 						long time,
 						long avlTime,
@@ -1617,7 +1619,8 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 						Long freqStartTime,
 						Long dwellTime,
 						String tripPatternId,
-						String stopPathId
+						String stopPathId,
+					    boolean scheduleAdherenceStop
 		) {
 			this.vehicleId = vehicleId;
 			this.time = time;
@@ -1642,7 +1645,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 			this.dwellTime = dwellTime;
 			this.tripPatternId = tripPatternId;
 			this.stopPathId = stopPathId;
-
+			this.scheduleAdherenceStop = scheduleAdherenceStop;
 		}
 
 		/**
@@ -1675,7 +1678,8 @@ public class ArrivalDeparture implements Lifecycle, Serializable, ArrivalDepartu
 			freqStartTime,
 			dwellTime,
 			tripPatternId,
-			stopPathId
+			stopPathId,
+			scheduleAdherenceStop
 			);
 			return ad;
 		}

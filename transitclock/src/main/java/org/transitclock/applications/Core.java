@@ -179,7 +179,9 @@ public class Core {
 		// one can read in timezone from database, set the default timezone,
 		// clear the factory so that future db connections will use the newly
 		// configured timezone, and then successfully process dates.
-		HibernateUtils.clearSessionFactory();
+		if (System.getProperty("transitclock.integration_test.enabled") == null) {
+			HibernateUtils.clearSessionFactory();
+		}
 
 		// Read in all GTFS based config data from the database
 		configData = new DbConfig(agencyId);
@@ -475,11 +477,11 @@ public class Core {
 		reportingServer.start(agencyId);
 	}
 	
-	static private void populateCaches() throws Exception
+	public static void populateCaches() throws Exception
 	{
 		boolean cacheLoaded = false;
 		Session session = HibernateUtils.getSession();
-
+		logger.info("in populateCaches with {} and {}", cacheReloadStartTimeStr.getValue(), cacheReloadEndTimeStr.getValue());
 		List<DateRange> cacheReloadRanges = DateRange.parseFromCSV(cacheReloadStartTimeStr.getValue(), cacheReloadEndTimeStr.getValue());
 		// CASE I:  a configured range of dates to load
 		for (DateRange cacheReloadRange : cacheReloadRanges) {
@@ -490,7 +492,8 @@ public class Core {
 			List<ArrivalDeparture> results = StopArrivalDepartureCache.createArrivalDeparturesCriteriaMultiDay(criteria,
 							cacheReloadRange.getStart(),
 							cacheReloadRange.getEnd());
-			logger.info("query complete  from {} to {}", cacheReloadRange.getStart(), cacheReloadRange.getEnd());
+			logger.info("query complete from {} to {} with {} entries",
+					cacheReloadRange.getStart(), cacheReloadRange.getEnd(), results.size());
 			if (TripDataHistoryCacheFactory.getInstance() != null) {
 				logger.info("Populating TripDataHistoryCache cache for period {} to {}", cacheReloadRange.getStart(), cacheReloadRange.getEnd());
 				TripDataHistoryCacheFactory.getInstance().populateCacheFromDb(results);

@@ -127,7 +127,8 @@ public class GtfsBasedDataGenerator {
             null,
             null,
             TRIP_PATTERN_ID,
-            STOP_PATH_ID);
+            STOP_PATH_ID,
+            false);
     apc.setArrivalDeparture(ad.create());
     records.add(apc);
     return records;
@@ -199,7 +200,8 @@ public class GtfsBasedDataGenerator {
             null,
             null,
             TRIP_PATTERN_ID,
-            STOP_PATH_ID);
+            STOP_PATH_ID,
+            false);
 
     return ad.create();
   }

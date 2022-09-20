@@ -158,6 +158,7 @@ public class ApcCache {
       ApcCacheElements apcCacheElements = binCache.get(bin);
       binCache.put(bin, new ApcCacheElements(apcCacheElements.getElements(), element));
     } else {
+      cacheSize++;
       binCache.put(bin, new ApcCacheElements(element));
     }
   }

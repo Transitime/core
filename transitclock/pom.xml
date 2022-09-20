@@ -83,6 +83,11 @@
 			<version>2.0.57-cs-SNAPSHOT</version>
 		</dependency>
 		<dependency>
+			<groupId>TheTransitClock</groupId>
+			<artifactId>transitclockSwagger</artifactId>
+			<version>2.0.54.8-int-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>com.esri.geometry</groupId>
 			<artifactId>esri-geometry-api</artifactId>
 			<version>1.1</version>

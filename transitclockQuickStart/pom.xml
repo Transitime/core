@@ -8,11 +8,6 @@
 	<artifactId>transitclockQuickStart</artifactId>
 	<name>transitclockQuickStart</name>
 	<url>http://maven.apache.org</url>
-	<parent>
-	    <groupId>TheTransitClock</groupId>
-	  	<artifactId>transitclock</artifactId>
-	  	<version>2.0.0-SNAPSHOT</version>
-  	</parent>
 	<properties>
 		<jettyVersion>9.4.15.v20190215</jettyVersion>
 	</properties>

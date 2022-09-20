@@ -1,0 +1,27 @@
+agency_id,route_id,route_short_name,route_long_name,route_type,route_desc,route_url,route_color,route_text_color,eligibility_restricted,route_sort_order
+0,114,114,,3,Ltd Stop - Excelsior Blvd - Uptown - U of M,https://www.metrotransit.org/route/114,,000000,-999,49
+0,14,14,,3,Robbinsdale-West Broadway-Bloomington Av-66St/Ceda,https://www.metrotransit.org/route/14,,000000,-999,20
+0,21,21,,3,Uptown - Lake St - Midway - Selby  Av,https://www.metrotransit.org/route/21,,000000,-999,23
+0,22,22,,3,Brooklyn Ctr - Lyndale Av N - Cedar - 28 Av S - VA,https://www.metrotransit.org/route/22,,000000,-999,24
+0,23,23,,3,Uptown - 38th St - Highland Village,https://www.metrotransit.org/route/23,,000000,-999,25
+0,25,25,,3,Northtown - Silver Lake - Stinson - Lake of Isles,https://www.metrotransit.org/route/25,,000000,-999,26
+0,3,3,,3,U of M - Como Av - Energy Park Dr - Maryland Av,https://www.metrotransit.org/route/3,,000000,-999,12
+0,32,32,,3,Robbinsdale - Lowry Av - Rosedale,https://www.metrotransit.org/route/32,,000000,-999,29
+0,4,4,,3,Johnson St - Bryant Av - Southtown,https://www.metrotransit.org/route/4,,000000,-999,13
+0,46,46,,3,50St - 46St - 46St Sta - Highland Village,https://www.metrotransit.org/route/46,,000000,-999,31
+0,5,5,,3,Brooklyn Ctr - Fremont - 26th Av - Chicago - MOA,https://www.metrotransit.org/route/5,,000000,-999,14
+0,515,515,,3,Southdale - 66th St - Bloomington Av - MOA,https://www.metrotransit.org/route/515,,000000,-999,93
+0,54,54,,3,Ltd Stop - W 7 St - Airport - MOA - Maplewood Mall,https://www.metrotransit.org/route/54,,000000,-999,32
+0,6,6,,3,U of M - Hennepin - Xerxes - France - Southdale,https://www.metrotransit.org/route/6,,000000,-999,15
+0,61,61,,3,E Hennepin Av - Larpenteur Av - Arcade St,https://www.metrotransit.org/route/61,,000000,-999,33
+0,612,612,,3,Uptown - Excelsior Blvd - Hopkins - Opus,https://www.metrotransit.org/route/612,,000000,-999,104
+0,62,62,,3,Shoreview - Little Canada - Rice St - Signal Hills,https://www.metrotransit.org/route/62,,000000,-999,34
+0,63,63,,3,Raymond Sta - Grand Av - Sunray,https://www.metrotransit.org/route/63,,000000,-999,35
+0,64,64,,3,Payne - Maryland - White Bear Av - Maplewood Mall,https://www.metrotransit.org/route/64,,000000,-999,36
+0,65,65,,3,Dale St - Co Rd B - Rosedale,https://www.metrotransit.org/route/65,,000000,-999,37
+0,673,673,,3,Express - Co Rd 73 P&R - Mpls,https://www.metrotransit.org/route/673,,000000,-999,108
+0,68,68,,3,Jackson St - Robert St - W St Paul - Inver Hills,https://www.metrotransit.org/route/68,,000000,-999,39
+0,71,71,,3,Little Canada - Westminster- Concord - Inver Hills,https://www.metrotransit.org/route/71,,000000,-999,41
+0,74,74,,3,46th St - Randolph - W 7th St - E 7th St - Sunray,https://www.metrotransit.org/route/74,,000000,-999,42
+0,852,852,,3,Express - Anoka - Coon Rapids - Northtown - Mpls,https://www.metrotransit.org/route/852,,000000,-999,141
+0,921,,METRO A Line,3,A Line - Roseville - Snelling Av - 46th St,https://www.metrotransit.org/route/aline,7A8690,ffffff,-999,7

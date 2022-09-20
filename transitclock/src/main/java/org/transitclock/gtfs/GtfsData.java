@@ -33,6 +33,7 @@ import org.transitclock.monitoring.MonitoringService;
 import org.transitclock.utils.*;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -222,7 +223,7 @@ public class GtfsData {
 	 * @param notes
 	 * @param zipFileLastModifiedTime
 	 * @param shouldStoreNewRevs
-	 * @param projectId
+	 * @param agencyId
 	 * @param gtfsDirectoryName
 	 * @param supplementDir
 	 * @param pathOffsetDistance
@@ -239,7 +240,7 @@ public class GtfsData {
 			Date zipFileLastModifiedTime,
 			boolean shouldStoreNewRevs,
 			boolean shouldDeleteRevs,
-			String projectId,
+			String agencyId,
 			String gtfsDirectoryName, 
 			String supplementDir, 
 			double pathOffsetDistance,
@@ -250,7 +251,7 @@ public class GtfsData {
 			double maxTravelTimeSegmentLength,
 			boolean trimPathBeforeFirstStopOfTrip,
 			TitleFormatter titleFormatter) {
-		this.agencyId = projectId;
+		this.agencyId = agencyId;
 		this.notes = notes;
 		this.zipFileLastModifiedTime = zipFileLastModifiedTime;
 		this.gtfsDirectoryName = gtfsDirectoryName;
@@ -1940,7 +1941,7 @@ public class GtfsData {
 			List<CalendarDate> calendarDates) {
 		// If calendar end date is for sometime in the future then it is
 		// definitely active.
-		if (calendar.getEndDate().getTime() > System.currentTimeMillis()) 
+		if (calendar.getEndDate().getTime() > getCurrentTimeMillis())
 			return true;
 		
 		// End date is not in the future so see if it is being added as an
@@ -1948,7 +1949,7 @@ public class GtfsData {
 		for (CalendarDate calendarDate : calendarDates) {
 			if (calendar.getServiceId().equals(calendarDate.getServiceId())
 					&& calendarDate.addService() 
-					&& calendarDate.getDate().getTime() > System.currentTimeMillis()) {
+					&& calendarDate.getDate().getTime() > getCurrentTimeMillis()) {
 				return true;
 			}
 		}
@@ -1966,7 +1967,7 @@ public class GtfsData {
 	 * @return
 	 */
 	private static boolean isCalendarDateActiveInTheFuture(CalendarDate calendarDate) {
-		return calendarDate.getDate().getTime() > System.currentTimeMillis()
+		return calendarDate.getDate().getTime() > getCurrentTimeMillis()
 				&& calendarDate.addService();
 	}
 	
@@ -2045,7 +2046,7 @@ public class GtfsData {
 			// not clean out old dates from the calendar_dates.txt file even
 			// if they are no longer useful.			
 			if (calendarDate.getDate().getTime() + 1*Time.DAY_IN_MSECS < 
-					System.currentTimeMillis()) 
+					getCurrentTimeMillis())
 				continue;
 
 			// The calendar date is for in the future so store it
@@ -2704,7 +2705,24 @@ public class GtfsData {
 		boolean matches = routeIdFilterRegExPattern.matcher(routeId.trim()).matches();
 		return matches;
 	}
-	
+
+	private static Long systemTime = null;
+	private static long getCurrentTimeMillis() {
+		if (systemTime == null) {
+			String systemTimeStr = System.getProperty("transitclock.gtfs.systemTime");
+			if (systemTimeStr != null) {
+				try {
+					systemTime = Time.parse(systemTimeStr).getTime();
+				} catch (ParseException e) {
+					throw new RuntimeException(e);
+				}
+			} else {
+				systemTime = System.currentTimeMillis();
+			}
+		}
+		return systemTime;
+	}
+
 	/**
 	 * Does all the work. Processes the data and store it in internal structures
 	 */
@@ -2791,41 +2809,29 @@ public class GtfsData {
   		
   		
 
+		if (System.getProperty("transitclock.core.integrationTest") != null) {
+			System.err.println("\nBlocks:");
+			for (Block b : getBlocks()) {
+				System.err.println("  " + b.toShortString());
+			}
+
+			System.err.println("\nRoutes:");
+			for (Route r : getRoutes()) {
+				System.err.println("  " + r);
+			}
+
+			System.err.println("\nCalendars:");
+			for (Calendar c : getCalendars()) {
+				System.err.println(" " + c);
+			}
+			GtfsLoggingAppender.outputMessagesToSysErr();
+		}
 		// just for debugging
-//		GtfsLoggingAppender.outputMessagesToSysErr();
-//		
-//		//outputShapesForGraphing("102589" /*"102829"*/);
-//		
-//		outputPathsAndStopsForGraphing("8701");
-//		
-//		System.err.println("\nPaths:");
-//		for (StopPath p : getPathsMap().values()) {
-//			TripPattern tp = getTripPattern(p.getTripPatternId());
-//			System.err.println("\npathId=" + p.getPathId() + 
-//					" routeId=" + p.getRouteId() +
-//					" tripPattern=" + tp.toStringListingTripIds());
-//			for (Location l : p.getLocations()) {
-//				System.err.println("" + Geo.format(l.getLat()) + ", " + Geo.format(l.getLon()));
-//			}
-//		}
-//		
-//		System.err.println("\nPaths:");
-//		for (StopPath p : getPathsMap().values()) {
-//			System.err.println("  " + p);
-//		}
-//
-//		System.err.println("\nBlocks:");
-//		for (Block b : getBlocks()) {
-//			System.err.println("  " + b.toShortString());
-//		}
-//		
-//		System.err.println("\nRoutes:");
-//		for (Route r : getRoutes()) {
-//			System.err.println("  " + r);
-//		}
 	}
 
   public Long updateMetrics(int originalTravelTimesCount, int expectedTravelTimesCount, int configRev, int travelTimesRev) {
+	// don't reset session factory if an integration test
+	if (System.getProperty("transitclock.core.integrationTest") != null) return 0l;
     HibernateUtils.clearSessionFactory();
     SessionFactory sessionFactory =  
         HibernateUtils.getSessionFactory(getAgencyId());

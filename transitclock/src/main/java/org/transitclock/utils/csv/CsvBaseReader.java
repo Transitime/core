@@ -134,7 +134,7 @@ public abstract class CsvBaseReader<T> {
 					in = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader()
 									.getResourceAsStream(fileName.substring("classpath:".length()))));
 				} catch (Exception any) {
-					throw new IllegalArgumentException("file '" + fileName + "' not found on classpath");
+					throw new FileNotFoundException("file '" + fileName + "' not found on classpath");
 				}
 			} else {
 				// typical configuration of an external file on disk
@@ -184,7 +184,7 @@ public abstract class CsvBaseReader<T> {
 					gtfsObject = handleRecord(record, supplemental);
 				} catch (ParseException e) {
 					logger.error("ParseException occurred for record {} "
-							+ "(comment lines not included when determing record #) for "
+							+ "(comment lines not included when determining record #) for "
 							+ "filename {} . {}",  
 							record.getRecordNumber(), fileName, e.getMessage());
 
@@ -193,7 +193,7 @@ public abstract class CsvBaseReader<T> {
 					continue;
 				} catch (NumberFormatException e) {
 					logger.error("NumberFormatException occurred for record {} "
-							+ "(comment lines not included when determing record #) "
+							+ "(comment lines not included when determining record #) "
 							+ "for filename {} . {}", 
 							record.getRecordNumber(), fileName, e.getMessage());
 
