@@ -3,6 +3,7 @@
          pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <%@page import="org.transitclock.web.WebConfigParams"%>
+<%@ page import="org.transitclock.reports.ReportsConfig" %>
 <%
     String agencyId = request.getParameter("a");
     if (agencyId == null || agencyId.isEmpty()) {
@@ -61,7 +62,7 @@
             <input type="hidden" name="date-range-picker" value="true" class="isDateRangePicker">
 
             <jsp:include page="params/routeAllOrSingleNew.jsp" />
-            <jsp:include page="params/fromDateNumDaysTime.jsp" />
+            <jsp:include page="params/fromDateNumDaysTimeSidePanel.jsp" />
 
             <div class="row">
                 <label class="col-sm-12 col-form-label">Report Settings</label>
@@ -79,14 +80,16 @@
             <div class="row">
                 <label class="col-sm-7 col-form-label">Allowable late (mins)</label>
                 <div class="col-sm-5 pad-left-0">
-                    <input type="number" id="late" class="form-control"  name="late" min="0" max="1440" step="0.5" value="5">
+                    <input type="number" id="late" class="form-control"  name="late" min="0" max="1440" step="0.5"
+                           value=<% out.print(ReportsConfig.getDefaultAllowableLateMinutes()); %>>
                 </div>
 
             </div>
             <div class="row">
                 <label class="col-sm-7 col-form-label">Allowable early (mins)</label>
                 <div class="col-sm-5 pad-left-0">
-                    <input type="number" id="early"  class="form-control" name="early" min="0" max="1440" step="0.5" value="1">
+                    <input type="number" id="early"  class="form-control" name="early" min="0" max="1440" step="0.5"
+                           value=<% out.print(ReportsConfig.getDefaultAllowableEarlyMinutes()); %>>
                 </div>
 
             </div>

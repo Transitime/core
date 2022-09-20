@@ -1,0 +1,2 @@
+"vehicleId","tripId","startTime","configRev","actualLastStopPathIndex","directionId","dwellTime","endTime","expectedLastStopPathIndex","headsign","nextTripStartTime","routeShortName","scheduledEndTime","scheduledStartTime","serviceId","serviceType","startStopPathIndex","tripPatternId"
+"39004","7330860","2022-06-23 08:07:34.000","13","44","0","826511","2022-06-23 08:51:35.564","44","01 BEXAR","31800","001","31620","29160","2","WEEKDAY","0","shape_138428_33286_to_15842_4be656c0"

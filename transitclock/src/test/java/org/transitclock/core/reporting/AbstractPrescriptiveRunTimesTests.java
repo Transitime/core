@@ -13,28 +13,32 @@ import java.util.Map;
 
 public abstract class AbstractPrescriptiveRunTimesTests {
 
-    private String servicePeriod = "171 - 2022-06-13 - 2022-09-11";
+    private String routeFileName = null;
 
-    public String getServicePeriod() {
-        return servicePeriod;
+
+    public String getRouteFileName(String routeName){
+        if(this.routeFileName == null){
+            return routeName;
+        }
+        return routeFileName;
     }
 
-    public void setServicePeriod(String servicePeriod) {
-        this.servicePeriod = servicePeriod;
+    public void setRouteFileName(String routeFileName){
+        this.routeFileName = routeFileName;
     }
 
-    public String getDataFilePath(ReportingDataFileType fileType, String routeShortName){
+    public String getDataFilePath(ReportingDataFileType fileType, String routeShortName, String servicePeriod){
         if(fileType.includeRoute()){
             return MessageFormat.format("reporting/prescriptive/{0}/routes/{1}/{2}_{1}.csv",
-                    getServicePeriod(), routeShortName, fileType.fileName());
+                    servicePeriod, getRouteFileName(routeShortName), fileType.fileName());
         } else {
-            return MessageFormat.format("reporting/prescriptive/{0}/{1}.csv", getServicePeriod(), fileType.fileName());
+            return MessageFormat.format("reporting/prescriptive/{0}/{1}.csv", servicePeriod, fileType.fileName());
         }
     }
 
-    protected List<RunTimesForRoutes> getRunTimesForRoutes(String routeShortName) throws IOException, ParseException {
-        String runTimesForRoutesFilePath = getDataFilePath(ReportingDataFileType.RUNTIMES_FOR_ROUTES, routeShortName);
-        String runTimesForStopsFilePath = getDataFilePath(ReportingDataFileType.RUNTIMES_FOR_STOPS, routeShortName);
+    protected List<RunTimesForRoutes> getRunTimesForRoutes(String routeShortName, String servicePeriod) throws IOException, ParseException {
+        String runTimesForRoutesFilePath = getDataFilePath(ReportingDataFileType.RUNTIMES_FOR_ROUTES, routeShortName, servicePeriod);
+        String runTimesForStopsFilePath = getDataFilePath(ReportingDataFileType.RUNTIMES_FOR_STOPS, routeShortName, servicePeriod);
 
         RunTimesForRoutesCsvDao runTimesForRouteDao = new RunTimesForRoutesCsvDao(runTimesForRoutesFilePath);
         List<RunTimesForRoutes> runTimesForRoutes = runTimesForRouteDao.getAll(ServiceType.WEEKDAY);
@@ -51,28 +55,27 @@ public abstract class AbstractPrescriptiveRunTimesTests {
         return runTimesForRoutes;
     }
 
-    protected List<ArrivalDeparture> getArrivalDepartures(String routeShortName) throws IOException, ParseException {
-        String dataFilePath = getDataFilePath(ReportingDataFileType.ARRIVALS_DEPARTURES, routeShortName);
+    protected List<ArrivalDeparture> getArrivalDepartures(String routeShortName, String servicePeriod) throws IOException, ParseException {
+        String dataFilePath = getDataFilePath(ReportingDataFileType.ARRIVALS_DEPARTURES, routeShortName, servicePeriod);
         ArrivalsDeparturesCsvDao adDao = new ArrivalsDeparturesCsvDao(dataFilePath);
         return adDao.getAll();
     }
 
-    protected List<org.transitclock.db.structs.Calendar> getCalendars(String routeShortName) throws IOException, ParseException {
-        String dataFilePath = getDataFilePath(ReportingDataFileType.CALENDARS, routeShortName);
+    protected List<org.transitclock.db.structs.Calendar> getCalendars(String routeShortName, String servicePeriod) throws IOException, ParseException {
+        String dataFilePath = getDataFilePath(ReportingDataFileType.CALENDARS, routeShortName, servicePeriod);
         CalendarsCsvDao calendarsDao = new CalendarsCsvDao(dataFilePath);
         return calendarsDao.getAll();
     }
 
-    protected List<CalendarDate> getCalendarDates(String routeShortName) throws IOException, ParseException {
-        String dataFilePath = getDataFilePath(ReportingDataFileType.CALENDAR_DATES, routeShortName);
+    protected List<CalendarDate> getCalendarDates(String routeShortName, String servicePeriod) throws IOException, ParseException {
+        String dataFilePath = getDataFilePath(ReportingDataFileType.CALENDAR_DATES, routeShortName, servicePeriod);
         CalendarDatesCsvDao calendarDatesDao = new CalendarDatesCsvDao(dataFilePath);
         return calendarDatesDao.getAll();
     }
 
-
-    protected List<Trip> getTripsWithScheduleTimes(String routeShortName) throws IOException, ParseException {
-        String tripsFilePath = getDataFilePath(ReportingDataFileType.TRIPS, routeShortName);
-        String tripsScheduleFilePath = getDataFilePath(ReportingDataFileType.TRIP_SCHEDULE_TIMES, routeShortName);
+    protected List<Trip> getTripsWithScheduleTimes(String routeShortName, String servicePeriod) throws IOException, ParseException {
+        String tripsFilePath = getDataFilePath(ReportingDataFileType.TRIPS, routeShortName, servicePeriod);
+        String tripsScheduleFilePath = getDataFilePath(ReportingDataFileType.TRIP_SCHEDULE_TIMES, routeShortName, servicePeriod);
 
         TripsCsvDao tripsDao = new TripsCsvDao(tripsFilePath);
         List<Trip> trips = tripsDao.getAll();
@@ -90,9 +93,9 @@ public abstract class AbstractPrescriptiveRunTimesTests {
         return trips;
     }
 
-    protected List<TripPattern> getTripPatternsWithStopPaths(String routeShortName) throws IOException, ParseException {
-        String stopPathsFilePath = getDataFilePath(ReportingDataFileType.STOP_PATHS, routeShortName);
-        String tripPatternsFilePath = getDataFilePath(ReportingDataFileType.TRIP_PATTERNS, routeShortName);
+    protected List<TripPattern> getTripPatternsWithStopPaths(String routeShortName, String servicePeriod) throws IOException, ParseException {
+        String stopPathsFilePath = getDataFilePath(ReportingDataFileType.STOP_PATHS, routeShortName, servicePeriod);
+        String tripPatternsFilePath = getDataFilePath(ReportingDataFileType.TRIP_PATTERNS, routeShortName, servicePeriod);
 
         StopPathsCsvDao stopPathsCsvDao = new StopPathsCsvDao(stopPathsFilePath);
         List<StopPath> stopPaths = stopPathsCsvDao.getAll();
@@ -103,5 +106,10 @@ public abstract class AbstractPrescriptiveRunTimesTests {
         return tripPatterns;
     }
 
+    protected List<FeedInfo> getFeedInfo(String servicePeriod) throws IOException, ParseException {
+        String dataFilePath = getDataFilePath(ReportingDataFileType.FEED_INFO, "", servicePeriod);
+        FeedInfoCsvDao feedInfoCsvDao = new FeedInfoCsvDao(dataFilePath);
+        return feedInfoCsvDao.getAll();
+    }
 
 }

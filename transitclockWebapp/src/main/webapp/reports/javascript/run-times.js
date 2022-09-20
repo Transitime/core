@@ -160,7 +160,7 @@
                 borderColor: rgbRED,
                 borderWidth: 1,
                 data: distributedData,
-                padding: 10,
+                padding: 1,
                 itemRadius: 2,
                 itemStyle: 'circle',
                 itemBackgroundColor: 'rgba(143,143,143,0.5)'
@@ -179,6 +179,14 @@
                 },
                 scales: {
                     xAxes: [
+                        {
+                            scaleLabel: {
+                                display: true,
+                                labelString: "Minutes"
+                            }
+                        }
+                    ],
+                    yAxes: [
                         {
                             scaleLabel: {
                                 display: true,

@@ -85,7 +85,7 @@
                     <label class="col-sm-12 col-form-label ">Select Comparison Period 1</label>
                 </div>
 
-                <jsp:include page="params/fromDateNumDaysTime.jsp" />
+                <jsp:include page="params/fromDateNumDaysTimeSidePanel.jsp" />
 
                 <div class="row">
                     <label class="col-sm-12 col-form-label">Service Day Type</label>
@@ -108,7 +108,7 @@
                 <div class="row comparision-label-container">
                     <label class="col-sm-12 col-form-label">Select Comparison Period 2</label>
                 </div>
-                <jsp:include page="params/fromDateNumDaysTime.jsp" />
+                <jsp:include page="params/fromDateNumDaysTimeSidePanel.jsp" />
 
                 <div class="row">
                     <label class="col-sm-12 col-form-label">Service Day Type</label>

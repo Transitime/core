@@ -98,6 +98,17 @@ public enum ReportingDataFileType {
         public boolean includeRoute(){
             return true;
         }
+    },
+    FEED_INFO {
+        @Override
+        public String fileName(){
+            return "feed_info";
+        }
+
+        @Override
+        public boolean includeRoute(){
+            return false;
+        }
     };
 
     public abstract String fileName();

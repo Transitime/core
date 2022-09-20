@@ -16,11 +16,16 @@
 </head>
 <body>
 <%@include file="/template/header.jsp" %>
-<div id="title">
+
+<h4>
     Select Parameters for Schedule Adherence by Stop Chart
-</div>
+</h4>
 
 <div id="mainDiv">
+    <div class="params-description">
+        Checks the schedule adherence of every stop (including time-points) for both Arrival and Departure records
+        and breaks down schedule adherence by stop and direction for the selected route and time period.
+    </div>
     <form action="schAdhByStopChart.jsp" method="POST">
         <%-- For passing agency param to the report --%>
         <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
@@ -29,29 +34,9 @@
 
         <jsp:include page="params/fromDateNumDaysTime.jsp" />
 
-        <div class="param">
-            <label for="allowableEarly">Allowable Early:</label>
-            <input id="allowableEarly" name="allowableEarly"
-                   title="How early a vehicle can arrive compared to the prediction
-    	and still be acceptable. Must be a negative number to indicate
-    	early."
-                   size="1"
-                   type="text"
-                   placeholder="minutes"
-                   value="1.0" />
-        </div>
+        <jsp:include page="params/numDays.jsp"/>
 
-        <div class="param">
-            <label for="allowableLate">Allowable Late:</label>
-            <input id="allowableLate" name="allowableLate"
-                   title="How late a vehicle can arrive compared to the prediction
-    	and still be acceptable. Must be a positive number to indicate
-    	late."
-                   size="1"
-                   type="text"
-                   placeholder="minutes"
-                   value="4.0"/>
-        </div>
+        <jsp:include page="params/allowableEarlyLate.jsp" />
 
         <jsp:include page="params/submitReport.jsp" />
     </form>

@@ -49,4 +49,14 @@ public class DatedGtfs {
     public void setVersion(String version) {
         this.version = version;
     }
+
+    @Override
+    public String toString() {
+        return "DatedGtfs{" +
+                "version='" + version + '\'' +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", configRev=" + configRev +
+                '}';
+    }
 }

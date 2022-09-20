@@ -25,8 +25,14 @@ function avlAnimation(map, icon, clock) {
 		for (var i = 0; i < labels.length; i++) {
 			var label = $("<b />").text(labels[i] + ": ");
 			var value = $("<div />").attr("class", "vehicle-value").text('N/A');
-			if(avl[keys[i]]){
-				value = $("<div />").attr("class", "vehicle-value").text(avl[keys[i]]);
+
+			var text = avl[keys[i]];
+			if(text){
+				var key = keys[i];
+				if(key == 'schedAdh'){
+					text += ' Minutes';
+				}
+				value = $("<div />").attr("class", "vehicle-value").text(text);
 			}
 
 
@@ -124,7 +130,7 @@ function avlAnimation(map, icon, clock) {
 		sprite = L.marker(positions[0], {icon: icon}).bindPopup(content[0]).addTo(map);
 		sprite.headingArrow = headingArrow;
 		sprite.background = vehicleBackground;
-		sprite.setZIndexOffset(400)
+		sprite.setZIndexOffset(400);
 		clock.textContent = parseTime(elapsedTime);
 
 
@@ -137,10 +143,11 @@ function avlAnimation(map, icon, clock) {
 	function getVehicleMarkerBackgroundOptions(vehicleData) {
 		// Handle unassigned vehicles
 		var vehicleMarkerBackgroundOptions = {
-			radius: 13,
+			radius: 15,
 			weight: 0,
 			fillColor: '#1E3F78',
 			fillOpacity: 1,
+			pane: "markerPane"
 		};
 
 		if (vehicleData.otp === "on-time")
@@ -184,7 +191,9 @@ function avlAnimation(map, icon, clock) {
 			sprite._popup.setContent(popupData(positions[currentIndex])[0]);
 			sprite.background.setLatLng(positions[currentIndex])
 			sprite.background.options.fillColor= getVehicleMarkerBackgroundOptions(positions[currentIndex]).fillColor;
+			sprite.setZIndexOffset(400);
 			sprite.background._updateStyle();
+
 
 			sprite.update()
 			elapsedTime = positions[currentIndex].timestamp
@@ -329,6 +338,8 @@ function avlAnimation(map, icon, clock) {
 			sprite.background.setLatLng(positions[currentIndex])
 			sprite.background.options.fillColor= getVehicleMarkerBackgroundOptions(positions[currentIndex]).fillColor;
 			sprite.background._updateStyle();
+
+			sprite.setZIndexOffset(400);
 
 			sprite.update();
 			console.log('elapsedTime .....',parseTime(elapsedTime));

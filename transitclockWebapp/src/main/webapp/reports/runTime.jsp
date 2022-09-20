@@ -79,7 +79,7 @@
 
             </div>
 
-            <jsp:include page="params/fromDateNumDaysTime.jsp" />
+            <jsp:include page="params/fromDateNumDaysTimeSidePanel.jsp" />
 
             <div class="row">
                 <label class="col-sm-12 col-form-label">Service Day Type</label>
@@ -212,13 +212,13 @@
 
 <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-chart-box-and-violin-plot/2.4.0/Chart.BoxPlot.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-chart-box-and-violin-plot/4.0.0/Chart.BoxPlot.js"></script>
 <script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.plugin.js"></script>
 <script type="text/javascript" src="../jquery.datepick.package-5.1.0/js/jquery.datepick.js"></script>
 <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
 
 <script type="text/javascript" src="javascript/run-time-helper.js"> </script>
-<script type="text/javascript" src="javascript/run-times.js"> </script>
+<script type="text/javascript" src="javascript/run-times.js" defer> </script>
 
 
 </body>

@@ -17,9 +17,9 @@
 
 <%@include file="/template/header.jsp" %>
 
-<div id="title">
+<h4>
    Select Parameters for Displaying Event Log by Vehicle
-</div>
+</h4>
    
 <div id="mainDiv">
 <form action="vehicleEventReport.jsp" method="POST">

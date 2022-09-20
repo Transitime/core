@@ -18,6 +18,7 @@
 package org.transitclock.reports;
 
 import org.transitclock.config.BooleanConfigValue;
+import org.transitclock.config.StringConfigValue;
 
 public class ReportsConfig {
 	
@@ -29,5 +30,25 @@ public class ReportsConfig {
 	
 	public static boolean isShowPredictionSource() {
 		return showPredictionSource.getValue();
+	}
+
+	private static StringConfigValue defaultAllowableLateMinutes =
+			new StringConfigValue(
+					"transitclock.reports.defaultAllowableLateMinutes",
+					"5",
+					"Default allowable late minutes for OTP reports");
+
+	public static String getDefaultAllowableLateMinutes() {
+		return defaultAllowableLateMinutes.getValue();
+	}
+
+	private static StringConfigValue defaultAllowableEarlyMinutes =
+			new StringConfigValue(
+					"transitclock.reports.defaultAllowableEarlyMinutes",
+					"1",
+					"Default allowable early minutes for OTP reports");
+
+	public static String getDefaultAllowableEarlyMinutes() {
+		return defaultAllowableEarlyMinutes.getValue();
 	}
 }
