@@ -190,6 +190,16 @@ public class PrescriptiveRunTimesDataSourceTest extends AbstractPrescriptiveRunT
         List<RunTimesForRoutes> filteredRunTimesForRoutes = runTimeService.getRunTimesForRoutes(query);
 
         Assert.assertEquals(1131, runTimesForRoutes.size());
+        System.out.println("============START filteredRunTimesForRoutes============");
+        for (RunTimesForRoutes rtfr : filteredRunTimesForRoutes) {
+            System.out.println(
+                    rtfr.getConfigRev() + ":"
+                    + rtfr.getTripId() + ":"
+                    + rtfr.getStartTime() + ":"
+                    + rtfr.getVehicleId()
+            );
+        }
+        System.out.println("============END   filteredRunTimesForRoutes============");
         Assert.assertEquals(689, filteredRunTimesForRoutes.size());
     }
 
