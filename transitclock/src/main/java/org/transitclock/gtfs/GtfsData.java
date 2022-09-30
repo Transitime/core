@@ -2582,10 +2582,30 @@ public class GtfsData {
 	 * @return
 	 */
 	public ConfigRevision getConfigRevision() {
+		String configRevisionNotes = notes;
+		if (configRevisionNotes == null || configRevisionNotes.length() == 0) {
+			configRevisionNotes = getFeedVersion();
+		}
 		return new ConfigRevision(revs.getConfigRev(), new Date(), 
-				zipFileLastModifiedTime, notes);
+				zipFileLastModifiedTime, configRevisionNotes);
 	}
-	
+
+	/**
+	 * Loop through FeedInfo list and return first instance of a FeedVersion
+	 * @return FeedVersion string or null.
+	 */
+	private String getFeedVersion() {
+		if (getFeedInfo() != null) {
+			for (FeedInfo feedInfo : getFeedInfo()) {
+				// simply take the first
+				if (feedInfo.getFeedVersion() != null) {
+					return feedInfo.getFeedVersion();
+				}
+			}
+		}
+		return null;
+	}
+
 	/*************************** Main Public Methods **********************/
 	
 	public void outputRoutesForGraphing() {
