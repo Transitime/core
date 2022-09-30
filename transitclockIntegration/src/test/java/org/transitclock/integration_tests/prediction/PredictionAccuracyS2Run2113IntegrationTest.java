@@ -13,7 +13,7 @@ public class PredictionAccuracyS2Run2113IntegrationTest extends AbstractPredicti
     private static final String OUTPUT_DIRECTORY = "/tmp/output/S2_2113";
 
     public PredictionAccuracyS2Run2113IntegrationTest() {
-        super("S2_2113", OUTPUT_DIRECTORY, GTFS, AVL, PREDICTIONS_CSV, "America/New_York");
+        super("S2_2113", OUTPUT_DIRECTORY, GTFS, AVL, PREDICTIONS_CSV, "America/New_York", "Build off of Abstract Prediction Integration Test.");
     }
 
     @Test

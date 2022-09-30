@@ -8,7 +8,7 @@ import org.junit.Test;
 public class PredictionAccuracy921_497IntegrationTest extends AbstractPredictionAccuracyIntegrationTest {
 
     public PredictionAccuracy921_497IntegrationTest() {
-        super(createTraceConfig("921-497", "America/Chicago"));
+        super(createTraceConfig("921-497", "America/Chicago", "Bad predictions on route 921, MET-208"));
     }
 
     @Test

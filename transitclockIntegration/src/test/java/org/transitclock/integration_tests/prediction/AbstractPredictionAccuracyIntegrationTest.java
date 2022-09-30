@@ -26,7 +26,7 @@ public abstract class AbstractPredictionAccuracyIntegrationTest extends TestCase
     private ReplayService rs;
 	private TraceConfig config;
 	public AbstractPredictionAccuracyIntegrationTest(String id, String outputDirectory, String gtfs, String avl,
-													 String predictionsCsv, String tz) {
+													 String predictionsCsv, String tz, String description) {
 		TraceConfig pc = new TraceConfig();
 		pc.setId(id);
 		pc.setGtfsDirectoryName(gtfs);
@@ -36,6 +36,7 @@ public abstract class AbstractPredictionAccuracyIntegrationTest extends TestCase
 		pc.setOutputDirectory(outputDirectory);
 		pc.setTz(tz);
 		pc.setArrivalDepartureCsv(null);
+		pc.setDescription(description);
 		this.config = pc;
 
 	}
@@ -43,16 +44,16 @@ public abstract class AbstractPredictionAccuracyIntegrationTest extends TestCase
 		this.config = config;
 	}
 
-	public static TraceConfig createApcTraceConfig(String id, String tz) {
-		return createTraceConfig(id, tz, true, true, false);
+	public static TraceConfig createApcTraceConfig(String id, String tz, String description) {
+		return createTraceConfig(id, tz, description, true, true, false);
 	}
-	public static TraceConfig createApcTraceConfig(String id, String tz, boolean includePredictionCsv, boolean addConfigFile) {
-		return createTraceConfig(id, tz, includePredictionCsv, true, addConfigFile);
+	public static TraceConfig createApcTraceConfig(String id, String tz, String description, boolean includePredictionCsv, boolean addConfigFile) {
+		return createTraceConfig(id, tz, description, includePredictionCsv, true, addConfigFile);
 	}
-	public static TraceConfig createTraceConfig(String id, String tz) {
-		return createTraceConfig(id, tz, true, true, false);
+	public static TraceConfig createTraceConfig(String id, String tz, String description) {
+		return createTraceConfig(id, tz, description, true, true, false);
 	}
-	public static TraceConfig createTraceConfig(String id, String tz,
+	public static TraceConfig createTraceConfig(String id, String tz, String description,
 												boolean includePredictionsCsv, boolean includeApcCsv,
 												boolean addConfigFile) {
 		TraceConfig config = new TraceConfig();
@@ -72,6 +73,7 @@ public abstract class AbstractPredictionAccuracyIntegrationTest extends TestCase
 			config.setConfigFileNames("classpath:config/" + id + ".xml"
 					+ ";" + DEFAULT_CONFIG_FILE);
 		}
+		config.setDescription(description);
 		return config;
 	}
 

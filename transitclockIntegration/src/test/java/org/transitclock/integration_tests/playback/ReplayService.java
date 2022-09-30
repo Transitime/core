@@ -33,6 +33,8 @@ public class ReplayService {
 
     public List<ArrivalDeparture> run(TraceConfig config) {
         // Run trace
+        logger.info(config.getDescription());
+        System.out.println(config.getDescription());
         DateRange range = PlaybackModule.runTrace(config, null);
         return loader.queryArrivalDepartures(range, config.getArrivalDepartureCsv());
 

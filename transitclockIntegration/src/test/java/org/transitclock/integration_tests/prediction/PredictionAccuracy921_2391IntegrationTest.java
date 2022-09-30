@@ -8,7 +8,8 @@ import org.junit.Test;
  */
 public class PredictionAccuracy921_2391IntegrationTest extends AbstractPredictionAccuracyIntegrationTest {
     public PredictionAccuracy921_2391IntegrationTest() {
-        super(createApcTraceConfig("921-2391", "America/Chicago", false, true));
+        super(createApcTraceConfig("921-2391", "America/Chicago", "Test of Trace with APC data.  APCStopTimeGenerator will not succeed until we add real-time headway data.\n" +
+                "create_trace.sh 2391 921 \"2022-05-12 12:30:00\" \"2022-05-12 13:05:00\"", false, true));
     }
     @Test
     public void testPredictions() { super.testPredictions(); }
