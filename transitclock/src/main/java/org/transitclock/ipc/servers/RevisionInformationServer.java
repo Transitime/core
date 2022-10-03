@@ -46,7 +46,7 @@ public class RevisionInformationServer extends AbstractServer implements Revisio
         ipcRevisionInformation.setActiveRev(activeRev);
         ipcRevisionInformation.setLastConfigRev(lastConfigRevision.getConfigRev());
         ipcRevisionInformation.setLastProcessedTime(lastConfigRevision.getProcessedTime());
-        ipcRevisionInformation.setLastNote(lastConfigRevision.getNotes());
+        ipcRevisionInformation.setNote(lastConfigRevision.getNotes());
         ipcRevisionInformation.setZipFileLastModifiedTime(lastConfigRevision.getZipFileLastModifiedTime());
         return ipcRevisionInformation;
     }

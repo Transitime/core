@@ -39,7 +39,7 @@ public class IpcRevisionInformation implements Serializable {
         return note;
     }
 
-    public void setLastNote(String note) {
+    public void setNote(String note) {
         this.note = note;
     }
 
