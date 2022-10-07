@@ -46,6 +46,7 @@
         <timeForDeterminingDelayedSecs>300</timeForDeterminingDelayedSecs>
         <timeForDeterminingNoProgress>360000</timeForDeterminingNoProgress>
         <useArrivalPredictionsForNormalStops>false</useArrivalPredictionsForNormalStops>
+        <routesExcludedForExactTripMatch>887;888</routesExcludedForExactTripMatch>
 
     </core>
     <avl>

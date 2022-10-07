@@ -440,7 +440,8 @@ public class AvlProcessor {
 
 		// Find best temporal match of the spatial matches
 		TemporalMatch bestTemporalMatch = null;
-		if (CoreConfig.tryForExactTripMatch()) {
+		// Do not use exact trip matching for routes without TransitMaster assignments
+		if (CoreConfig.tryForExactTripMatch() && !CoreConfig.getRoutesExcludedForExactTripMatch().contains(vehicleState.getRouteId())) {
 			//strict trip-level matching
 			TemporalMatcher.getInstance()
 					.getBestTemporalMatch(vehicleState, spatialMatches, true);
@@ -787,7 +788,8 @@ public class AvlProcessor {
 
 		// Determine the best temporal match
 		TemporalMatch bestMatch = null;
-		if (CoreConfig.tryForExactTripMatch()) {
+		if (CoreConfig.tryForExactTripMatch() &&
+				!CoreConfig.getRoutesExcludedForExactTripMatch().contains(vehicleState.getRouteId())) {
 			// strict trip matching is configured -- only consider matches
 			// that are same as assignment
 			bestMatch = TemporalMatcher.getInstance()
