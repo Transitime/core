@@ -219,26 +219,25 @@ public abstract class StopArrivalDepartureCacheInterface {
 		int tripIndex = block.getTripIndex(trip);
 
 		if (ad.isArrival()) {
+			Arrival a = null;
 			try {
-				Arrival a = new Arrival(ad.getVehicleId(),
-								ad.getTime(),
-								ad.getAvlTime(),
-								block,
-								tripIndex,
-								ad.getStopPathIndex(),
-								ad.getFreqStartTime(),
-								null /* stopPathId not present */,
-								ad.isScheduleAdherenceStop());
-				return a;
-			} catch (Throwable t) {
-				logger.error("unable to create arrival {}", t, t);
-				return null;
+				a = new Arrival(ad.getVehicleId(),
+						ad.getTime(),
+						ad.getAvlTime(),
+						block,
+						tripIndex,
+						ad.getStopPathIndex(),
+						ad.getFreqStartTime(),
+						null /* stopPathId not present */,
+						ad.isScheduleAdherenceStop());
+			} catch (Exception e) {
+				logger.error("creating arrival failed: {}", e, e);
 			}
-
+			return a;
 		}
-
+		Departure d = null;
 		try {
-			Departure d = new Departure(ad.getVehicleId(),
+			d = new Departure(ad.getVehicleId(),
 					ad.getTime(),
 					ad.getAvlTime(),
 					block,
@@ -248,12 +247,10 @@ public abstract class StopArrivalDepartureCacheInterface {
 					ad.getDwellTime(),
 					null, /* stopPathId not present */
 					ad.isScheduleAdherenceStop());
-			return d;
-		} catch(Throwable t){
-			logger.error("unable to create departure {}", t, t);
-
+		} catch (Exception e){
+			logger.error("creating arrival failed: {}", e, e);
 		}
-		return null;
+		return d;
 	}
 
 
