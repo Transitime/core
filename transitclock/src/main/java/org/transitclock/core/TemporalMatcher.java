@@ -107,7 +107,7 @@ public class TemporalMatcher {
 		int travelTimeForCurrentTrip = 
 				TravelTimes.getInstance().expectedTravelTimeBetweenMatches(vehicleId, 
 						tripStartTimeSecs, 
-						beginningOfTrip, spatialMatch);
+						beginningOfTrip, spatialMatch, false);
 		
 		int msecIntoDayVehicleExpectedToBeAtMatch = 
 				tripStartTimeSecs * 1000 + travelTimeForCurrentTrip;
@@ -425,16 +425,17 @@ public class TemporalMatcher {
 					TravelTimes.getInstance().expectedTravelTimeBetweenMatches(
 							vehicleState.getVehicleId(), 
 							previousAvlTime, 
-							previousMatch, spatialMatch);
+							previousMatch, spatialMatch, true);
 			int expectedTravelTimeMsecBackward = 
 					TravelTimes.getInstance().expectedTravelTimeBetweenMatches(
 							vehicleState.getVehicleId(), 
 							previousAvlTime, 
-							spatialMatch, previousMatch);
+							spatialMatch, previousMatch, false);
 
 			// TODO - Check why it has to look backwards. Useful for freq based trips. Currently breaks schedule based trips
-			//int expectedTravelTimeMsec = Math.min(expectedTravelTimeMsecForward, expectedTravelTimeMsecBackward);
-
+			// int expectedTravelTimeMsec = Math.min(expectedTravelTimeMsecForward, expectedTravelTimeMsecBackward);
+			// if expectedTravelTimeMsecForward == 0 but expectedTravelTimeMsecBackward
+			// use expectedTravelTimeMsecBackward as matches may be reversed?
 			int expectedTravelTimeMsec = expectedTravelTimeMsecForward;
 			
 			// If looking at layover match and the match is different from 
