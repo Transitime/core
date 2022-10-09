@@ -257,7 +257,7 @@ public class TemporalMatcher {
 		// If the current match is definitely better than can return true
 		if (differenceFromExpectedTime.betterThanOrEqualTo(
 						bestTemporalMatchSoFar.getTemporalDifference())) {
-			if (CoreConfig.tryForExactTripMatch()) {
+			if (CoreConfig.tryForExactTripMatch() && !CoreConfig.getRoutesExcludedForExactTripMatch().contains(currentSpatialMatch.getRoute().getId())) {
 				if (!tripMatches(avlReport.getAssignmentType(), avlReport.getAssignmentId(), currentSpatialMatch.getTrip().getId()))
 				{
 					logger.warn("DROPPING preferred assignment {} for better temporal assignment {} for vehicle {}",

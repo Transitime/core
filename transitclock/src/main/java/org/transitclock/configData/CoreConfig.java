@@ -809,4 +809,18 @@ public class CoreConfig {
 	public static boolean tryForExactTripMatch() {
 		return strictTripAssignmentMatch.getValue();
 	}
+
+	/**
+	 * Remove routes without TransitMaster assignments from exact trip matching.
+	 * @return
+	 */
+	private static List<String> defaultRoutesExcludedForExactTripMatch = new ArrayList<String>();
+
+	private static StringListConfigValue routesExcludedForExactTripMatch =
+			new StringListConfigValue("transitclock.core.routesExcludedForExactTripMatch",
+					defaultRoutesExcludedForExactTripMatch,
+					"The semicolon separated list of names of all of the routes that should be excluded " +
+							"from exact trip matching due to lack of TransitMaster assignments.");
+
+	public static List<String> getRoutesExcludedForExactTripMatch() { return routesExcludedForExactTripMatch.getValue(); }
 }
