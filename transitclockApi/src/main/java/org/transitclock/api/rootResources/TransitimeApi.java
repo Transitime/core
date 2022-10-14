@@ -1349,11 +1349,11 @@ public class TransitimeApi {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Operation(summary="Gets which blocks are active by routeName.",
   	description="Retrives a list routes with its  active blocks, including the vechicles. "
-  			+ "Optionally can be filered accorditn to routesIdOrShortNames params."
+  			+ "Optionally can be filered according to routeName param."
   			+ "Every trip is associated with a block.",tags= {"prediction","trip","block","route","vehicle"})
     public Response getActiveBlockByRouteNameWithVehicles(
             @BeanParam StandardParameters stdParameters,
-            @Parameter(description="if set, retrives only active blocks belongind to the route name specified.",required=false)
+            @Parameter(description="if set, retrives only active blocks belonging to the route name specified.",required=false)
             @QueryParam(value = "r") String routeName,
             @Parameter(description="A block will be active if the time is between the block start time minus allowableBeforeTimeSecs and the block end time")
             @QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs,
