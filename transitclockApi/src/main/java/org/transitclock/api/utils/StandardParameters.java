@@ -18,17 +18,20 @@
 package org.transitclock.api.utils;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.http.client.methods.RequestBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.transitclock.api.rootResources.LoginApi;
 import org.transitclock.db.webstructs.ApiKeyManager;
 import org.transitclock.ipc.clients.CacheQueryInterfaceFactory;
 import org.transitclock.ipc.clients.CommandsInterfaceFactory;
@@ -53,6 +56,14 @@ import org.transitclock.ipc.interfaces.VehiclesInterface;
 
 import io.swagger.v3.oas.annotations.Parameter;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 /**
  * For getting the standard parameters from the URI used to access the feed.
  * Includes the key, agency, and the media type (JSON or XML). Does not include
@@ -62,6 +73,9 @@ import io.swagger.v3.oas.annotations.Parameter;
  * 
  */
 public class StandardParameters {
+
+	private static final Logger logger = LoggerFactory.getLogger(StandardParameters.class);
+
 	@PathParam("key")
 	@Parameter(description="Application key to access this api.")
 	private String key;
@@ -86,6 +100,12 @@ public class StandardParameters {
 
 	@Context
 	HttpServletRequest request;
+
+	@Context
+	HttpServletResponse response;
+
+	@Context
+	HttpHeaders header;
 
 	/********************** Member Functions **************************/
 
@@ -191,6 +211,35 @@ public class StandardParameters {
 
 		// Return the response
 		return responseBuilder.build();
+	}
+
+	public Response logout(String redirectUrl, String ... cookieNames) throws URISyntaxException {
+
+		try {
+			Date expirationDate = new Date(System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(5));
+
+			ResponseBuilder responseBuilder =
+					Response
+					.seeOther(new URI(redirectUrl))
+					.header("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0")
+					.header("Pragma", "no-cache")
+					.header("access-control-expose-headers", "Set-Cookie")
+					.expires(expirationDate);
+
+			for(String cookieName : cookieNames){
+				responseBuilder.header("Set-Cookie", cookieName + "=deleted;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT;");
+			}
+
+			request.getSession().invalidate();
+
+			return responseBuilder.build();
+
+		} catch (Exception e) {
+			logger.error("Exception logging out", e);
+		}
+
+		return null;
+
 	}
 
 	/**

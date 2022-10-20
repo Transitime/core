@@ -13,17 +13,33 @@ body {
 	background: linear-gradient(to right, #1E3F78 , #3564B5);
 	margin-left: 0px;
 	margin-right: 0px;
-	padding: 10px;	
-	font-weight: 100;
-	font-size: xx-large;
+	padding: 10px;
 	color: white;
-	text-shadow: 2px 2px 4px #0D6E0E;
 	box-shadow: 0px 0px 10px black;
+	height: 2.2em;
 }
 /* For header need to override link styles */
-#header a:link { color: white;}
-#header a:visited { color: white;}
-#header a:hover { font-weight: normal;}
+#header #headerText a:link { color: white;}
+#header #headerText a:visited { color: white;}
+#header #headerText a:hover { font-weight: normal;}
+
+#header #headerText {
+	font-weight: 100;
+	font-size: xx-large;
+	text-shadow: 2px 2px 4px #0D6E0E;
+	float: left;
+}
+
+#header #logout {
+	float: right;
+	font-size: medium;
+	padding-right: 30px;
+	padding-top: 10px;
+}
+
+#header #logout a:link { color: white; text-decoration: underline;}
+#header #logout a:visited { color: white; text-decoration: underline;}
+#header #logout a:hover { font-weight: bold;}
 
 #mainDiv {
 	margin-left: auto;

@@ -16,6 +16,7 @@
  */
 package org.transitclock.web;
 
+import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.StringConfigValue;
 
 /**
@@ -43,4 +44,24 @@ public class WebConfigParams {
 					"MapQuest",
 					"For displaying as map attributing for the where map tiles "
 					+ "from.");
+
+	private static BooleanConfigValue showLogOut =
+			new BooleanConfigValue(
+					"transitclock.web.login.showLogOut",
+					false,
+					"Whether logout link should be shown. Assumes some sort of authentication system is in place");
+
+	public static boolean isShowLogout() {
+		return showLogOut.getValue();
+	}
+
+	private static StringConfigValue logOutUrl =
+			new StringConfigValue(
+					"transitclock.web.login.logOutUrl",
+					null,
+					"Logout url used to log out of current session");
+
+	public static String getLogoutUrl() {
+		return logOutUrl.getValue();
+	}
 }
