@@ -91,9 +91,13 @@ public class AvlCsvRecord extends CsvBase {
 		float speed = speedStr == null ? Float.NaN : Float.parseFloat(speedStr);
 
 		String headingStr = avlCsvRecord.getOptionalValue(record, "heading");
-		float heading = headingStr == null ? 
-				Float.NaN : Float.parseFloat(headingStr);
-		
+		float heading = Float.NaN;
+		try {
+			heading = headingStr == null ?
+					Float.NaN : Float.parseFloat(headingStr);
+		} catch (NumberFormatException nfe) {
+			logger.error("illegal value heading {}", headingStr);
+		}
 		// Obtain the optional values
 		String leadVehicleId = avlCsvRecord.getOptionalValue(record,
 				"leadVehicleId");

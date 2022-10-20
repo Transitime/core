@@ -1,0 +1,2 @@
+agency_id,agency_name,agency_url,agency_timezone,agency_lang,agency_phone,agency_fare_url
+0,Metro Transit,https://www.metrotransit.org,America/Chicago,en,612-373-3333,https://www.metrotransit.org/fares

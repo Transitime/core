@@ -3,7 +3,7 @@ package org.transitclock.integration_tests;
 import org.junit.Test;
 import org.transitclock.core.dataCache.VehicleDataCache;
 import org.transitclock.ipc.data.IpcVehicleComplete;
-import org.transitclock.playback.PlaybackModule;
+import org.transitclock.integration_tests.playback.PlaybackModule;
 import org.transitclock.utils.Time;
 
 import junit.framework.TestCase;
@@ -22,7 +22,7 @@ public class RecoverFromDetourTest extends TestCase {
 	
 	@Test
 	public void test() {
-		PlaybackModule.runTrace(GTFS, AVL);
+		PlaybackModule.runTrace(GTFS, AVL, null, "America/New_York");
 		IpcVehicleComplete v = VehicleDataCache.getInstance().getVehicle(VEHICLE);
 		assertFalse(v.isLayover());
 		int adh = Math.abs(v.getRealTimeSchedAdh().getTemporalDifference());

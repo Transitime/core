@@ -289,7 +289,7 @@ public class AutoBlockAssigner {
 								.expectedTravelTimeBetweenMatches(
 										avlReport.getVehicleId(),
 										timeOfDayInSecs, prevSpatialMatch,
-										spatialMatch);
+										spatialMatch, false);
 				TemporalDifference differenceFromExpectedTime =
 						new TemporalDifference(expectedTravelTimeMsec
 								- avlTimeDifferenceMsec);

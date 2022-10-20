@@ -122,7 +122,8 @@ public class RunTimeGenerator {
 			// 3 - Check if transitioned to new block (in case step 1 fails since vehicles don't always reach last stop)
 			// If using exact trip match should in theory minimize block flapping making this method more accurate
 			if(CoreConfig.tryForExactTripMatch() &&
-					currentMatchBlock != null &&  !currentMatchBlock.getId().equals(lastValidBlockId)){
+					currentMatchBlock != null &&  !currentMatchBlock.getId().equals(lastValidBlockId) &&
+					!CoreConfig.getRoutesExcludedForExactTripMatch().contains(vehicleState.getRouteId())){
 				logger.debug("Found a block transition, hopefully not due to flapping. Prev block is {}, new block is {}",
 						lastValidBlockId, currentMatchBlock.getId());
 				return true;

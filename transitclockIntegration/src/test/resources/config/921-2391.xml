@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transitclock>
+    <core>
+        <predictionGeneratorClass>org.transitclock.core.predictiongenerator.scheduled.dwell.ApcStopTimeGenerator</predictionGeneratorClass>
+    </core>
+</transitclock>

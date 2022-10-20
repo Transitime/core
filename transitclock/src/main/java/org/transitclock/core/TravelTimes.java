@@ -387,7 +387,7 @@ public class TravelTimes {
 	 *         before match1
 	 */
 	public int expectedTravelTimeBetweenMatches(String vehicleId,
-			int timeOfDaySecs, SpatialMatch match1, SpatialMatch match2) {
+			int timeOfDaySecs, SpatialMatch match1, SpatialMatch match2, boolean logError) {
 		logger.debug("For vehicleId={} determining travel time between " +
 				"following two matches: \n" +
 				"  match1={}\n" +
@@ -404,7 +404,7 @@ public class TravelTimes {
 		// log & investigate if a schedule based assignment since for non schedule
 		// based ones the trip loops back and so you can have match2 < match1.
 		if (!match2.block.isNoSchedule()) {
-			if (match2.lessThan(match1)) {
+			if (logError && match2.lessThan(match1)) {
 				logger.error("For vehicleId={} match1AfterStop is after " +
 						"match2BeforeStop so returning travel time of 0. " +
 						"match1AfterStop={}, match2BeforeStop={}",
@@ -535,9 +535,9 @@ public class TravelTimes {
 	 *         before match1
 	 */
 	public int expectedTravelTimeBetweenMatches(String vehicleId,
-			Date time, SpatialMatch match1, SpatialMatch match2) {
+			Date time, SpatialMatch match1, SpatialMatch match2, boolean logError) {
 		int timeOfDaySecs = Core.getInstance().getTime().getSecondsIntoDay(time);
-		return expectedTravelTimeBetweenMatches(vehicleId, timeOfDaySecs, match1, match2);
+		return expectedTravelTimeBetweenMatches(vehicleId, timeOfDaySecs, match1, match2, logError);
 	}
 	
 }

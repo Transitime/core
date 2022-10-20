@@ -25,8 +25,10 @@ import org.transitclock.config.StringConfigValue;
 import org.transitclock.core.AvlProcessor;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.modules.Module;
+import org.transitclock.utils.DateRange;
 import org.transitclock.utils.Time;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -47,7 +49,10 @@ public class BatchCsvAvlFeedModule extends Module {
 
 	// For running in real time
 	private long lastAvlReportTimestamp = -1;
-			
+	private long min = Long.MAX_VALUE;
+	private long max = Long.MIN_VALUE;
+
+
 	/*********** Configurable Parameters for this module ***********/
 	private static String getCsvAvlFeedFileName() {
 		return csvAvlFeedFileName.getValue();
@@ -117,6 +122,7 @@ public class BatchCsvAvlFeedModule extends Module {
 		for (AvlReport avlReport : avlReports) {
 			
 			logger.info("Processing avlReport={}", avlReport);
+			processMinAndMax(avlReport);
 			
 			// If configured to process data in real time them delay
 			// the appropriate amount of time
@@ -142,12 +148,24 @@ public class BatchCsvAvlFeedModule extends Module {
         }
 	}
 
+	private void processMinAndMax(AvlReport avlReport) {
+		long current = avlReport.getTime();
+		if (current < min)
+			min = current;
+		if (current > max)
+			max = current;
+	}
+
 	private AvlPostProcessor avlPostProcessor = null;
 	
 	public void setAvlPostProcessor(AvlPostProcessor avlPostProcessor) {
 		this.avlPostProcessor = avlPostProcessor;
 	}
-	
+
+	public DateRange getAvlRange() {
+		return new DateRange(new Date(min), new Date(max));
+	}
+
 	public interface AvlPostProcessor {
 		void postProcess(AvlReport avlReport);
 	}

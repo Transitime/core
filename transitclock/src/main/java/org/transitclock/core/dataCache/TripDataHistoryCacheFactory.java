@@ -10,7 +10,7 @@ import org.transitclock.utils.ClassInstantiator;
 public class TripDataHistoryCacheFactory {
 	private static StringConfigValue className = 
 			new StringConfigValue("transitclock.core.cache.tripDataHistoryCache", 
-					"org.transitclock.core.dataCache.ehcache.frequency.TripDataHistoryCache",
+					"org.transitclock.core.dataCache.ehcache.scheduled.TripDataHistoryCache",
 					"Specifies the class used to cache the arrival and departures for a trip.");
 	
 	public static TripDataHistoryCacheInterface singleton = null;

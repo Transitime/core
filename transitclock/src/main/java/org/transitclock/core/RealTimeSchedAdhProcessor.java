@@ -143,7 +143,7 @@ public class RealTimeSchedAdhProcessor {
 		// that stop
 		int travelTimeToStopMsec = TravelTimes.getInstance()
 				.expectedTravelTimeBetweenMatches(vehicleId, avlTime,
-						match, matchAtStopWithScheduleTime);
+						match, matchAtStopWithScheduleTime, true);
 		
 		// If using departure time then add in expected stop wait time
 		int stopPathIndex = matchAtStopWithScheduleTime.getStopPathIndex();

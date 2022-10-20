@@ -3,7 +3,7 @@
 <ehcache:config xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
 				xmlns:ehcache='http://www.ehcache.org/v3'
 				xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core-3.1.xsd">
-	<ehcache:persistence directory="/usr/local/transitclock/cache/" />
+	<ehcache:persistence directory="/tmp/cache/" />
 	<ehcache:disk-store thread-pool="pool-disk" />
 
 
@@ -111,4 +111,34 @@
 			<ehcache:offheap unit="MB">1</ehcache:offheap>
 		</ehcache:resources>
 	</ehcache:cache>
+	<ehcache:cache alias="apcStopTimeCache">
+		<ehcache:key-type >org.transitclock.avl.ApcStopTimeEvent</ehcache:key-type>
+		<ehcache:value-type>java.lang.Long</ehcache:value-type>
+		<ehcache:expiry>
+			<ehcache:tti unit="minutes">2</ehcache:tti>
+		</ehcache:expiry>
+		<ehcache:resources>
+			<ehcache:heap unit="entries">1</ehcache:heap>
+			<ehcache:offheap unit="MB">1</ehcache:offheap>
+			<ehcache:disk unit="MB">10</ehcache:disk>
+		</ehcache:resources>
+		<ehcache:disk-store-settings thread-pool="pool-disk"
+									 writer-concurrency="1" />
+	</ehcache:cache>
+
+	<ehcache:cache alias="apcCacheBin">
+		<ehcache:key-type >org.transitclock.avl.CacheBin</ehcache:key-type>
+		<ehcache:value-type>org.transitclock.avl.ApcCacheElements</ehcache:value-type>
+		<ehcache:expiry>
+			<ehcache:tti unit="days">7</ehcache:tti>
+		</ehcache:expiry>
+		<ehcache:resources>
+			<ehcache:heap unit="entries">2000</ehcache:heap>
+			<ehcache:offheap unit="MB">1</ehcache:offheap>
+			<ehcache:disk unit="MB">5</ehcache:disk>
+		</ehcache:resources>
+		<ehcache:disk-store-settings thread-pool="pool-disk"
+									 writer-concurrency="1" />
+	</ehcache:cache>
+
 </ehcache:config>

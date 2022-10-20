@@ -436,7 +436,8 @@ public class KalmanDataGenerator {
     null,
     null,
     TRIP_PATTERN_ID,
-    STOP_PATH_ID);
+    STOP_PATH_ID,
+    false);
     apc.setArrivalDeparture(ad.create());
     records.add(apc);
     return records;

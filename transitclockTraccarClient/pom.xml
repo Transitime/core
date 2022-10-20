@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>TheTransitClock</groupId>
 		<artifactId>transitclock</artifactId>
-		<version>2.0.57-cs-SNAPSHOT</version>
+		<version>2.0.60-cs-SNAPSHOT</version>
 	</parent>
 	<packaging>jar</packaging>
 	<artifactId>transitclockTraccarClient</artifactId>
@@ -86,6 +86,11 @@
 		</pluginManagement>
 	</build>
 	<dependencies>
+		<dependency>
+			<groupId>TheTransitClock</groupId>
+			<artifactId>transitclockSwagger</artifactId>
+			<version>2.0.60-cs-SNAPSHOT</version>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

@@ -23,11 +23,9 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitclock.avl.AmigoCloudAvlModule;
 import org.transitclock.avl.PollUrlAvlModule;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.db.structs.AvlReport;
-import org.transitclock.db.structs.AvlReport.AssignmentType;
 import io.swagger.client.ApiClient;
 import io.swagger.client.api.DefaultApi;
 import io.swagger.client.model.Position;
