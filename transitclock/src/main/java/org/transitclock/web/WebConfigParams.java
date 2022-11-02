@@ -55,13 +55,4 @@ public class WebConfigParams {
 		return showLogOut.getValue();
 	}
 
-	private static StringConfigValue logOutUrl =
-			new StringConfigValue(
-					"transitclock.web.login.logOutUrl",
-					null,
-					"Logout url used to log out of current session");
-
-	public static String getLogoutUrl() {
-		return logOutUrl.getValue();
-	}
 }

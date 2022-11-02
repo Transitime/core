@@ -18,6 +18,10 @@ package org.transitclock.db.structs;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -25,6 +29,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -220,6 +225,24 @@ public class Stop implements Serializable {
 		Query query = session.createQuery(hql);
 		query.setInteger("configRev", configRev);
 		return query.list();
+	}
+
+	public static Map<String, Stop> getStops(int configRev, Set<String> stopIds)
+			throws HibernateException {
+		String hql = "FROM Stop s "
+					 + " WHERE s.configRev = :configRev "
+					 + " AND s.id in (:stopIds) ";
+
+		Session session = HibernateUtils.getReadOnlySession();
+
+		Query query = session.createQuery(hql);
+		query.setInteger("configRev", configRev);
+		query.setParameterList("stopIds", stopIds);
+		List<Stop> stops = query.list();
+
+		session.close();
+
+		return stops.stream().collect(Collectors.toMap(Stop::getId, Function.identity()));
 	}
 
 	/**

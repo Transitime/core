@@ -8,6 +8,7 @@ import org.transitclock.config.DoubleConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.ServiceType;
 import org.transitclock.core.ServiceTypeUtil;
+import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.db.query.ArrivalDepartureQuery;
 import org.transitclock.db.query.PrescriptiveRunTimeStateQuery;
 import org.transitclock.db.query.RunTimeForRouteQuery;
@@ -144,10 +145,21 @@ public class PrescriptiveRunTimeService {
 
         for (TripPattern tripPattern : tripPatterns) {
 
+            List<StopPath> tripPatternStopPaths = tripPattern.getScheduleAdhStopPaths();
+
+            Set<String> tripPatternStopIds = tripPatternStopPaths.stream()
+                                                                 .map(StopPath::getStopId)
+                                                                 .collect(Collectors.toSet());
+
+
+            // Get all stops for provided TripPattern
+            Map<String, Stop> stopsByStopId = Stop.getStops(configRev, tripPatternStopIds);
+
             // Populate Timepoints for trip pattern
             List<IpcStopPath> timePoints = new ArrayList<>();
-            for (StopPath timePoint : tripPattern.getScheduleAdhStopPaths()) {
-                timePoints.add(new IpcStopPath(timePoint));
+            for (StopPath timePoint : tripPatternStopPaths) {
+                Stop stop = stopsByStopId.get(timePoint.getStopId());
+                timePoints.add(new IpcStopPath(timePoint, stop));
             }
 
             // Check to see if tripPattern has associated timeband
@@ -165,7 +177,7 @@ public class PrescriptiveRunTimeService {
 
             // Gets new prescriptive runtimes for timebands
             IpcPrescriptiveRunTimesForTimeBands runTimesForTimeBands = getPrescriptiveRunTimesForTimeBands(timebandsForTripPattern,
-                    tripsByTripPatternId, timePoints, serviceTypesByServiceId, routeShortName, tripPattern, serviceType,
+                    tripsByTripPatternId, timePoints, tripPatternStopPaths, serviceTypesByServiceId, routeShortName, tripPattern, serviceType,
                     beginDate, endDate, configRev, readOnly);
 
 
@@ -262,6 +274,7 @@ public class PrescriptiveRunTimeService {
     private IpcPrescriptiveRunTimesForTimeBands getPrescriptiveRunTimesForTimeBands(TimebandsForTripPattern timebandsByPattern,
                                                                                     Map<String, List<Trip>> tripsByTripPatternId,
                                                                                      List<IpcStopPath> timePoints,
+                                                                                     List<StopPath> tripPatternStopPaths,
                                                                                      Map<String, Set<ServiceType>> serviceTypesByServiceId,
                                                                                      String routeShortName,
                                                                                      TripPattern tripPattern,
@@ -301,7 +314,8 @@ public class PrescriptiveRunTimeService {
 
                 // Get timepoint specific runtime info
                 PrescriptiveRunTimeStates prescriptiveRunTimeStates =
-                        getPrescriptiveRunTimeStates(query, serviceTypesByServiceId, tripPattern, tripsForTripPattern);
+                        getPrescriptiveRunTimeStates(query, serviceTypesByServiceId, tripPattern,
+                                tripPatternStopPaths, tripsForTripPattern);
 
                 // confirm that the run time info lines up with the expected timepoints
                 // if it doesn't match up then skip
@@ -399,6 +413,7 @@ public class PrescriptiveRunTimeService {
     public PrescriptiveRunTimeStates getPrescriptiveRunTimeStates(PrescriptiveRunTimeStateQuery prtsQuery,
                                                                 Map<String, Set<ServiceType>> serviceTypesByServiceId,
                                                                 TripPattern tripPattern,
+                                                                List<StopPath> tripPatternStopPaths,
                                                                 List<Trip> trips) throws Exception{
 
 
@@ -473,8 +488,9 @@ public class PrescriptiveRunTimeService {
             try {
                 // Put RunTimes and StopPaths into TimePoint RunTime Processor
                 // Groups them into timepoints and gets runtime info for timepoints
+
                 TimePointRunTimeProcessor timePointRunTimeProcessor =
-                        getTimePointRunTimeProcessorWithStopPaths(runTimesForRoutes, tripPattern.getStopPaths());
+                        getTimePointRunTimeProcessorWithStopPaths(runTimesForRoutes, tripPatternStopPaths);
 
                 // Create Prescriptive RunTimeState using timepoint stats and stop paths info
                 PrescriptiveRunTimeState prescriptiveRunTimeState =

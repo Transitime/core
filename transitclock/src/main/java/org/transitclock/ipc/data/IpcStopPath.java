@@ -54,8 +54,7 @@ public class IpcStopPath implements Serializable {
 		this.configRev = dbStopPath.getConfigRev();
 		this.stopPathId = dbStopPath.getStopPathId();
 		this.stopId = dbStopPath.getStopId();
-		Stop stop = Core.getInstance().getDbConfig()
-				.getStop(dbStopPath.getStopId());
+		Stop stop = getStop(dbStopPath);
 		if(stop != null){
 			this.stopName = stop.getName();
 		} else {
@@ -68,6 +67,28 @@ public class IpcStopPath implements Serializable {
 		this.breakTime = dbStopPath.getBreakTimeSec();
 		this.locations = dbStopPath.getLocations();
 		this.pathLength = dbStopPath.getLength();		
+	}
+
+	public IpcStopPath(StopPath dbStopPath, Stop stop) {
+		this.configRev = dbStopPath.getConfigRev();
+		this.stopPathId = dbStopPath.getStopPathId();
+		this.stopId = dbStopPath.getStopId();
+		if(stop != null){
+			this.stopName = stop.getName();
+		} else {
+			this.stopName = "";
+		}
+		this.gtfsStopSeq = dbStopPath.getGtfsStopSeq();
+		this.layoverStop = dbStopPath.isLayoverStop();
+		this.waitStop = dbStopPath.isWaitStop();
+		this.scheduleAdherenceStop = dbStopPath.isScheduleAdherenceStop();
+		this.breakTime = dbStopPath.getBreakTimeSec();
+		this.locations = dbStopPath.getLocations();
+		this.pathLength = dbStopPath.getLength();
+	}
+
+	private Stop getStop(StopPath dbStopPath) {
+		return Core.getInstance().getDbConfig().getStop(dbStopPath.getStopId());
 	}
 
 	@Override

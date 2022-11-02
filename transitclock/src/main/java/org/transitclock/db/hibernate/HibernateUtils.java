@@ -291,6 +291,10 @@ public class HibernateUtils {
 		return getSession(agencyId, false);
 	}
 
+	public static Session getReadOnlySession(String agencyId) throws HibernateException {
+		return getSession(agencyId, true);
+	}
+
 	public static Session getSession(String agencyId, boolean readOnly) throws HibernateException {
 		SessionFactory sessionFactory =
 				HibernateUtils.getSessionFactory(agencyId, readOnly);
@@ -311,6 +315,10 @@ public class HibernateUtils {
 	 */
 	public static Session getSession() {
 		return getSession(false);
+	}
+
+	public static Session getReadOnlySession() throws HibernateException {
+		return getSession(true);
 	}
 	
 	public static Session getSession(boolean readOnly) {

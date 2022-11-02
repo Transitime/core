@@ -19,7 +19,8 @@ public class PrescriptiveRunTimeOutput implements Serializable {
         PrescriptiveRunTimeDataAll prescriptiveRunTimeDataAll = new PrescriptiveRunTimeDataAll();
 
         String routeShortName = null;
-        for(IpcPrescriptiveRunTimesForPattern prescriptiveRunTimeBand : prescriptiveRunTimesForPatterns.getRunTimesForPatterns()){
+        List<IpcPrescriptiveRunTimesForPattern> ipcPrescriptiveRunTimesForPatterns = prescriptiveRunTimesForPatterns.getRunTimesForPatterns();
+        for(IpcPrescriptiveRunTimesForPattern prescriptiveRunTimeBand : ipcPrescriptiveRunTimesForPatterns){
             if(routeShortName == null && prescriptiveRunTimeBand.getRouteShortName() != null){
                 routeShortName = prescriptiveRunTimeBand.getRouteShortName();
                 prescriptiveRunTimeDataAll.setRouteShortName(routeShortName);
