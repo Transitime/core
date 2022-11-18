@@ -1,0 +1,32 @@
+<xml>
+    <tests>
+        <test>
+            <testClassName>org.transitclock.integration_tests.prediction.PredictionAccuracy921_2641IntegrationTest</testClassName>
+            <resourcesDirectory>921-2641</resourcesDirectory>
+        </test>
+        <test>
+            <testClassName>org.transitclock.integration_tests.prediction.PredictionAccuracy921_2391IntegrationTest</testClassName>
+            <resourcesDirectory>921-2391</resourcesDirectory>
+        </test>
+<!--        <test>-->
+<!--            <testClassName>org.transitclock.integration_tests.prediction.PredictionAccuracy921_497IntegrationTest</testClassName>-->
+<!--            <resourcesDirectory>what is this supposed to be for this test?</resourcesDirectory>-->
+<!--        </test>-->
+<!--        <test>-->
+<!--            <testClassName>org.transitclock.integration_tests.prediction.PredictionAccuracyS2Run2113IntegrationTest</testClassName>-->
+<!--            <resourcesDirectory>S2_2113</resourcesDirectory>-->
+<!--        </test>-->
+<!--        <test>-->
+<!--            <testClassName>org.transitclock.integration_tests.EffectiveScheduleDifferenceDuringLayoverTest</testClassName>-->
+<!--            <resourcesDirectory>5A_8062</resourcesDirectory>-->
+<!--        </test>-->
+<!--        <test>-->
+<!--            <testClassName>org.transitclock.integration_tests.GenerateEffectiveScheduleDifferenceTest</testClassName>-->
+<!--            <resourcesDirectory>5A_8062</resourcesDirectory>-->
+<!--        </test>-->
+<!--        <test>-->
+<!--            <testClassName>org.transitclock.integration_tests.RecoverFromDetourTest</testClassName>-->
+<!--            <resourcesDirectory>3T_3757</resourcesDirectory>-->
+<!--        </test>-->
+    </tests>
+</xml>

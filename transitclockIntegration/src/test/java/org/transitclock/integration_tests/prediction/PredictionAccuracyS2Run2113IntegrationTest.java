@@ -6,9 +6,9 @@ import org.junit.Test;
  * Build off of Abstract Prediction Integration Test.
  */
 public class PredictionAccuracyS2Run2113IntegrationTest extends AbstractPredictionAccuracyIntegrationTest {
-    private static final String GTFS = "classpath:gtfs/S2";
-    private static final String AVL = "classpath:avl/S2_2113.csv";
-    private static final String PREDICTIONS_CSV = "classpath:pred/S2_2113.csv";
+    private static final String GTFS = "classpath:tests/S2_2113/gtfs";
+    private static final String AVL = "classpath:tests/S2_2113/avl.csv";
+    private static final String PREDICTIONS_CSV = "classpath:tests/S2_2113/pred.csv";
 
     private static final String OUTPUT_DIRECTORY = "/tmp/output/S2_2113";
 
