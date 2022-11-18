@@ -18,8 +18,8 @@ import junit.framework.TestCase;
 // When we're using schedule times, effective schedule difference should be equal to schedule deviation.
 public class GenerateEffectiveScheduleDifferenceTest extends TestCase {
 	
-	private static final String GTFS = "src/test/resources/gtfs/5A";
-	private static final String AVL = "src/test/resources/avl/5A_8062.csv";
+	private static final String GTFS = "src/test/resources/tests/5A_8062/gtfs";
+	private static final String AVL = "src/test/resources/tests/5A_8062/avl.csv";
 	
 	private static final int THRESHOLD = 10000; // 10 seconds
 	

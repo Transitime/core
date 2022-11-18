@@ -58,19 +58,19 @@ public abstract class AbstractPredictionAccuracyIntegrationTest extends TestCase
 												boolean addConfigFile) {
 		TraceConfig config = new TraceConfig();
 		config.setId(id);
-		config.setGtfsDirectoryName("classpath:gtfs/" + id);
-		config.setAvlReportsCsv("classpath:avl/" + id + ".csv");
+		config.setGtfsDirectoryName("src/test/resources/tests/" + id + "/gtfs");
+		config.setAvlReportsCsv("src/test/resources/tests/" + id + "/avl.csv");
 		if (includePredictionsCsv) {
-			config.setPredictionCsv("classpath:pred/" + id + ".csv");
+			config.setPredictionCsv("src/test/resources/tests/" + id + "/pred.csv");
 		}
 		if (includeApcCsv) {
-			config.setApcCsv("classpath:apc/" + id + ".csv");
+			config.setApcCsv("src/test/resources/tests/" + id + "/apc.csv");
 		}
-		config.setArrivalDepartureCsv("classpath:history/" + id + ".csv");
+		config.setArrivalDepartureCsv("src/test/resources/tests/" + id + "/history.csv");
 		config.setOutputDirectory(getOutputDirectory() + id);
 		config.setTz(tz);
 		if (addConfigFile) {
-			config.setConfigFileNames("classpath:config/" + id + ".xml"
+			config.setConfigFileNames("src/test/resources/config/" + id + ".xml"
 					+ ";" + DEFAULT_CONFIG_FILE);
 		}
 		config.setDescription(description);
@@ -86,7 +86,7 @@ public abstract class AbstractPredictionAccuracyIntegrationTest extends TestCase
 		if (!property.endsWith("/"))
 			property = property + "/";
 		if (property.endsWith("transitclockIntegration/"))
-			property = property + "/target/classes/reports/";
+			property = property + "target/classes/reports/";
 		System.out.println("using outputdirectory of '" + property + "'");
 		logger.info("using outputdirectory of '" + property + "'");
 		return property;

@@ -1,5 +1,6 @@
 package org.transitclock.integration_tests.playback;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -23,10 +24,12 @@ import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.db.structs.ApcReport;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.gtfs.GtfsData;
+import org.transitclock.gtfs.HttpGetGtfsFile;
 import org.transitclock.gtfs.TitleFormatter;
 import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitclock.utils.DateRange;
 import org.transitclock.utils.Time;
+import org.transitclock.utils.Zip;
 
 
 /*
@@ -38,8 +41,9 @@ public class PlaybackModule {
 	
 	private static final Logger logger = LoggerFactory.getLogger(PlaybackModule.class);
 
-	private static String defaultGtfsDirectoryName = "src/main/resources/wmata_gtfs"; 
-	private static String defaultAvlReportsCsv = "src/main/resources/avl/03142016_SE-04.csv";
+	// TODO: does this pertain to a specific test's gtfs? do we need a list for the new directory structure?
+	private static String defaultGtfsDirectoryName = "src/main/resources/wmata_gtfs";
+	private static String defaultAvlReportsCsv = "src/main/resources/03142016_SE-04/avl.csv";
 	private static final String defaultTransitimeConfigFile = "classpath:transitclockConfigHsql.xml";
 
 	private static final String agencyId = "1";
@@ -78,7 +82,7 @@ public class PlaybackModule {
 		//updateTravelTimes();
 		checkPredictionsCache();
 		
-		System.exit(0); // threads somewhere. maybe in Core.		
+		System.exit(0); // threads somewhere. maybe in Core.
 		
 	}
 	
@@ -314,7 +318,7 @@ public class PlaybackModule {
 				shouldStoreNewRevs,
 				shouldDeleteRevs,
 				AgencyConfig.getAgencyId(),
-				gtfsDirectoryName,
+				unzipGtfsFiles(gtfsDirectoryName),
 				null,
 				pathOffsetDistance,
 				maxStopToPathDistance,
@@ -327,6 +331,14 @@ public class PlaybackModule {
 				200.0,
 				true*/);
 		gtfsData.processData();
+	}
+
+	private static String unzipGtfsFiles(String gtfsDirectoryName) throws IllegalArgumentException {
+		// Uncompress the GTFS zip file if need to
+		if (gtfsDirectoryName != null) {
+			return Zip.unzip(gtfsDirectoryName + ".zip", "gtfs");
+		}
+		return null;
 	}
 	
 	private static void updateTravelTimes() {
