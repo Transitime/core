@@ -104,16 +104,18 @@ public class ConfiguredTestsRunner {
                     .withRegion("us-east-1")
                     .build();
 
-            AssumeRoleRequest roleRequest = new AssumeRoleRequest()
-                    .withRoleArn("")
-                    .withRoleSessionName(UUID.randomUUID().toString());
+            // Add appropriate credentials
+//             AssumeRoleRequest roleRequest = new AssumeRoleRequest()
+//                     .withRoleArn("")
+//                     .withRoleSessionName(UUID.randomUUID().toString());
 
 //            AssumeRoleResult roleResponse = stsClient.assumeRole(roleRequest);
 //            Credentials sessionCredentials = roleResponse.getCredentials();
 
-            BasicAWSCredentials awsCredentials = new BasicAWSCredentials(
-                    "",
-                    "");
+            // Add appropriate credentials
+//            BasicAWSCredentials awsCredentials = new BasicAWSCredentials(
+//                    "",
+//                    "");
 
             AmazonS3ClientBuilder.standard()
                     .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
