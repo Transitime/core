@@ -59,7 +59,7 @@ public class ReplayLoader {
 
     private void waitForQueuesToDrain() {
         final int MAX_COUNT = 20;
-        sleep(5000);
+        sleep(20000);
         int i = 0;
         while (Core.getInstance().getDbLogger().queueSize() > 0 && i < MAX_COUNT) {
             i++;
