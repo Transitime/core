@@ -53,8 +53,6 @@ public class ConfiguredTestsRunner {
                 logger.info("running test {}", ite.getName());
                 IntegrationTestResult itr = forkTestClass(defaultTestClass, ite);
                 logger.info("back from test {} with rc={}", ite.getName(), itr.getReturnCode());
-                logger.info("copied output follows:");
-                logger.info(itr.getOutput());
                 logger.info("finished loop iteration {}", i);
             }
 
@@ -73,13 +71,13 @@ public class ConfiguredTestsRunner {
         cmdAndArgs.add("-Dsurefie.failOnFlakeCount=0");
         cmdAndArgs.add("-DreuseForks=false");
         cmdAndArgs.add("-Dsurefire.useSystemClassLoader=false");
+        cmdAndArgs.add("-Dlogback.configurationFile=logbackIntegration.xml");
         cmdAndArgs.add("-Dtest=" + testClass);
         addToCommandLine(cmdAndArgs, environment);
         String prettyPrint = prettyPrintArgs(cmdAndArgs);
         logger.info("executing cmd: " + prettyPrint);
         ProcessBuilder pb = new ProcessBuilder(cmdAndArgs);
-        pb.redirectError();
-        pb.redirectOutput();
+        pb.inheritIO();
         Process process = pb.start();
         return createResult(process);
     }
@@ -104,11 +102,11 @@ public class ConfiguredTestsRunner {
         }
 
         IntegrationTestResult itr = new IntegrationTestResult(returnCode);
-        try {
-            itr.setOutput(copy(process.getInputStream()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            itr.setOutput(copy(process.getInputStream()));
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
 
         return itr;
     }
