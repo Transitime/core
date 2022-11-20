@@ -1,32 +1,33 @@
 <xml>
     <tests>
         <test>
-            <testClassName>org.transitclock.integration_tests.prediction.PredictionAccuracy921_2641IntegrationTest</testClassName>
-            <resourcesDirectory>921-2641</resourcesDirectory>
+            <id>2-4094</id>
+            <gtfs>gtfs</gtfs>
+            <avl>avl.csv</avl>
+            <history>history.csv</history>
+            <apc>apc.csv</apc>
+        </test>
+<!--        <test>-->
+<!--            <id>baseline</id>-->
+<!--            <gtfs>gtfs</gtfs>-->
+<!--            <avl>avl.csv</avl>-->
+<!--            <history>history.csv</history>-->
+<!--            <apc>apc.csv</apc>-->
+<!--        </test>-->
+        <test>
+            <id>921-2641</id>
+            <gtfs>gtfs</gtfs>
+            <avl>avl.csv</avl>
+            <history>history.csv</history>
+            <predictions>predictions.csv</predictions>
         </test>
         <test>
-            <testClassName>org.transitclock.integration_tests.prediction.PredictionAccuracy921_2391IntegrationTest</testClassName>
-            <resourcesDirectory>921-2391</resourcesDirectory>
+            <id>921-2391</id>
+            <gtfs>gtfs</gtfs>
+            <avl>avl.csv</avl>
+            <history>history.csv</history>
+            <!-- no predictions -->
+<!--            <config>config.xml</config>&lt;!&ndash; todo &ndash;&gt;-->
         </test>
-<!--        <test>-->
-<!--            <testClassName>org.transitclock.integration_tests.prediction.PredictionAccuracy921_497IntegrationTest</testClassName>-->
-<!--            <resourcesDirectory>what is this supposed to be for this test?</resourcesDirectory>-->
-<!--        </test>-->
-<!--        <test>-->
-<!--            <testClassName>org.transitclock.integration_tests.prediction.PredictionAccuracyS2Run2113IntegrationTest</testClassName>-->
-<!--            <resourcesDirectory>S2_2113</resourcesDirectory>-->
-<!--        </test>-->
-<!--        <test>-->
-<!--            <testClassName>org.transitclock.integration_tests.EffectiveScheduleDifferenceDuringLayoverTest</testClassName>-->
-<!--            <resourcesDirectory>5A_8062</resourcesDirectory>-->
-<!--        </test>-->
-<!--        <test>-->
-<!--            <testClassName>org.transitclock.integration_tests.GenerateEffectiveScheduleDifferenceTest</testClassName>-->
-<!--            <resourcesDirectory>5A_8062</resourcesDirectory>-->
-<!--        </test>-->
-<!--        <test>-->
-<!--            <testClassName>org.transitclock.integration_tests.RecoverFromDetourTest</testClassName>-->
-<!--            <resourcesDirectory>3T_3757</resourcesDirectory>-->
-<!--        </test>-->
     </tests>
 </xml>

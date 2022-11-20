@@ -46,7 +46,11 @@ public class ReplayService {
 
     public void accumulate(List<ArrivalDeparture> arrivalDepartures) {
         // Fill new predictions
-        loader.accumulate(id, arrivalDepartures);
+        try {
+            loader.accumulate(id, arrivalDepartures);
+        } catch (Throwable t) {
+            logger.error("accumulate failed: {}", t, t);
+        }
     }
 
     public ReplayResults compare() {

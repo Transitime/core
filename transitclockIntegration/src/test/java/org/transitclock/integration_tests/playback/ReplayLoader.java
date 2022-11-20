@@ -99,6 +99,11 @@ public class ReplayLoader {
     }
 
     public void accumulate(String id, List<ArrivalDeparture> arrivalDepartures) {
+        if (arrivalDepartures == null) {
+            logger.info("accumulating error, no A/Ds");
+        } else {
+            logger.info("accumulating with {} A/Ds", arrivalDepartures.size());
+        }
         List<Prediction> newPreds = getSession().createCriteria(Prediction.class).list();
         csv.write(newPreds,"prediction", id);
 
@@ -131,7 +136,7 @@ public class ReplayLoader {
         chain.addComparator(new CombinedPredictionAccuracyStopSequenceComparator());
 
         Collections.sort(sortedList, chain);
-
+        logger.info("writing {} preds to combined_prediction.csv", sortedList.size());
         csv.write(sortedList, "combined_prediction", id);
 
         getSession().close();

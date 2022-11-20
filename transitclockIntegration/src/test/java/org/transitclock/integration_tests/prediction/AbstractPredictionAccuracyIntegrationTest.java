@@ -20,11 +20,17 @@ import java.util.List;
  */
 public abstract class AbstractPredictionAccuracyIntegrationTest extends TestCase {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractPredictionAccuracyIntegrationTest.class);
+    protected static final Logger logger = LoggerFactory.getLogger(AbstractPredictionAccuracyIntegrationTest.class);
 
 	private static final String DEFAULT_CONFIG_FILE = "classpath:transitclockConfigHsql.xml";
     private ReplayService rs;
-	private TraceConfig config;
+	protected TraceConfig config;
+	protected void setConfig(TraceConfig config) {
+		this.config = config;
+	}
+	public AbstractPredictionAccuracyIntegrationTest() {
+		// allow setter injection of config
+	}
 	public AbstractPredictionAccuracyIntegrationTest(String id, String outputDirectory, String gtfs, String avl,
 													 String predictionsCsv, String tz, String description) {
 		TraceConfig pc = new TraceConfig();
@@ -77,7 +83,7 @@ public abstract class AbstractPredictionAccuracyIntegrationTest extends TestCase
 		return config;
 	}
 
-	private static String getOutputDirectory() {
+	protected static String getOutputDirectory() {
 		// expecting ~/transitime/transitclockIntegration/ to which we add the classes dir
 		// so the output of the integration tests will end up in the jar file
 		String property = System.getProperty("user.dir");

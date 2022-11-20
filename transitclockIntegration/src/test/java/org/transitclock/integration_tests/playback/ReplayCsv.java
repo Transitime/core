@@ -28,8 +28,14 @@ public class ReplayCsv {
     public List<Prediction> loadPredictions(String predictionsCsvFileName) {
         ArrayList<Prediction> list = new ArrayList<>();
         try {
-            InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(predictionsCsvFileName.substring("classpath:".length()));
-            if (inputStream == null) throw new FileNotFoundException(predictionsCsvFileName + " not found!");
+            String filename = predictionsCsvFileName.replaceFirst("classpath:", "");
+            InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(filename);
+            if (inputStream == null) {
+                // some sort of classloader issue -- try again with truncated path
+                filename = filename.replaceFirst("src/test/resources/", "");
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(filename);
+            }
+            if (inputStream == null) throw new FileNotFoundException("'" + filename + "' not found!");
             Iterable<CSVRecord> records = CSVFormat.DEFAULT.withHeader().parse(new InputStreamReader(inputStream));
 
             for (CSVRecord r : records) {
