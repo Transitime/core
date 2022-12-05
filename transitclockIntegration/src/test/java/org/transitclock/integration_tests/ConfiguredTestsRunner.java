@@ -26,10 +26,12 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class ConfiguredTestsRunner {
     private static final Logger logger = LoggerFactory.getLogger(ConfiguredTestsRunner.class);
     private static final String DEFAULT_MVN_CMD = "mvn";
+    private static final String CONFIG_FILE = "src/test/resources/tests/configuredTests.xml";
     private static String defaultTestClass = "org.transitclock.integration_tests.prediction.EnvironmentBasedPredictionAccuracyIntegrationTestImpl";
 
     private static String bucketName = "camsys-met-integration";
@@ -37,12 +39,13 @@ public class ConfiguredTestsRunner {
 
     @Test
     public void runTests() throws Exception {
-        // Load in config file
-        Document testsDoc = getConfiguredTests();
-        NodeList configuredTests = testsDoc.getElementsByTagName("test");
 
         // Download resources for configured tests
-        syncS3ToDisk(configuredTests);
+        File configFile = syncS3ToDisk();
+
+        // Load in config file
+        Document testsDoc = getConfiguredTests(configFile);
+        NodeList configuredTests = testsDoc.getElementsByTagName("test");
 
         // Run tests
         try {
@@ -77,7 +80,6 @@ public class ConfiguredTestsRunner {
         String prettyPrint = prettyPrintArgs(cmdAndArgs);
         logger.info("executing cmd: " + prettyPrint);
         ProcessBuilder pb = new ProcessBuilder(cmdAndArgs);
-        pb.inheritIO();
         Process process = pb.start();
         return createResult(process);
     }
@@ -92,30 +94,33 @@ public class ConfiguredTestsRunner {
 
     // block on the sub process and capture return code
     private IntegrationTestResult createResult(Process process) {
-        int returnCode = -1;
+        int returnCode = -100;
         try {
-            logger.info("waiting on result....");
-            returnCode = process.waitFor();
-            logger.info("process rc=" + returnCode);
+            while (returnCode == -100) {
+                copyStreamNoWait(process.getInputStream(), System.out);
+                copyStreamNoWait(process.getErrorStream(), System.err);
+
+                boolean finished = process.waitFor(1, TimeUnit.SECONDS);
+                if (finished) {
+                    returnCode = process.exitValue();
+                    // grab any remaining output
+                    copyStreamNoWait(process.getInputStream(), System.out);
+                    copyStreamNoWait(process.getErrorStream(), System.err);
+                }
+            }
         } catch (InterruptedException e) {
             returnCode = -99;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
-        IntegrationTestResult itr = new IntegrationTestResult(returnCode);
-//        try {
-//            itr.setOutput(copy(process.getInputStream()));
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-
-        return itr;
+        return new IntegrationTestResult(returnCode);
     }
 
-    // copy input stream to a string for logging
-    private String copy(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        inputStream.transferTo(baos);
-        return baos.toString();
+    private void copyStreamNoWait(InputStream in, PrintStream out) throws IOException {
+        // we are waiting on process regardless, so no need to be efficient here
+        while (in.available() > 0)
+            out.write(in.read());
     }
 
     private void addToCommandLine(List<String> cmdAndArgs, IntegrationTestEnvironment environment) {
@@ -158,19 +163,15 @@ public class ConfiguredTestsRunner {
     }
 
 
-    private Document getConfiguredTests() {
+    private Document getConfiguredTests(File configFile) {
         try {
-            InputStream resourceAsStream = this.getClass().getClassLoader()
-                    .getResourceAsStream("configuredTests.xml");
-            if (resourceAsStream == null) throw  new FileNotFoundException("configuredTests.xml not found in classpath");
-
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 
             DocumentBuilder builder = null;
             builder = factory.newDocumentBuilder();
 
             Document testsDoc = null;
-            testsDoc = builder.parse(resourceAsStream);
+            testsDoc = builder.parse(configFile);
             testsDoc.getDocumentElement().normalize();
 
             return testsDoc;
@@ -180,7 +181,13 @@ public class ConfiguredTestsRunner {
         return null;
     }
 
-    private static void syncS3ToDisk(NodeList configuredTests) {
+    private static File syncS3ToDisk() {
+        File configFile = new File(CONFIG_FILE);
+
+        if (System.getProperty("test.s3.skipSync") != null) {
+            logger.info("Configuration set to skip sync, assuming files are present locally");
+            return configFile;
+        }
 
         logger.info("Starting sync to disk from S3...");
 
@@ -215,16 +222,11 @@ public class ConfiguredTestsRunner {
 
             TransferManager tm = TransferManagerBuilder.standard().withS3Client(AmazonS3ClientBuilder.standard()
                     .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build()).build();
-            for (int i = 0; i < configuredTests.getLength(); i++) {
-                Node testNode = configuredTests.item(i);
-                Element testElement = (Element) testNode;
-                String testDirectory = testElement.getElementsByTagName("id").item(0).getTextContent();
-                if (testDirectory != "") {
-                    logger.info("downloading {} from s3://{}/{}", testDirectory, bucketName, keyPrefix);
-                    MultipleFileDownload x = tm.downloadDirectory(bucketName, keyPrefix + testDirectory, new File(resourcesDirPath));
-                    x.waitForCompletion();
-                }
-            }
+
+            tm.download(bucketName, keyPrefix, configFile);
+            logger.info("downloading content from s3://{}/{}", bucketName, keyPrefix);
+            MultipleFileDownload x = tm.downloadDirectory(bucketName, keyPrefix, new File(resourcesDirPath));
+            x.waitForCompletion();
             tm.shutdownNow();
 
             logger.info("Complete.");
@@ -233,5 +235,6 @@ public class ConfiguredTestsRunner {
             logger.error("Exception: " + e.getMessage());
             e.printStackTrace();
         }
+        return configFile;
     }
 }
