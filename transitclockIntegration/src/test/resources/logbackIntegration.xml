@@ -14,7 +14,7 @@
         . Valid timezone format is at http://en.wikipedia.org/wiki/List_of_tz_zones -->
 
     <property name="LOG_FILE_ROOT"
-              value="${transitclock.logging.dir:-/Logs}/${transitclock.core.agencyId:-DEFAULT}/core/%d{yyyy/MM/dd}" />
+              value="${transitclock.logging.dir:-/tmp/ttc-integration-tests}/${transitclock.test.id:-default}/logs" />
 
     <!-- The pattern layout how the log file should log info is set here. Note
         that a newline is used at beginning so that there is a blank line between
@@ -44,15 +44,11 @@
         logs should be dealt with daily. Logs are compressed automatically since
         "gz" specified. -->
     <appender name="CORE"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- daily rollover. Compress the file when rolling it over. -->
-            <fileNamePattern>${LOG_FILE_ROOT}/core.log.gz</fileNamePattern>
-        </rollingPolicy>
-
+              class="ch.qos.logback.core.FileAppender">
         <!-- Only want this appender to take effect if not DEBUG level. This way
             when DEBUG level the CORE_DEBUG can instead handle things and use more verbose
             logging that could be useful for debugging. -->
+        <file>${LOG_FILE_ROOT}/core.log</file>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>DEBUG</level>
             <onMatch>DENY</onMatch>
@@ -71,15 +67,11 @@
     <!-- For debugging probably want to log additional info so the pattern is
         enhanced. Otherwise it should be identical to the CORE appender. -->
     <appender name="CORE_DEBUG"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- daily rollover. Compress the file when rolling it over. -->
-            <fileNamePattern>${LOG_FILE_ROOT}/core.log.gz</fileNamePattern>
-        </rollingPolicy>
-
+              class="ch.qos.logback.core.FileAppender">
         <!-- Only want this appender to take effect if DEBUG level. This way when
             DEBUG level this CORE_DEBUG appender can handle things and use more verbose
             logging that could be useful for debugging. -->
+        <file>${LOG_FILE_ROOT}/core.log</file>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>DEBUG</level>
             <onMatch>ACCEPT</onMatch>
@@ -145,11 +137,8 @@
 
     <!-- Separate file for config parameters logging -->
     <appender name="CONFIG"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_ROOT}/configParams.log.gz
-            </fileNamePattern>
-        </rollingPolicy>
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE_ROOT}/configParams.log</file>
         <encoder>
             <charset>UTF-8</charset>
             <pattern>${DATA_PATTERN}</pattern>
@@ -158,10 +147,8 @@
 
     <!-- Separate file for AVL logging -->
     <appender name="AVL"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_ROOT}/avl.log.gz</fileNamePattern>
-        </rollingPolicy>
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE_ROOT}/avl.log</file>
         <encoder>
             <charset>UTF-8</charset>
             <pattern>${DEFAULT_PATTERN}</pattern>
@@ -169,10 +156,8 @@
     </appender>
 
     <appender name="MATCHER"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_ROOT}/matcher.log.gz</fileNamePattern>
-        </rollingPolicy>
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE_ROOT}/matcher.log</file>
         <encoder>
             <charset>UTF-8</charset>
             <pattern>${DEFAULT_PATTERN}</pattern>
@@ -181,11 +166,8 @@
 
     <!-- Separate file for ArrivalDeparture logging -->
     <appender name="FREQUENCY"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_ROOT}/frequency.log.gz
-            </fileNamePattern>
-        </rollingPolicy>
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE_ROOT}/frequency.log</file>
         <encoder>
             <charset>UTF-8</charset>
             <pattern>${DATA_PATTERN}</pattern>
@@ -194,11 +176,8 @@
 
     <!-- Separate file for ArrivalDeparture logging -->
     <appender name="ARRIVAL_DEPARTURE"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_ROOT}/arrivalDeparture.log.gz
-            </fileNamePattern>
-        </rollingPolicy>
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE_ROOT}/arrivalDeparture.log</file>
         <encoder>
             <charset>UTF-8</charset>
             <pattern>${DATA_PATTERN}</pattern>
@@ -207,11 +186,8 @@
 
     <!-- Separate file for VehicleEvents logging -->
     <appender name="VEHICLE_EVENT"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_ROOT}/vehicleEvents.log.gz
-            </fileNamePattern>
-        </rollingPolicy>
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE_ROOT}/vehicleEvents.log</file>
         <encoder>
             <charset>UTF-8</charset>
             <pattern>${DATA_PATTERN}</pattern>
@@ -220,10 +196,8 @@
 
     <!-- Separate file for Cache logging -->
     <appender name="CACHE"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_ROOT}/cache.log.gz</fileNamePattern>
-        </rollingPolicy>
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE_ROOT}/cache.log</file>
         <encoder>
             <charset>UTF-8</charset>
             <pattern>${DATA_PATTERN}</pattern>
@@ -231,10 +205,8 @@
     </appender>
     <!-- Separate file for Holding Time Generator logging -->
     <appender name="HOLDING"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_ROOT}/holding.log.gz</fileNamePattern>
-        </rollingPolicy>
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE_ROOT}/holding.log</file>
         <encoder>
             <charset>UTF-8</charset>
             <pattern>${DATA_PATTERN}</pattern>
@@ -242,10 +214,8 @@
     </appender>
     <!-- Separate file for Prediction logging -->
     <appender name="PREDICTION"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_ROOT}/prediction.log.gz</fileNamePattern>
-        </rollingPolicy>
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE_ROOT}/prediction.log</file>
         <encoder>
             <charset>UTF-8</charset>
             <pattern>${DATA_PATTERN}</pattern>
@@ -254,11 +224,8 @@
 
     <!-- Separate file for schedule based predictions logging -->
     <appender name="SCHED_BASED_PREDS"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_ROOT}/schedBasedPreds.log.gz
-            </fileNamePattern>
-        </rollingPolicy>
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE_ROOT}/schedBasedPreds.log</file>
         <encoder>
             <charset>UTF-8</charset>
             <pattern>${DATA_PATTERN}</pattern>
@@ -267,11 +234,8 @@
 
     <!-- Separate file for PRED_ACCURACY logging -->
     <appender name="PRED_ACCURACY"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_ROOT}/predAccuracy.log.gz
-            </fileNamePattern>
-        </rollingPolicy>
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE_ROOT}/predAccuracy.log</file>
         <encoder>
             <charset>UTF-8</charset>
             <pattern>${DEFAULT_PATTERN}</pattern>
@@ -280,11 +244,8 @@
 
     <!-- Separate file for PRED_ACCURACY logging -->
     <appender name="EXTERNAL_PRED_ACCURACY"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_ROOT}/externalPredAccuracy.log.gz
-            </fileNamePattern>
-        </rollingPolicy>
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE_ROOT}/externalPredAccuracy.log</file>
         <encoder>
             <charset>UTF-8</charset>
             <pattern>${DEFAULT_PATTERN}</pattern>
@@ -293,10 +254,8 @@
 
     <!-- Separate file for Match logging -->
     <appender name="MATCH"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_ROOT}/match.log.gz</fileNamePattern>
-        </rollingPolicy>
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE_ROOT}/match.log</file>
         <encoder>
             <charset>UTF-8</charset>
             <pattern>${DATA_PATTERN}</pattern>
@@ -305,10 +264,8 @@
 
     <!-- Separate file for Monitoring logging -->
     <appender name="MONITORING"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_ROOT}/monitoring.log.gz</fileNamePattern>
-        </rollingPolicy>
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE_ROOT}/monitoring.log</file>
         <encoder>
             <charset>UTF-8</charset>
             <pattern>${DEFAULT_PATTERN}</pattern>
@@ -317,11 +274,8 @@
 
     <!-- Separate file for Auto Block Assigner logging -->
     <appender name="AUTO_ASSIGNER"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_ROOT}/autoAssigner.log.gz
-            </fileNamePattern>
-        </rollingPolicy>
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE_ROOT}/autoAssigner.log</file>
         <encoder>
             <charset>UTF-8</charset>
             <pattern>${DEFAULT_PATTERN}</pattern>
@@ -330,10 +284,8 @@
 
     <!-- Separate file for SQL logging -->
     <appender name="SQL"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_ROOT}/sql.log.gz</fileNamePattern>
-        </rollingPolicy>
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE_ROOT}/sql.log</file>
         <encoder>
             <charset>UTF-8</charset>
             <pattern>${DEFAULT_PATTERN}</pattern>
@@ -350,10 +302,8 @@
 
     <!-- Separate file for Match logging -->
     <appender name="MAPMATCH"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_ROOT}/mapmatch.log.gz</fileNamePattern>
-        </rollingPolicy>
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE_ROOT}/mapmatch.log</file>
         <encoder>
             <charset>UTF-8</charset>
             <pattern>${DATA_PATTERN}</pattern>
@@ -362,10 +312,8 @@
 
     <!-- Separate file for SQL logging -->
     <appender name="UPDATE_TRAVEL_TIMES"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_ROOT}/update_travel_times.log.gz</fileNamePattern>
-        </rollingPolicy>
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE_ROOT}/update_travel_times.log</file>
         <encoder>
             <charset>UTF-8</charset>
             <pattern>${DEFAULT_PATTERN}</pattern>
@@ -374,10 +322,8 @@
 
 
     <appender name="RUN_TIME_GENERATOR"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_ROOT}/run_time_generator.log.gz</fileNamePattern>
-        </rollingPolicy>
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE_ROOT}/run_time_generator.log</file>
         <encoder>
             <charset>UTF-8</charset>
             <pattern>${DEFAULT_PATTERN}</pattern>
@@ -401,11 +347,13 @@
     <logger name="org.transitclock.db.structs.ArrivalDeparture" level="error"
             additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="ARRIVAL_DEPARTURE" />
     </logger>
 
     <logger name="org.transitclock.db.structs.VehicleEvent" level="error"
             additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="VEHICLE_EVENT" />
     </logger>
 
     <!-- Taken out (by setting level to warn instead of info) for now because
@@ -415,10 +363,12 @@
             name="org.transitclock.core.VehicleState"
             level="error" additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="FREQUENCY" />
     </logger>
 
     <logger name="org.transitclock.core.PredictionGeneratorDefaultImpl"
             level="info" additivity="false">
+        <appender-ref ref="STDOUT" />
         <appender-ref ref="PREDICTION" />
     </logger>
 
@@ -426,50 +376,64 @@
             name="org.transitclock.core.predictiongenerator"
             level="info" additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="PREDICTION" />
     </logger>
 
     <logger name="org.transitclock.core.schedBasedPreds" level="error"
             additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="SCHED_BASED_PREDS" />
     </logger>
 
     <logger name="org.transitclock.db.structs.Match" level="error"
             additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="MATCH" />
     </logger>
 
     <logger name="org.transitclock.avl" level="error" additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="AVL" />
     </logger>
 
     <logger name="org.transitclock.core.dataCache.TripDataHistoryCache"
             level="error" additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="CACHE" />
     </logger>
     <logger name="org.transitclock.core.dataCache.KalmanErrorCache"
             level="error" additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="CACHE" />
     </logger>
     <logger name="org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache"
             level="error" additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="CACHE" />
     </logger>
     <logger name="org.transitclock.core.dataCache.scheduled.ScheduledBasedHistoricalAverageCache"
             level="error" additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="CACHE" />
     </logger>
     <logger name="org.transitclock.core.dataCache.StopArrivalDepartureCache"
             level="error" additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="CACHE" />
     </logger>
     <logger name="org.transitclock.core.holdingmethod.HoldingTimeGeneratorDefaultImpl"
             level="error" additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="HOLDING" />
     </logger>
     <logger name="org.transitclock.core.TemporalMatcher" level="error" additivity="true">
-        <appender-ref ref="STDOUT" /> </logger>
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="MATCHER" />
+    </logger>
     <logger name="org.transitclock.core.SpatialMatcher" level="error" additivity="true">
-        <appender-ref ref="STDOUT" /> </logger>
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="MATCHER" />
+    </logger>
     <!-- For config params it is more complicated because want to both have
         config params logged in separate file but also want some errors to send out
         an e-mail. Need to use ERROR_SMTP and additivity=true to make sure the e-mail
@@ -478,6 +442,7 @@
         for now. -->
     <logger name="org.transitclock.config" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="CONFIG" />
     </logger>
     <!-- <logger name="org.transitclock.config" level="error" additivity="false">
         <appender-ref ref="ERROR_SMTP" /> </logger> -->
@@ -485,21 +450,25 @@
     <logger name="org.transitclock.core.predAccuracy.PredictionAccuracyModule" level="error"
             additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="PRED_ACCURACY" />
     </logger>
 
     <logger name="org.transitclock.core.predAccuracy.gtfsrt.GTFSRealtimePredictionAccuracyModule" level="error"
             additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="EXTERNAL_PRED_ACCURACY" />
     </logger>
 
     <logger name="org.transitclock.monitoring" level="error"
             additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="MONITORING" />
     </logger>
 
     <logger name="org.transitclock.core.autoAssigner" level="error"
             additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="AUTO_ASSIGNER" />
     </logger>
 
     <logger name="org.transitclock.core.dataCache.TripDataHistoryCache"
@@ -510,62 +479,75 @@
     <logger name="org.transitclock.core.TravelTimeDetails"
             level="warn" additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="PREDICTION" />
     </logger>
     <logger name="org.transitclock.core.DwellTimeDetails"
             level="warn" additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="PREDICTION" />
     </logger>
     <logger name="org.transitclock.core.dataCache"
             level="error" additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="CACHE" />
     </logger>
 
     <logger name="org.transitclock.core.dataCache.jcs.DwellTimeModelCache"
             level="error" additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="PREDICTION" />
     </logger>
 
     <logger name="net.sf.ehcache" level="error" additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="CACHE" />
     </logger>
 
     <logger name="net.sf.ehcache" level="error" additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="CACHE" />
     </logger>
 
     <logger name="org.transitclock.core.ArrivalDepartureGeneratorDefaultImpl"
             level="warn" additivity="true">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="ARRIVAL_DEPARTURE" />
     </logger>
 
     <logger name="org.transitclock.custom.barefoot.BarefootAVLModule"
             level="error" additivity="true">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="MAPMATCH" />
     </logger>
 
     <logger name="org.transitclock.applications.UpdateTravelTimes"
             level="error" additivity="true">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="UPDATE_TRAVEL_TIMES" />
     </logger>
 
     <logger name="org.transitclock.core.reporting.RunTimeProcessor"
             level="error" additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="RUN_TIME_GENERATOR" />
     </logger>
 
     <logger name="org.transitclock.core.reporting.RunTimeProcessorResult"
             level="error" additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="RUN_TIME_GENERATOR" />
     </logger>
 
     <logger name="org.transitclock.core.reporting.RunTimeProcessorHelper"
             level="error" additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="RUN_TIME_GENERATOR" />
     </logger>
 
     <logger name="org.transitclock.core.reporting.RunTimeProcessorHelper"
             level="error" additivity="false">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="RUN_TIME_GENERATOR" />
     </logger>
 
     <!-- In order to log the hibernate SQL queries need to set org.hibernate.SQL
@@ -614,6 +596,7 @@
         to be info, which is a higher level. -->
     <root level="info">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="CORE" />
     </root>
 
 </configuration>

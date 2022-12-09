@@ -98,14 +98,15 @@ public class ReplayLoader {
         return pred;
     }
 
-    public void accumulate(String id, List<ArrivalDeparture> arrivalDepartures) {
+    public List<String> accumulate(String id, List<ArrivalDeparture> arrivalDepartures) {
+        ArrayList<String> ouptputfilenames = new ArrayList<>();
         if (arrivalDepartures == null) {
             logger.info("accumulating error, no A/Ds");
         } else {
             logger.info("accumulating with {} A/Ds", arrivalDepartures.size());
         }
         List<Prediction> newPreds = getSession().createCriteria(Prediction.class).list();
-        csv.write(newPreds,"prediction", id);
+        ouptputfilenames.add(csv.write(newPreds,"prediction", id));
 
 
         for (Prediction p : newPreds) {
@@ -137,10 +138,10 @@ public class ReplayLoader {
 
         Collections.sort(sortedList, chain);
         logger.info("writing {} preds to combined_prediction.csv", sortedList.size());
-        csv.write(sortedList, "combined_prediction", id);
+        ouptputfilenames.add(csv.write(sortedList, "combined_prediction", id));
 
         getSession().close();
-
+        return ouptputfilenames;
     }
 
     private boolean match(CombinedPredictionAccuracy combined, ArrivalDeparture ad) {

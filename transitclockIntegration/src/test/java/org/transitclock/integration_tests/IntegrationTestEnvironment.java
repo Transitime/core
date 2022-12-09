@@ -11,6 +11,8 @@ public class IntegrationTestEnvironment {
     private String history;
     private String predictions;
     private String config;
+    private String loggingDir;
+    private String runId;
 
     public String getName() {
         return name;
@@ -66,5 +68,19 @@ public class IntegrationTestEnvironment {
 
     public void setConfig(String config) {
         this.config = config;
+    }
+
+    public String getLoggingDir() {
+        return loggingDir;
+    }
+    public void setLoggingDir(String directory) {
+        loggingDir = directory;
+    }
+
+    public void setRunId(String id) {
+        this.runId = id;
+    }
+    public String getRunId() {
+        return runId;
     }
 }

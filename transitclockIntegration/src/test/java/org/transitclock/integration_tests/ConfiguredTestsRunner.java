@@ -1,6 +1,7 @@
 package org.transitclock.integration_tests;
 
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -32,6 +35,9 @@ public class ConfiguredTestsRunner {
     private static final Logger logger = LoggerFactory.getLogger(ConfiguredTestsRunner.class);
     private static final String DEFAULT_MVN_CMD = "mvn";
     private static final String CONFIG_FILE = "src/test/resources/tests/configuredTests.xml";
+
+    private static final String OUTPUT_DIRECTORY = "reports";
+    private static final String RESULT_DIRECTORY = "target/classes/reports";
     private static String defaultTestClass = "org.transitclock.integration_tests.prediction.EnvironmentBasedPredictionAccuracyIntegrationTestImpl";
 
     private static String bucketName = "camsys-met-integration";
@@ -46,13 +52,15 @@ public class ConfiguredTestsRunner {
         // Load in config file
         Document testsDoc = getConfiguredTests(configFile);
         NodeList configuredTests = testsDoc.getElementsByTagName("test");
+        String runId = getRunId();
+        String resultsDirectory = getResultsDirectory(runId);
 
         // Run tests
         try {
 
             for (int i = 0; i < configuredTests.getLength(); i++) {
                 Element testNode = (Element) configuredTests.item(i);
-                IntegrationTestEnvironment ite = createEnvironment(testNode);
+                IntegrationTestEnvironment ite = createEnvironment(testNode, runId, resultsDirectory);
                 logger.info("running test {}", ite.getName());
                 IntegrationTestResult itr = forkTestClass(defaultTestClass, ite);
                 logger.info("back from test {} with rc={}", ite.getName(), itr.getReturnCode());
@@ -61,8 +69,31 @@ public class ConfiguredTestsRunner {
 
         } catch (Throwable e) {
             logger.error("test setup failure: {}", e, e);
+        } finally {
+            pushResultsBackToS3(resultsDirectory);
         }
         logger.error("exiting for cleanup!");
+    }
+
+    private static void pushResultsBackToS3(String resultsDirectory) throws InterruptedException {
+        TransferManager tm = getTransferManager();
+        // put transitime/transitclockIntegration/target/classes/reports/* to
+        // s3://<bucket>/results/YYYY-MM-DDTHH:MM:SS/
+        File directory = new File(RESULT_DIRECTORY);
+        String keyPrefix = OUTPUT_DIRECTORY;
+        MultipleFileUpload x = tm.uploadDirectory(bucketName, keyPrefix, directory, true);
+        logger.info("uploading results to S3 at s3://{}/{}", bucketName, keyPrefix);
+        x.waitForCompletion();
+        tm.shutdownNow();
+        logger.info("uploading complete to S3 at s3://{}/{}", bucketName, keyPrefix);
+    }
+
+    private static String getRunId() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        return sdf.format(new Date());
+    }
+    private static String getResultsDirectory(String runId) {
+        return RESULT_DIRECTORY + "/" + runId;
     }
 
     // this is a bit strange:  but here we recusrively invoke mvn
@@ -131,6 +162,9 @@ public class ConfiguredTestsRunner {
         addArg(cmdAndArgs, "it.history", environment.getHistory());
         addArg(cmdAndArgs, "it.predictions", environment.getPredictions());
         addArg(cmdAndArgs, "it.config", environment.getConfig());
+        addArg(cmdAndArgs, "it.runid", environment.getRunId());
+        addArg(cmdAndArgs, "transitclock.logging.dir", environment.getLoggingDir());
+        addArg(cmdAndArgs, "transitclock.test.id", environment.getName());
     }
 
     private void addArg(List<String> cmdAndArgs, String property, String value) {
@@ -139,7 +173,7 @@ public class ConfiguredTestsRunner {
         }
     }
 
-    private IntegrationTestEnvironment createEnvironment(Element testNode) {
+    private IntegrationTestEnvironment createEnvironment(Element testNode, String runId, String outputDirectory) {
         NodeList testNameNode = testNode.getElementsByTagName("testClassName");
         Node item = testNameNode.item(0);
         IntegrationTestEnvironment ite = new IntegrationTestEnvironment();
@@ -149,6 +183,8 @@ public class ConfiguredTestsRunner {
         ite.setHistory(nullSafeGet(testNode, "history"));
         ite.setPredictions(nullSafeGet(testNode, "predictions"));
         ite.setConfig(nullSafeGet(testNode, "config"));
+        ite.setLoggingDir(outputDirectory);
+        ite.setRunId(runId);
 
         return ite;
     }
@@ -189,40 +225,13 @@ public class ConfiguredTestsRunner {
             return configFile;
         }
 
+        String resourcesDirPath = "src/test/resources/";
+
+
         logger.info("Starting sync to disk from S3...");
 
         try {
-            AWSSecurityTokenService stsClient = AWSSecurityTokenServiceClientBuilder.standard()
-                    .withCredentials(new DefaultAWSCredentialsProviderChain())
-                    .withRegion("us-east-1")
-                    .build();
-
-            // Add appropriate credentials
-//             AssumeRoleRequest roleRequest = new AssumeRoleRequest()
-//                     .withRoleArn("")
-//                     .withRoleSessionName(UUID.randomUUID().toString());
-
-//            AssumeRoleResult roleResponse = stsClient.assumeRole(roleRequest);
-//            Credentials sessionCredentials = roleResponse.getCredentials();
-
-            // Add appropriate credentials
-            BasicAWSCredentials awsCredentials = new BasicAWSCredentials(
-                    System.getProperty("test.s3.apikey"),
-                    System.getProperty("test.s3.secret"));
-
-            AmazonS3ClientBuilder.standard()
-                    .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-                    .build();
-
-            logger.info("Got credentials.");
-
-            String resourcesDirPath = "src/test/resources/";
-
-            logger.info("Starting xfer.");
-
-            TransferManager tm = TransferManagerBuilder.standard().withS3Client(AmazonS3ClientBuilder.standard()
-                    .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build()).build();
-
+            TransferManager tm = getTransferManager();
             tm.download(bucketName, keyPrefix, configFile);
             logger.info("downloading content from s3://{}/{}", bucketName, keyPrefix);
             MultipleFileDownload x = tm.downloadDirectory(bucketName, keyPrefix, new File(resourcesDirPath));
@@ -232,9 +241,41 @@ public class ConfiguredTestsRunner {
             logger.info("Complete.");
 
         } catch (AmazonClientException | InterruptedException e) {
-            logger.error("Exception: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Exception: {}", e.getMessage(), e);
+            return null;
         }
         return configFile;
+    }
+
+    private static TransferManager getTransferManager() {
+        AWSSecurityTokenService stsClient = AWSSecurityTokenServiceClientBuilder.standard()
+                .withCredentials(new DefaultAWSCredentialsProviderChain())
+                .withRegion("us-east-1")
+                .build();
+
+        // Add appropriate credentials
+//             AssumeRoleRequest roleRequest = new AssumeRoleRequest()
+//                     .withRoleArn("")
+//                     .withRoleSessionName(UUID.randomUUID().toString());
+
+//            AssumeRoleResult roleResponse = stsClient.assumeRole(roleRequest);
+//            Credentials sessionCredentials = roleResponse.getCredentials();
+
+        // Add appropriate credentials
+        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(
+                System.getProperty("test.s3.apikey"),
+                System.getProperty("test.s3.secret"));
+
+        AmazonS3ClientBuilder.standard()
+                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+                .build();
+
+        logger.info("Got credentials.");
+
+        logger.info("Starting xfer.");
+
+        TransferManager tm = TransferManagerBuilder.standard().withS3Client(AmazonS3ClientBuilder.standard()
+                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build()).build();
+        return tm;
     }
 }

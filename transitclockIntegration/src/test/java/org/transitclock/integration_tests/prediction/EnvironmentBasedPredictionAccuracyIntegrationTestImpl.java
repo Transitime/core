@@ -2,6 +2,8 @@ package org.transitclock.integration_tests.prediction;
 
 import org.junit.Test;
 
+import java.io.File;
+
 /**
  * Integration Test designed to take its configuration from environment variables.
  * Can be called directly via:
@@ -24,7 +26,10 @@ public class EnvironmentBasedPredictionAccuracyIntegrationTestImpl
         config.setArrivalDepartureCsv(getOptionalPropertyRelativeTo(prefix, "it.history"));
         config.setPredictionCsv(getOptionalPropertyRelativeTo(prefix, "it.predictions"));
         config.setConfigFileNames(getOptionalPropertyRelativeTo(prefix, "it.config"));
-        config.setOutputDirectory(getOutputDirectory() + config.getId());
+        config.setOutputDirectory(getOutputDirectory()
+                + getRequiredProperty("it.runid")
+                + File.separator
+                + config.getId());
         setConfig(config);
     }
 
@@ -38,6 +43,7 @@ public class EnvironmentBasedPredictionAccuracyIntegrationTestImpl
         try {
             super.testPredictions();
             logger.info("success for {}", config.getId());
+            logger.info("Output files: {}", this.getGeneratedFiles());
         } finally {
             logger.info("exiting testPredictions for {}", config.getId());
         }

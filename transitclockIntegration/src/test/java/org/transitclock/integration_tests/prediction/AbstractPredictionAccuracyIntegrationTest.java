@@ -7,6 +7,7 @@ import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.integration_tests.playback.ReplayResults;
 import org.transitclock.integration_tests.playback.ReplayService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,9 +26,16 @@ public abstract class AbstractPredictionAccuracyIntegrationTest extends TestCase
 	private static final String DEFAULT_CONFIG_FILE = "classpath:transitclockConfigHsql.xml";
     private ReplayService rs;
 	protected TraceConfig config;
+	private List<String> generatedFiles = new ArrayList<>();
+
 	protected void setConfig(TraceConfig config) {
 		this.config = config;
 	}
+
+	public List<String> getGeneratedFiles() {
+		return generatedFiles;
+	}
+
 	public AbstractPredictionAccuracyIntegrationTest() {
 		// allow setter injection of config
 	}
@@ -106,8 +114,7 @@ public abstract class AbstractPredictionAccuracyIntegrationTest extends TestCase
 
 		if (config.getPredictionCsv() != null)
 			rs.loadPastPredictions(config.getPredictionCsv());
-		rs.accumulate(arrivalDepartures);
-
+		generatedFiles.addAll(rs.accumulate(arrivalDepartures));
     }
 
     public void testPredictions() {

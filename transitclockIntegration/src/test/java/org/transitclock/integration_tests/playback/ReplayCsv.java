@@ -91,11 +91,11 @@ public class ReplayCsv {
 
     }
 
-    public void write(List<Prediction> predictions, String fileType, String id) {
+    public String write(List<Prediction> predictions, String fileType, String id) {
         String fileName = generateOutputFileName(fileType, id);
         if (predictions == null) {
             logger.error("no predictions to write out to disk");
-            return;
+            return null;
         }
         logger.info("writing {} predictions to {}", predictions.size(), fileName);
         PredictionCsvWriter writer = new PredictionCsvWriter(fileName, null);
@@ -103,7 +103,7 @@ public class ReplayCsv {
             writer.write(prediction);
         }
         writer.close();
-
+        return fileName;
     }
 
     private String generateOutputFileName(String fileType, String id) {
@@ -115,17 +115,18 @@ public class ReplayCsv {
     }
 
 
-    public void write(ArrayList<CombinedPredictionAccuracy> combinedPredictionAccuracy, String fileType, String id) {
+    public String write(ArrayList<CombinedPredictionAccuracy> combinedPredictionAccuracy, String fileType,
+                        String id) {
         String fileName = generateOutputFileName(fileType, id);
         if (combinedPredictionAccuracy == null) {
             logger.error("no combined predictions to write out to disk");
-            return;
+            return null;
         }
         CombinedPredictionCsvWriter writer = new CombinedPredictionCsvWriter(fileName, null);
         for (CombinedPredictionAccuracy predictionAccuracy : combinedPredictionAccuracy) {
             writer.write(predictionAccuracy);
         }
         writer.close();
-
+        return fileName;
     }
 }
