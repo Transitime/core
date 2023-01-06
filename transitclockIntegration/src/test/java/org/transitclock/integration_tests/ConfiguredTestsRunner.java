@@ -105,6 +105,7 @@ public class ConfiguredTestsRunner {
         cmdAndArgs.add("-Dsurefie.failOnFlakeCount=0");
         cmdAndArgs.add("-DreuseForks=false");
         cmdAndArgs.add("-Dsurefire.useSystemClassLoader=false");
+        cmdAndArgs.add("-Xmx7g");
         cmdAndArgs.add("-Dlogback.configurationFile=logbackIntegration.xml");
         cmdAndArgs.add("-Dtest=" + testClass);
         addToCommandLine(cmdAndArgs, environment);
