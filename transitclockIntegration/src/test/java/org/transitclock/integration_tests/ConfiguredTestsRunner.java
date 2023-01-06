@@ -101,7 +101,6 @@ public class ConfiguredTestsRunner {
     private IntegrationTestResult forkTestClass(String testClass, IntegrationTestEnvironment environment) throws IOException, InterruptedException {
         List<String> cmdAndArgs = new ArrayList<>();
         cmdAndArgs.add(DEFAULT_MVN_CMD);
-        cmdAndArgs.add("-Xmx7g");
         cmdAndArgs.add("test");
         cmdAndArgs.add("-Dsurefie.failOnFlakeCount=0");
         cmdAndArgs.add("-DreuseForks=false");
