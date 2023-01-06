@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ConfiguredTestsRunner {
     private static final Logger logger = LoggerFactory.getLogger(ConfiguredTestsRunner.class);
-    private static final String DEFAULT_MVN_CMD = "mvn -Xmx7g";
+    private static final String DEFAULT_MVN_CMD = "mvn";
     private static final String CONFIG_FILE = "src/test/resources/tests/configuredTests.xml";
 
     private static final String OUTPUT_DIRECTORY = "reports";
@@ -101,6 +101,7 @@ public class ConfiguredTestsRunner {
     private IntegrationTestResult forkTestClass(String testClass, IntegrationTestEnvironment environment) throws IOException, InterruptedException {
         List<String> cmdAndArgs = new ArrayList<>();
         cmdAndArgs.add(DEFAULT_MVN_CMD);
+        cmdAndArgs.add("-Xmx7g");
         cmdAndArgs.add("test");
         cmdAndArgs.add("-Dsurefie.failOnFlakeCount=0");
         cmdAndArgs.add("-DreuseForks=false");
