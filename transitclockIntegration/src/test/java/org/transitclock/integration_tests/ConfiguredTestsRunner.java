@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ConfiguredTestsRunner {
     private static final Logger logger = LoggerFactory.getLogger(ConfiguredTestsRunner.class);
-    private static final String DEFAULT_MVN_CMD = "mvn";
+    private static final String DEFAULT_MVN_CMD = "mvn -Xmx7g";
     private static final String CONFIG_FILE = "src/test/resources/tests/configuredTests.xml";
 
     private static final String OUTPUT_DIRECTORY = "reports";
@@ -105,7 +105,6 @@ public class ConfiguredTestsRunner {
         cmdAndArgs.add("-Dsurefie.failOnFlakeCount=0");
         cmdAndArgs.add("-DreuseForks=false");
         cmdAndArgs.add("-Dsurefire.useSystemClassLoader=false");
-        cmdAndArgs.add("-Xmx7g");
         cmdAndArgs.add("-Dlogback.configurationFile=logbackIntegration.xml");
         cmdAndArgs.add("-Dtest=" + testClass);
         addToCommandLine(cmdAndArgs, environment);
