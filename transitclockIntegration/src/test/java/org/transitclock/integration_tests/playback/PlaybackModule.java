@@ -128,6 +128,8 @@ public class PlaybackModule {
 				+ size + " entries");
 			}
 
+		} else {
+			logger.info("no arrival/departure CSV configured.  This is likely an error");
 		}
 
 		if (state.getApcCsv() != null) {
