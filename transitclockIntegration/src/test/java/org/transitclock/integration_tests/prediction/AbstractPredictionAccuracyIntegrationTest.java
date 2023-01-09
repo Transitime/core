@@ -84,8 +84,12 @@ public abstract class AbstractPredictionAccuracyIntegrationTest extends TestCase
 		config.setOutputDirectory(getOutputDirectory() + id);
 		config.setTz(tz);
 		if (addConfigFile) {
-			config.setConfigFileNames("src/test/resources/config/" + id + ".xml"
+			// additive, we layer these config items in priority over top of default
+			config.setConfigFileNames("classpath:src/test/resources/config/" + id + ".xml"
 					+ ";" + DEFAULT_CONFIG_FILE);
+		} else {
+			// replacement, we use only this configuration
+			config.setConfigFileNames("classpath:src/test/resources/config/" + id + ".xml");
 		}
 		config.setDescription(description);
 		return config;
