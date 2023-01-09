@@ -35,7 +35,7 @@ public class ConfiguredTestsRunner {
     private static final Logger logger = LoggerFactory.getLogger(ConfiguredTestsRunner.class);
     private static final String DEFAULT_MVN_CMD = "mvn";
     private static final String CONFIG_FILE = "src/test/resources/tests/configuredTests.xml";
-
+    private static final String DEFAULT_HSQL_CONFIG_FILE = "classpath:transitclockConfigHsql.xml";
     private static final String OUTPUT_DIRECTORY = "reports";
     private static final String RESULT_DIRECTORY = "target/classes/reports";
     private static String defaultTestClass = "org.transitclock.integration_tests.prediction.EnvironmentBasedPredictionAccuracyIntegrationTestImpl";
@@ -182,7 +182,7 @@ public class ConfiguredTestsRunner {
         ite.setGtfs(nullSafeGet(testNode, "gtfs"));
         ite.setHistory(nullSafeGet(testNode, "history"));
         ite.setPredictions(nullSafeGet(testNode, "predictions"));
-        ite.setConfig(nullSafeGet(testNode, "config"));
+        ite.setConfig(nullSafeGet(testNode, "config") + ";" + DEFAULT_HSQL_CONFIG_FILE);
         ite.setLoggingDir(outputDirectory);
         ite.setRunId(runId);
 
