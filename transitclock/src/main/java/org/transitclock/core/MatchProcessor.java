@@ -210,6 +210,11 @@ public class MatchProcessor {
 			processSpatialMatch(vehicleState);
 		}
 		processArrivalDepartures(vehicleState);
-		processRunTimes(vehicleState);
+		String integrationTest = System.getProperty("transitclock.core.integrationTest");
+		if (integrationTest == null) {
+			// no need to process run times for integration tests
+			processRunTimes(vehicleState);
+		}
+
 	}
 }
