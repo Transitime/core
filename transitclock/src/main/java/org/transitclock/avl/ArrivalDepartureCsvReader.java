@@ -41,7 +41,13 @@ public class ArrivalDepartureCsvReader extends CsvBaseReader<ArrivalDeparture> {
             // stopPathIndex
             int stopPathIndex = Integer.parseInt(r.get("stopPathIndex"));
             // isArrival
-            boolean isArrival = Integer.parseInt(r.get("isArrival")) > 0;
+            boolean isArrival = false;
+            try {
+                isArrival = Integer.parseInt(r.get("isArrival")) > 0;
+            } catch (NumberFormatException nfe) {
+                // be lenient here and accept string boolean as well
+                isArrival = "TRUE".equalsIgnoreCase(nullSafeGet(r,"isArrival"));
+            }
             // configRev -- param
             // scheduleTime
             long scheduledTime = -1;

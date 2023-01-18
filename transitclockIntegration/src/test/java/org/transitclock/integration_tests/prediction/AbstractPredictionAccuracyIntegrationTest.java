@@ -7,6 +7,7 @@ import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.integration_tests.playback.ReplayResults;
 import org.transitclock.integration_tests.playback.ReplayService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,11 +21,24 @@ import java.util.List;
  */
 public abstract class AbstractPredictionAccuracyIntegrationTest extends TestCase {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractPredictionAccuracyIntegrationTest.class);
+    protected static final Logger logger = LoggerFactory.getLogger(AbstractPredictionAccuracyIntegrationTest.class);
 
 	private static final String DEFAULT_CONFIG_FILE = "classpath:transitclockConfigHsql.xml";
     private ReplayService rs;
-	private TraceConfig config;
+	protected TraceConfig config;
+	private List<String> generatedFiles = new ArrayList<>();
+
+	protected void setConfig(TraceConfig config) {
+		this.config = config;
+	}
+
+	public List<String> getGeneratedFiles() {
+		return generatedFiles;
+	}
+
+	public AbstractPredictionAccuracyIntegrationTest() {
+		// allow setter injection of config
+	}
 	public AbstractPredictionAccuracyIntegrationTest(String id, String outputDirectory, String gtfs, String avl,
 													 String predictionsCsv, String tz, String description) {
 		TraceConfig pc = new TraceConfig();
@@ -58,26 +72,30 @@ public abstract class AbstractPredictionAccuracyIntegrationTest extends TestCase
 												boolean addConfigFile) {
 		TraceConfig config = new TraceConfig();
 		config.setId(id);
-		config.setGtfsDirectoryName("classpath:gtfs/" + id);
-		config.setAvlReportsCsv("classpath:avl/" + id + ".csv");
+		config.setGtfsDirectoryName("src/test/resources/tests/" + id + "/gtfs");
+		config.setAvlReportsCsv("src/test/resources/tests/" + id + "/avl.csv");
 		if (includePredictionsCsv) {
-			config.setPredictionCsv("classpath:pred/" + id + ".csv");
+			config.setPredictionCsv("src/test/resources/tests/" + id + "/pred.csv");
 		}
 		if (includeApcCsv) {
-			config.setApcCsv("classpath:apc/" + id + ".csv");
+			config.setApcCsv("src/test/resources/tests/" + id + "/apc.csv");
 		}
-		config.setArrivalDepartureCsv("classpath:history/" + id + ".csv");
+		config.setArrivalDepartureCsv("src/test/resources/tests/" + id + "/history.csv");
 		config.setOutputDirectory(getOutputDirectory() + id);
 		config.setTz(tz);
 		if (addConfigFile) {
-			config.setConfigFileNames("classpath:config/" + id + ".xml"
+			// additive, we layer these config items in priority over top of default
+			config.setConfigFileNames("classpath:src/test/resources/config/" + id + ".xml"
 					+ ";" + DEFAULT_CONFIG_FILE);
+		} else {
+			// replacement, we use only this configuration
+			config.setConfigFileNames("classpath:src/test/resources/config/" + id + ".xml");
 		}
 		config.setDescription(description);
 		return config;
 	}
 
-	private static String getOutputDirectory() {
+	protected static String getOutputDirectory() {
 		// expecting ~/transitime/transitclockIntegration/ to which we add the classes dir
 		// so the output of the integration tests will end up in the jar file
 		String property = System.getProperty("user.dir");
@@ -86,7 +104,7 @@ public abstract class AbstractPredictionAccuracyIntegrationTest extends TestCase
 		if (!property.endsWith("/"))
 			property = property + "/";
 		if (property.endsWith("transitclockIntegration/"))
-			property = property + "/target/classes/reports/";
+			property = property + "target/classes/reports/";
 		System.out.println("using outputdirectory of '" + property + "'");
 		logger.info("using outputdirectory of '" + property + "'");
 		return property;
@@ -100,8 +118,7 @@ public abstract class AbstractPredictionAccuracyIntegrationTest extends TestCase
 
 		if (config.getPredictionCsv() != null)
 			rs.loadPastPredictions(config.getPredictionCsv());
-		rs.accumulate(arrivalDepartures);
-
+		generatedFiles.addAll(rs.accumulate(arrivalDepartures));
     }
 
     public void testPredictions() {

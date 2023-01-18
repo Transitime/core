@@ -44,9 +44,14 @@ public class ReplayService {
         loader.loadPredictionsFromCSV(predictionsCsvFileName);
     }
 
-    public void accumulate(List<ArrivalDeparture> arrivalDepartures) {
+    public List<String> accumulate(List<ArrivalDeparture> arrivalDepartures) {
         // Fill new predictions
-        loader.accumulate(id, arrivalDepartures);
+        try {
+            return loader.accumulate(id, arrivalDepartures);
+        } catch (Throwable t) {
+            logger.error("accumulate failed: {}", t, t);
+        }
+        return null;
     }
 
     public ReplayResults compare() {

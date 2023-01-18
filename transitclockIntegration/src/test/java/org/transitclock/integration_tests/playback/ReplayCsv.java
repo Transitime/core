@@ -28,8 +28,14 @@ public class ReplayCsv {
     public List<Prediction> loadPredictions(String predictionsCsvFileName) {
         ArrayList<Prediction> list = new ArrayList<>();
         try {
-            InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(predictionsCsvFileName.substring("classpath:".length()));
-            if (inputStream == null) throw new FileNotFoundException(predictionsCsvFileName + " not found!");
+            String filename = predictionsCsvFileName.replaceFirst("classpath:", "");
+            InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(filename);
+            if (inputStream == null) {
+                // some sort of classloader issue -- try again with truncated path
+                filename = filename.replaceFirst("src/test/resources/", "");
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(filename);
+            }
+            if (inputStream == null) throw new FileNotFoundException("'" + filename + "' not found!");
             Iterable<CSVRecord> records = CSVFormat.DEFAULT.withHeader().parse(new InputStreamReader(inputStream));
 
             for (CSVRecord r : records) {
@@ -85,11 +91,11 @@ public class ReplayCsv {
 
     }
 
-    public void write(List<Prediction> predictions, String fileType, String id) {
+    public String write(List<Prediction> predictions, String fileType, String id) {
         String fileName = generateOutputFileName(fileType, id);
         if (predictions == null) {
             logger.error("no predictions to write out to disk");
-            return;
+            return null;
         }
         logger.info("writing {} predictions to {}", predictions.size(), fileName);
         PredictionCsvWriter writer = new PredictionCsvWriter(fileName, null);
@@ -97,7 +103,7 @@ public class ReplayCsv {
             writer.write(prediction);
         }
         writer.close();
-
+        return fileName;
     }
 
     private String generateOutputFileName(String fileType, String id) {
@@ -109,17 +115,18 @@ public class ReplayCsv {
     }
 
 
-    public void write(ArrayList<CombinedPredictionAccuracy> combinedPredictionAccuracy, String fileType, String id) {
+    public String write(ArrayList<CombinedPredictionAccuracy> combinedPredictionAccuracy, String fileType,
+                        String id) {
         String fileName = generateOutputFileName(fileType, id);
         if (combinedPredictionAccuracy == null) {
             logger.error("no combined predictions to write out to disk");
-            return;
+            return null;
         }
         CombinedPredictionCsvWriter writer = new CombinedPredictionCsvWriter(fileName, null);
         for (CombinedPredictionAccuracy predictionAccuracy : combinedPredictionAccuracy) {
             writer.write(predictionAccuracy);
         }
         writer.close();
-
+        return fileName;
     }
 }

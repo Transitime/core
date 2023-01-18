@@ -16,8 +16,8 @@ import junit.framework.TestCase;
  */
 public class RecoverFromDetourTest extends TestCase {
 
-	private static final String GTFS = "src/test/resources/gtfs/3T";
-	private static final String AVL = "src/test/resources/avl/3T_3757.csv";
+	private static final String GTFS = "src/test/resources/tests/3T_3757/gtfs";
+	private static final String AVL = "src/test/resources/tests/3T_3757/avl.csv";
 	private static final String VEHICLE = "3757";
 	
 	@Test
