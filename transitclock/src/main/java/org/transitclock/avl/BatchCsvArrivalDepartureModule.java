@@ -46,7 +46,7 @@ public class BatchCsvArrivalDepartureModule {
             logger.info("Processing arrivalDeparture={}", arrivalDeparture);
             try {
                 session.save(arrivalDeparture);
-                session.flush();// we do this to validate each record
+                // we don't flush here, it's too expensive
             } catch (Throwable t) {
                 logger.error("issue with record {}, {}", arrivalDeparture, t, t);
             }
