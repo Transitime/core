@@ -16,10 +16,12 @@ public class ArrivalDepartureCsvReader extends CsvBaseReader<ArrivalDeparture> {
 
     private int configRev;
     private boolean includeTrips;
-    public ArrivalDepartureCsvReader(String fileName, int configRev, boolean includeTrips) {
+    private BatchCsvValidator batchCsvValidator;
+    public ArrivalDepartureCsvReader(String fileName, int configRev, boolean includeTrips, BatchCsvValidator batchCsvValidator) {
         super(fileName);
         this.configRev = configRev;
         this.includeTrips = includeTrips;
+        this.batchCsvValidator = batchCsvValidator;
     }
 
     @Override
@@ -70,6 +72,9 @@ public class ArrivalDepartureCsvReader extends CsvBaseReader<ArrivalDeparture> {
             String tripId = nullSafeGet(r, "tripId");
             // stopId
             String stopId = nullSafeGet(r, "stopId");
+            if (!this.batchCsvValidator.validateStopId(stopId, configRev)) {
+                stopId = null;
+            }
             // stopSeq
             int gtfsStopSeq = Integer.parseInt(r.get("gtfsStopSeq"));
             // stopPathLength

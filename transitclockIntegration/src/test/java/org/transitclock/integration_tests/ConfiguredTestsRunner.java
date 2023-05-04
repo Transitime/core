@@ -76,16 +76,18 @@ public class ConfiguredTestsRunner {
     }
 
     private static void pushResultsBackToS3(String resultsDirectory) throws InterruptedException {
-        TransferManager tm = getTransferManager();
-        // put transitime/transitclockIntegration/target/classes/reports/* to
-        // s3://<bucket>/results/YYYY-MM-DDTHH:MM:SS/
-        File directory = new File(RESULT_DIRECTORY);
-        String keyPrefix = OUTPUT_DIRECTORY;
-        MultipleFileUpload x = tm.uploadDirectory(bucketName, keyPrefix, directory, true);
-        logger.info("uploading results to S3 at s3://{}/{}", bucketName, keyPrefix);
-        x.waitForCompletion();
-        tm.shutdownNow();
-        logger.info("uploading complete to S3 at s3://{}/{}", bucketName, keyPrefix);
+        if (System.getProperty("test.s3.skipSync") != null) {
+            TransferManager tm = getTransferManager();
+            // put transitime/transitclockIntegration/target/classes/reports/* to
+            // s3://<bucket>/results/YYYY-MM-DDTHH:MM:SS/
+            File directory = new File(RESULT_DIRECTORY);
+            String keyPrefix = OUTPUT_DIRECTORY;
+            MultipleFileUpload x = tm.uploadDirectory(bucketName, keyPrefix, directory, true);
+            logger.info("uploading results to S3 at s3://{}/{}", bucketName, keyPrefix);
+            x.waitForCompletion();
+            tm.shutdownNow();
+            logger.info("uploading complete to S3 at s3://{}/{}", bucketName, keyPrefix);
+        }
     }
 
     private static String getRunId() {
