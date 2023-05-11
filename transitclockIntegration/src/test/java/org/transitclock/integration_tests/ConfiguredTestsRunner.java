@@ -70,6 +70,7 @@ public class ConfiguredTestsRunner {
         } catch (Throwable e) {
             logger.error("test setup failure: {}", e, e);
         } finally {
+            logger.info("in finally with resultsDirectory=" + resultsDirectory);
             pushResultsBackToS3(resultsDirectory);
         }
         logger.error("exiting for cleanup!");
@@ -87,6 +88,8 @@ public class ConfiguredTestsRunner {
             x.waitForCompletion();
             tm.shutdownNow();
             logger.info("uploading complete to S3 at s3://{}/{}", bucketName, keyPrefix);
+        } else {
+            logger.info("not uploading results as configuration says not to!");
         }
     }
 
