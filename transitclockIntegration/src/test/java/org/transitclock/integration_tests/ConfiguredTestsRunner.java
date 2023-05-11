@@ -77,7 +77,7 @@ public class ConfiguredTestsRunner {
     }
 
     private static void pushResultsBackToS3(String resultsDirectory) throws InterruptedException {
-        if (System.getProperty("test.s3.skipSync") != null) {
+        if (System.getProperty("test.s3.skipSync") == null) {
             TransferManager tm = getTransferManager();
             // put transitime/transitclockIntegration/target/classes/reports/* to
             // s3://<bucket>/results/YYYY-MM-DDTHH:MM:SS/
