@@ -151,9 +151,10 @@ public class ConfiguredTestsRunner {
     }
 
     private void copyStreamNoWait(InputStream in, PrintStream out) throws IOException {
-        // we are waiting on process regardless, so no need to be efficient here
-        while (in.available() > 0)
-            out.write(in.read());
+        int size = in.available();
+        byte buff[] = new byte[size];
+        in.read(buff);
+        out.write(buff);
     }
 
     private void addToCommandLine(List<String> cmdAndArgs, IntegrationTestEnvironment environment) {
