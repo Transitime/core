@@ -803,6 +803,10 @@ public class ArrivalDepartureGeneratorDefaultImpl
 					if (scheduledTime != null) {
 						scheduleTimeMsecs = Core.getInstance().getTime().getEpochTime(scheduledTime.getArrivalOrDepartureTime(), arrivalTime);
 					}
+					// TODO: vehicle state may be wrong if:
+					// 1) bad ping
+					// 2) integration test
+					// decide what is truth here, such as by looking at scheduleTimeMsecs....
 					logger.error("vehicle={} generated illegal arrival time less than next departure {}"
 					+ " but not greater than previous departure {}, scheduled {}", vehicleId, Time.dateTimeStrMsec(departureTime),
 									Time.dateTimeStrMsec(vehicleState.getLastDepartureTime()),

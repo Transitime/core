@@ -70,22 +70,27 @@ public class ConfiguredTestsRunner {
         } catch (Throwable e) {
             logger.error("test setup failure: {}", e, e);
         } finally {
+            logger.info("in finally with resultsDirectory=" + resultsDirectory);
             pushResultsBackToS3(resultsDirectory);
         }
         logger.error("exiting for cleanup!");
     }
 
     private static void pushResultsBackToS3(String resultsDirectory) throws InterruptedException {
-        TransferManager tm = getTransferManager();
-        // put transitime/transitclockIntegration/target/classes/reports/* to
-        // s3://<bucket>/results/YYYY-MM-DDTHH:MM:SS/
-        File directory = new File(RESULT_DIRECTORY);
-        String keyPrefix = OUTPUT_DIRECTORY;
-        MultipleFileUpload x = tm.uploadDirectory(bucketName, keyPrefix, directory, true);
-        logger.info("uploading results to S3 at s3://{}/{}", bucketName, keyPrefix);
-        x.waitForCompletion();
-        tm.shutdownNow();
-        logger.info("uploading complete to S3 at s3://{}/{}", bucketName, keyPrefix);
+        if (System.getProperty("test.s3.skipSync") == null) {
+            TransferManager tm = getTransferManager();
+            // put transitime/transitclockIntegration/target/classes/reports/* to
+            // s3://<bucket>/results/YYYY-MM-DDTHH:MM:SS/
+            File directory = new File(RESULT_DIRECTORY);
+            String keyPrefix = OUTPUT_DIRECTORY;
+            MultipleFileUpload x = tm.uploadDirectory(bucketName, keyPrefix, directory, true);
+            logger.info("uploading results to S3 at s3://{}/{}", bucketName, keyPrefix);
+            x.waitForCompletion();
+            tm.shutdownNow();
+            logger.info("uploading complete to S3 at s3://{}/{}", bucketName, keyPrefix);
+        } else {
+            logger.info("not uploading results as configuration says not to!");
+        }
     }
 
     private static String getRunId() {
@@ -149,9 +154,10 @@ public class ConfiguredTestsRunner {
     }
 
     private void copyStreamNoWait(InputStream in, PrintStream out) throws IOException {
-        // we are waiting on process regardless, so no need to be efficient here
-        while (in.available() > 0)
-            out.write(in.read());
+        int size = in.available();
+        byte buff[] = new byte[size];
+        in.read(buff);
+        out.write(buff);
     }
 
     private void addToCommandLine(List<String> cmdAndArgs, IntegrationTestEnvironment environment) {

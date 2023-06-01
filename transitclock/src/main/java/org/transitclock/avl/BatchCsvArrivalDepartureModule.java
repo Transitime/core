@@ -39,14 +39,18 @@ public class BatchCsvArrivalDepartureModule {
     public void run() {
         String fileName = getCsvArrivalDepartureFileName();
         ArrivalDepartureCsvReader arrivalDepartureCsvReader
-                = new ArrivalDepartureCsvReader(fileName, configRev, false);
+                = new ArrivalDepartureCsvReader(fileName, configRev, false, new BatchCsvValidator(session));
         this.arrivalDepartures =
                 arrivalDepartureCsvReader.get();
         for (ArrivalDeparture arrivalDeparture : arrivalDepartures) {
             logger.info("Processing arrivalDeparture={}", arrivalDeparture);
             try {
-                session.save(arrivalDeparture);
-                session.flush();// we do this to validate each record
+                if (arrivalDeparture.getStopId() != null) {
+                    session.save(arrivalDeparture);
+                } else {
+                    logger.warn("discaring A/D record {}", arrivalDeparture);
+                }
+                // we don't flush here, it's too expensive
             } catch (Throwable t) {
                 logger.error("issue with record {}, {}", arrivalDeparture, t, t);
             }

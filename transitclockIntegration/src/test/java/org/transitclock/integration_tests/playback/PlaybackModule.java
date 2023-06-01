@@ -124,7 +124,8 @@ public class PlaybackModule {
 			size = session.createCriteria(ArrivalDeparture.class).list().size();
 			logger.info("post load has {} ADs", size);
 			if (size != expectedSize) {
-				throw new RuntimeException("Expected " + expectedSize + " A/Ds but loaded"
+				// we now discard bad records so this is allowed to differ
+				logger.warn("Expected " + expectedSize + " A/Ds but loaded"
 				+ size + " entries");
 			}
 

@@ -478,7 +478,7 @@ public class IpcPrediction implements Serializable {
 						: "")
 				+ (!Float.isNaN(passengerFullness) ? ", psngrFullness="
 						+ StringUtils.twoDigitFormat(passengerFullness) : "")
-				+ ("isCanceled= "+isCanceled)
+				+ ", isCanceled=" + (isCanceled ? "t" : "f")
 				+ "]";
 	}
 
