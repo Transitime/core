@@ -13,8 +13,31 @@
     function execute() {
       var tripId = $("#tripId").val();
       var format = $('input:radio[name=format]:checked').val();
-      
-  	  var url = apiUrlPrefix + "/command/tripWithTravelTimes" 
+  	  var key = $("#apiKey").val().trim();
+
+      var isValid = true;
+
+      // Validate key
+      if (!key) {
+          $("#apiKey").addClass('is-invalid');
+          isValid = false;
+      } else {
+          $("#apiKey").removeClass('is-invalid');
+      }
+
+      // Validate Trip ID
+      if (!tripId) {
+          $("#tripId").addClass('is-invalid');
+          isValid = false;
+      } else {
+          $("#tripId").removeClass('is-invalid');
+      }
+
+      if(!isValid){
+          return;
+      }
+
+      var url = apiUrlKeyPrefix + key + apiUrlAgencyPrefix + "/command/tripWithTravelTimes"
   	          + "?tripId=" + tripId
   			  + "&format=" + format;
 
@@ -32,10 +55,16 @@
    Select Parameters for Trip API
 </div>
    
-<div id="mainDiv">   
-  <div class="param">
-    <label for="trip">Trip:</label>
-    <input type="text" id="tripId" size="35" />
+<div id="mainDiv">
+  <%-- API Key Input --%>
+  <jsp:include page="../params/apiKeyInput.jsp" />
+
+  <div class="row param">
+    <div class="col-sm-5 label">Trip ID:</div>
+    <div class="col-sm-7">
+      <input type="text" id="tripId" name="tripID" required />
+      <div class="invalid-feedback">Please enter the Trip ID.</div>
+    </div>
   </div>
    
    <%-- Create json/xml format radio buttons --%>

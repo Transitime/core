@@ -19,9 +19,33 @@
       var stopId = $("#stopId").val();
       var numPreds = $("#numPreds").val();
       var format = $('input:radio[name=format]:checked').val();
-  	  var url = apiUrlPrefix + "/command/predictions?rs=" + selectedRouteId + "|" + stopId
-		  	  + (numPreds!=""?"&numPreds=" + numPreds:"")
-  			  + "&format=" + format;
+  	  var key = $("#apiKey").val().trim();
+
+      var isValid = true;
+
+      // Validate key
+      if (!key) {
+          $("#apiKey").addClass('is-invalid');
+          isValid = false;
+      } else {
+          $("#apiKey").removeClass('is-invalid');
+      }
+
+      // Validate Stop ID
+      if (!stopId) {
+          $("#stopId").addClass('is-invalid');
+          isValid = false;
+      } else {
+          $("#stopId").removeClass('is-invalid');
+      }
+
+      if(!isValid){
+          return;
+      }
+
+      var url = apiUrlKeyPrefix + key + apiUrlAgencyPrefix + "/command/predictions?rs=" + selectedRouteId + "%7C" + stopId
+        + (numPreds!=""?"&numPreds=" + numPreds:"")
+        + "&format=" + format;
 
    	  // Actually do the API call
    	  location.href = url;
@@ -37,19 +61,28 @@
    Select Parameters for Predictions by Route/Stop API
 </div>
    
-<div id="mainDiv">   
+<div id="mainDiv">
+    <%-- API Key Input --%>
+    <jsp:include page="../params/apiKeyInput.jsp" />
+
    <%-- Create route selector --%>
    <jsp:include page="../params/routeSingle.jsp" />
-   
-   <div class="param">
-    <label for="stop">Stop ID or code:</label>
-    <input type="text" id="stopId" size="10" />
-   </div>
-   
-   <div class="param">
-    <label for="numPreds">Number Predictions:</label>
-    <input type="text" id="numPreds" size="10" /> <span class="note">(default is 3 per stop)</span>
-   </div>
+
+    <div class="row param">
+        <div class="col-sm-5 label">Stop ID or Code:</div>
+        <div class="col-sm-7">
+            <input type="text" id="stopId" name="stopId" required />
+            <div class="invalid-feedback">Please enter Stop ID or Code.</div>
+        </div>
+    </div>
+
+    <div class="row param">
+        <div class="col-sm-5 label">Number of Predicitons:</div>
+        <div class="col-sm-7">
+            <input type="number" id="numPreds" placeholder="3" />
+        </div>
+    </div>
+
    
    <%-- Create json/xml format radio buttons --%>
    <jsp:include page="../params/jsonXmlFormat.jsp" />

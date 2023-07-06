@@ -23,7 +23,23 @@
     	  	routesSpecifier += "r=" + routeId + "&";
       }
       var format = $('input:radio[name=format]:checked').val();
-  	  var url = apiUrlPrefix + "/command/routesDetails?" + routesSpecifier + "format=" + format;
+  	  var key = $("#apiKey").val().trim();
+
+      var isValid = true;
+
+      // Validate key
+      if (!key) {
+          $("#apiKey").addClass('is-invalid');
+          isValid = false;
+      } else {
+          $("#apiKey").removeClass('is-invalid');
+      }
+
+      if(!isValid){
+          return;
+      }
+
+      var url = apiUrlKeyPrefix + key + apiUrlAgencyPrefix + "/command/routesDetails?" + routesSpecifier + "format=" + format;
 
    	  // Actually do the API call
    	  location.href = url;
@@ -39,7 +55,10 @@
    Select Parameters for routesDetails API
 </div>
    
-<div id="mainDiv">   
+<div id="mainDiv">
+    <%-- API Key Input --%>
+    <jsp:include page="../params/apiKeyInput.jsp" />
+
    <%-- Create route selector --%>
    <jsp:include page="../params/routeMultiple.jsp" />
    

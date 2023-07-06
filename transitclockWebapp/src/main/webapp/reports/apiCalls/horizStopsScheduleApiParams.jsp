@@ -17,7 +17,21 @@
     function execute() {
       var selectedRouteId = $("#route").val();
       var format = $('input:radio[name=format]:checked').val();
-  	  var url = apiUrlPrefix + "/command/scheduleHorizStops?r=" + selectedRouteId + "&format=" + format;
+  	  var key = $("#apiKey").val().trim();
+
+      // Validate key
+      if (!key) {
+          $("#apiKey").addClass('is-invalid');
+          isValid = false;
+      } else {
+          $("#apiKey").removeClass('is-invalid');
+      }
+
+      if(!isValid){
+          return;
+      }
+
+      var url = apiUrlKeyPrefix + key + apiUrlAgencyPrefix + "/command/scheduleHorizStops?r=" + selectedRouteId + "&format=" + format;
 
    	  // Actually do the API call
    	  location.href = url;
@@ -33,7 +47,10 @@
    Select Parameters for Schedule (Horizontal Stops) API
 </div>
    
-<div id="mainDiv">   
+<div id="mainDiv">
+    <%-- API Key Input --%>
+    <jsp:include page="../params/apiKeyInput.jsp" />
+
    <%-- Create route selector --%>
    <jsp:include page="../params/routeSingle.jsp" />
    

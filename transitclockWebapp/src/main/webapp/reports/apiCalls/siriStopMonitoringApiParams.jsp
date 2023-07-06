@@ -19,7 +19,23 @@
       var stopId = $("#stopId").val();
       var numPreds = $("#numPreds").val();
       var format = $('input:radio[name=format]:checked').val();
-  	  var url = apiUrlPrefix + "/command/siri/stopMonitoring?r=" + selectedRouteId 
+  	  var key = $("#apiKey").val().trim();
+
+      var isValid = true;
+
+      // Validate key
+      if (!key) {
+          $("#apiKey").addClass('is-invalid');
+          isValid = false;
+      } else {
+          $("#apiKey").removeClass('is-invalid');
+      }
+
+      if(!isValid){
+          return;
+      }
+
+      var url = apiUrlKeyPrefix + key + apiUrlAgencyPrefix + "/command/siri/stopMonitoring?r=" + selectedRouteId
   			  + "&s=" + stopId
 		  	  + (numPreds!=""?"&numPreds=" + numPreds:"")
   			  + "&format=" + format;
@@ -38,7 +54,10 @@
    Select Parameters for Predictions by Route/Stop API
 </div>
    
-<div id="mainDiv">   
+<div id="mainDiv">
+    <%-- API Key Input --%>
+    <jsp:include page="../params/apiKeyInput.jsp" />
+
    <%-- Create route selector --%>
    <jsp:include page="../params/routeSingle.jsp" />
    

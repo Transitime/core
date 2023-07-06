@@ -13,40 +13,45 @@
 
 <script>
 
-$.getJSON(apiUrlPrefix + "/command/vehicleIds", 
- 		function(vehicles) {
-	        // Generate list of routes for the selector
-	 		var selectorData = [];
-	 		for (var i in vehicles.ids) {
-	 			var id = vehicles.ids[i];
-	 			selectorData.push({id: id, text: id})
-	 		}
-	 		
-	 		// Configure the selector to be a select2 one that has
-	 		// search capability
- 			$("#vehicle").select2({
- 				placeholder: "Select Vehicle", 				
- 				data : selectorData});
-	 		
-	 		// Tooltips for a select2 widget don't automatically go away when 
-	 		// item selected so remove the tooltip manually. This is a really 
-	 		// complicated interaction between select2 and jquery UI tooltips.
-	 		// First need to set the tooltip title content but getting the
-	 		// originally configured title for the element.
- 			var modifiedRouteElement = $( "#s2id_vehicle" );
-	 		var configuredTitle = modifiedRouteElement.attr("title");
-	 		$( "#s2id_vehicle" ).tooltip({ content: configuredTitle });
- 			
-	 		// Now that the title has set need to manually remove the tooltip
-	 		// when a select2 item is selected. Sheesh!
- 		 	$("#vehicle").on("change", function(e) { $("#s2id_vehicle").tooltip("close") }); 		 	
- 	});
+$.getJSON(apiUrlPrefix + "/command/vehicleIds",
+    function(vehicles) {
+        // Generate list of routes for the selector.
+        // Put in default value of Select Route but need to use
+        // an id of ' ' instead of '' since otherwise select2
+        // version 4.0.0 uses the text name as the id, which is wrong!
+        var selectorData = [];
+        for (var id in vehicles.ids) {
+            var vehicleId = vehicles.ids[id];
+            selectorData.push({id: vehicleId, text: vehicleId});
+        }
+
+        // Configure the selector to be a select2 one that has
+        // search capability
+        $("#vehicle").select2({
+            placeholder: "Select Vehicle Id",
+            data: selectorData
+        })
+            // Need to reset tooltip after selector is used. Sheesh!
+            .on("select2:select", function(e) {
+                var configuredTitle = $( "#vehicle" ).attr("title");
+                $( "#select2-vehicle-container" ).tooltip({ content: configuredTitle,
+                    position: { my: "left+10 center", at: "right center" } });
+            });
+
+        // Tooltips for a select2 widget are rather broken. So get
+        // the tooltip title attribute from the original route element
+        // and set the tooltip for the newly created element.
+        var configuredTitle = $( "#vehicle" ).attr("title");
+        $( "#select2-vehicle-container" ).tooltip({ content: configuredTitle,
+            position: { my: "left+10 center", at: "right center" } });
+  });
  	
 </script>
 
-    <div id="vehicleDiv"  class="param">
-      <label for="vehicle">Vehicle:</label>
-      <input id="vehicle" name="v" style="width: 200px" 
-      	title="Select which vehicle you want data for. "/>
-    </div>
-    
+<div class="row param">
+  <div class="col-sm-5 label">Vehicle:</div>
+  <div class="col-sm-7">
+    <select type="text" id="vehicle" class="form-control time-input time-input-box"
+            name="v" title="Select which vehicle you want data for. " ></select>
+  </div>
+</div>

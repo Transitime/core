@@ -44,9 +44,11 @@ $.getJSON(apiUrlPrefix + "/command/blockIds",
  	
 </script>
 
-    <div id="blocksDiv"  class="param">
-      <label for="block">Block:</label>
-      <select id="block" name="b" style="width: 300px" 
-      	title="Select which block you want data for."></select>
+<div class="row param">
+    <div class="col-sm-5 label">Block:</div>
+    <div class="col-sm-7">
+        <select id="block" name="b" style="width: 300px"
+                title="Select which block you want data for."></select>
     </div>
+</div>
     

@@ -20,8 +20,39 @@
       var maxDistance = $("#maxDistance").val();
       var numPreds = $("#numPreds").val();
       var format = $('input:radio[name=format]:checked').val();
-      
-  	  var url = apiUrlPrefix + "/command/predictionsByLoc?lat=" + latitude
+      var key = $("#apiKey").val().trim();
+
+      var isValid = true;
+
+      // Validate key
+      if (!key) {
+          $("#apiKey").addClass('is-invalid');
+          isValid = false;
+      } else {
+          $("#apiKey").removeClass('is-invalid');
+      }
+
+      // Validate Latitude
+      if (!latitude) {
+          $("#latitude").addClass('is-invalid');
+          isValid = false;
+      } else {
+          $("#latitude").removeClass('is-invalid');
+      }
+
+      // Validate Longitude
+      if (!latitude) {
+          $("#longitude").addClass('is-invalid');
+          isValid = false;
+      } else {
+          $("#longitude").removeClass('is-invalid');
+      }
+
+      if(!isValid){
+          return;
+      }
+
+      var url = apiUrlKeyPrefix + key + apiUrlAgencyPrefix + "/command/predictionsByLoc?lat=" + latitude
   			  + "&lon=" + longitude
   			  + (maxDistance!=""?"&maxDistance=" + maxDistance:"")
   			  + (numPreds!=""?"&numPreds=" + numPreds:"")
@@ -41,22 +72,38 @@
    Select Parameters for Predictions by Location API
 </div>
    
-<div id="mainDiv">   
-  <div class="param">
-    <label for="latitude">Latitude:</label>
-    <input type="text" id="latitude" size="10" />
+<div id="mainDiv">
+  <%-- API Key Input --%>
+  <jsp:include page="../params/apiKeyInput.jsp" />
+
+  <div class="row param">
+    <div class="col-sm-5 label">Latitude:</div>
+    <div class="col-sm-7">
+      <input type="text" id="latitude" name="latitude" required />
+      <div class="invalid-feedback">Please enter the latitude.</div>
+    </div>
   </div>
-  <div class="param">
-    <label for="longitude">Longitude:</label>
-    <input type="text" id="longitude" size="10" />
+
+  <div class="row param">
+    <div class="col-sm-5 label">Longitude:</div>
+    <div class="col-sm-7">
+      <input type="text" id="longitude" name="longitude" required />
+      <div class="invalid-feedback">Please enter the longitude.</div>
+    </div>
   </div>
-  <div class="param">
-    <label for="maxDistance">Max Distance:</label>
-    <input type="text" id="maxDistance" size="10" /> <span class="note">meters (default is 1500m)</span>
+
+  <div class="row param">
+    <div class="col-sm-5 label">Max Distance (meters):</div>
+    <div class="col-sm-7">
+      <input type="number" id="maxDistance" name="maxDistance" placeholder="1500" />
+    </div>
   </div>
-  <div class="param">
-    <label for="numPreds">Number Predictions:</label>
-    <input type="text" id="numPreds" size="10" /> <span class="note">(default is 3 per stop)</span>
+
+  <div class="row param">
+    <div class="col-sm-5 label">Number of Predicitons:</div>
+    <div class="col-sm-7">
+      <input type="number" id="numPreds" placeholder="3" />
+    </div>
   </div>
    
    <%-- Create json/xml format radio buttons --%>

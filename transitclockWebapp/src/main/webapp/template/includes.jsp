@@ -27,6 +27,7 @@
 var apiKey = "<%=System.getProperty("transitclock.apikey")%>"
 
 // For accessing the api for an agency command
-var apiUrlPrefixAllAgencies = "/api/v1/key/" + apiKey;
-var apiUrlPrefix = apiUrlPrefixAllAgencies + "/agency/<%= request.getParameter("a") %>";
+var apiUrlKeyPrefix = "/api/v1/key/";
+var apiUrlAgencyPrefix = "/agency/<%= request.getParameter("a") %>";
+var apiUrlPrefix = apiUrlKeyPrefix + apiKey + apiUrlAgencyPrefix;
 </script>

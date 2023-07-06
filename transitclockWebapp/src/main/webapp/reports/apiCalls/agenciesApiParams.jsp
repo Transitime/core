@@ -12,7 +12,22 @@
   <script>
     function execute() {
       var format = $('input:radio[name=format]:checked').val();
-  	  var url = apiUrlPrefixAllAgencies + "/command/agencies?format=" + format;
+      var key = $("#apiKey").val().trim();
+  	  var url = apiUrlKeyPrefix + key + "/command/agencies?format=" + format;
+
+      var isValid = true;
+
+      // Validate key
+      if (!key) {
+        $("#apiKey").addClass('is-invalid');
+        isValid = false;
+      } else {
+        $("#apiKey").removeClass('is-invalid');
+      }
+
+      if(!isValid){
+        return;
+      }
 
    	  // Actually do the API call
    	  location.href = url;
@@ -28,7 +43,10 @@
    Select Parameters for Agencies API
 </div>
    
-<div id="mainDiv">   
+<div id="mainDiv">
+    <%-- API Key Input --%>
+    <jsp:include page="../params/apiKeyInput.jsp" />
+
    <%-- Create json/xml format radio buttons --%>
    <jsp:include page="../params/jsonXmlFormat.jsp" />
    
@@ -39,3 +57,8 @@
 
 </body>
 </html>
+
+
+<div id="title">
+    Select Parameters for Trip API
+</div>

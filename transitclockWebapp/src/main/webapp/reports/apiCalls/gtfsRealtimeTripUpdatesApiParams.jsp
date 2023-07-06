@@ -17,7 +17,21 @@
     function execute() {
       var selectedRouteId = $("#route").val();
       var format = $('input:radio[name=format]:checked').val();
-  	  var url = apiUrlPrefix + "/command/gtfs-rt/tripUpdates?format=" + format;
+  	  var key = $("#apiKey").val().trim();
+
+      // Validate key
+      if (!key) {
+          $("#apiKey").addClass('is-invalid');
+          isValid = false;
+      } else {
+          $("#apiKey").removeClass('is-invalid');
+      }
+
+      if(!isValid){
+          return;
+      }
+
+      var url = apiUrlKeyPrefix + key + apiUrlAgencyPrefix + "/command/gtfs-rt/tripUpdates?format=" + format;
 
    	  // Actually do the API call
    	  location.href = url;
@@ -33,7 +47,10 @@
    Select Parameters for GTFS-Realtime Trip Updates API
 </div>
    
-<div id="mainDiv">   
+<div id="mainDiv">
+    <%-- API Key Input --%>
+    <jsp:include page="../params/apiKeyInput.jsp" />
+
    <div id="radioButtonsDiv">
      <input type="radio" name="format" value="binary" checked>Binary
      <input type="radio" name="format" value="human">Human Readable

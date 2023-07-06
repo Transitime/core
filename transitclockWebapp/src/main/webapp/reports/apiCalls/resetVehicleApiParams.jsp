@@ -15,9 +15,25 @@
 
   <script>
     function execute() {
-      var selectedVehicleId = $("#vehicle").val();
+      var selectedVehicleId = $("#vehicle").val().trim();
       var format = $('input:radio[name=format]:checked').val();
-      var url = apiUrlPrefix + "/command/resetVehicle?v=" + selectedVehicleId + "&format=" + format;
+      var key = $("#apiKey").val().trim();
+
+      var isValid = true;
+
+      // Validate key
+      if (!key) {
+          $("#apiKey").addClass('is-invalid');
+          isValid = false;
+      } else {
+          $("#apiKey").removeClass('is-invalid');
+      }
+
+      if(!isValid){
+          return;
+      }
+
+      var url = apiUrlKeyPrefix + key + apiUrlAgencyPrefix + "/command/resetVehicle?v=" + selectedVehicleId + "&format=" + format;
 
    	  // Actually do the API call
    	  location.href = url;
@@ -34,6 +50,9 @@
 </div>
 
 <div id="mainDiv">
+    <%-- API Key Input --%>
+    <jsp:include page="../params/apiKeyInput.jsp" />
+
    <%-- Create route selector --%>
    <jsp:include page="../params/vehicleSingle.jsp" />
 
