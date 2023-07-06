@@ -17,6 +17,7 @@
 
 package org.transitclock.utils.web;
 
+import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.db.webstructs.WebAgency;
@@ -36,6 +37,8 @@ import java.util.Map;
  *
  */
 public class WebUtils {
+
+	private static final String EMPTY_STRING = "";
 
 	private static StringConfigValue apiHostname =
 			new StringConfigValue("transitime.web.apiHostname",
@@ -60,6 +63,34 @@ public class WebUtils {
 
 	public static String getHeaderBrandingText() {
 		return headerBrandingText.getValue();
+	}
+
+	private static BooleanConfigValue showApiKey =
+					new BooleanConfigValue(
+									"transitclock.web.showApiKey",
+									true,
+									"Option to hide the API Key from the UI. Please note API Key information can still be derived" +
+													"by monitoring network calls.");
+
+	public static Boolean showApiKey() {
+		return showApiKey.getValue();
+	}
+
+	public static StringConfigValue apiKey =
+				new StringConfigValue(
+					"transitclock.apikey",
+								EMPTY_STRING,
+									"API Key that the web service will use to make calls to the API");
+
+	public static String getApiKey() {
+		return apiKey.getValue();
+	}
+
+	public static String getShowableApiKey(){
+		if(showApiKey()){
+			return getApiKey();
+		}
+		return EMPTY_STRING;
 	}
 
 	protected static Integer getApiPort() {
