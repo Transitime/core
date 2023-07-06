@@ -44,7 +44,7 @@ public class CreateWebAgency {
 		String dbUserName = args[5];
 		String dbPassword = args[6];
 		// Name of database where to store the WebAgency object
-		String webAgencyDbName = "web";
+		String webAgencyDbName = dbName;
 		
 		// Create the WebAgency object
 		WebAgency webAgency = new WebAgency(agencyId, hostName, active, dbName,

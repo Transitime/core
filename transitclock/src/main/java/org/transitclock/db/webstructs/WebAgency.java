@@ -38,6 +38,7 @@ import org.hibernate.Transaction;
 import org.hibernate.annotations.DynamicUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.config.ConfigFileReader;
 import org.transitclock.configData.DbSetupConfig;
 import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.db.structs.Agency;
@@ -149,6 +150,7 @@ public class WebAgency {
 	 *            Name of the db that the WebAgency object is stored in
 	 */
 	public void store(String dbName) {
+
 		Session session = HibernateUtils.getSession(dbName);
 		try {
 			Transaction transaction = session.beginTransaction();
@@ -508,6 +510,8 @@ public class WebAgency {
 		WebAgency webAgency = new WebAgency(agencyId, hostName, active, dbName,
 				dbType, dbHost, dbUserName, dbPassword);
 		System.out.println("Storing " + webAgency);
+
+		ConfigFileReader.processConfig();
 		
 		// Store the WebAgency
 		webAgency.store(webAgencyDbName);
