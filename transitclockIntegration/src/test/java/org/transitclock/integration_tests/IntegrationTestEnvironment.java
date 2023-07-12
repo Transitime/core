@@ -13,6 +13,7 @@ public class IntegrationTestEnvironment {
     private String config;
     private String loggingDir;
     private String runId;
+    private String tz;
 
     public String getName() {
         return name;
@@ -82,5 +83,15 @@ public class IntegrationTestEnvironment {
     }
     public String getRunId() {
         return runId;
+    }
+
+    public void setTimeZone(String tz) {
+      this.tz = tz;
+    }
+    public String getTimeZoneOrDefault() {
+          if (tz == null) {
+              return "America/Chicago"; // current integration tests are out of MN
+          }
+          return tz;
     }
 }

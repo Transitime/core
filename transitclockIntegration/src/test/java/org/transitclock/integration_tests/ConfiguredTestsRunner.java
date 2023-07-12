@@ -171,6 +171,7 @@ public class ConfiguredTestsRunner {
         addArg(cmdAndArgs, "it.runid", environment.getRunId());
         addArg(cmdAndArgs, "transitclock.logging.dir", environment.getLoggingDir());
         addArg(cmdAndArgs, "transitclock.test.id", environment.getName());
+        addArg(cmdAndArgs, "user.timezone", environment.getTimeZoneOrDefault());
     }
 
     private void addArg(List<String> cmdAndArgs, String property, String value) {
@@ -189,6 +190,7 @@ public class ConfiguredTestsRunner {
         ite.setHistory(nullSafeGet(testNode, "history"));
         ite.setPredictions(nullSafeGet(testNode, "predictions"));
         ite.setConfig(nullSafeGet(testNode, "config") + ";" + DEFAULT_HSQL_CONFIG_FILE);
+        ite.setTimeZone(nullSafeGet(testNode, "tz"));
         ite.setLoggingDir(outputDirectory);
         ite.setRunId(runId);
 
