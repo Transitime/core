@@ -18,6 +18,7 @@
       var selectedRouteId = $("#route").val();
       var format = $('input:radio[name=format]:checked').val();
   	  var key = $("#apiKey").val().trim();
+      var isValid = true;
 
       // Validate key
       if (!key) {
