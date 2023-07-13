@@ -154,10 +154,11 @@ public class ConfiguredTestsRunner {
     }
 
     private void copyStreamNoWait(InputStream in, PrintStream out) throws IOException {
-        int size = in.available();
-        byte buff[] = new byte[size];
-        in.read(buff);
-        out.write(buff);
+        byte buff[] = new byte[1024];
+        int count = 0;
+        while ((count = in.read(buff)) > 0) {
+            out.write(buff, 0, count);
+        }
     }
 
     private void addToCommandLine(List<String> cmdAndArgs, IntegrationTestEnvironment environment) {
