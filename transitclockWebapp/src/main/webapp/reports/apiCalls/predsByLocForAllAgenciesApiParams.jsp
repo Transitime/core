@@ -52,7 +52,7 @@
           return;
       }
 
-      var url = apiUrlKeyPrefix + key + apiUrlAgencyPrefixAllAgencies + "/command/predictionsByLoc?lat=" + latitude
+      var url = apiUrlKeyPrefix + key + "/command/predictionsByLoc?lat=" + latitude
   			  + "&lon=" + longitude
   			  + (maxDistance!=""?"&maxDistance=" + maxDistance:"")
   			  + (numPreds!=""?"&numPreds=" + numPreds:"")
