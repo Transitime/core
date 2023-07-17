@@ -459,7 +459,7 @@
         <appender-ref ref="EXTERNAL_PRED_ACCURACY" />
     </logger>
 
-    <logger name="org.transitclock.monitoring" level="error"
+    <logger name="org.transitclock.monitoring" level="info"
             additivity="false">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="MONITORING" />
