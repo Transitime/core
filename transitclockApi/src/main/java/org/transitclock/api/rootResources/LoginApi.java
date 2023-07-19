@@ -24,10 +24,18 @@ public class LoginApi {
             new StringConfigValue("transitclock.api.login.logoutRedirectUrl", "/",
                     "Url to redirect user to after logging out.");
 
+    private static StringConfigValue logOutGrafanaURL =
+            new StringConfigValue("transitclock.api.login.logOutGrafanaURL", "/",
+                    "Url to redirect user to for grafana after logging out.");
+
     @Path("/logout")
     @GET
-    public Response logout(@BeanParam StandardParameters stdParameters){
+    public Response logout(@BeanParam StandardParameters stdParameters,
+                           @QueryParam("grafana") boolean isGrafana){
         try {
+            if(isGrafana){
+                return stdParameters.logout(logOutGrafanaURL.getValue(), getSessionCookieNames());
+            }
             return stdParameters.logout(logOutURL.getValue(), getSessionCookieNames());
         } catch (Exception e) {
             throw WebUtils.badRequestException(e);
