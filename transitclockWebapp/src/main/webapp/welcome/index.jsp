@@ -17,7 +17,7 @@
 <body class="welcome">
 <%@include file="/template/welcomeheader.jsp" %>
 <div id="mainDiv">
-<div class="btn-title">Dart</div>
+<div class="btn-title">Index</div>
 <!-- <table id="agencyList"> -->
 	<%
 			// Output links for all the agencies
