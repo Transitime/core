@@ -65,17 +65,15 @@
         website, can connect to multiple project dbs. But you can
         uncomment this part and set the db parameters here. -->
 
-<!--
-   <property name="hibernate.connection.url">
-      jdbc:mysql://localhost/transitime?rewriteBatchedStatements=true&amp;cachePrepStmts=true
-   </property>
-   <property name="hibernate.connection.username">
-      root
-   </property>
-   <property name="hibernate.connection.password">
-      changeme
-   </property>
--->
+     <property name="hibernate.connection.url">
+         jdbc:mysql://localhost/transitime_met?rewriteBatchedStatements=true&amp;cachePrepStmts=true
+     </property>
+     <property name="hibernate.connection.username">
+         root
+     </property>
+     <property name="hibernate.connection.password">
+         changeme
+     </property>
 
 
    <!-- List of XML mapping files. Commented out because adding

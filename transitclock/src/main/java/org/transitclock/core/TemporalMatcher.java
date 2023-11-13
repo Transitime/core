@@ -102,7 +102,8 @@ public class TemporalMatcher {
 				0,    // stopPathIndex 
 				0,    // segmentIndex 
 				0.0,  // distanceToSegment
-				0.0); // distanceAlongSegment
+				0.0, // distanceAlongSegment
+				SpatialMatch.MatchType.TRANSITCLOCK);
 		int tripStartTimeSecs = spatialMatch.getTrip().getStartTime();
 		int travelTimeForCurrentTrip = 
 				TravelTimes.getInstance().expectedTravelTimeBetweenMatches(vehicleId, 

@@ -17,6 +17,7 @@
 package org.transitclock.core;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import org.transitclock.applications.Core;
 import org.transitclock.db.structs.ArrivalDeparture;
@@ -632,6 +633,11 @@ public class Indices implements Serializable {
 	public boolean controlPoint() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(block, segmentIndex, stopPathIndex, tripIndex);
 	}
 
 }

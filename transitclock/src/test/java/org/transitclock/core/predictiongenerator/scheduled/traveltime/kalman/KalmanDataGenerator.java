@@ -98,7 +98,7 @@ public class KalmanDataGenerator {
     SpatialMatch spatialMatch = new SpatialMatch(getAvlTime(),
             getBlock(),
             tripIndex, stopPathIndex, 0,
-            0.0, 0.0);
+            0.0, 0.0, SpatialMatch.MatchType.TRANSITCLOCK);
     TemporalMatch match = new TemporalMatch(spatialMatch, new TemporalDifference(scheduleDeviation));
     vs.setMatch(match);
     return vs;

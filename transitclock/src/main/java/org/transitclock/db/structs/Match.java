@@ -39,6 +39,8 @@ import org.hibernate.classic.Lifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
+import org.transitclock.core.SpatialMatch;
+import org.transitclock.core.SpatialMatch.MatchType;
 import org.transitclock.core.TemporalMatch;
 import org.transitclock.core.VehicleState;
 import org.transitclock.db.hibernate.HibernateUtils;
@@ -126,6 +128,9 @@ public class Match implements Lifecycle, Serializable {
 	// instead using arrival/departure times for that situation.
 	@Column
 	private final boolean atStop;
+
+	@Column
+	private SpatialMatch.MatchType type;
 	
 	
 	// Needed because serializable due to Hibernate requirement
@@ -157,6 +162,7 @@ public class Match implements Lifecycle, Serializable {
 		this.distanceAlongStopPath =
 				(float) (lastMatch!=null ? lastMatch.getDistanceAlongStopPath() : 0.0);
 		this.atStop = vehicleState.getMatch().isAtStop();
+		this.type=lastMatch.getType();
 		
 		// Log each creation of a Match to the match.log log file
 		logger.info(this.toString());
@@ -186,6 +192,15 @@ public class Match implements Lifecycle, Serializable {
 		this.distanceAlongSegment = Float.NaN;	
 		this.distanceAlongStopPath = Float.NaN;
 		this.atStop = false;
+		this.type= MatchType.TRANSITCLOCK;
+	}
+
+	public SpatialMatch.MatchType getType() {
+		return type;
+	}
+
+	public void setType(SpatialMatch.MatchType type) {
+		this.type = type;
 	}
 
 	private Match(String vehicleId,

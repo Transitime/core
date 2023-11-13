@@ -93,7 +93,12 @@
 		<dependency>
 			<groupId>com.esri.geometry</groupId>
 			<artifactId>esri-geometry-api</artifactId>
-			<version>1.1</version>
+			<version>2.2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.bmw-carit</groupId>
+			<artifactId>barefoot</artifactId>
+			<version>0.1.5</version>
 		</dependency>
 		<!-- Needed to fix problem with one-jar not working with AWS SDK. Was getting
                 error message "Fatal: Failed to load the internal config for AWS" -->

@@ -156,7 +156,7 @@ public class GtfsBasedDataGenerator {
     SpatialMatch spatialMatch = new SpatialMatch(avlTime,
             getBlock(),
             tripIndex, stopPathIndex, 0,
-            0.0, 0.0);
+            0.0, 0.0, SpatialMatch.MatchType.TRANSITCLOCK);
     TemporalMatch match = new TemporalMatch(spatialMatch, new TemporalDifference(scheduleDeviationSeconds*Time.MS_PER_SEC));
     vs.setMatch(match);
     vs.setRealTimeSchedAdh(match.getTemporalDifference());

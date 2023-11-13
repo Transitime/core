@@ -278,6 +278,22 @@
 		</encoder>
 	</appender>
 
+	<!-- Separate file for MAP BAREFOOT MAP MATCHING logging -->
+	<appender name="BAREFOOT"
+			  class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_FILE_ROOT}/barefoot.log.gz
+			</fileNamePattern>
+			<!-- keep 3 days' worth of history capped at 1GB total size -->
+			<maxHistory>3</maxHistory>
+			<totalSizeCap>1GB</totalSizeCap>
+		</rollingPolicy>
+		<encoder>
+			<charset>UTF-8</charset>
+			<pattern>${DATA_PATTERN}</pattern>
+		</encoder>
+	</appender>
+
 	<!-- Separate file for PRED_ACCURACY logging -->
 	<appender name="EXTERNAL_PRED_ACCURACY"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -566,6 +582,19 @@
 	<logger name="org.transitclock.core.reporting.RunTimeProcessorHelper"
 			level="debug" additivity="false">
 		<appender-ref ref="RUN_TIME_GENERATOR" />
+	</logger>
+
+	<logger name="org.transitclock.core.barefoot.TransitClockRoadReader"
+			level="info" additivity="true">
+		<appender-ref ref="BAREFOOT" />
+	</logger>
+	<logger name="org.transitclock.core.AvlProcessor"
+			level="debug" additivity="true">
+		<appender-ref ref="BAREFOOT" />
+	</logger>
+	<logger name="org.transitclock.core.barefoot.BareFootMapMatcher"
+			level="debug" additivity="true">
+		<appender-ref ref="BAREFOOT" />
 	</logger>
 
 	<!-- In order to log the hibernate SQL queries need to set org.hibernate.SQL

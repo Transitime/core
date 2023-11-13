@@ -673,7 +673,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 
 			// Determine departure time for first stop of trip
 			SpatialMatch beginningOfTrip = new SpatialMatch(0, block,
-					tripIndex, 0, 0, 0.0, 0.0);
+					tripIndex, 0, 0, 0.0, 0.0, SpatialMatch.MatchType.TRANSITCLOCK);
 			long travelTimeFromFirstStopToMatch = TravelTimes.getInstance()
 					.expectedTravelTimeBetweenMatches(vehicleId, avlReportTime,
 							beginningOfTrip, newMatch, true);

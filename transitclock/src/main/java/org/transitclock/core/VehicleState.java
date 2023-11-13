@@ -95,6 +95,8 @@ public class VehicleState {
 	//Used for schedPred AVL. Identify if trip is canceled.
 	private boolean isCanceled;
 
+	MapMatcher mapMatcher = null;
+
 	public Headway getHeadway() {
 		return headway;
 	}
@@ -157,6 +159,17 @@ public class VehicleState {
 		this.assignmentId = assignmentId;
 		this.predictable = predictable;
 		this.assignmentTime = getAvlReport().getDate();
+		this.mapMatcher=(MapMatcher) MapMatcherFactory.getInstance();
+		mapMatcher.setMatcher(block, assignmentTime);
+
+	}
+
+	public SpatialMatch getMapMatchedSpatialMatch()
+	{
+		if(mapMatcher!=null)
+			return mapMatcher.getSpatialMatch(getAvlReport());
+		else
+			return null;
 	}
 
 	/**

@@ -49,7 +49,13 @@ public class SpatialMatch {
 	protected final double distanceAlongSegment;
 	protected final VehicleAtStopInfo atStop;
 	protected final Location predictedLocation;
-	
+	protected final MatchType type;
+
+	public enum MatchType {
+		TRANSITCLOCK,
+		BAREFOOT
+	} ;
+
 	private static final Logger logger = 
 			LoggerFactory.getLogger(SpatialMatch.class);
 
@@ -58,7 +64,7 @@ public class SpatialMatch {
 
 	public SpatialMatch(long avlTime, Block block,
 			int tripIndex, int stopPathIndex, int segmentIndex,
-			double distanceToSegment, double distanceAlongSegment) {
+			double distanceToSegment, double distanceAlongSegment, MatchType type) {
 		this.avlTime = avlTime;
 		this.block = block;
 		this.tripIndex = tripIndex;
@@ -70,6 +76,11 @@ public class SpatialMatch {
 		// Determine whether at stop
 		this.atStop = atStop();
 		this.predictedLocation = computeLocation();
+		this.type=type;
+	}
+
+	public MatchType getType() {
+		return type;
 	}
 
 	/**
@@ -145,6 +156,7 @@ public class SpatialMatch {
 		}
 		// recomupte predictedLocation for above reasons as well
 		this.predictedLocation = toCopy.computeLocation(toCopy.getIndices(), toCopy.distanceAlongSegment);
+		this.type=toCopy.type;
 	}
 	
 	/**
@@ -167,6 +179,7 @@ public class SpatialMatch {
 		this.distanceAlongSegment = distanceAlongSegment;
 		this.atStop = toCopy.atStop;
 		this.predictedLocation = computeLocation(newIndices, distanceAlongSegment);
+		this.type=toCopy.type;
 	}
 
 	/**
@@ -184,6 +197,7 @@ public class SpatialMatch {
 		this.distanceAlongSegment = toCopy.distanceAlongSegment;
 		this.atStop = toCopy.atStop;
 		this.predictedLocation = toCopy.predictedLocation;
+		this.type=toCopy.type;
 	}
 
 	/**
@@ -452,7 +466,8 @@ public class SpatialMatch {
 				m.getStopPathIndex(),
 				segmentIndex, 
 				Double.NaN, // distanceToSegment not set to a valid value
-				segmentLength);
+				segmentLength,
+				this.type);
 	}
 	
 	/**
@@ -511,7 +526,8 @@ public class SpatialMatch {
 				indices.getStopPathIndex(),
 				indices.getSegmentIndex(),
 				Double.NaN,       // distanceToSegment not set to a valid value
-				segmentVectorLength); 
+				segmentVectorLength,
+				this.type);
 	}
 	
 	/**
